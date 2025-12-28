@@ -20,29 +20,13 @@ class Auth
         return $_SESSION['user']['role'] ?? null;
     }
 
-    public static function requireLogin(): void
+    public static function hasRole(array $roles): bool
     {
-        if (!self::check()) {
-            header('Location: /');
-            exit;
-        }
-    }
-
-    public static function requireRole(array $roles): void
-    {
-        self::requireLogin();
-
-        if (!in_array(self::role(), $roles, true)) {
-            http_response_code(403);
-            echo '403 – Nemáš oprávnění';
-            exit;
-        }
+        return in_array(self::role(), $roles, true);
     }
 
     public static function logout(): void
     {
-        session_destroy();
-        header('Location: /');
-        exit;
+        unset($_SESSION['user']);
     }
 }
