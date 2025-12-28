@@ -5,6 +5,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Csrf;
+use App\Core\Database;
 
 class AuthController extends Controller
 {
@@ -21,18 +22,39 @@ class AuthController extends Controller
             return 'Neplatný CSRF token';
         }
 
-        // ZATÍM NAPEČNO
-        if ($_POST['login'] === 'admin' && $_POST['password'] === 'admin') {
-            $_SESSION['user'] = [
-                'id' => 1,
-                'role' => 'admin'
-            ];
-            header('Location: /');
-            exit;
+        $email = trim($_POST['login'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if ($email === '' || $password === '') {
+            return 'Vyplň přihlašovací údaje';
         }
 
-        return 'Neplatné přihlašovací údaje';
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare(
+            'SELECT id, role, password_hash 
+             FROM users 
+             WHERE email = :email 
+               AND terminated_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch();
+
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            return 'Neplatný e-mail nebo heslo';
+        }
+
+        // login OK
+        $_SESSION['user'] = [
+            'id'   => (int)$user['id'],
+            'role' => $user['role'],
+        ];
+
+        header('Location: /dashboard');
+        exit;
     }
+
+
 public function logout(): void
 {
     Auth::logout();
