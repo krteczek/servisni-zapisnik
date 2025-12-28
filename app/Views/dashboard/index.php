@@ -1,3 +1,6 @@
+<?php require __DIR__ . '/../layout/header.php'; ?>
+
+
 <h1>Dashboard</h1>
 
 <p>
