@@ -1,0 +1,9 @@
+<?php
+declare(strict_types=1);
+
+use App\Core\Autoloader;
+
+session_start();
+
+require __DIR__ . '/app/Core/Autoloader.php';
+Autoloader::register();
