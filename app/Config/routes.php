@@ -1,32 +1,26 @@
 <?php
-declare(strict_types=1);
 
-use App\Controllers\AuthController;
+use App\Controllers\LoginController;
 use App\Controllers\DashboardController;
 
 return [
     [
         'method' => 'GET',
-        'path' => '/',
-        'handler' => [AuthController::class, 'loginForm'],
-        'roles' => null
+        'path'   => '/login',
+        'action' => LoginController::class . '@show',
+        'auth'   => false,
     ],
     [
         'method' => 'POST',
-        'path' => '/login',
-        'handler' => [AuthController::class, 'login'],
-        'roles' => null
+        'path'   => '/login',
+        'action' => LoginController::class . '@login',
+        'auth'   => false,
     ],
     [
         'method' => 'GET',
-        'path' => '/dashboard',
-        'handler' => [DashboardController::class, 'index'],
-        'roles' => ['admin', 'mistr', 'predak', 'monter']
-    ],
-    [
-        'method' => 'GET',
-        'path' => '/logout',
-        'handler' => [AuthController::class, 'logout'],
-        'roles' => ['admin', 'mistr', 'predak', 'monter']
+        'path'   => '/dashboard',
+        'action' => DashboardController::class . '@index',
+        'auth'   => true,
+        'roles'  => ['admin', 'mistr', 'predak', 'monter'],
     ],
 ];
