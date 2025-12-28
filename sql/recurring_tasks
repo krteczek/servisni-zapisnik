@@ -1,0 +1,25 @@
+CREATE TABLE recurring_tasks (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    team_id INT UNSIGNED NOT NULL,
+
+    title VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+
+    frequency_type ENUM(
+        'weekly',
+        'monthly',
+        'quarterly',
+        'semiannual',
+        'yearly'
+    ) NOT NULL,
+
+    frequency_value INT UNSIGNED NOT NULL DEFAULT 1,
+    next_due_date DATE NOT NULL,
+
+    warning_days_before INT UNSIGNED NOT NULL DEFAULT 0,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+
+    CONSTRAINT fk_rt_team
+        FOREIGN KEY (team_id) REFERENCES teams(id)
+) ENGINE=InnoDB;
