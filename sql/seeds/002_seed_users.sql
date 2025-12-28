@@ -1,0 +1,52 @@
+INSERT INTO users
+(
+    first_name,
+    last_name,
+    email,
+    role,
+    password_hash,
+    employee_number,
+    hired_at,
+    created_at
+)
+VALUES
+(
+    'Admin',
+    'System',
+    'admin@servis.local',
+    'admin',
+    '$2y$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    'A001',
+    '2020-01-01',
+    NOW()
+),
+(
+    'Martin',
+    'Mistr',
+    'mistr@servis.local',
+    'mistr',
+    '$2y$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    'M001',
+    '2021-03-01',
+    NOW()
+),
+(
+    'Pavel',
+    'Predak',
+    'predak@servis.local',
+    'predak',
+    '$2y$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    'P001',
+    '2022-06-01',
+    NOW()
+),
+(
+    'Milan',
+    'Monter',
+    'monter@servis.local',
+    'monter',
+    '$2y$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    'E001',
+    '2023-01-01',
+    NOW()
+);
