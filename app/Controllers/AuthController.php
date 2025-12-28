@@ -33,4 +33,8 @@ class AuthController extends Controller
 
         return 'Neplatné přihlašovací údaje';
     }
+public function logout(): void
+{
+    Auth::logout();
+}
 }
