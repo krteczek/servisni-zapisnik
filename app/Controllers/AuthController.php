@@ -31,7 +31,7 @@ class AuthController extends Controller
 
         $pdo = Database::pdo();
         $stmt = $pdo->prepare(
-            'SELECT id, role, password_hash 
+            'SELECT id, role_id, password_hash 
              FROM users 
              WHERE email = :email 
                AND terminated_at IS NULL
@@ -59,4 +59,29 @@ public function logout(): void
 {
     Auth::logout();
 }
+public function index(): never
+{
+	
+    if (!Auth::check()) {
+    	
+        header('Location: ' . BASE_PATH . '/login');
+        exit;
+    }
+
+    header('Location: ' . BASE_PATH . '/dashboard');
+    exit;
+}
+
+public function root(): string
+{
+    if (\App\Core\Auth::check()) {
+        header('Location: ' . BASE_PATH . '/dashboard');
+        exit;
+    }
+
+    header('Location: ' . BASE_PATH . '/login');
+    exit;
+}
+
+
 }

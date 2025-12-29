@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 return [
-    'dsn'  => 'mysql:host=localhost;dbname=servisni_zapisnik;charset=utf8mb4',
-    'user' => 'db_user',
-    'pass' => 'db_pass',
+    'dsn'  => 'mysql:host=localhost;dbname=jelmark;charset=utf8mb4',
+    'user' => 'root',
+    'pass' => '',
 ];
