@@ -3,85 +3,91 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Csrf;
 use App\Core\Database;
+use App\Models\UserModel;
 
 class AuthController extends Controller
 {
+    public function root(): string
+    {
+        redirect(Auth::check() ? '/dashboard' : '/login');
+    }
+
     public function loginForm(): string
     {
-        return $this->view('auth/login', [
-            'csrf' => Csrf::token()
-        ]);
+        $this->view->csrf   = Csrf::token();
+        $this->view->errors = [];
+        $this->view->data   = [];
+
+        return $this->render('auth/login');
     }
 
     public function login(): string
     {
-        if (!Csrf::check($_POST['_csrf'] ?? '')) {
-            return 'Neplatný CSRF token';
-        }
-
-        $email = trim($_POST['login'] ?? '');
+        $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        if ($email === '' || $password === '') {
-            return 'Vyplň přihlašovací údaje';
-        }
-
-        $pdo = Database::pdo();
-        $stmt = $pdo->prepare(
-            'SELECT id, role_id, password_hash 
-             FROM users 
-             WHERE email = :email 
-               AND terminated_at IS NULL
-             LIMIT 1'
-        );
-        $stmt->execute(['email' => $email]);
-        $user = $stmt->fetch();
-
-        if (!$user || !password_verify($password, $user['password_hash'])) {
-            return 'Neplatný e-mail nebo heslo';
-        }
-
-        // login OK
-        $_SESSION['user'] = [
-            'id'   => (int)$user['id'],
-            'role' => $user['role'],
+        $this->view->csrf = Csrf::token();
+        $this->view->errors = [];
+        $this->view->data = [
+            'email' => $email,
         ];
 
-        header('Location: /dashboard');
-        exit;
+        if ($email === '') {
+            $this->view->errors['email'][] = 'Email je povinný';
+        }
+
+        if ($password === '') {
+            $this->view->errors['password'][] = 'Heslo je povinné';
+        }
+
+        if ($this->view->errors) {
+            return $this->render('auth/login');
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->findByEmail($email);
+
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            $this->view->errors['global'][] = 'Neplatné přihlašovací údaje';
+            return $this->render('auth/login');
+        }
+    \App\Core\Session::regenerate();
+        $_SESSION['user'] = [
+            'id'          => (int) $user['id'],
+            'email'       => $user['email'],
+            'global_role' => $user['global_role'],
+            'first_name'  => $user['first_name'] ?? null,
+            'last_name'   => $user['last_name'] ?? null,
+        ];
+			
+        $_SESSION['permissions'] = $this->loadPermissions((int) $user['id']);
+
+        redirect('/dashboard');
     }
 
+    public function logout(): string
+    {
+        Auth::logout();
+			\App\Core\Session::destroy();
 
-public function logout(): void
-{
-    Auth::logout();
-}
-public function index(): never
-{
-	
-    if (!Auth::check()) {
-    	
-        header('Location: ' . BASE_PATH . '/login');
-        exit;
+        redirect('/login');
     }
 
-    header('Location: ' . BASE_PATH . '/dashboard');
-    exit;
-}
+    private function loadPermissions(int $userId): array
+    {
+        $pdo = Database::pdo();
 
-public function root(): string
-{
-    if (\App\Core\Auth::check()) {
-        header('Location: ' . BASE_PATH . '/dashboard');
-        exit;
+        $stmt = $pdo->prepare(
+            'SELECT permission_code
+             FROM user_permissions
+             WHERE user_id = ?'
+        );
+        $stmt->execute([$userId]);
+
+        return array_column($stmt->fetchAll(), 'permission_code');
     }
-
-    header('Location: ' . BASE_PATH . '/login');
-    exit;
-}
-
-
 }

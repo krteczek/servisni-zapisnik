@@ -5,11 +5,24 @@ namespace App\Core;
 
 abstract class Controller
 {
-    protected function view(string $path, array $data = []): string
+    protected ViewContext $view;
+
+    public function __construct(array $routes)
     {
-        extract($data);
+        $this->view = new ViewContext();
+
+        // základní globální data
+        $this->view->isLogged = Auth::check();
+        $this->view->user     = Auth::user();
+        $this->view->menu     = Menu::fromRoutes($routes);
+    }
+
+    protected function render(string $template): string
+    {
+        $view = $this->view;
+
         ob_start();
-        require __DIR__ . '/../Views/' . $path . '.php';
+        require __DIR__ . '/../Views/' . $template . '.php';
         return ob_get_clean();
     }
 }

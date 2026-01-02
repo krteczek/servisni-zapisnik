@@ -1,26 +1,30 @@
-<!doctype html>
-<html lang="cs">
-<head>
-    <meta charset="utf-8">
-    <title>Servisní zápisník</title>
-</head>
-<body>
+<?php require __DIR__ . '/../layout/header.php'; ?>
 
-<h1>Servisní zápisník</h1>
-
+<h1>Přihlášení do aplikace Servisní Zápisník</h1>
 <form method="post" action="./login">
-    <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
+    <input type="hidden" name="csrf" value="<?= htmlspecialchars($view->csrf) ?>">
 
-    <div>
-        <input type="text" name="login" placeholder="Login">
-    </div>
+    <?php if (!empty($view->errors['global'])): ?>
+        <div class="error"><?= htmlspecialchars($view->errors['global'][0]) ?></div>
+    <?php endif; ?>
 
-    <div>
-        <input type="password" name="password" placeholder="Heslo">
-    </div>
+    <label>
+        Email
+        <input name="email" value="<?= htmlspecialchars($view->data['email'] ?? '') ?>"><br>
+        <?php if (!empty($view->errors['email'])): ?>
+            <div class="error"><?= htmlspecialchars($view->errors['email'][0]) ?></div>
+        <?php endif; ?>
+    </label>
 
-    <button type="submit">Přihlásit</button>
+    <label>
+        Heslo
+        <input type="password" name="password">
+        <?php if (!empty($view->errors['password'])): ?><br>
+            <div class="error"><?= htmlspecialchars($view->errors['password'][0]) ?></div><br>
+        <?php endif; ?>
+    </label>
+
+    <br><button>Přihlásit</button>
 </form>
 
-</body>
-</html>
+<?php require __DIR__ . '/../layout/footer.php'; ?>
