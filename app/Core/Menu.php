@@ -5,13 +5,31 @@ namespace App\Core;
 
 class Menu
 {
-    public static function items(): array
+    public static function fromRoutes(array $routes): array
     {
-        $items = require __DIR__ . '/../Config/menu.php';
-        $role = Auth::role();
+        $items = [];
 
-        return array_values(array_filter($items, function ($item) use ($role) {
-            return $role !== null && in_array($role, $item['roles'], true);
-        }));
+        foreach ($routes as $route) {
+
+            if (empty($route['menu'])) {
+                continue;
+            }
+
+            if (($route['auth'] ?? false) && !Auth::check()) {
+                continue;
+            }
+
+            if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
+                continue;
+            }
+
+            $items[] = [
+                'label'  => $route['menu'],
+                'path'   => $route['path'],
+                'method' => $route['method'] ?? 'GET',
+            ];
+        }
+
+        return $items;
     }
 }

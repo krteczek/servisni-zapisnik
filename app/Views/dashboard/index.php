@@ -1,10 +1,9 @@
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
+<h1><?= htmlspecialchars($view->title) ?></h1>
 
-<h1>Dashboard</h1>
+<?php foreach ($view->data['tasks'] ?? [] as $task): ?>
+    <div><?= htmlspecialchars($task['title']) ?></div>
+<?php endforeach; ?>
 
-<p>
-    Přihlášen: <?= htmlspecialchars($user['role']) ?>
-</p>
-
-<a href="/logout">Odhlásit</a>
+<?php require __DIR__ . '/../layout/footer.php'; ?>

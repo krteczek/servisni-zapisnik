@@ -4,32 +4,32 @@ declare(strict_types=1);
 return [
     [
         'label' => 'Dashboard',
-        'url'   => '/dashboard',
+        'url'   => './dashboard',
         'roles' => ['admin', 'mistr', 'predak', 'monter'],
     ],
     [
         'label' => 'Úkoly',
-        'url'   => '/tasks',
+        'url'   => './tasks',
         'roles' => ['mistr', 'predak', 'monter'],
     ],
     [
         'label' => 'Periodické úkoly',
-        'url'   => '/recurring-tasks',
+        'url'   => './recurring-tasks',
         'roles' => ['mistr', 'predak'],
     ],
     [
         'label' => 'Lidé',
-        'url'   => '/users',
+        'url'   => './users',
         'roles' => ['admin', 'mistr'],
     ],
     [
         'label' => 'Admin',
-        'url'   => '/admin',
+        'url'   => './admin',
         'roles' => ['admin'],
     ],
     [
-        'label' => 'Odhlásit',
-        'url'   => '/logout',
-        'roles' => ['admin', 'mistr', 'predak', 'monter'],
-    ],
+    'label' => 'Odhlásit',
+    'url'   => './logout',
+    'auth'  => true,
+],
 ];

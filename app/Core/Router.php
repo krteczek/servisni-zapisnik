@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 use RuntimeException;
+use App\Controllers\ErrorController;
 
 class Router
 {
@@ -12,41 +13,49 @@ class Router
     ) {}
 
     // volá controller@metodu
-protected function call(array $action): string
+protected function call(array $action)
 {
-	//print_r($action);
     [$controllerClass, $method] = $action;
 
-    $controller = new $controllerClass();
+    $controller = new $controllerClass($this->routes);
 
     return $controller->$method();
 }
 
-public function dispatch(string $path, string $method): string
+public function dispatch(string $path, string $method)
 {
     $path = rtrim($path, '/');
     $path = $path === '' ? '/' : $path;
-	 //var_dump($path);exit;
-	 $loginPath = BASE_PATH . '/login';
-	 //var_dump($loginPath);exit;
+
     foreach ($this->routes as $route) {
         if ($route['method'] === $method && $route['path'] === $path) {
 
             if (($route['auth'] ?? false) === true && !Auth::check()) {
-                header('Location: ' . $loginPath);
-                exit;
+            	redirect('/login');
+ 
             }
-
-            if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
-                http_response_code(403);
-                return '403 – Nemáš oprávnění';
-            }
-				//var_dump($route['action']);exit;
+if (!empty($route['permission']) && !Auth::can($route['permission'])) {
+    return (new ErrorController())->forbidden();
+}
+if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
+    return (new ErrorController())->forbidden();
+}
+				
             return $this->call($route['action']);
         }
     }
-	var_dump($route['action']);exit;
-    http_response_code(404);
-    return '404 – stránka nenalezena';
+
+    return (new ErrorController())->notFound();
 }
+
+
+private function runMiddlewares(array $middlewares): void
+{
+    foreach ($middlewares as $middleware) {
+        (new $middleware())->handle();
+    }
+}
+
+
+
 }

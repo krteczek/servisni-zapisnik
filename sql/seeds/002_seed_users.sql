@@ -3,7 +3,7 @@ INSERT INTO users
     first_name,
     last_name,
     email,
-    role,
+    global_role,
     password_hash,
     employee_number,
     hired_at,

@@ -22,11 +22,33 @@ return [
         'action' => [AuthController::class, 'login'],
         'auth'   => false,
     ],
-    [
-        'method' => 'GET',
-        'path'   => '/dashboard',
-        'action' => [DashboardController::class, 'index'],
-        'auth'   => true,
-        'roles'  => ['admin', 'mistr', 'predak', 'monter'],
-    ],
+[
+    'method' => 'GET',
+    'path'   => '/dashboard',
+    'action' => [DashboardController::class, 'index'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr', 'predak', 'monter'],
+    'menu'   => 'Dashboard',
+],
+
+
+
+[
+    'method' => 'GET',
+    'path'   => '/users',
+    'action' => [UserController::class, 'index'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr'],
+    'menu'   => 'Lidé',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/logout',
+    'action' => [AuthController::class, 'logout'],
+    'auth'   => true,
+    'menu'   => 'Odhlásit',
+],
+
+
 ];

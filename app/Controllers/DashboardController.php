@@ -8,12 +8,11 @@ use App\Core\Auth;
 
 class DashboardController extends Controller
 {
-    public function index(): string
-    {
-        $user = Auth::user();
 
-        return $this->view('dashboard/index', [
-            'user' => $user
-        ]);
+public function index(): string
+    {
+        $this->view->title = 'Dashboard';
+
+        return $this->render('dashboard/index');
     }
 }

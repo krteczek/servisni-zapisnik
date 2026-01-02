@@ -1,0 +1,5 @@
+CREATE TABLE permissions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(100) NOT NULL UNIQUE,  -- users.view
+    label VARCHAR(255) NOT NULL
+);
