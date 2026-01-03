@@ -7,10 +7,8 @@ use App\Core\Auth;
 
 class AuthMiddleware
 {
-    public function handle(): void
+    public function handle(): bool
     {
-        if (!Auth::check()) {
-            redirect('/login');
-        }
+        return Auth::check();
     }
 }

@@ -7,20 +7,15 @@ abstract class Controller
 {
     protected ViewContext $view;
 
-    public function __construct(array $routes)
+    public function __construct(ViewContext $view)
     {
-        $this->view = new ViewContext();
-
-        // základní globální data
-        $this->view->isLogged = Auth::check();
-        $this->view->user     = Auth::user();
-        $this->view->menu     = Menu::fromRoutes($routes);
+        $this->view = $view;
     }
 
     protected function render(string $template): string
     {
         $view = $this->view;
-
+			
         ob_start();
         require __DIR__ . '/../Views/' . $template . '.php';
         return ob_get_clean();

@@ -15,4 +15,8 @@ public function index(): string
 
         return $this->render('dashboard/index');
     }
+    public function admin(): string
+    {
+        return $this->render('dashboard/admin');
+    }
 }

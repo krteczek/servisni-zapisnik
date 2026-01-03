@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Core\Csrf;
 use App\Core\Database;
 use App\Models\UserModel;
+use \App\Core\Session;
 
 class AuthController extends Controller
 {
@@ -21,7 +22,6 @@ class AuthController extends Controller
         $this->view->csrf   = Csrf::token();
         $this->view->errors = [];
         $this->view->data   = [];
-
         return $this->render('auth/login');
     }
 
@@ -55,7 +55,7 @@ class AuthController extends Controller
             $this->view->errors['global'][] = 'Neplatné přihlašovací údaje';
             return $this->render('auth/login');
         }
-    \App\Core\Session::regenerate();
+    		Session::regenerate();
         $_SESSION['user'] = [
             'id'          => (int) $user['id'],
             'email'       => $user['email'],
@@ -65,14 +65,14 @@ class AuthController extends Controller
         ];
 			
         $_SESSION['permissions'] = $this->loadPermissions((int) $user['id']);
-
+			
         redirect('/dashboard');
     }
 
     public function logout(): string
     {
         Auth::logout();
-			\App\Core\Session::destroy();
+			Session::destroy();
 
         redirect('/login');
     }
