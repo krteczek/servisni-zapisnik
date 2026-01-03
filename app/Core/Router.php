@@ -3,59 +3,69 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use RuntimeException;
 use App\Controllers\ErrorController;
 
 class Router
 {
-    public function __construct(
-        private array $routes
-    ) {}
+    private array $routes;
+    private ViewContext $view;
 
-    // volá controller@metodu
-protected function call(array $action)
-{
-    [$controllerClass, $method] = $action;
+    public function __construct(array $routes)
+    {
+        $this->routes = $routes;
 
-    $controller = new $controllerClass($this->routes);
+        // jeden ViewContext pro celý request
+        $this->view = new ViewContext();
+        $this->view->isLogged = Auth::check();
+        $this->view->user     = Auth::user();
+        $this->view->menu     = Menu::fromRoutes($routes);
+    }
 
-    return $controller->$method();
-}
+    public function dispatch(string $path, string $method): string
+    {
+        // normalizace cesty
+        $path = rtrim($path, '/');
+        $path = $path === '' ? '/' : $path;
+//print_r($path);print_r($this->routes);
+        foreach ($this->routes as $route) {
 
-public function dispatch(string $path, string $method)
-{
-    $path = rtrim($path, '/');
-    $path = $path === '' ? '/' : $path;
-
-    foreach ($this->routes as $route) {
-        if ($route['method'] === $method && $route['path'] === $path) {
-
-            if (($route['auth'] ?? false) === true && !Auth::check()) {
-            	redirect('/login');
- 
+            if (
+                ($route['method'] ?? '') !== $method ||
+                ($route['path'] ?? '') !== $path
+            ) {
+                continue;
             }
-if (!empty($route['permission']) && !Auth::can($route['permission'])) {
-    return (new ErrorController())->forbidden();
-}
-if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
-    return (new ErrorController())->forbidden();
-}
+
+            /* ===== AUTH ===== */
+            if (($route['auth'] ?? false) === true && !Auth::check()) {
+                redirect('/login');
+            }
+
+            /* ===== ROLE ===== */
+            if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
+            	
+                return (new ErrorController($this->view))->forbidden();
+            }
+
+            /* ===== PERMISSION ===== */
+            if (!empty($route['permission']) && !Auth::can($route['permission'])) {
+            	
+                return (new ErrorController($this->view))->forbidden();
+            }
 				
+            /* ===== CONTROLLER ===== */
             return $this->call($route['action']);
         }
+
+        return (new ErrorController($this->view))->notFound();
     }
 
-    return (new ErrorController())->notFound();
-}
+    protected function call(array $action): string
+    {
+        [$controllerClass, $method] = $action;
 
+        $controller = new $controllerClass($this->view);
 
-private function runMiddlewares(array $middlewares): void
-{
-    foreach ($middlewares as $middleware) {
-        (new $middleware())->handle();
+        return $controller->$method();
     }
-}
-
-
-
 }
