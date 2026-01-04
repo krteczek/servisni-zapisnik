@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace App\Core;
 
 use App\Controllers\ErrorController;
-
+use App\Controllers\UserController;
+use App\Controllers\DashboardController;
 class Router
 {
     private array $routes;

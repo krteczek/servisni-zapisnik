@@ -18,3 +18,8 @@ function redirectWithMessage(string $path, string $message): never
     $_SESSION['flash'] = $message;
     redirect($path);
 }
+
+function url(string $path = ''): string
+{
+    return BASE_PATH . '/' . ltrim($path, '/');
+}

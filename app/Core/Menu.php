@@ -25,7 +25,7 @@ class Menu
 
             $items[] = [
                 'label'  => $route['menu'],
-                'path'   => $route['path'],
+                'path'   => url($route['path']),
                 'method' => $route['method'] ?? 'GET',
             ];
         }
