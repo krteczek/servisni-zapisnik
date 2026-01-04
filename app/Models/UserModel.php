@@ -16,28 +16,26 @@ class UserModel
     }
 
     /* =========================
-       ZÁKLADNÍ NAČÍTÁNÍ
+       NAČÍTÁNÍ
        ========================= */
 
     public function findById(int $id): ?array
     {
         $stmt = $this->db->prepare(
-            'SELECT 
-            	email,
-            	first_name,
-            	last_name,
-            	global_role,
-            	active
+            'SELECT
+                id,
+                email,
+                first_name,
+                last_name,
+                global_role,
+                active,
+                created_at
              FROM users
              WHERE id = :id
-               AND active = 1
              LIMIT 1'
         );
 
-        $stmt->execute([
-            'id' => $id,
-        ]);
-
+        $stmt->execute(['id' => $id]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $user ?: null;
@@ -49,37 +47,42 @@ class UserModel
             'SELECT *
              FROM users
              WHERE email = :email
-               AND active = 1
              LIMIT 1'
         );
 
-        $stmt->execute([
-            'email' => $email,
-        ]);
-
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $user ?: null;
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     public function existsByEmail(string $email): bool
     {
         $stmt = $this->db->prepare(
-            'SELECT 1
-             FROM users
-             WHERE email = :email
-             LIMIT 1'
+            'SELECT 1 FROM users WHERE email = :email LIMIT 1'
         );
 
-        $stmt->execute([
-            'email' => $email,
-        ]);
-
+        $stmt->execute(['email' => $email]);
         return (bool) $stmt->fetchColumn();
     }
 
+    public function all(): array
+    {
+        $stmt = $this->db->query(
+            'SELECT
+                id,
+                email,
+                first_name,
+                last_name,
+                global_role,
+                active,
+                created_at
+             FROM users
+             ORDER BY last_name, first_name'
+        );
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     /* =========================
-       VYTVÁŘENÍ UŽIVATELE
+       VYTVÁŘENÍ
        ========================= */
 
     public function create(array $data): int
@@ -88,91 +91,86 @@ class UserModel
             'INSERT INTO users (
                 email,
                 password_hash,
-                global_role,
                 first_name,
                 last_name,
-                employee_number,
-                birth_date,
-                employment_start,
-                employment_end,
-                role_id,
-                hired_at,
-                terminated_at,
+                global_role,
                 active
             ) VALUES (
                 :email,
                 :password_hash,
-                :global_role,
                 :first_name,
                 :last_name,
-                :employee_number,
-                :birth_date,
-                :employment_start,
-                :employment_end,
-                :role_id,
-                :hired_at,
-                :terminated_at,
-                :active
+                :global_role,
+                1
             )'
         );
 
         $stmt->execute([
-            'email'             => $data['email'],
-            'password_hash'     => $data['password_hash'],
-            'global_role'       => $data['global_role'] ?? 'user',
-
-            'first_name'        => $data['first_name'],
-            'last_name'         => $data['last_name'],
-            'employee_number'   => $data['employee_number'] ?? null,
-
-            'birth_date'        => $data['birth_date'] ?? null,
-
-            'employment_start'  => $data['employment_start'],
-            'employment_end'    => $data['employment_end'] ?? null,
-
-            'role_id'           => $data['role_id'],
-            'hired_at'          => $data['hired_at'],
-            'terminated_at'     => $data['terminated_at'] ?? null,
-
-            'active'            => 1,
+            'email'         => $data['email'],
+            'password_hash' => $data['password_hash'],
+            'first_name'    => $data['first_name'] ?? null,
+            'last_name'     => $data['last_name'] ?? null,
+            'global_role'   => $data['global_role'] ?? 'monter',
         ]);
 
         return (int) $this->db->lastInsertId();
     }
 
     /* =========================
+       AKTIVACE / DEAKTIVACE
+       ========================= */
+
+    public function deactivate(int $userId): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE users SET active = 0 WHERE id = :id'
+        );
+
+        $stmt->execute(['id' => $userId]);
+    }
+
+    public function activate(int $userId): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE users SET active = 1 WHERE id = :id'
+        );
+
+        $stmt->execute(['id' => $userId]);
+    }
+
+    /* =========================
        ROLE
        ========================= */
 
-    public function getGlobalRole(int $userId): ?string
+    public function setGlobalRole(int $userId, string $role): void
     {
         $stmt = $this->db->prepare(
-            'SELECT global_role
-             FROM users
-             WHERE id = :id
-             LIMIT 1'
+            'UPDATE users
+             SET global_role = :role
+             WHERE id = :id'
         );
 
         $stmt->execute([
-            'id' => $userId,
+            'id'   => $userId,
+            'role' => $role,
         ]);
-
-        $role = $stmt->fetchColumn();
-
-        return $role !== false ? (string) $role : null;
     }
-    
-    public function getPermissions(int $roleId): array
-{
-    $stmt = $this->db->prepare(
-        'SELECT p.code
-         FROM permissions p
-         JOIN role_permissions rp ON rp.permission_id = p.id
-         WHERE rp.role_id = ?'
-    );
-    $stmt->execute([$roleId]);
 
-    return array_column($stmt->fetchAll(), 'code');
-}
+    /* =========================
+       HESLO
+       ========================= */
 
+    public function updatePassword(int $userId, string $passwordHash): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE users
+             SET password_hash = :hash
+             WHERE id = :id'
+        );
+
+        $stmt->execute([
+            'id'   => $userId,
+            'hash' => $passwordHash,
+        ]);
+    }
 }

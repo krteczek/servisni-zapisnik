@@ -20,7 +20,8 @@ use App\Core\Session;
 Session::start();
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
+//session_destroy();
+//var_dump($_SESSION);
 /**
  * BASE PATH aplikace
  * /servisni-zapisnik/public

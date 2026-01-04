@@ -7,6 +7,7 @@ class ViewContext
 {
     public string $title = '';
     public ?array $user = null;
+    public ?array $users = null;
     public bool $isLogged = false;
 
     public string $csrf = '';
@@ -22,4 +23,5 @@ class ViewContext
 
     /** data formulářů */
     public array $data = [];
+    
 }

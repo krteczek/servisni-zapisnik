@@ -2,53 +2,59 @@
 declare(strict_types=1);
 
 namespace App\Core;
-/**
+
 class Csrf
 {
+    private const KEY = '_csrf';
+
     public static function token(): string
     {
-        return $_SESSION['_csrf'] ??= bin2hex(random_bytes(32));
+        Session::start();
+        
+        $token = Session::get(self::KEY);
+        
+        if (empty($token)) {
+            $token = bin2hex(random_bytes(32));
+            Session::set(self::KEY, $token);
+        }
+
+        return $token;
     }
 
     public static function check(string $token): bool
     {
-        return hash_equals($_SESSION['_csrf'] ?? '', $token);
-    }
-}
-**/
-
-class Csrf
-{
-    private const KEY = '_csrf_';
-
-    public static function token(): string
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (empty($_SESSION[self::KEY])) {
-            $_SESSION[self::KEY] = bin2hex(random_bytes(32));
-        }
-
-        return $_SESSION[self::KEY];
-    }
-
-    public static function check(string $token): bool
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (empty($_SESSION[self::KEY])) {
+        Session::start();
+        
+        $storedToken = Session::get(self::KEY);
+        
+        if (empty($storedToken)) {
             return false;
         }
 
-        $isValid = hash_equals($_SESSION[self::KEY], $token);
-
-        // token můžeš po kontrole zneplatnit:
-        // unset($_SESSION[self::KEY]);
-
-        return $isValid;
+        return hash_equals($storedToken, $token);
+    }
+    
+    public static function verify(string $token): bool
+    {
+        return self::check($token);
+    }
+    
+    public static function invalidate(): void
+    {
+        Session::forget(self::KEY);
+    }
+    
+    public static function regenerate(): string
+    {
+        self::invalidate();
+        return self::token();
+    }
+    
+    public static function getField(): string
+    {
+        return sprintf(
+            '<input type="hidden" name="_token" value="%s">',
+            htmlspecialchars(self::token(), ENT_QUOTES)
+        );
     }
 }
