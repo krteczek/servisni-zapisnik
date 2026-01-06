@@ -15,13 +15,13 @@
         <?php foreach ($view->menu as $item): ?>
             <li>
                 <?php if ($item['method'] === 'POST'): ?>
-                    <form method="post" action="<?= htmlspecialchars('.' . $item['path']) ?>" style="display:inline">
+                    <form method="post" action="<?= htmlspecialchars($item['path']) ?>" style="display:inline">
                         <button type="submit">
                             <?= htmlspecialchars($item['label']) ?>
                         </button>
                     </form>
                 <?php else: ?>
-                    <a href="<?= htmlspecialchars('.' . $item['path']) ?>">
+                    <a href="<?= htmlspecialchars($item['path']) ?>">
                         <?= htmlspecialchars($item['label']) ?>
                     </a>
                 <?php endif; ?>

@@ -21,5 +21,5 @@ function redirectWithMessage(string $path, string $message): never
 
 function url(string $path = ''): string
 {
-    return BASE_PATH . '/' . ltrim($path, '/');
+    return '/' . ltrim($path, '/');
 }

@@ -6,6 +6,8 @@ namespace App\Core;
 use App\Controllers\ErrorController;
 use App\Controllers\UserController;
 use App\Controllers\DashboardController;
+use App\Core\Url;
+
 class Router
 {
     private array $routes;
@@ -27,7 +29,7 @@ class Router
         // normalizace cesty
         $path = rtrim($path, '/');
         $path = $path === '' ? '/' : $path;
-//print_r($path);print_r($this->routes);
+
         foreach ($this->routes as $route) {
 
             if (
@@ -38,9 +40,10 @@ class Router
             }
 
             /* ===== AUTH ===== */
-            if (($route['auth'] ?? false) === true && !Auth::check()) {
-                redirect('/login');
-            }
+				if (($route['auth'] ?? false) === true && !Auth::check()) {
+				    redirect(Url::to('/login'));
+				    exit;
+				}
 
             /* ===== ROLE ===== */
             if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {

@@ -24,4 +24,11 @@ class ViewContext
     /** data formulářů */
     public array $data = [];
     
+    public array $old = [];
+    
+    public ?array $roles = null;
+    
+    public ?string $selectedRole = null;
+    
+    
 }
