@@ -25,6 +25,7 @@ class UserModel
             'SELECT
                 id,
                 email,
+                employee_number,
                 first_name,
                 last_name,
                 global_role,
@@ -70,6 +71,7 @@ class UserModel
             'SELECT
                 id,
                 email,
+                employee_number,
                 first_name,
                 last_name,
                 global_role,
@@ -90,6 +92,7 @@ class UserModel
         $stmt = $this->db->prepare(
             'INSERT INTO users (
                 email,
+                employee_number,
                 password_hash,
                 first_name,
                 last_name,
@@ -97,6 +100,7 @@ class UserModel
                 active
             ) VALUES (
                 :email,
+                :employee_number,
                 :password_hash,
                 :first_name,
                 :last_name,
@@ -107,6 +111,7 @@ class UserModel
 
         $stmt->execute([
             'email'         => $data['email'],
+            'employee_number' => $data['employee_number'],
             'password_hash' => $data['password_hash'],
             'first_name'    => $data['first_name'] ?? null,
             'last_name'     => $data['last_name'] ?? null,
@@ -173,4 +178,13 @@ class UserModel
             'hash' => $passwordHash,
         ]);
     }
+    
+public function existsByEmployeeNumber(string $number): bool
+{
+    $stmt = $this->db->prepare(
+        'SELECT 1 FROM users WHERE employee_number = :num LIMIT 1'
+    );
+    $stmt->execute(['num' => $number]);
+    return (bool) $stmt->fetchColumn();
+}
 }

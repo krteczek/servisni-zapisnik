@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\Url;
+
 class Menu
 {
     public static function fromRoutes(array $routes): array
@@ -25,7 +27,7 @@ class Menu
 
             $items[] = [
                 'label'  => $route['menu'],
-                'path'   => url($route['path']),
+                'path'   => Url::to($route['path']),//url($route['path']),
                 'method' => $route['method'] ?? 'GET',
             ];
         }
