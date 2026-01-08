@@ -187,4 +187,59 @@ public function existsByEmployeeNumber(string $number): bool
     $stmt->execute(['num' => $number]);
     return (bool) $stmt->fetchColumn();
 }
+
+public function update(int $id, array $data): void
+{
+    $allowed = [
+        'email',
+        'employee_number',
+        'first_name',
+        'last_name',
+        'global_role',
+        'active',
+    ];
+
+    $set = [];
+    $params = ['id' => $id];
+
+    foreach ($allowed as $field) {
+        if (array_key_exists($field, $data)) {
+            $set[] = "{$field} = :{$field}";
+            $params[$field] = $data[$field];
+        }
+    }
+
+    if (!$set) {
+        return;
+    }
+
+    $sql = 'UPDATE users SET ' . implode(', ', $set) . ' WHERE id = :id';
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute($params);
+}
+
+public function findByIdFull(int $id): ?array
+{
+    $stmt = $this->db->prepare(
+        'SELECT
+            id,
+            email,
+            employee_number,
+            first_name,
+            last_name,
+            global_role,
+            active,
+            created_at
+         FROM users
+         WHERE id = :id
+         LIMIT 1'
+    );
+
+    $stmt->execute(['id' => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
+
+
+
 }

@@ -9,14 +9,16 @@ use App\Core\Csrf;
 use App\Core\Database;
 use App\Models\UserModel;
 use \App\Core\Session;
+use App\Core\Url;
 
 class AuthController extends Controller
 {
-    public function root(): string
-    {
-        redirect(Auth::check() ? '/dashboard' : '/login');
-    }
-
+	public function root(): string
+	{
+	    Url::redirect(Auth::check() ? '/dashboard' : '/login');
+	}
+	
+	
     public function loginForm(): string
     {
         $this->view->csrf   = Csrf::token();
@@ -66,15 +68,14 @@ class AuthController extends Controller
 			
         $_SESSION['permissions'] = $this->loadPermissions((int) $user['id']);
 			
-        redirect('/dashboard');
+        Url::redirect('/dashboard');
     }
 
     public function logout(): string
     {
         Auth::logout();
 			Session::destroy();
-
-        redirect('/login');
+			Url::redirect('/login');
     }
 
     private function loadPermissions(int $userId): array

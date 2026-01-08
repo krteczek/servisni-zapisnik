@@ -3,35 +3,69 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use App\Core\Url;
-
-class Menu
+final class Menu
 {
-    public static function fromRoutes(array $routes): array
+    public static function build(array $routes, string $currentPath): array
     {
-        $items = [];
+        $menu = [];
 
         foreach ($routes as $route) {
 
-            if (empty($route['menu'])) {
+            if (!self::isAllowed($route)) {
                 continue;
             }
 
-            if (($route['auth'] ?? false) && !Auth::check()) {
-                continue;
+            $routePath = Url::to($route['path']);
+
+            /* ===== HLAVNÍ MENU ===== */
+            if (!empty($route['menu'])) {
+
+                $section = $route['section'] ?? $route['path'];
+
+                $menu[$section] ??= [
+                    'label'  => $route['menu'],
+                    'path'   => $routePath,
+                    'method' => $route['method'] ?? 'GET',
+                    'active' => false,
+                    'items'  => [],
+                ];
+
+                // aktivní sekce = URL začíná cestou sekce
+                if (str_starts_with($currentPath, $routePath)) {
+                    $menu[$section]['active'] = true;
+                }
             }
 
-            if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
-                continue;
-            }
+            /* ===== SUBMENU ===== */
+            if (!empty($route['submenu']) && !empty($route['section'])) {
 
-            $items[] = [
-                'label'  => $route['menu'],
-                'path'   => Url::to($route['path']),//url($route['path']),
-                'method' => $route['method'] ?? 'GET',
-            ];
+                $active = $currentPath === $routePath;
+
+                $menu[$route['section']]['items'][] = [
+                    'label'  => $route['submenu'],
+                    'path'   => $routePath,
+                    'active' => $active,
+                ];
+
+                if ($active) {
+                    $menu[$route['section']]['active'] = true;
+                }
+            }
         }
 
-        return $items;
+        return $menu;
+    }
+
+    private static function isAllowed(array $route): bool
+    {
+        if (($route['auth'] ?? false) && !Auth::check()) {
+            return false;
+        }
+
+        if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
+            return false;
+        }
+
+        return true;
     }
 }
