@@ -1,6 +1,6 @@
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
-<h1>Uživatelé</h1>
+
 <table>
     <tr>
         <th>Email</th>

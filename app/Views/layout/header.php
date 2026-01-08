@@ -3,6 +3,7 @@
 use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Auth;
+
 ?>
 <!doctype html>
 <html lang="cs">
@@ -58,3 +59,5 @@ use App\Core\Auth;
 <?php endif ?>
 
 </header>
+
+<h1><?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></h1>

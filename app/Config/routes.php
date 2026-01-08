@@ -37,6 +37,7 @@ return [
         'roles'   => ['admin', 'mistr', 'predak', 'monter'],
         'menu'    => 'Dashboard',
         'section' => 'dashboard',
+        'title'   => 'Úkoly',
     ],
 
     // USERS – přehled
@@ -49,6 +50,7 @@ return [
         'menu'    => 'Uživatelé',
         'submenu' => 'Přehled',
         'section' => 'users',
+        'title'   => 'Uživatelé > Přehled',
     ],
 
     // USERS – create
@@ -60,6 +62,7 @@ return [
         'roles'   => ['admin'],
         'submenu' => 'Přidat uživatele',
         'section' => 'users',
+        'title'   => 'Uživatelé > Přidat uživatele',
     ],
 
     [
@@ -75,7 +78,7 @@ return [
     'action' => [UserController::class, 'editForm'],
     'auth'   => true,
     'roles'  => ['admin'],
-    //'submenu'=> 'Upravit uživatele',
+    'title'=> 'Upravit uživatele',
     'section'=> 'users',
 ],
 
