@@ -16,8 +16,11 @@ class Router
 public function __construct(array $routes)
 {
     $this->routes = $routes;
+    
+	 //$this->title =
 
     $this->view = new ViewContext();
+
     $this->view->isLogged = Auth::check();
     $this->view->user     = Auth::user();
     $this->view->menu = Menu::build(
@@ -57,6 +60,17 @@ if (($route['method'] ?? '') !== $method) {
             	
                 return (new ErrorController($this->view))->forbidden();
             }
+    if (!isset($route['title'])) {
+    if (isset($route['menu'], $route['submenu'])) {
+        $this->view->title = $route['menu'] . ' > ' . $route['submenu'];
+    } elseif (isset($route['menu'])) {
+        $this->view->title = $route['menu'];
+    } else {
+        $this->view->title = 'Aplikace';
+    }
+} else {
+    $this->view->title = $route['title'];
+}
 
             /* ===== CONTROLLER ===== */
             return $this->call($route['action']);

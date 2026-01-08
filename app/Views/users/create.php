@@ -10,8 +10,6 @@ $old = $view->old ?? [];
 $errors = $view->errors ?? [];
 ?>
 
-<h1>Nový uživatel</h1>
-
 <?php if ($errors): ?>
     <ul style="color:red">
         <?php foreach ($errors as $error): ?>
