@@ -1,15 +1,13 @@
 <?php require __DIR__ . '/../layout/header.php'; ?>
-<?php require __DIR__ . '/submenu.php'; ?>
 
 <h1>Uživatelé</h1>
-
 <table>
     <tr>
         <th>Email</th>
         <th>Jméno</th>
         <th>Akce</th>
     </tr>
-<?php foreach (($view->data['users'] ?? []) as $user): ?>
+<?php foreach (($view->users ?? []) as $user): ?>
         <tr>
             <td><?= htmlspecialchars($user['email']) ?></td>
             <td>

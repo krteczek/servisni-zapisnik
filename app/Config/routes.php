@@ -5,12 +5,16 @@ use App\Controllers\DashboardController;
 use App\Controllers\UserController;
 
 return [
-[
-    'method' => 'GET',
-    'path'   => '/',
-    'action' => [AuthController::class, 'root'],
-    'auth'   => false,
-],
+
+    // ROOT (není v menu!)
+    [
+        'method' => 'GET',
+        'path'   => '/',
+        'action' => [AuthController::class, 'root'],
+        'auth'   => false,
+    ],
+
+    // LOGIN
     [
         'method' => 'GET',
         'path'   => '/login',
@@ -23,49 +27,73 @@ return [
         'action' => [AuthController::class, 'login'],
         'auth'   => false,
     ],
+
+    // DASHBOARD
+    [
+        'method'  => 'GET',
+        'path'    => '/dashboard',
+        'action'  => [DashboardController::class, 'index'],
+        'auth'    => true,
+        'roles'   => ['admin', 'mistr', 'predak', 'monter'],
+        'menu'    => 'Dashboard',
+        'section' => 'dashboard',
+    ],
+
+    // USERS – přehled
+    [
+        'method'  => 'GET',
+        'path'    => '/users',
+        'action'  => [UserController::class, 'index'],
+        'auth'    => true,
+        'roles'   => ['admin', 'mistr'],
+        'menu'    => 'Uživatelé',
+        'submenu' => 'Přehled',
+        'section' => 'users',
+    ],
+
+    // USERS – create
+    [
+        'method'  => 'GET',
+        'path'    => '/users/create',
+        'action'  => [UserController::class, 'create'],
+        'auth'    => true,
+        'roles'   => ['admin'],
+        'submenu' => 'Přidat uživatele',
+        'section' => 'users',
+    ],
+
+    [
+        'method' => 'POST',
+        'path'   => '/users',
+        'action' => [UserController::class, 'store'],
+        'auth'   => true,
+        'roles'  => ['admin'],
+    ],
 [
     'method' => 'GET',
-    'path'   => '/dashboard',
-    'action' => [DashboardController::class, 'index'],
-    'auth'   => true,
-    'roles'  => ['admin', 'mistr', 'predak', 'monter'],
-    'menu'   => 'Dashboard',
-],
-
-
-
-[
-    'method' => 'GET',
-    'path'   => '/users',
-    'action' => [UserController::class, 'index'],
-    'auth'   => true,
-    'roles'  => ['admin', 'mistr'],
-    'menu'   => 'Lidé',
-],
-
-[
-    'method' => 'GET',
-    'path'   => '/users/create',
-    'action' => [UserController::class, 'create'],
+    'path'   => '/users/{id}/edit',
+    'action' => [UserController::class, 'editForm'],
     'auth'   => true,
     'roles'  => ['admin'],
+    //'submenu'=> 'Upravit uživatele',
+    'section'=> 'users',
 ],
 
 [
     'method' => 'POST',
-    'path'   => '/users',
-    'action' => [UserController::class, 'store'],
+    'path'   => '/users/{id}/edit',
+    'action' => [UserController::class, 'edit'],
     'auth'   => true,
     'roles'  => ['admin'],
+    'section'=> 'users',
 ],
 
-[
-    'method' => 'POST',
-    'path'   => '/logout',
-    'action' => [AuthController::class, 'logout'],
-    'auth'   => true,
-    'menu'   => 'Odhlásit',
-],
-
-
+    // LOGOUT (POST!)
+    [
+        'method' => 'POST',
+        'path'   => '/logout',
+        'action' => [AuthController::class, 'logout'],
+        'auth'   => true,
+        'menu'   => 'Odhlásit',
+    ],
 ];

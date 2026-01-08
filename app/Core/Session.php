@@ -115,4 +115,31 @@ class Session
         session_destroy();
         self::$started = false;
     }
+    
+    /* =========================
+       FLASH ZPRÁVY
+       ========================= */
+
+    public static function flash(string $key, mixed $value): void
+    {
+        self::set('_flash.' . $key, $value);
+    }
+
+    public static function hasFlash(string $key): bool
+    {
+        return self::has('_flash.' . $key);
+    }
+
+    public static function getFlash(string $key, mixed $default = null): mixed
+    {
+        if (!self::hasFlash($key)) {
+            return $default;
+        }
+
+        $value = self::get('_flash.' . $key, $default);
+        self::forget('_flash.' . $key);
+
+        return $value;
+    }
+
 }

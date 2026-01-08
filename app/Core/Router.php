@@ -13,16 +13,18 @@ class Router
     private array $routes;
     private ViewContext $view;
 
-    public function __construct(array $routes)
-    {
-        $this->routes = $routes;
+public function __construct(array $routes)
+{
+    $this->routes = $routes;
 
-        // jeden ViewContext pro celý request
-        $this->view = new ViewContext();
-        $this->view->isLogged = Auth::check();
-        $this->view->user     = Auth::user();
-        $this->view->menu     = Menu::fromRoutes($routes);
-    }
+    $this->view = new ViewContext();
+    $this->view->isLogged = Auth::check();
+    $this->view->user     = Auth::user();
+    $this->view->menu = Menu::build(
+    	$routes,
+    	rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/'
+	);
+}
 
     public function dispatch(string $path, string $method): string
     {
@@ -31,17 +33,22 @@ class Router
         $path = $path === '' ? '/' : $path;
 
         foreach ($this->routes as $route) {
+        	
+$routePath = $route['path'];
+$params = [];
 
-            if (
-                ($route['method'] ?? '') !== $method ||
-                ($route['path'] ?? '') !== $path
-            ) {
-                continue;
-            }
+if (!self::match($routePath, $path, $params)) {
+    continue;
+}
+
+if (($route['method'] ?? '') !== $method) {
+    continue;
+}
+
 
             /* ===== AUTH ===== */
 				if (($route['auth'] ?? false) === true && !Auth::check()) {
-				    redirect(Url::to('/login'));
+				    Url::redirect('/login');
 				    exit;
 				}
 
@@ -51,12 +58,6 @@ class Router
                 return (new ErrorController($this->view))->forbidden();
             }
 
-            /* ===== PERMISSION ===== */
-            if (!empty($route['permission']) && !Auth::can($route['permission'])) {
-            	
-                return (new ErrorController($this->view))->forbidden();
-            }
-				
             /* ===== CONTROLLER ===== */
             return $this->call($route['action']);
         }
@@ -72,4 +73,27 @@ class Router
 
         return $controller->$method();
     }
+    
+    
+    private static function match(string $routePath, string $requestPath, array &$params): bool
+{
+    // /users/{id}/edit → regex
+    $pattern = preg_replace('#\{([\w]+)\}#', '(?P<$1>[^/]+)', $routePath);
+    $pattern = '#^' . $pattern . '$#';
+
+    if (!preg_match($pattern, $requestPath, $matches)) {
+        return false;
+    }
+
+    foreach ($matches as $key => $value) {
+        if (!is_int($key)) {
+            $params[$key] = $value;
+        }
+    }
+
+    $_GET = array_merge($_GET, $params);
+
+    return true;
+}
+
 }

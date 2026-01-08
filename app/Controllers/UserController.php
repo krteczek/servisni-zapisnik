@@ -15,6 +15,7 @@ class UserController extends Controller
     {
         $model = new UserModel();
         $this->view->users = $model->all();
+        //var_dump($this->view->users);
 
         return $this->render('users/index');
     }
@@ -89,7 +90,63 @@ class UserController extends Controller
             'global_role'      => $data['role'],
             'created_at'       => date('Y-m-d H:i:s'),
         ]);
-
-        redirect(Url::to('/users'));
+			Url::redirect('/users');
     }
+    
+public function editForm(): string
+{
+    $id = (int) ($_GET['id'] ?? 0);
+
+    $user = (new UserModel())->findByIdFull($id);
+    if (!$user) {
+        return $this->forbidden();
+    }
+
+    $this->view->old = $user;
+    $this->view->roles = \App\Core\Roles::all();
+
+    return $this->render('users/edit');
+}
+
+public function edit(): string
+{
+    $id = (int) ($_GET['id'] ?? 0);
+    $model = new UserModel();
+
+    $data = [
+        'email'           => trim($_POST['email'] ?? ''),
+        'employee_number' => trim($_POST['employee_number'] ?? ''),
+        'first_name'      => trim($_POST['first_name'] ?? ''),
+        'last_name'       => trim($_POST['last_name'] ?? ''),
+        'global_role'     => $_POST['global_role'] ?? 'monter',
+        'active'          => isset($_POST['active']) ? 1 : 0,
+    ];
+
+    /* === VALIDACE === */
+    $errors = [];
+
+    if ($data['email'] === '') {
+        $errors['email'][] = 'Email je povinný';
+    }
+
+    if (!\App\Core\Roles::exists($data['global_role'])) {
+        $errors['global_role'][] = 'Neplatná role';
+    }
+
+    if ($errors) {
+        $this->view->errors = $errors;
+        $this->view->userData = array_merge($model->findByIdFull($id), $data);
+        return $this->render('users/edit');
+    }
+
+    $model->update($id, $data);
+
+    \App\Core\Session::flash('message', [
+        'type' => 'success',
+        'text' => 'Uživatel byl upraven',
+    ]);
+
+    \App\Core\Url::redirect('/users');
+}
+
 }
