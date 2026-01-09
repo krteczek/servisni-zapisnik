@@ -12,48 +12,57 @@ $errors = $view->errors ?? [];
 
 <?php if ($errors): ?>
 <ul style="color:red">
-    <?php foreach ($errors as $msg): ?>
-        <li><?= htmlspecialchars($msg, ENT_QUOTES) ?></li>
+    <?php foreach ($errors as $error): ?>
+        <li><?= htmlspecialchars($error) ?></li>
     <?php endforeach ?>
 </ul>
 <?php endif ?>
 
-<form method="post" action="<?= Url::to('/users') ?>">
+<form method="post"
+      action="<?= Url::to('/users') ?>"
+      autocomplete="off"
+      data-lpignore="true">
+
     <?= Csrf::getField() ?>
 
-    <label>Email<br>
-        <input type="email" name="email"
-               value="<?= htmlspecialchars($old['email'] ?? '', ENT_QUOTES) ?>" required>
-    </label><br><br>
+    <!-- fake username (pro password managery) -->
+    <input type="text" name="username" autocomplete="username" hidden>
 
-    <label>Číslo zaměstnance<br>
-        <input name="employee_number"
-               value="<?= htmlspecialchars($old['employee_number'] ?? '', ENT_QUOTES) ?>">
-    </label><br><br>
+    <!-- fake current password -->
+    <input type="password" autocomplete="current-password" hidden>
 
-    <label>Jméno<br>
-        <input name="first_name"
-               value="<?= htmlspecialchars($old['first_name'] ?? '', ENT_QUOTES) ?>">
-    </label><br><br>
+    <label>Email</label><br>
+    <input type="email" name="email" value="<?= htmlspecialchars($old['email'] ?? '') ?>"><br><br>
 
-    <label>Příjmení<br>
-        <input name="last_name"
-               value="<?= htmlspecialchars($old['last_name'] ?? '', ENT_QUOTES) ?>">
-    </label><br><br>
+    <label>Číslo zaměstnance</label><br>
+    <input type="text" name="employee_number" value="<?= htmlspecialchars($old['employee_number'] ?? '') ?>"><br><br>
 
-    <label>Heslo<br>
-        <input type="password" name="password">
-    </label><br><br>
+    <label>Jméno</label><br>
+    <input type="text" name="first_name" value="<?= htmlspecialchars($old['first_name'] ?? '') ?>"><br><br>
 
-    <label>Role<br>
-        <select name="global_role">
-            <?php foreach ($view->roles as $key => $label): ?>
-                <option value="<?= $key ?>" <?= $key === ($view->selectedRole ?? '') ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($label, ENT_QUOTES) ?>
-                </option>
-            <?php endforeach ?>
-        </select>
-    </label><br><br>
+    <label>Příjmení</label><br>
+    <input type="text" name="last_name" value="<?= htmlspecialchars($old['last_name'] ?? '') ?>"><br><br>
+
+    <label>Heslo</label><br>
+    <input type="password"
+           name="new_password"
+           autocomplete="new-password"
+           data-lpignore="true"><br><br>
+
+    <label>Potvrzení hesla</label><br>
+    <input type="password"
+           name="new_password_confirm"
+           autocomplete="new-password"
+           data-lpignore="true"><br><br>
+
+    <label>Role</label><br>
+    <select name="global_role">
+        <?php foreach ($view->roles as $key => $label): ?>
+            <option value="<?= $key ?>" <?= $key === ($view->selectedRole ?? '') ? 'selected' : '' ?>>
+                <?= htmlspecialchars($label) ?>
+            </option>
+        <?php endforeach ?>
+    </select><br><br>
 
     <button type="submit">Vytvořit</button>
 </form>
