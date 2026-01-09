@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 
+/**
+
+PDO je globálně nastaveno na FETCH_ASSOC.
+V modelech se nikdy fetch mód nespecifikuje.
+
+**/
+
 namespace App\Core;
 
 use PDO;

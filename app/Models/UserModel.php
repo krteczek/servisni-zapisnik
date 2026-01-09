@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 
+/**
+
+PDO je globálně nastaveno na FETCH_ASSOC.
+V modelech se nikdy fetch mód nespecifikuje.
+
+**/
+
 namespace App\Models;
 
 use App\Core\Database;
@@ -15,232 +22,114 @@ class UserModel
         $this->db = Database::pdo();
     }
 
-    /* =========================
-       NAČÍTÁNÍ
-       ========================= */
+    public function all(): array
+    {
+        return $this->db->query(
+            'SELECT id, email, employee_number, first_name, last_name, global_role, active, created_at
+             FROM users ORDER BY last_name, first_name'
+        )->fetchAll();
+    }
 
-    public function findById(int $id): ?array
+    public function findByIdFull(int $id): ?array
     {
         $stmt = $this->db->prepare(
-            'SELECT
-                id,
-                email,
-                employee_number,
-                first_name,
-                last_name,
-                global_role,
-                active,
-                created_at
-             FROM users
-             WHERE id = :id
-             LIMIT 1'
+            'SELECT id, email, employee_number, first_name, last_name, global_role, active, created_at
+             FROM users WHERE id = :id LIMIT 1'
         );
-
         $stmt->execute(['id' => $id]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $user ?: null;
+        return $stmt->fetch() ?: null;
     }
+public function findById(int $id): ?array
+{
+    $stmt = $this->db->prepare(
+        'SELECT id, email, first_name, last_name, global_role, active 
+         FROM users 
+         WHERE id = :id LIMIT 1'
+    );
+    $stmt->execute(['id' => $id]);
 
-    public function findByEmail(string $email): ?array
+    return $stmt->fetch() ?: null;
+}
+
+    public function existsByEmail(string $email, ?int $ignoreId = null): bool
     {
-        $stmt = $this->db->prepare(
-            'SELECT *
-             FROM users
-             WHERE email = :email
-             LIMIT 1'
-        );
+        $sql = 'SELECT 1 FROM users WHERE email = :email';
+        $params = ['email' => $email];
 
-        $stmt->execute(['email' => $email]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-    }
+        if ($ignoreId !== null) {
+            $sql .= ' AND id != :id';
+            $params['id'] = $ignoreId;
+        }
 
-    public function existsByEmail(string $email): bool
-    {
-        $stmt = $this->db->prepare(
-            'SELECT 1 FROM users WHERE email = :email LIMIT 1'
-        );
+        $stmt = $this->db->prepare($sql . ' LIMIT 1');
+        $stmt->execute($params);
 
-        $stmt->execute(['email' => $email]);
         return (bool) $stmt->fetchColumn();
     }
 
-    public function all(): array
+    public function existsByEmployeeNumber(string $number, ?int $ignoreId = null): bool
     {
-        $stmt = $this->db->query(
-            'SELECT
-                id,
-                email,
-                employee_number,
-                first_name,
-                last_name,
-                global_role,
-                active,
-                created_at
-             FROM users
-             ORDER BY last_name, first_name'
-        );
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+        $sql = 'SELECT 1 FROM users WHERE employee_number = :num';
+        $params = ['num' => $number];
 
-    /* =========================
-       VYTVÁŘENÍ
-       ========================= */
+        if ($ignoreId !== null) {
+            $sql .= ' AND id != :id';
+            $params['id'] = $ignoreId;
+        }
+
+        $stmt = $this->db->prepare($sql . ' LIMIT 1');
+        $stmt->execute($params);
+
+        return (bool) $stmt->fetchColumn();
+    }
 
     public function create(array $data): int
     {
         $stmt = $this->db->prepare(
-            'INSERT INTO users (
-                email,
-                employee_number,
-                password_hash,
-                first_name,
-                last_name,
-                global_role,
-                active
-            ) VALUES (
-                :email,
-                :employee_number,
-                :password_hash,
-                :first_name,
-                :last_name,
-                :global_role,
-                1
-            )'
+            'INSERT INTO users (email, employee_number, password_hash, first_name, last_name, global_role, active)
+             VALUES (:email, :employee_number, :password_hash, :first_name, :last_name, :global_role, 1)'
         );
 
-        $stmt->execute([
-            'email'         => $data['email'],
-            'employee_number' => $data['employee_number'],
-            'password_hash' => $data['password_hash'],
-            'first_name'    => $data['first_name'] ?? null,
-            'last_name'     => $data['last_name'] ?? null,
-            'global_role'   => $data['global_role'] ?? 'monter',
-            'active'        => 1,
-        ]);
+        $stmt->execute($data);
 
         return (int) $this->db->lastInsertId();
     }
 
-    /* =========================
-       AKTIVACE / DEAKTIVACE
-       ========================= */
-
-    public function deactivate(int $userId): void
+    public function update(int $id, array $data): void
     {
-        $stmt = $this->db->prepare(
-            'UPDATE users SET active = 0 WHERE id = :id'
-        );
+        $allowed = ['email', 'employee_number', 'first_name', 'last_name', 'global_role', 'active'];
 
-        $stmt->execute(['id' => $userId]);
-    }
+        $set = [];
+        $params = ['id' => $id];
 
-    public function activate(int $userId): void
-    {
-        $stmt = $this->db->prepare(
-            'UPDATE users SET active = 1 WHERE id = :id'
-        );
+        foreach ($allowed as $field) {
+            if (array_key_exists($field, $data)) {
+                $set[] = "{$field} = :{$field}";
+                $params[$field] = $data[$field];
+            }
+        }
 
-        $stmt->execute(['id' => $userId]);
-    }
+        if (!$set) {
+            return;
+        }
 
-    /* =========================
-       ROLE
-       ========================= */
-
-    public function setGlobalRole(int $userId, string $role): void
-    {
-        $stmt = $this->db->prepare(
-            'UPDATE users
-             SET global_role = :role
-             WHERE id = :id'
-        );
-
-        $stmt->execute([
-            'id'   => $userId,
-            'global_role' => $role,
-        ]);
-    }
-
-    /* =========================
-       HESLO
-       ========================= */
-
-    public function updatePassword(int $userId, string $passwordHash): void
-    {
-        $stmt = $this->db->prepare(
-            'UPDATE users
-             SET password_hash = :hash
-             WHERE id = :id'
-        );
-
-        $stmt->execute([
-            'id'   => $userId,
-            'hash' => $passwordHash,
-        ]);
+        $sql = 'UPDATE users SET ' . implode(', ', $set) . ' WHERE id = :id';
+        $this->db->prepare($sql)->execute($params);
     }
     
-public function existsByEmployeeNumber(string $number): bool
+public function updatePassword(int $userId, string $passwordHash): void
 {
     $stmt = $this->db->prepare(
-        'SELECT 1 FROM users WHERE employee_number = :num LIMIT 1'
-    );
-    $stmt->execute(['num' => $number]);
-    return (bool) $stmt->fetchColumn();
-}
-
-public function update(int $id, array $data): void
-{
-    $allowed = [
-        'email',
-        'employee_number',
-        'first_name',
-        'last_name',
-        'global_role',
-        'active',
-    ];
-
-    $set = [];
-    $params = ['id' => $id];
-
-    foreach ($allowed as $field) {
-        if (array_key_exists($field, $data)) {
-            $set[] = "{$field} = :{$field}";
-            $params[$field] = $data[$field];
-        }
-    }
-
-    if (!$set) {
-        return;
-    }
-
-    $sql = 'UPDATE users SET ' . implode(', ', $set) . ' WHERE id = :id';
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-}
-
-public function findByIdFull(int $id): ?array
-{
-    $stmt = $this->db->prepare(
-        'SELECT
-            id,
-            email,
-            employee_number,
-            first_name,
-            last_name,
-            global_role,
-            active,
-            created_at
-         FROM users
-         WHERE id = :id
-         LIMIT 1'
+        'UPDATE users
+         SET password_hash = :hash
+         WHERE id = :id'
     );
 
-    $stmt->execute(['id' => $id]);
-    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    $stmt->execute([
+        'id'   => $userId,
+        'hash' => $passwordHash,
+    ]);
 }
-
-
-
+    
 }

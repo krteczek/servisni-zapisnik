@@ -90,8 +90,26 @@ return [
     'roles'  => ['admin'],
     'section'=> 'users',
 ],
+[
+    'method'  => 'GET',
+    'path'    => '/users/{id}/password',
+    'action'  => [UserController::class, 'passwordForm'],
+    'auth'    => true,
+    'roles'   => ['admin'],
+    'section' => 'users',
+    'title'   => 'Změna hesla',
+],
 
-    // LOGOUT (POST!)
+[
+    'method'  => 'POST',
+    'path'    => '/users/{id}/password',
+    'action'  => [UserController::class, 'updatePassword'],
+    'auth'    => true,
+    'roles'   => ['admin'],
+],
+
+
+    // LOGOUT (POST!) Nechat poslední, aby byl poslední i ve výpisu
     [
         'method' => 'POST',
         'path'   => '/logout',

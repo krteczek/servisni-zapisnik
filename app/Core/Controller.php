@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace App\Core;
+use \app\Core\ViewContext;
 
 abstract class Controller
 {
