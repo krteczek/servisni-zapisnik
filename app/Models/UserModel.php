@@ -116,6 +116,7 @@ class UserModel
             'first_name'    => $data['first_name'] ?? null,
             'last_name'     => $data['last_name'] ?? null,
             'global_role'   => $data['global_role'] ?? 'monter',
+            'active'        => 1,
         ]);
 
         return (int) $this->db->lastInsertId();
@@ -157,7 +158,7 @@ class UserModel
 
         $stmt->execute([
             'id'   => $userId,
-            'role' => $role,
+            'global_role' => $role,
         ]);
     }
 

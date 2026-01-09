@@ -78,7 +78,7 @@ return [
     'action' => [UserController::class, 'editForm'],
     'auth'   => true,
     'roles'  => ['admin'],
-    'title'=> 'Upravit uživatele',
+    'title'=> 'Uživatelé > Upravit uživatele',
     'section'=> 'users',
 ],
 
