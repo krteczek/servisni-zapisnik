@@ -131,5 +131,23 @@ public function updatePassword(int $userId, string $passwordHash): void
         'hash' => $passwordHash,
     ]);
 }
-    
+   
+   
+public function availableForTeam(int $teamId): array
+{
+    $stmt = $this->db->prepare("
+        SELECT u.*
+        FROM users u
+        WHERE u.active = 1
+          AND u.id NOT IN (
+              SELECT user_id
+              FROM team_memberships
+              WHERE team_id = ?
+                AND valid_to IS NULL
+          )
+    ");
+    $stmt->execute([$teamId]);
+    return $stmt->fetchAll();
+}
+
 }

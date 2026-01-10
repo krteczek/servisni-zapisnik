@@ -78,7 +78,7 @@ if (($route['method'] ?? '') !== $method) {
 
         return (new ErrorController($this->view))->notFound();
     }
-
+/**
     protected function call(array $action): string
     {
         [$controllerClass, $method] = $action;
@@ -87,6 +87,30 @@ if (($route['method'] ?? '') !== $method) {
 
         return $controller->$method();
     }
+**/
+protected function call(array $action): string
+{
+    [$controllerClass, $method] = $action;
+
+    $controller = new $controllerClass($this->view);
+
+    $reflection = new \ReflectionMethod($controller, $method);
+    $args = [];
+
+    foreach ($reflection->getParameters() as $param) {
+        $name = $param->getName();
+
+        if (isset($_GET[$name])) {
+            $args[] = $_GET[$name];
+        } elseif ($param->isDefaultValueAvailable()) {
+            $args[] = $param->getDefaultValue();
+        } else {
+            throw new \RuntimeException("Missing route parameter: $name");
+        }
+    }
+
+    return $reflection->invokeArgs($controller, $args);
+}
     
     
     private static function match(string $routePath, string $requestPath, array &$params): bool

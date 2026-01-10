@@ -3,6 +3,7 @@
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\UserController;
+use App\Controllers\TeamController;
 
 return [
 
@@ -106,6 +107,61 @@ return [
     'action'  => [UserController::class, 'updatePassword'],
     'auth'    => true,
     'roles'   => ['admin'],
+],
+
+
+
+// TEAMS – přehled
+[
+    'method'  => 'GET',
+    'path'    => '/teams',
+    'action'  => [TeamController::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'menu'    => 'Týmy',
+    'submenu' => 'Přehled týmů',
+    'section' => 'teams',
+    'title'   => 'Týmy',
+],
+
+// TEAMS – create
+[
+    'method'  => 'GET',
+    'path'    => '/teams/create',
+    'action'  => [TeamController::class, 'create'],
+    'auth'    => true,
+    'roles'   => ['admin'],
+    'submenu' => 'Vytvořit tým',
+    'section' => 'teams',
+    'title'   => 'Týmy -> Vytvořit tým',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/teams',
+    'action' => [TeamController::class, 'store'],
+    'auth'   => true,
+    'roles'  => ['admin'],
+],
+
+// TEAMS – detail + členové
+[
+    'method'  => 'GET',
+    'path'    => '/teams/{id}/edit',
+    'action'  => [TeamController::class, 'edit'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'teams',
+    'title'   => 'Týmy -> Detail týmu',
+],
+
+// TEAMS – update + členové
+[
+    'method' => 'POST',
+    'path'   => '/teams/{id}/edit',
+    'action' => [TeamController::class, 'update'],
+    'auth'   => true,
+    'roles'  => ['admin'],
 ],
 
 
