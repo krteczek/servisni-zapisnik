@@ -100,9 +100,9 @@ public function store(): string
     /**
      * Editační formulář
      */
-    public function editForm(): string
+    public function editForm(int $id): string
     {
-        $id = (int) ($_GET['id'] ?? 0);
+        //$id = (int) ($_GET['id'] ?? 0);
 
         $user = $this->model->findByIdFull($id);
         if (!$user) {
@@ -118,9 +118,9 @@ public function store(): string
     /**
      * Uložení úprav uživatele
      */
-    public function edit(): string
+    public function edit(int $id): string
     {
-        $id = (int) ($_GET['id'] ?? 0);
+        //$id = (int) ($_GET['id'] ?? 0);
 
         $data = [
             '_token'          => trim($_POST['_token'] ?? ''),
@@ -156,9 +156,9 @@ public function store(): string
 /**
  * Zobrazí formulář pro změnu hesla uživatele
  */
-public function passwordForm(): string
+public function passwordForm(int $id): string
 {
-    $id = (int) ($_GET['id'] ?? 0);
+    //$id = (int) ($_GET['id'] ?? 0);
 
     if ($id <= 0) {
         return $this->forbidden();
@@ -183,9 +183,9 @@ public function passwordForm(): string
 /**
  * Zpracuje změnu hesla uživatele (admin mění cizí heslo)
  */
-public function updatePassword(): string
+public function updatePassword(int $id): string
 {
-    $id = (int) ($_GET['id'] ?? 0);
+    // $id = (int) ($_GET['id'] ?? 0);
 
     if ($id <= 0) {
         return $this->forbidden();

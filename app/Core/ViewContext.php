@@ -30,7 +30,11 @@ class ViewContext
     
     public ?string $selectedRole = null;
     
-    
+// TEAMS
+    public array $teams = [];
+    public array $team = [];
+    public array $members = [];
+    public array $availableUsers = [];    
     
     
 }
