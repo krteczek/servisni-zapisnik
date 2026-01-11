@@ -149,5 +149,18 @@ public function availableForTeam(int $teamId): array
     $stmt->execute([$teamId]);
     return $stmt->fetchAll();
 }
+public function findByEmail($email)
+{
+    $stmt = $this->db->prepare(
+        'SELECT id, email, first_name, last_name, global_role, active, password_hash 
+         FROM users 
+         WHERE email = :email LIMIT 1'
+    );
+    $stmt->execute(['email' => $email]);
+
+    return $stmt->fetch() ?: null;
+	
+}
+
 
 }

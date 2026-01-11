@@ -4,6 +4,7 @@ declare(strict_types=1);
 //views/teams/index.php – přehled týmů
 
 use App\Core\Url;
+use App\Core\Access;
 
 require __DIR__ . '/../layout/header.php';
 ?>

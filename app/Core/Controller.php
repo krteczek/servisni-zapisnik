@@ -40,4 +40,17 @@ abstract class Controller
         return $this->render('errors/404');
     }
 
+public function switchRole(string $role): void
+{
+    $allowed = array_keys(Config::get('roles')['roles']);
+
+    if (!in_array($role, $allowed, true)) {
+        throw new DomainException('Neplatná role');
+    }
+	Session::set('effective_role',$role);
+    //$_SESSION['effective_role'] = $role;
+
+    Url::redirect('/');
+}
+
 }
