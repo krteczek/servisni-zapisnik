@@ -1,0 +1,10 @@
+[2026-01-11 23:11:34] error: sleep(): Argument #1 ($seconds) must be of type int, float given
+[2026-01-11 23:13:52] error: sleep(): Argument #1 ($seconds) must be of type int, float given
+[2026-01-11 23:14:37] error: syntax error, unexpected identifier "min"
+[2026-01-11 23:15:53] error: sleep(): Argument #1 ($seconds) must be of type int, float given
+[2026-01-11 23:58:23] error: syntax error, unexpected identifier "Url"
+[2026-01-11 23:58:43] error: Class "Roles" not found
+[2026-01-11 23:59:58] error: Class "AdminController" not found
+[2026-01-12 00:03:13] error: Class "AdminController" not found
+[2026-01-12 00:07:52] error: Neplatná role
+[2026-01-12 00:08:15] error: Neplatná role

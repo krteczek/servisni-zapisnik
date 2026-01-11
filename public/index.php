@@ -10,14 +10,16 @@ error_reporting(E_ALL);
 define('BASE_PATH', '/servisni-zapisnik/public');
 
 require dirname(__DIR__) . '/bootstrap.php';
-require dirname(__DIR__) . '/app/Core/helpers.php';
 
 $routes = require dirname(__DIR__) . '/app/Config/routes.php';
 
 use App\Core\Router;
 use App\Core\Session;
+use App\Core\Logger;
 
 Session::start();
+
+$logger = new Logger(dirname(__DIR__) . '/storage/logs/app.log');
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -35,11 +37,15 @@ try {
 
     http_response_code(500);
 
-    // do budoucna: logger
-    // Logger::error($e);
+    $logger->error(
+        $e->getMessage(),
+        [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]
+    );
 
     if (ini_get('display_errors')) {
-        echo '<h1>Application error</h1>';
         echo '<pre>' . $e . '</pre>';
     } else {
         echo 'Internal Server Error';

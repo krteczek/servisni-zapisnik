@@ -3,6 +3,7 @@
 use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Auth;
+use App\Core\Roles;
 
 ?>
 <!doctype html>
@@ -18,7 +19,23 @@ use App\Core\Auth;
 <body>
 
 <header>
+<?php if ($view->user['global_role'] === 'admin'): ?>
+    <small style="opacity:.6">
+        Pohled jako: <strong><?= \App\Core\Auth::effectiveRole() ?></strong>
+    </small>
+<?php endif; ?>
+<?php if (Auth::user()['global_role'] === 'admin'): ?>
+    <div style="background:#fee;padding:6px">
+        Přepnout na pohled jako:
+        <?php foreach (Roles::all() as $key => $label): ?>
+            <a href="<?= Url::to('/admin/switch-role/' . $key) ?>"> [
+                <?= $label ?>
+           ] </a>&nbsp;&nbsp;
+        <?php endforeach; ?>
 
+        | <a href="<?= Url::to('/admin/switch-role/reset') ?>">Admin</a>
+    </div>
+<?php endif; ?>
 <ul class="menu">
 <?php foreach ($view->menu as $section): ?>
     <li class="menu-item <?= $section['active'] ? 'active' : '' ?>">

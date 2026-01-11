@@ -54,12 +54,15 @@ if (($route['method'] ?? '') !== $method) {
 				    Url::redirect('/login');
 				    exit;
 				}
+				
+				/* ===== ROLE ===== */
+				if (!empty($route['roles']) && !Auth::hasGlobalRole($route['roles']))
+				{
+					return (new ErrorController($this->view))->forbidden();
+				}
+            
 
-            /* ===== ROLE ===== */
-            if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
-            	
-                return (new ErrorController($this->view))->forbidden();
-            }
+
     if (!isset($route['title'])) {
     if (isset($route['menu'], $route['submenu'])) {
         $this->view->title = $route['menu'] . ' > ' . $route['submenu'];
@@ -133,5 +136,6 @@ protected function call(array $action): string
 
     return true;
 }
+
 
 }

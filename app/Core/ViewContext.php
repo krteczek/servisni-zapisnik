@@ -36,5 +36,7 @@ class ViewContext
     public array $members = [];
     public array $availableUsers = [];    
     public array $rolesInTeam = [];
-    
+
+// login s hláškami:
+	public string $aprilWarning = '';
 }

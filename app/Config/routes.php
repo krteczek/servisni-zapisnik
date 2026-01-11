@@ -4,8 +4,15 @@ use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\UserController;
 use App\Controllers\TeamController;
+use App\Controllers\AdminController;
 
 return [
+[
+    'path'   => '/admin/switch-role/{role}',
+    'method' => 'GET',
+    'action' => [AdminController::class, 'switchRole'],
+    'roles'  => ['admin'],
+],
 
     // ROOT (není v menu!)
     [
@@ -78,7 +85,7 @@ return [
     'path'   => '/users/{id}/edit',
     'action' => [UserController::class, 'editForm'],
     'auth'   => true,
-    'roles'  => ['admin'],
+    'roles'  => ['admin', 'mistr'],
     'title'=> 'Uživatelé > Upravit uživatele',
     'section'=> 'users',
 ],
@@ -88,7 +95,7 @@ return [
     'path'   => '/users/{id}/edit',
     'action' => [UserController::class, 'edit'],
     'auth'   => true,
-    'roles'  => ['admin'],
+    'roles'  => ['admin', 'mistr'],
     'section'=> 'users',
 ],
 [
@@ -96,7 +103,7 @@ return [
     'path'    => '/users/{id}/password',
     'action'  => [UserController::class, 'passwordForm'],
     'auth'    => true,
-    'roles'   => ['admin'],
+    'roles'   => ['admin', 'mistr'],
     'section' => 'users',
     'title'   => 'Změna hesla',
 ],
@@ -106,7 +113,7 @@ return [
     'path'    => '/users/{id}/password',
     'action'  => [UserController::class, 'updatePassword'],
     'auth'    => true,
-    'roles'   => ['admin'],
+    'roles'   => ['admin', 'mistr'],
 ],
 
 

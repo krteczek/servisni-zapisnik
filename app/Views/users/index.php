@@ -1,11 +1,11 @@
 <?php require __DIR__ . '/../layout/header.php'; 
 use App\Core\Url;
 use App\Core\Csrf;
-
+use App\Core\Access;
 
 ?>
 
-<table>
+<table border="1" cellpadding="8">
     <thead>
         <tr>
             <th>Email</th>
@@ -31,13 +31,15 @@ use App\Core\Csrf;
                 <?= $user['active'] ? 'Aktivní' : 'Neaktivní' ?>
             </td>
 
-            <td>
-            	<a href="<?= Url::to('/users/' . (int)$user['id'] . '/edit') ?>">Upravit</a>
- 
-                <!-- připraveno do budoucna -->
-                <a href="<?= Url::to('/users/' . (int)$user['id'] . '/password') ?>">Změnit heslo</a>
-            </td>
-        </tr>
+<td>
+    <?php if (Access::can('users.edit')): ?>
+        <a href="<?= Url::to('/users/' . (int)$user['id'] . '/edit') ?>">Upravit</a>
+    <?php endif; ?>
+
+    <?php if (Access::can('users.password')): ?>
+        <a href="<?= Url::to('/users/' . (int)$user['id'] . '/password') ?>">Změnit heslo</a>
+    <?php endif; ?>
+</td>        </tr>
     <?php endforeach; ?>
     </tbody>
 </table>

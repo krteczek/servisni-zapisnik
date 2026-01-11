@@ -7,8 +7,7 @@ use App\Models\UserModel;
 
 class Auth
 {
-    private const USER_KEY        = 'user';
-    private const PERMISSIONS_KEY = 'permissions';
+    private const USER_KEY = 'user';
 
     /** cache načteného uživatele */
     private static ?array $cachedUser = null;
@@ -82,9 +81,9 @@ class Auth
     }
 
     /* =========================
-       ROLE / PERMISSION
+       ROLE
        ========================= */
-
+/**
     public static function hasRole(array $roles): bool
     {
         if (!self::check()) {
@@ -93,38 +92,33 @@ class Auth
 
         return in_array(self::role(), $roles, true);
     }
+    
+    **/
+public static function hasRole(array $roles): bool
+{
+    $role = self::effectiveRole();
 
-    public static function can(string $permission): bool
-    {
-        Session::start();
-        $permissions = Session::get(self::PERMISSIONS_KEY, []);
-        return in_array($permission, $permissions, true);
-    }
+    return in_array($role, $roles, true);
+}
 
     /* =========================
        LOGIN / LOGOUT
        ========================= */
 
-    public static function login(array $userData, array $permissions = []): void
+    public static function login(array $userData): void
     {
         Session::start();
         Session::regenerate(); // session fixation
 
         Session::set(self::USER_KEY, $userData);
-        Session::set(self::PERMISSIONS_KEY, $permissions);
-
         self::$cachedUser = null;
     }
 
     public static function logout(): void
     {
         Session::start();
-
         Session::forget(self::USER_KEY);
-        Session::forget(self::PERMISSIONS_KEY);
-
         Session::regenerate();
-
         self::$cachedUser = null;
     }
 
@@ -146,12 +140,6 @@ class Auth
         self::$cachedUser = null;
     }
 
-    public static function updatePermissions(array $permissions): void
-    {
-        Session::start();
-        Session::set(self::PERMISSIONS_KEY, $permissions);
-    }
-
     /* =========================
        HELPERY
        ========================= */
@@ -164,16 +152,49 @@ class Auth
     public static function redirectIfGuest(string $to = '/login'): void
     {
         if (self::isGuest()) {
-            header('Location: ' . $to);
-            exit;
+            Url::redirect($to);
         }
     }
 
     public static function redirectIfLoggedIn(string $to = '/'): void
     {
         if (self::check()) {
-            header('Location: ' . $to);
-            exit;
+            Url::redirect($to);
         }
     }
+    
+        public static function effectiveRole(): string
+    {
+        $user = self::user();
+
+        if (!$user) {
+            return '';
+        }
+
+        // admin může simulovat
+        if (
+            $user['global_role'] === 'admin'
+            && isset($_SESSION['effective_role'])
+        ) {
+            return $_SESSION['effective_role'];
+        }
+
+        return $user['global_role'];
+    }
+    
+    public static function hasGlobalRole(array $roles): bool
+{
+    $user = self::user();
+
+    if (!$user) {
+        return false;
+    }
+
+    if ($user['global_role'] === 'admin') {
+        return true;
+    }
+
+    return in_array($user['global_role'], $roles, true);
+}
+
 }
