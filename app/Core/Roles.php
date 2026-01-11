@@ -5,9 +5,15 @@ namespace App\Core;
 
 final class Roles
 {
+    private static ?array $roles = null;
+
     public static function all(): array
     {
-        return Config::get('roles')['roles'];
+        if (self::$roles === null) {
+            self::$roles = Config::get('roles')['roles'];
+        }
+
+        return self::$roles;
     }
 
     public static function default(): string
@@ -17,6 +23,6 @@ final class Roles
 
     public static function exists(string $role): bool
     {
-        return array_key_exists($role, self::all());
+        return isset(self::all()[$role]);
     }
 }

@@ -35,6 +35,6 @@ class ViewContext
     public array $team = [];
     public array $members = [];
     public array $availableUsers = [];    
-    
+    public array $rolesInTeam = [];
     
 }
