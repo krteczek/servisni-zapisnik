@@ -12,6 +12,7 @@ require __DIR__ . '/../layout/header.php';
     <tr>
         <th>Název</th>
         <th>Barva</th>
+        <th>Počet členů</th>
         <th>Členové</th>
         <th>Akce</th>
     </tr>
@@ -20,14 +21,17 @@ require __DIR__ . '/../layout/header.php';
         <tr>
             <td><?= htmlspecialchars($team['name']) ?></td>
             <td>
-                <span style="background:<?= htmlspecialchars($team['color']) ?>; padding:4px 10px;">
-                    <?= htmlspecialchars($team['color']) ?>
-                </span>
+                <span style="display:inline-block;width:20px;height:20px;background:<?= $team['color'] ?>"></span>
             </td>
-            <td><?= (int) $team['members'] ?></td>
+            <td><?= $team['members_count'] ?></td>
             <td>
-                <a href="<?= Url::to('/teams/' . $team['id'] . '/edit') ?>">Upravit</a>
+                <?php foreach ($team['members'] as $m): ?>
+                    <?= htmlspecialchars($m['last_name'] . ' ' . $m['first_name']) ?><br>
+                <?php endforeach; ?>
+            </td>
+            <td>
+                <a href="<?= Url::to('/teams/' . (int)$team['id']  . '/edit') ?>">Upravit</a>
             </td>
         </tr>
-    <?php endforeach ?>
+    <?php endforeach; ?>
 </table>

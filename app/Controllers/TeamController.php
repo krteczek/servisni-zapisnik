@@ -4,36 +4,36 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Url;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\UserModel;
-
+use App\Core\Url;
+use App\Core\Config;
 class TeamController extends Controller
 {
-    /**
-     * Přehled týmů
-     */
+		
     public function index(): string
     {
-        $teamModel = new Team();
+        $teams = Team::all();
+			
 
-        $this->view->teams = $teamModel->allWithMembersCount();
+
+        // doplníme členy ke každému týmu
+        foreach ($teams as &$team) {
+            $team['members'] = TeamMembership::currentMembers((int)$team['id']);
+            $team['members_count'] = count($team['members']);
+        }
+
+        $this->view->teams = $teams;
 
         return $this->render('teams/index');
     }
 
-    /**
-     * Formulář pro vytvoření týmu
-     */
     public function create(): string
     {
         return $this->render('teams/create');
     }
 
-    /**
-     * Uložení nového týmu
-     */
     public function store(): string
     {
         $name  = trim($_POST['name'] ?? '');
@@ -44,64 +44,47 @@ class TeamController extends Controller
             return $this->render('teams/create');
         }
 
-        $teamModel = new Team();
-        $teamModel->create($name, $color);
-
-        Url::redirect('/teams');
+        Team::create($name, $color);
+			Url::redirect('/teams');
     }
 
-    /**
-     * Detail / editace týmu + členové
-     */
     public function edit(int $id): string
     {
-        //$id = (int) ($_GET['id'] ?? 0);
-        if ($id <= 0) {
-            return $this->forbidden();
-        }
 
-        $teamModel       = new Team();
-        $membershipModel = new TeamMembership();
-        $userModel       = new UserModel();
-
-        $team = $teamModel->find($id);
-        if (!$team) {
-            return $this->forbidden();
-        }
-
-        $this->view->team = $team;
-        $this->view->members = $membershipModel->currentMembers($id);
-        $this->view->availableUsers = $userModel->availableForTeam($id);
+        $this->view->team = Team::find($id);
+        $this->view->members = TeamMembership::currentMembers($id);
+        $this->view->rolesInTeam = Config::get('roles_in_team')['roles'];
+        $model = new UserModel;
+        $this->view->availableUsers = $model->availableForTeam($id);
 
         return $this->render('teams/edit');
     }
 
-    /**
-     * Přidání / odebrání členů týmu
-     */
     public function update(int $id): string
     {
-        //$id = (int) ($_GET['id'] ?? 0);
-        if ($id <= 0) {
-            return $this->forbidden();
-        }
 
-        $membershipModel = new TeamMembership();
-
-        // přidání člena
-        if (!empty($_POST['add_user_id'])) {
-            $membershipModel->add(
-                (int) $_POST['add_user_id'],
+        /* === UPDATE TÝMU === */
+        if (isset($_POST['name'], $_POST['color'])) {
+            Team::update(
                 $id,
-                $_POST['role_in_team'] ?? 'monter'
+                trim($_POST['name']),
+                trim($_POST['color'])
             );
         }
 
-        // odebrání člena (ukončení platnosti)
-        if (!empty($_POST['remove_membership_id'])) {
-            $membershipModel->end((int) $_POST['remove_membership_id']);
+        /* === PŘIDÁNÍ ČLENA === */
+        if (!empty($_POST['add_user_id'])) {
+            TeamMembership::add(
+                (int)$_POST['add_user_id'],
+                $id,
+                $_POST['role_in_team'] ?? 'member'
+            );
         }
 
-        Url::redirect('/teams/' . $id . '/edit');
+        /* === ODEBRÁNÍ ČLENA === */
+        if (!empty($_POST['remove_membership_id'])) {
+            TeamMembership::end((int)$_POST['remove_membership_id']);
+        }
+			Url::redirect('/teams/' . $id . '/edit');
     }
 }

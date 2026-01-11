@@ -160,9 +160,6 @@ public function passwordForm(int $id): string
 {
     //$id = (int) ($_GET['id'] ?? 0);
 
-    if ($id <= 0) {
-        return $this->forbidden();
-    }
 	
     $data = $this->model->findById($id);
 

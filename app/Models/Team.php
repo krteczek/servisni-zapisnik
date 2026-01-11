@@ -5,38 +5,46 @@ namespace App\Models;
 
 use App\Core\Database;
 use PDO;
+
 class Team
 {
-    private PDO $db;
+		private UserModel $model;
 
-    public function __construct()
+    private static function db(): PDO
     {
-        $this->db = Database::pdo();
+        return Database::pdo();
     }
 
-    public function allWithMembersCount(): array
+    public static function all(): array
     {
-        return $this->db->query("
-            SELECT t.*, COUNT(tm.id) AS members
-            FROM teams t
-            LEFT JOIN team_memberships tm 
-              ON tm.team_id = t.id AND tm.valid_to IS NULL
-            GROUP BY t.id
-        ")->fetchAll();
+        return self::db()
+            ->query('SELECT * FROM teams ORDER BY name')
+            ->fetchAll();
     }
 
-    public function find(int $id): ?array
+    public static function find(int $id): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM teams WHERE id = ?");
+        $stmt = self::db()->prepare(
+            'SELECT * FROM teams WHERE id = ? LIMIT 1'
+        );
         $stmt->execute([$id]);
-        return $stmt->fetch() ?: null;
+
+        return $stmt->fetch() ?: [];
     }
 
-    public function create(string $name, string $color): void
+    public static function create(string $name, string $color): void
     {
-        $stmt = $this->db->prepare("
-            INSERT INTO teams (name, color) VALUES (?, ?)
-        ");
+        $stmt = self::db()->prepare(
+            'INSERT INTO teams (name, color) VALUES (?, ?)'
+        );
         $stmt->execute([$name, $color]);
+    }
+
+    public static function update(int $id, string $name, string $color): void
+    {
+        $stmt = self::db()->prepare(
+            'UPDATE teams SET name = ?, color = ? WHERE id = ?'
+        );
+        $stmt->execute([$name, $color, $id]);
     }
 }
