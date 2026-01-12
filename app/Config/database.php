@@ -5,4 +5,7 @@ return [
     'dsn'  => 'mysql:host=localhost;dbname=jelmark;charset=utf8mb4',
     'user' => 'root',
     'pass' => '',
+
+    // ⬇️ DŮLEŽITÉ
+    'table_prefix' => '',   // např. 'sz_' na produkci
 ];
