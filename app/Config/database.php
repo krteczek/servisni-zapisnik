@@ -1,11 +1,11 @@
-<?php
-declare(strict_types=1);
+public static function table(string $name): string
+{
+    static $prefix = null;
 
-return [
-    'dsn'  => 'mysql:host=localhost;dbname=jelmark;charset=utf8mb4',
-    'user' => 'root',
-    'pass' => '',
+    if ($prefix === null) {
+        $config = require BASE_PATH . '/../config/database.php';
+        $prefix = $config['table_prefix'] ?? '';
+    }
 
-    // ⬇️ DŮLEŽITÉ
-    'table_prefix' => '',   // např. 'sz_' na produkci
-];
+    return $prefix . $name;
+}
