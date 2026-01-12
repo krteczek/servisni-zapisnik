@@ -3,16 +3,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Core\Database;
-use PDO;
-
-class TeamMembership
+class TeamMembership extends BaseModel
 {
-    private static function db(): PDO
-    {
-        return Database::pdo();
-    }
-
     public static function currentMembers(int $teamId): array
     {
         $stmt = self::db()->prepare("
@@ -20,8 +12,8 @@ class TeamMembership
                    u.first_name,
                    u.last_name,
                    tm.role_in_team
-            FROM team_memberships tm
-            JOIN users u ON u.id = tm.user_id
+            FROM " . self::table('team_memberships') . " tm
+            JOIN " . self::table('users') . " u ON u.id = tm.user_id
             WHERE tm.team_id = ?
               AND tm.valid_to IS NULL
             ORDER BY u.last_name
@@ -34,7 +26,7 @@ class TeamMembership
     public static function add(int $userId, int $teamId, string $role): void
     {
         $stmt = self::db()->prepare("
-            INSERT INTO team_memberships
+            INSERT INTO " . self::table('team_memberships') . "
             (user_id, team_id, role_in_team, valid_from)
             VALUES (?, ?, ?, CURDATE())
         ");
@@ -44,7 +36,7 @@ class TeamMembership
     public static function end(int $membershipId): void
     {
         $stmt = self::db()->prepare("
-            UPDATE team_memberships
+            UPDATE " . self::table('team_memberships') . "
             SET valid_to = CURDATE()
             WHERE id = ?
         ");
