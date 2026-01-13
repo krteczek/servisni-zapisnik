@@ -5,6 +5,7 @@ use App\Controllers\DashboardController;
 use App\Controllers\UserController;
 use App\Controllers\TeamController;
 use App\Controllers\AdminController;
+use App\Controllers\WorkOrderController;
 
 return [
 [
@@ -15,13 +16,12 @@ return [
 ],
 
     // ROOT (není v menu!)
-    [
-        'method' => 'GET',
-        'path'   => '/',
-        'action' => [AuthController::class, 'root'],
-        'auth'   => false,
-    ],
-
+[
+    'method' => 'GET',
+    'path'   => '/',
+    'action' => [DashboardController::class, 'root'],
+    'auth'   => true,
+],
     // LOGIN
     [
         'method' => 'GET',
@@ -36,6 +36,7 @@ return [
         'auth'   => false,
     ],
 
+
     // DASHBOARD
     [
         'method'  => 'GET',
@@ -47,6 +48,46 @@ return [
         'section' => 'dashboard',
         'title'   => 'Úkoly',
     ],
+[
+    'method'  => 'GET',
+    'path'    => '/work-orders',
+    'action'  => [WorkOrderController::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin','mistr','predak'],
+    'menu'    => 'Dashboard',
+    'submenu' => 'Zakázky',
+    'section' => 'dashboard',
+    'title'   => 'Dashboard > Zakázky',
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/work-orders/create',
+    'action'  => [WorkOrderController::class, 'createForm'],
+    'auth'    => true,
+    'roles'   => ['admin','mistr','predak'],
+    'submenu' => 'Nová zakázka',
+    'section' => 'dashboard',
+    'title'   => 'Dashboard > Zakázky > Nová',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/work-orders/create',
+    'action' => [WorkOrderController::class, 'create'],
+    'auth'   => true,
+    'roles'  => ['admin','mistr','predak'],
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/work-orders/{id}',
+    'action'  => [WorkOrderController::class, 'detail'],
+    'auth'    => true,
+    'roles'   => ['admin','mistr','predak','monter'],
+    'section' => 'dashboard',
+    'title'   => 'Dashboard > Zakázka',
+],
 
     // USERS – přehled
     [

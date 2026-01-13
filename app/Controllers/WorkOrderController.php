@@ -59,7 +59,6 @@ class WorkOrderController extends Controller
     {
         $model = new WorkOrderModel();
         $order = $model->find($id);
-
         if (!$order) {
             Url::redirect('/work-orders');
         }

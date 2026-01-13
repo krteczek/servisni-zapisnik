@@ -29,14 +29,18 @@ class ViewContext
     public ?array $roles = null;
     
     public ?string $selectedRole = null;
-    
+
 // TEAMS
     public array $teams = [];
     public array $team = [];
     public array $members = [];
-    public array $availableUsers = [];    
+    public array $availableUsers = [];
     public array $rolesInTeam = [];
 
 // login s hláškami:
 	public string $aprilWarning = '';
+
+//WORKORER
+	 public array $orders = [];
+	 public array $order = [];
 }

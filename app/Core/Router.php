@@ -6,6 +6,8 @@ namespace App\Core;
 use App\Controllers\ErrorController;
 use App\Controllers\UserController;
 use App\Controllers\DashboardController;
+use App\Controllers\WorkOrderController;
+
 use App\Core\Url;
 
 class Router
@@ -94,7 +96,6 @@ if (($route['method'] ?? '') !== $method) {
 protected function call(array $action): string
 {
     [$controllerClass, $method] = $action;
-
     $controller = new $controllerClass($this->view);
 
     $reflection = new \ReflectionMethod($controller, $method);
@@ -114,8 +115,8 @@ protected function call(array $action): string
 
     return $reflection->invokeArgs($controller, $args);
 }
-    
-    
+
+
     private static function match(string $routePath, string $requestPath, array &$params): bool
 {
     // /users/{id}/edit → regex
