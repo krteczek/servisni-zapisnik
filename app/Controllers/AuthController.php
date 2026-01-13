@@ -27,7 +27,7 @@ class AuthController extends Controller
         
         // Aprílový vtip
         if ($this->isAprilFirst()) {
-            $this->view->aprilWarning = "Pozor! Dnes je 1. duben!";
+            $this->view->aprilWarning = "Pozor! Dnes je 1. duben! Vše je podezřelé.";
         }
         
         return $this->render('auth/login');
@@ -76,10 +76,12 @@ class AuthController extends Controller
                 $this->view->errors['global'][] = "Zbývá {$remaining} pokusů.";
             }
             
+            /**
             // Čekání podle počtu pokusů (anti-brute force)
             $waitTime = (int) min(4, $this->getFailedAttempts() * 0.5);
             
             sleep($waitTime);
+            **/
             
             return $this->render('auth/login');
         }
@@ -96,12 +98,14 @@ class AuthController extends Controller
         ]);
         
         // Aprílové přesměrování (jen 1.4.)
+        /**
         if ($this->isAprilFirst()) {
             $redirectTo = $this->getAprilRedirect();
             if ($redirectTo) {
                 Url::redirect($redirectTo);
             }
         }
+        **/
         
         // Normální přesměrování
         Url::redirect('/dashboard');

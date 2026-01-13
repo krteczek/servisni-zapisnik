@@ -1,35 +1,39 @@
 <?php
 declare(strict_types=1);
 
-/**
-
-PDO je globálně nastaveno na FETCH_ASSOC.
-V modelech se nikdy fetch mód nespecifikuje.
-
-**/
-
 namespace App\Core;
 
 use PDO;
 
-class Database
+final class Database
 {
     private static ?PDO $pdo = null;
+    private static string $prefix = '';
 
     public static function pdo(): PDO
     {
         if (self::$pdo === null) {
-            $cfg = require __DIR__ . '/../Config/database.php';
+            $config = Config::get('database');
+
             self::$pdo = new PDO(
-                $cfg['dsn'],
-                $cfg['user'],
-                $cfg['pass'],
+                $config['dsn'],
+                $config['user'],
+                $config['pass'],
                 [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 ]
             );
+
+            self::$prefix = (string)($config['prefix'] ?? '');
         }
+
         return self::$pdo;
+    }
+
+    public static function table(string $name): string
+    {
+        self::pdo(); // init
+        return self::$prefix . $name;
     }
 }

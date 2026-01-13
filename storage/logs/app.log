@@ -8,3 +8,22 @@
 [2026-01-12 00:03:13] error: Class "AdminController" not found
 [2026-01-12 00:07:52] error: Neplatná role
 [2026-01-12 00:08:15] error: Neplatná role
+[2026-01-12 22:07:59] error: PDO::__construct(): Argument #1 ($dsn) must be of type string, null given
+[2026-01-12 22:41:10] error: Call to undefined method App\Core\Database::table()
+[2026-01-12 22:44:38] error: Failed opening required '/servisni-zapisnik/public/../config/database.php' (include_path='.:/opt/lampp/lib/php')
+[2026-01-12 22:48:48] error: Typed property App\Models\BaseModel::$table must not be accessed before initialization
+[2026-01-12 23:15:10] error: App\Models\UserModel must define protected string $table
+[2026-01-12 23:18:14] error: App\Models\UserModel must define protected string $table
+[2026-01-12 23:39:22] error: App\Models\UserModel must define protected string $table
+[2026-01-12 23:39:34] error: App\Models\UserModel must define protected string $table
+[2026-01-12 23:39:37] error: App\Models\UserModel must define protected string $table
+[2026-01-12 23:41:02] error: Call to undefined method App\Models\Team::db()
+[2026-01-13 00:06:06] error: Non-static method App\Models\Team::all() cannot be called statically
+[2026-01-13 00:06:13] error: Non-static method App\Models\Team::all() cannot be called statically
+[2026-01-13 00:16:16] error: Non-static method App\Models\Team::all() cannot be called statically
+[2026-01-13 01:13:47] error: Non-static method App\Models\TeamMembership::currentMembers() cannot be called statically
+[2026-01-13 01:42:21] error: Non-static method App\Models\Team::find() cannot be called statically
+[2026-01-13 01:43:55] error: Unclosed '{' on line 53 does not match ')'
+[2026-01-13 01:44:13] error: Class "App\Models\Database" not found
+[2026-01-13 01:47:27] error: Non-static method App\Models\Team::create() cannot be called statically
+[2026-01-13 01:51:02] error: Cannot assign int to property App\Core\ViewContext::$members of type array

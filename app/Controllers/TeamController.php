@@ -11,23 +11,24 @@ use App\Core\Url;
 use App\Core\Config;
 class TeamController extends Controller
 {
-		
-    public function index(): string
-    {
-        $teams = Team::all();
-			
 
+public function index(): string
+{
+    $teamModel = new Team();
+    $membershipModel = new TeamMembership();
 
-        // doplníme členy ke každému týmu
-        foreach ($teams as &$team) {
-            $team['members'] = TeamMembership::currentMembers((int)$team['id']);
-            $team['members_count'] = count($team['members']);
-        }
+    $teams = $teamModel->all();
 
-        $this->view->teams = $teams;
-
-        return $this->render('teams/index');
+    foreach ($teams as &$team) {
+        $team['members'] = $membershipModel->currentMembers((int)$team['id']);
+        $team['members_count'] = count($team['members']);
     }
+
+    $this->view->teams = $teams;
+
+    return $this->render('teams/index');
+}
+		
 
     public function create(): string
     {
@@ -43,48 +44,55 @@ class TeamController extends Controller
             $this->view->error = 'Název týmu je povinný';
             return $this->render('teams/create');
         }
-
-        Team::create($name, $color);
+		$team = new Team();
+        $team->create($name, $color);
 			Url::redirect('/teams');
     }
 
     public function edit(int $id): string
     {
-
-        $this->view->team = Team::find($id);
-        $this->view->members = TeamMembership::currentMembers($id);
-        $this->view->rolesInTeam = Config::get('roles_in_team')['roles'];
-        $model = new UserModel;
-        $this->view->availableUsers = $model->availableForTeam($id);
+			$team = new Team();
+        	$this->view->team = $team->find($id);
+        	
+        	$membershipModel = new TeamMembership();
+        	$this->view->members = $membershipModel->currentMembers($id);
+        	
+        	$this->view->rolesInTeam = Config::get('roles_in_team')['roles'];
+        	
+        	$model = new UserModel;
+        	$this->view->availableUsers = $model->availableForTeam($id);
 
         return $this->render('teams/edit');
     }
 
-    public function update(int $id): string
-    {
+public function update(int $id): string
+{
+    $membershipModel = new TeamMembership();
+    $teamModel = new Team();
 
-        /* === UPDATE TÝMU === */
-        if (isset($_POST['name'], $_POST['color'])) {
-            Team::update(
-                $id,
-                trim($_POST['name']),
-                trim($_POST['color'])
-            );
-        }
-
-        /* === PŘIDÁNÍ ČLENA === */
-        if (!empty($_POST['add_user_id'])) {
-            TeamMembership::add(
-                (int)$_POST['add_user_id'],
-                $id,
-                $_POST['role_in_team'] ?? 'member'
-            );
-        }
-
-        /* === ODEBRÁNÍ ČLENA === */
-        if (!empty($_POST['remove_membership_id'])) {
-            TeamMembership::end((int)$_POST['remove_membership_id']);
-        }
-			Url::redirect('/teams/' . $id . '/edit');
+    /* === UPDATE TÝMU === */
+    if (isset($_POST['name'], $_POST['color'])) {
+        $teamModel->updateRow($id, [
+            'name'  => trim($_POST['name']),
+            'color' => trim($_POST['color']),
+        ]);
     }
+
+    /* === PŘIDÁNÍ ČLENA === */
+    if (!empty($_POST['add_user_id'])) {
+        $membershipModel->add(
+            (int)$_POST['add_user_id'],
+            $id,
+            $_POST['role_in_team'] ?? 'member'
+        );
+    }
+
+    /* === ODEBRÁNÍ ČLENA === */
+    if (!empty($_POST['remove_membership_id'])) {
+        $membershipModel->end((int)$_POST['remove_membership_id']);
+    }
+
+    // 🚨 NIC nenastavujeme do view
+    return Url::redirect('/teams/' . $id . '/edit');
+}
 }
