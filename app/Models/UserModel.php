@@ -3,23 +3,29 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Core\Database;
+
 class UserModel extends BaseModel
 {
+    /** název tabulky bez prefixu */
+    protected string $table = 'users';
+
     public function all(): array
     {
-        return self::db()->query(
-            'SELECT id, email, employee_number, first_name, last_name, global_role, active, created_at
-             FROM ' . self::table('users') . '
-             ORDER BY last_name, first_name'
+        return $this->db->query(
+            "SELECT id, email, employee_number, first_name, last_name, global_role, active, created_at
+             FROM {$this->table}
+             ORDER BY last_name, first_name"
         )->fetchAll();
     }
 
     public function findById(int $id): ?array
     {
-        $stmt = self::db()->prepare(
-            'SELECT id, email, first_name, last_name, global_role, active
-             FROM ' . self::table('users') . '
-             WHERE id = :id LIMIT 1'
+        $stmt = $this->db->prepare(
+            "SELECT id, email, first_name, last_name, global_role, active
+             FROM {$this->table}
+             WHERE id = :id
+             LIMIT 1"
         );
         $stmt->execute(['id' => $id]);
 
@@ -28,10 +34,11 @@ class UserModel extends BaseModel
 
     public function findByIdFull(int $id): ?array
     {
-        $stmt = self::db()->prepare(
-            'SELECT id, email, employee_number, first_name, last_name, global_role, active, created_at
-             FROM ' . self::table('users') . '
-             WHERE id = :id LIMIT 1'
+        $stmt = $this->db->prepare(
+            "SELECT id, email, employee_number, first_name, last_name, global_role, active, created_at
+             FROM {$this->table}
+             WHERE id = :id
+             LIMIT 1"
         );
         $stmt->execute(['id' => $id]);
 
@@ -40,10 +47,11 @@ class UserModel extends BaseModel
 
     public function findByEmail(string $email): ?array
     {
-        $stmt = self::db()->prepare(
-            'SELECT id, email, first_name, last_name, global_role, active, password_hash
-             FROM ' . self::table('users') . '
-             WHERE email = :email LIMIT 1'
+        $stmt = $this->db->prepare(
+            "SELECT id, email, first_name, last_name, global_role, active, password_hash
+             FROM {$this->table}
+             WHERE email = :email
+             LIMIT 1"
         );
         $stmt->execute(['email' => $email]);
 
@@ -52,20 +60,28 @@ class UserModel extends BaseModel
 
     public function create(array $data): int
     {
-        $stmt = self::db()->prepare(
-            'INSERT INTO ' . self::table('users') . '
-            (email, employee_number, password_hash, first_name, last_name, global_role, active)
-            VALUES (:email, :employee_number, :password_hash, :first_name, :last_name, :global_role, 1)'
+        $stmt = $this->db->prepare(
+            "INSERT INTO {$this->table}
+             (email, employee_number, password_hash, first_name, last_name, global_role, active)
+             VALUES (:email, :employee_number, :password_hash, :first_name, :last_name, :global_role, 1)"
         );
 
         $stmt->execute($data);
 
-        return (int) self::db()->lastInsertId();
+        return (int) $this->db->lastInsertId();
     }
 
     public function update(int $id, array $data): void
     {
-        $allowed = ['email', 'employee_number', 'first_name', 'last_name', 'global_role', 'active'];
+        $allowed = [
+            'email',
+            'employee_number',
+            'first_name',
+            'last_name',
+            'global_role',
+            'active',
+        ];
+
         $set = [];
         $params = ['id' => $id];
 
@@ -80,39 +96,41 @@ class UserModel extends BaseModel
             return;
         }
 
-        $sql = 'UPDATE ' . self::table('users') .
-               ' SET ' . implode(', ', $set) .
-               ' WHERE id = :id';
+        $sql = "UPDATE {$this->table}
+                SET " . implode(', ', $set) . "
+                WHERE id = :id";
 
-        self::db()->prepare($sql)->execute($params);
+        $this->db->prepare($sql)->execute($params);
     }
 
     public function updatePassword(int $userId, string $hash): void
     {
-        self::db()->prepare(
-            'UPDATE ' . self::table('users') . '
+        $this->db->prepare(
+            "UPDATE {$this->table}
              SET password_hash = :hash
-             WHERE id = :id'
+             WHERE id = :id"
         )->execute([
-            'id' => $userId,
+            'id'   => $userId,
             'hash' => $hash,
         ]);
     }
 
     public function availableForTeam(int $teamId): array
     {
-        $stmt = self::db()->prepare("
-            SELECT u.*
-            FROM " . self::table('users') . " u
-            WHERE u.active = 1
-              AND u.id NOT IN (
-                  SELECT user_id
-                  FROM " . self::table('team_memberships') . "
-                  WHERE team_id = ?
-                    AND valid_to IS NULL
-              )
-        ");
-        $stmt->execute([$teamId]);
+        $teamMemberships = Database::table('team_memberships');
+
+        $stmt = $this->db->prepare(
+            "SELECT u.*
+             FROM {$this->table} u
+             WHERE u.active = 1
+               AND u.id NOT IN (
+                   SELECT user_id
+                   FROM {$teamMemberships}
+                   WHERE team_id = :team
+                     AND valid_to IS NULL
+               )"
+        );
+        $stmt->execute(['team' => $teamId]);
 
         return $stmt->fetchAll();
     }

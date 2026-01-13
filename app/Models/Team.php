@@ -5,38 +5,31 @@ namespace App\Models;
 
 class Team extends BaseModel
 {
-    public static function all(): array
+    protected string $table = 'teams';
+
+    public function all(): array
     {
-        return self::db()
-            ->query(
-                'SELECT * FROM ' . self::table('teams') . ' ORDER BY name'
-            )
-            ->fetchAll();
+        return $this->allRows('id');
     }
 
-    public static function find(int $id): array
+    public function find(int $id): ?array
     {
-        $stmt = self::db()->prepare(
-            'SELECT * FROM ' . self::table('teams') . ' WHERE id = ? LIMIT 1'
-        );
-        $stmt->execute([$id]);
-
-        return $stmt->fetch() ?: [];
+        return $this->findRow($id);
     }
 
-    public static function create(string $name, string $color): void
+    public function create(string $name, string $color): int
     {
-        $stmt = self::db()->prepare(
-            'INSERT INTO ' . self::table('teams') . ' (name, color) VALUES (?, ?)'
-        );
-        $stmt->execute([$name, $color]);
+        return $this->insert([
+            'name'  => $name,
+            'color'=> $color,
+        ]);
     }
 
-    public static function update(int $id, string $name, string $color): void
+    public function update(int $id, string $name, string $color): void
     {
-        $stmt = self::db()->prepare(
-            'UPDATE ' . self::table('teams') . ' SET name = ?, color = ? WHERE id = ?'
-        );
-        $stmt->execute([$name, $color, $id]);
+        $this->updateRow($id, [
+            'name'  => $name,
+            'color'=> $color,
+        ]);
     }
 }

@@ -1,0 +1,33 @@
+<h1>Nová zakázka</h1>
+
+<form method="post">
+    <label>Externí číslo</label>
+    <input name="external_number" value="<?= $this->e($this->data['external_number'] ?? '') ?>">
+
+    <label>Název *</label>
+    <input name="title" required value="<?= $this->e($this->data['title'] ?? '') ?>">
+
+    <label>Popis</label>
+    <textarea name="description"><?= $this->e($this->data['description'] ?? '') ?></textarea>
+
+    <label>Zdroj</label>
+    <select name="source">
+        <option value="email">Email</option>
+        <option value="phone">Telefon</option>
+        <option value="personal">Osobně</option>
+        <option value="system">Systém</option>
+    </select>
+
+    <label>Požadoval</label>
+    <input name="requested_by" value="<?= $this->e($this->data['requested_by'] ?? '') ?>">
+
+    <label>Priorita</label>
+    <select name="priority">
+        <option value="low">Nízká</option>
+        <option value="normal">Normální</option>
+        <option value="high">Vysoká</option>
+        <option value="emergency">Havárie</option>
+    </select>
+
+    <button>Uložit</button>
+</form>

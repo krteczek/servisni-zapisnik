@@ -1,6 +1,7 @@
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <h1>Přihlášení do aplikace Servisní Zápisník</h1>
+<?= htmlspecialchars($view->aprilWarning) ?>
 <form method="post" action="./login">
     <input type="hidden" name="csrf" value="<?= htmlspecialchars($view->csrf) ?>">
 

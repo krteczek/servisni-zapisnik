@@ -1,11 +1,12 @@
-public static function table(string $name): string
-{
-    static $prefix = null;
+<?php
 
-    if ($prefix === null) {
-        $config = require BASE_PATH . '/../config/database.php';
-        $prefix = $config['table_prefix'] ?? '';
-    }
+declare(strict_types=1);
 
-    return $prefix . $name;
-}
+
+
+return [
+    'dsn'  => 'mysql:host=localhost;dbname=jelmark;charset=utf8mb4',
+    'user' => 'root',
+    'pass' => '',
+	'prefix' => '',
+];
