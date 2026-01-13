@@ -5,6 +5,7 @@ use App\Core\Csrf;
 use App\Core\Auth;
 use App\Core\Roles;
 
+$user = $view->user ?? null;
 ?>
 <!doctype html>
 <html lang="cs">
@@ -19,18 +20,18 @@ use App\Core\Roles;
 <body>
 
 <header>
-<?php if ($view->user['global_role'] === 'admin'): ?>
+<?php if (Auth::hasGlobalRole(['admin'])): ?>
     <small style="opacity:.6">
-        Pohled jako: <strong><?= \App\Core\Auth::effectiveRole() ?></strong>
+        Pohled jako:
+        <strong><?= Auth::effectiveRole() ?></strong>
     </small>
-<?php endif; ?>
-<?php if (Auth::user()['global_role'] === 'admin'): ?>
+
     <div style="background:#fee;padding:6px">
         Přepnout na pohled jako:
         <?php foreach (Roles::all() as $key => $label): ?>
-            <a href="<?= Url::to('/admin/switch-role/' . $key) ?>"> [
-                <?= $label ?>
-           ] </a>&nbsp;&nbsp;
+            <a href="<?= Url::to('/admin/switch-role/' . $key) ?>">
+                [ <?= htmlspecialchars($label) ?> ]
+            </a>&nbsp;&nbsp;
         <?php endforeach; ?>
 
         | <a href="<?= Url::to('/admin/switch-role/reset') ?>">Admin</a>
@@ -68,8 +69,7 @@ use App\Core\Roles;
 </ul>
 <?php endif ?>
 <?php endforeach ?>
-
-<?php if ($view->isLogged): ?>
+<?php if (Auth::check()): ?>
 <div class="user-info">
     Přihlášen: <?= htmlspecialchars(App\Core\Auth::label()) ?>
 </div>

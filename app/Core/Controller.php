@@ -52,5 +52,8 @@ public function switchRole(string $role): void
 
     Url::redirect('/');
 }
-
+	public function e(string $text):string
+	{
+		return htmlspecialchars($text);
+	}
 }

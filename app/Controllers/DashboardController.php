@@ -19,4 +19,9 @@ public function index(): string
     {
         return $this->render('dashboard/admin');
     }
+public function root(): void
+{
+    \App\Core\Url::redirect('/dashboard');
+}
+
 }

@@ -27,3 +27,28 @@
 [2026-01-13 01:44:13] error: Class "App\Models\Database" not found
 [2026-01-13 01:47:27] error: Non-static method App\Models\Team::create() cannot be called statically
 [2026-01-13 01:51:02] error: Cannot assign int to property App\Core\ViewContext::$members of type array
+[2026-01-13 08:41:41] error: SQLSTATE[HY000] [1049] Unknown database 'jelmark'
+[2026-01-13 11:18:13] error: Class "WorkOrderController" not found
+[2026-01-13 11:19:32] error: Class "WorkOrderController" not found
+[2026-01-13 11:19:57] error: Class "WorkOrderController" not found
+[2026-01-13 11:21:05] error: Class "WorkOrderController" not found
+[2026-01-13 11:23:02] error: Class "WorkOrderController" not found
+[2026-01-13 11:29:20] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 11:31:48] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 11:32:23] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 11:34:54] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 11:36:31] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 11:36:32] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 11:46:03] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-13 11:46:10] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-13 11:48:07] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-13 11:48:16] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-13 11:51:08] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-13 12:20:00] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/detail.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 12:21:02] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/detail.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 12:25:36] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/detail.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-13 12:27:41] error: Class "Url" not found
+[2026-01-13 12:31:03] error: Class "Url" not found
+[2026-01-13 12:32:07] error: Class "Url" not found
+[2026-01-13 12:34:02] error: App\Controllers\WorkOrderController::detail(): Argument #1 ($id) must be of type int, string given
+[2026-01-13 13:03:37] error: syntax error, unexpected token "<"
