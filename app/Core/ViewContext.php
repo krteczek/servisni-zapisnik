@@ -21,6 +21,9 @@ class ViewContext
     /** validační chyby */
     public array $errors = [];
 
+	/** flash zprávy */
+    public array $flash = [];
+ 
     /** data formulářů */
     public array $data = [];
     
@@ -36,9 +39,8 @@ class ViewContext
     public array $members = [];
     public array $availableUsers = [];
     public array $rolesInTeam = [];
+	 public array $userTeams = [];
 
-// login s hláškami:
-	public string $aprilWarning = '';
 
 //WORKORER
 	 public array $orders = [];
