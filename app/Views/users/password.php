@@ -4,45 +4,46 @@ declare(strict_types=1);
 // views/users/password.php
 
 use App\Core\Url;
-use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
-$user   = $view->data;
+$user   = $view->data ?? [];
 $errors = $view->errors ?? [];
 ?>
 
 <h2>Změna hesla uživatele:
-    <?= htmlspecialchars($user['first_name']) ?>
-    <?= htmlspecialchars($user['last_name']) ?>
+    <?= htmlspecialchars($user['first_name'] ?? '') ?>
+    <?= htmlspecialchars($user['last_name'] ?? '') ?>
 </h2>
 
 <?php if ($errors): ?>
-<ul style="color:red">
-    <?php foreach ($errors as $error): ?>
-        <li><?= htmlspecialchars($error) ?></li>
+<ul class="errors">
+    <?php foreach ($errors as $field => $messages): ?>
+        <?php foreach ((array) $messages as $message): ?>
+            <li><?= htmlspecialchars($message) ?></li>
+        <?php endforeach ?>
     <?php endforeach ?>
 </ul>
 <?php endif ?>
 
 <form method="post"
-      action="<?= Url::to('/users/' . $user['id'] . '/password') ?>"
+      action="<?= Url::to('/users/' . ($user['id'] ?? '') . '/password') ?>"
       autocomplete="off"
       data-lpignore="true">
 
-    <?= Csrf::getField() ?>
+    <?= $this->csrfField() ?>
 
-    <!-- FALEŠNÉ POLE – uklidní Chrome -->
+    <!-- fake username (password managery) -->
     <input type="text"
            name="fake_user"
            autocomplete="username"
-           style="display:none">
+           hidden>
 
-    <!-- FALEŠNÉ HESLO – kritické -->
+    <!-- fake current password -->
     <input type="password"
            name="fake_pass"
            autocomplete="current-password"
-           style="display:none">
+           hidden>
 
     <label>Nové heslo</label><br>
     <input type="password"
