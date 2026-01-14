@@ -43,13 +43,13 @@ class AuthController extends Controller
             $this->addError('password', 'Heslo je povinné');
         }
 
+        /* ===== CSRF (součást validace) ===== */
+
+        $this->checkCsrf();
+
+        /* ===== FINÁLNÍ KONTROLA ===== */
+
         if ($this->hasErrors()) {
-            return $this->render('auth/login');
-        }
-
-        /* ===== CSRF (AŽ PO VALIDACI) ===== */
-
-        if (!$this->checkCsrf()) {
             return $this->render('auth/login');
         }
 
@@ -70,14 +70,18 @@ class AuthController extends Controller
             'first_name'  => $user['first_name'] ?? null,
             'last_name'   => $user['last_name'] ?? null,
         ]);
-			Flash::add('success', 'Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋');
-			
+
+        Flash::add(
+            'success',
+            'Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
+        );
+
         Url::redirect('/dashboard');
     }
 
     public function logout(): string
     {
-    		Flash::add('success', 'Byl jste odhlášen. Přijďte zas!');
+        Flash::add('success', 'Byl jste odhlášen. Přijďte zas!');
 
         Auth::logout();
         Url::redirect('/login');
