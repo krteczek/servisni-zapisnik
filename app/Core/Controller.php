@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 namespace App\Core;
-use \app\Core\ViewContext;
 
 abstract class Controller
 {
@@ -11,49 +10,72 @@ abstract class Controller
     public function __construct(ViewContext $view)
     {
         $this->view = $view;
+        $this->view->errors ??= [];
+        $this->view->data   ??= [];
     }
 
     protected function render(string $template): string
     {
         $view = $this->view;
-			
+
         ob_start();
         require __DIR__ . '/../Views/' . $template . '.php';
         return ob_get_clean();
     }
-    
+
+    /* =========================
+       CSRF
+       ========================= */
+
+    protected function csrfField(): string
+    {
+        return Csrf::getField();
+    }
+
+    protected function checkCsrf(): bool
+    {
+        if (!Csrf::verify($_POST['_token'] ?? '')) {
+            $this->addError('_csrf', 'Platnost formuláře vypršela. Zkuste jej odeslat znovu.');
+            return false;
+        }
+
+        return true;
+    }
+
+    /* =========================
+       ERRORS
+       ========================= */
+
+    protected function addError(string $field, string $message): void
+    {
+        $this->view->errors[$field][] = $message;
+    }
+
+    protected function hasErrors(): bool
+    {
+        return !empty($this->view->errors);
+    }
+
+    /* =========================
+       COMMON PAGES
+       ========================= */
+
     public function forbidden(): string
     {
         http_response_code(403);
-
         $this->view->title = '403 – Přístup zakázán';
-
         return $this->render('errors/403');
     }
 
     public function notFound(): string
     {
         http_response_code(404);
-
         $this->view->title = '404 – Stránka nenalezena';
-
         return $this->render('errors/404');
     }
 
-public function switchRole(string $role): void
-{
-    $allowed = array_keys(Config::get('roles')['roles']);
-
-    if (!in_array($role, $allowed, true)) {
-        throw new DomainException('Neplatná role');
+    protected function e(string $text): string
+    {
+        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
     }
-	Session::set('effective_role',$role);
-    //$_SESSION['effective_role'] = $role;
-
-    Url::redirect('/');
-}
-	public function e(string $text):string
-	{
-		return htmlspecialchars($text);
-	}
 }

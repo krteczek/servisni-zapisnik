@@ -83,17 +83,7 @@ class Auth
     /* =========================
        ROLE
        ========================= */
-/**
-    public static function hasRole(array $roles): bool
-    {
-        if (!self::check()) {
-            return false;
-        }
 
-        return in_array(self::role(), $roles, true);
-    }
-    
-    **/
 public static function hasRole(array $roles): bool
 {
     $role = self::effectiveRole();

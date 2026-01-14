@@ -1,9 +1,17 @@
-<?php require __DIR__ . '/../layout/header.php'; ?>
+<?php
+use App\Core\Url;
 
-<h1>Přihlášení do aplikace Servisní Zápisník</h1>
-<?= htmlspecialchars($view->aprilWarning) ?>
-<form method="post" action="./login">
-    <input type="hidden" name="csrf" value="<?= htmlspecialchars($view->csrf) ?>">
+require __DIR__ . '/../layout/header.php';
+?>
+
+<h1>Přihlášení</h1>
+
+<form method="post" action="<?= Url::current() ?>">
+    <?= $view->csrf ?>
+
+    <?php if (!empty($view->errors['_csrf'])): ?>
+        <div class="error"><?= htmlspecialchars($view->errors['_csrf'][0]) ?></div>
+    <?php endif; ?>
 
     <?php if (!empty($view->errors['global'])): ?>
         <div class="error"><?= htmlspecialchars($view->errors['global'][0]) ?></div>
@@ -11,21 +19,21 @@
 
     <label>
         Email
-        <input name="email" value="<?= htmlspecialchars($view->data['email'] ?? '') ?>"><br>
+        <input name="email" value="<?= htmlspecialchars($view->data['email'] ?? '') ?>">
         <?php if (!empty($view->errors['email'])): ?>
             <div class="error"><?= htmlspecialchars($view->errors['email'][0]) ?></div>
         <?php endif; ?>
     </label>
-
+<br>
     <label>
         Heslo
         <input type="password" name="password">
-        <?php if (!empty($view->errors['password'])): ?><br>
-            <div class="error"><?= htmlspecialchars($view->errors['password'][0]) ?></div><br>
+        <?php if (!empty($view->errors['password'])): ?>
+            <div class="error"><?= htmlspecialchars($view->errors['password'][0]) ?></div>
         <?php endif; ?>
     </label>
-
-    <br><button>Přihlásit</button>
+<br>
+    <button>Přihlásit</button>
 </form>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

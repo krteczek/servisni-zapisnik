@@ -49,50 +49,69 @@ public function index(): string
 			Url::redirect('/teams');
     }
 
-    public function edit(int $id): string
-    {
-			$team = new Team();
-        	$this->view->team = $team->find($id);
-        	
-        	$membershipModel = new TeamMembership();
-        	$this->view->members = $membershipModel->currentMembers($id);
-        	
-        	$this->view->rolesInTeam = Config::get('roles_in_team')['roles'];
-        	
-        	$model = new UserModel;
-        	$this->view->availableUsers = $model->availableForTeam($id);
+public function edit(int $id): string
+{
+    $teamModel = new Team();
+    $membershipModel = new TeamMembership();
+    $userModel = new UserModel();
 
-        return $this->render('teams/edit');
-    }
+    // aktuální tým
+    $this->view->team = $teamModel->find($id);
+
+    // členové tohoto týmu
+    $this->view->members = $membershipModel->currentMembers($id);
+
+    // role v týmu
+    $this->view->rolesInTeam = Config::get('roles_in_team')['roles'];
+
+    // uživatelé, které lze přidat
+    $this->view->availableUsers = $userModel->availableForTeam($id);
+
+    // 🔥 NOVÉ: aktivní týmy všech uživatelů (pro barevné tečky)
+    $this->view->userTeams = $membershipModel->activeTeamsByUsers();
+
+    return $this->render('teams/edit');
+}
 
 public function update(int $id): string
 {
     $membershipModel = new TeamMembership();
     $teamModel = new Team();
 
-    /* === UPDATE TÝMU === */
-    if (isset($_POST['name'], $_POST['color'])) {
-        $teamModel->updateRow($id, [
-            'name'  => trim($_POST['name']),
-            'color' => trim($_POST['color']),
-        ]);
+    $action = $_POST['_action'] ?? null;
+
+    switch ($action) {
+
+        case 'update_team':
+            $teamModel->updateTeam($id, [
+                'name'  => trim($_POST['name']),
+                'color' => trim($_POST['color']),
+            ]);
+            break;
+
+        case 'add_member':
+            $membershipModel->add(
+                (int)$_POST['add_user_id'],
+                $id,
+                $_POST['role_in_team'] ?? 'member'
+            );
+            break;
+
+        case 'change_role':
+            $membershipModel->change_user_role(
+                (int)$_POST['change_user_role'],
+                ['role_in_team' => $_POST['role_in_team']]
+            );
+            break;
+
+        case 'remove_member':
+            $membershipModel->end(
+                (int)$_POST['remove_membership_id']
+            );
+            break;
     }
 
-    /* === PŘIDÁNÍ ČLENA === */
-    if (!empty($_POST['add_user_id'])) {
-        $membershipModel->add(
-            (int)$_POST['add_user_id'],
-            $id,
-            $_POST['role_in_team'] ?? 'member'
-        );
-    }
-
-    /* === ODEBRÁNÍ ČLENA === */
-    if (!empty($_POST['remove_membership_id'])) {
-        $membershipModel->end((int)$_POST['remove_membership_id']);
-    }
-
-    // 🚨 NIC nenastavujeme do view
     return Url::redirect('/teams/' . $id . '/edit');
 }
+
 }

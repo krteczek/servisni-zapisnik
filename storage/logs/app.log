@@ -52,3 +52,18 @@
 [2026-01-13 12:32:07] error: Class "Url" not found
 [2026-01-13 12:34:02] error: App\Controllers\WorkOrderController::detail(): Argument #1 ($id) must be of type int, string given
 [2026-01-13 13:03:37] error: syntax error, unexpected token "<"
+[2026-01-14 01:15:50] error: current() expects exactly 1 argument, 0 given
+[2026-01-14 01:34:40] error: Call to protected method App\Models\BaseModel::updateRow() from scope App\Controllers\TeamController
+[2026-01-14 02:01:24] error: Class "Csrf" not found
+[2026-01-14 02:13:39] error: Class "Csfr" not found
+[2026-01-14 02:13:43] error: Class "Csfr" not found
+[2026-01-14 02:35:05] error: syntax error, unexpected token "=>", expecting ")"
+[2026-01-14 02:36:02] error: Call to protected method App\Models\BaseModel::updateRow() from scope App\Controllers\TeamController
+[2026-01-14 02:38:56] error: Call to protected method App\Models\BaseModel::updateRow() from scope App\Controllers\TeamController
+[2026-01-14 02:39:02] error: Call to protected method App\Models\BaseModel::updateRow() from scope App\Controllers\TeamController
+[2026-01-14 02:39:18] error: Call to undefined method App\Models\TeamMembership::change_user_role()
+[2026-01-14 02:41:13] error: App\Models\BaseModel::updateRow(): Argument #2 ($data) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Models\TeamMembership.php on line 83
+[2026-01-14 09:41:34] error: Call to undefined method App\Models\UserModel::existsByEmail()
+[2026-01-14 12:51:42] error: App\Core\Router::match(): Argument #3 ($params) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Core\Router.php on line 32
+[2026-01-14 12:51:45] error: App\Core\Router::match(): Argument #3 ($params) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Core\Router.php on line 32
+[2026-01-14 13:06:13] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given

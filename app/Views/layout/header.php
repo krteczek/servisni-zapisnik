@@ -69,6 +69,19 @@ $user = $view->user ?? null;
 </ul>
 <?php endif ?>
 <?php endforeach ?>
+
+<?php if (!empty($view->flash)): ?>
+    <div class="flash-messages">
+        <?php foreach ($view->flash as $type => $messages): ?>
+            <?php foreach ($messages as $message): ?>
+                <div class="flash flash-<?= htmlspecialchars($type) ?>">
+                    <?= htmlspecialchars($message) ?>
+                </div>
+            <?php endforeach; ?>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+
 <?php if (Auth::check()): ?>
 <div class="user-info">
     Přihlášen: <?= htmlspecialchars(App\Core\Auth::label()) ?>

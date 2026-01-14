@@ -15,6 +15,7 @@ class TeamMembership extends BaseModel
 
         $stmt = $this->db->prepare(
             "SELECT tm.id AS membership_id,
+							u.id,
                     u.first_name,
                     u.last_name,
                     tm.role_in_team
@@ -45,4 +46,41 @@ class TeamMembership extends BaseModel
             'valid_to' => date('Y-m-d'),
         ]);
     }
+    
+public function activeTeamsByUsers(): array
+{
+    $users = Database::table('users');
+    $teams = Database::table('teams');
+
+    $stmt = $this->db->query(
+        "SELECT
+            tm.user_id,
+            t.id   AS team_id,
+            t.name,
+            t.color
+         FROM {$this->table} tm
+         JOIN {$teams} t ON t.id = tm.team_id
+         WHERE tm.valid_to IS NULL"
+    );
+
+    $rows = $stmt->fetchAll();
+
+    $out = [];
+
+    foreach ($rows as $row) {
+        $uid = (int)$row['user_id'];
+        $out[$uid][] = [
+            'id'    => (int)$row['team_id'],
+            'name'  => $row['name'],
+            'color' => $row['color'],
+        ];
+    }
+
+    return $out;
+}
+	public function change_user_role(int $id, array $role)
+	{
+		$this->updateRow($id, $role);
+	}
+
 }

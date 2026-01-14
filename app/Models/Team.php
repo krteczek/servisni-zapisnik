@@ -32,4 +32,8 @@ class Team extends BaseModel
             'color'=> $color,
         ]);
     }
+    public function updateTeam(int $id, array $data): void
+{
+    $this->updateRow($id, $data);
+}
 }
