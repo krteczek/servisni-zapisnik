@@ -32,14 +32,11 @@ abstract class Controller
         return Csrf::getField();
     }
 
-    protected function checkCsrf(): bool
+    protected function checkCsrf(): void
     {
         if (!Csrf::verify($_POST['_token'] ?? '')) {
             $this->addError('_csrf', 'Platnost formuláře vypršela. Zkuste jej odeslat znovu.');
-            return false;
         }
-
-        return true;
     }
 
     /* =========================
