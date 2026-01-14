@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 use App\Core\Url;
-use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
@@ -11,9 +10,11 @@ $errors = $view->errors ?? [];
 ?>
 
 <?php if ($errors): ?>
-<ul style="color:red">
-    <?php foreach ($errors as $error): ?>
-        <li><?= htmlspecialchars($error) ?></li>
+<ul class="errors">
+    <?php foreach ($errors as $field => $messages): ?>
+        <?php foreach ((array)$messages as $message): ?>
+            <li><?= htmlspecialchars($message) ?></li>
+        <?php endforeach ?>
     <?php endforeach ?>
 </ul>
 <?php endif ?>
@@ -23,12 +24,9 @@ $errors = $view->errors ?? [];
       autocomplete="off"
       data-lpignore="true">
 
-    <?= Csrf::getField() ?>
+    <?= $this->csrfField() ?>
 
-    <!-- fake username (pro password managery) -->
     <input type="text" name="username" autocomplete="username" hidden>
-
-    <!-- fake current password -->
     <input type="password" autocomplete="current-password" hidden>
 
     <label>Email</label><br>
@@ -58,7 +56,7 @@ $errors = $view->errors ?? [];
     <label>Role</label><br>
     <select name="global_role">
         <?php foreach ($view->roles as $key => $label): ?>
-            <option value="<?= $key ?>" <?= $key === ($view->selectedRole ?? '') ? 'selected' : '' ?>>
+            <option value="<?= $key ?>" <?= $key === ($old['global_role'] ?? '') ? 'selected' : '' ?>>
                 <?= htmlspecialchars($label) ?>
             </option>
         <?php endforeach ?>
