@@ -4,134 +4,154 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use PDO;
+use LogicException;
 
-class UserModel extends BaseModel
+final class UserModel
 {
-    /** název tabulky bez prefixu */
+    protected PDO $db;
+
+    /** název tabulky BEZ prefixu */
     protected string $table = 'users';
 
-    public function all(): array
+    /** finální název tabulky S prefixem */
+    protected string $tableName;
+
+    /** povolené sloupce pro ORDER BY */
+    protected array $orderable = ['id'];
+    
+
+    public function __construct()
     {
-        return $this->db->query(
-            "SELECT id, email, employee_number, first_name, last_name, global_role, active, created_at
-             FROM {$this->table}
-             ORDER BY last_name, first_name"
-        )->fetchAll();
+        $this->db = Database::pdo();
+
+        if (!isset($this->table) || $this->table === '') {
+            throw new LogicException(
+                static::class . ' must define protected string $table'
+            );
+        }
+
+        $this->tableName = Database::table($this->table);
     }
 
-    public function findById(int $id): ?array
-    {
-        $stmt = $this->db->prepare(
-            "SELECT id, email, first_name, last_name, global_role, active
-             FROM {$this->table}
-             WHERE id = :id
-             LIMIT 1"
-        );
-        $stmt->execute(['id' => $id]);
+    /* ==========================================================
+     * ZÁKLADNÍ SELECT – univerzální
+     * ========================================================== */
 
-        return $stmt->fetch() ?: null;
+    protected function select(
+        array|string $columns = '*',
+        array $where = [],
+        ?string $orderBy = 'id',
+        string $direction = 'ASC',
+        ?int $limit = null,
+        ?int $offset = null
+    ): array {
+        $sqlCols = is_array($columns)
+            ? implode(', ', $columns)
+            : $columns;
+
+        $sql = "SELECT {$sqlCols} FROM {$this->tableName}";
+        $params = [];
+
+        if ($where) {
+            $conds = [];
+            foreach ($where as $key => $value) {
+                $conds[] = "{$key} = :{$key}";
+                $params[$key] = $value;
+            }
+            $sql .= ' WHERE ' . implode(' AND ', $conds);
+        }
+
+        if ($orderBy && in_array($orderBy, $this->orderable, true)) {
+            $dir = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+            $sql .= " ORDER BY {$orderBy} {$dir}";
+        }
+
+        if ($limit !== null) {
+            $sql .= ' LIMIT ' . (int)$limit;
+        }
+
+        if ($offset !== null) {
+            $sql .= ' OFFSET ' . (int)$offset;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll();
     }
 
-    public function findByIdFull(int $id): ?array
-    {
-        $stmt = $this->db->prepare(
-            "SELECT id, email, employee_number, first_name, last_name, global_role, active, created_at
-             FROM {$this->table}
-             WHERE id = :id
-             LIMIT 1"
-        );
-        $stmt->execute(['id' => $id]);
+    /* ==========================================================
+     * KRATŠÍ ALIASY (čitelnost v controlleru)
+     * ========================================================== */
 
-        return $stmt->fetch() ?: null;
+    protected function all(string $orderBy = 'id'): array
+    {
+        return $this->select('*', [], $orderBy);
+    }
+
+    public function find(int $id): ?array
+    {
+        $rows = $this->select('*', ['id' => $id], null, limit: 1);
+        return $rows[0] ?? null;
     }
 
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->db->prepare(
-            "SELECT id, email, first_name, last_name, global_role, active, password_hash
-             FROM {$this->table}
-             WHERE email = :email
-             LIMIT 1"
-        );
-        $stmt->execute(['email' => $email]);
-
-        return $stmt->fetch() ?: null;
+        $rows = $this->select('*', ['email' => $email], null, limit: 1);
+        return $rows[0] ?? null;
     }
 
-    public function create(array $data): int
+    /* ==========================================================
+     * INSERT / UPDATE
+     * ========================================================== */
+
+    protected function insert(array $data): int
     {
-        $stmt = $this->db->prepare(
-            "INSERT INTO {$this->table}
-             (email, employee_number, password_hash, first_name, last_name, global_role, active)
-             VALUES (:email, :employee_number, :password_hash, :first_name, :last_name, :global_role, 1)"
-        );
-
-        $stmt->execute($data);
-
-        return (int) $this->db->lastInsertId();
-    }
-
-    public function update(int $id, array $data): void
-    {
-        $allowed = [
-            'email',
-            'employee_number',
-            'first_name',
-            'last_name',
-            'global_role',
-            'active',
-        ];
-
-        $set = [];
-        $params = ['id' => $id];
-
-        foreach ($allowed as $field) {
-            if (array_key_exists($field, $data)) {
-                $set[] = "{$field} = :{$field}";
-                $params[$field] = $data[$field];
-            }
+        if (!$data) {
+            throw new LogicException('Insert data cannot be empty');
         }
 
-        if (!$set) {
+        $cols = array_keys($data);
+        $fields = implode(', ', $cols);
+        $values = ':' . implode(', :', $cols);
+
+        $stmt = $this->db->prepare(
+            "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})"
+        );
+        $stmt->execute($data);
+
+        return (int)$this->db->lastInsertId();
+    }
+
+    protected function update(int $id, array $data): void
+    {
+        if (!$data) {
             return;
         }
 
-        $sql = "UPDATE {$this->table}
+        $set = [];
+        foreach ($data as $key => $val) {
+            $set[] = "{$key} = :{$key}";
+        }
+
+        $sql = "UPDATE {$this->tableName}
                 SET " . implode(', ', $set) . "
                 WHERE id = :id";
 
-        $this->db->prepare($sql)->execute($params);
+        $data['id'] = $id;
+
+        $this->db->prepare($sql)->execute($data);
     }
 
-    public function updatePassword(int $userId, string $hash): void
+    /* ==========================================================
+     * DELETE (volitelné, ale hodí se)
+     * ========================================================== */
+
+    protected function delete(int $id): void
     {
-        $this->db->prepare(
-            "UPDATE {$this->table}
-             SET password_hash = :hash
-             WHERE id = :id"
-        )->execute([
-            'id'   => $userId,
-            'hash' => $hash,
-        ]);
-    }
-
-    public function availableForTeam(int $teamId): array
-    {
-        $teamMemberships = Database::table('team_memberships');
-
-        $stmt = $this->db->prepare(
-            "SELECT u.*
-             FROM {$this->table} u
-             WHERE u.active = 1
-               AND u.id NOT IN (
-                   SELECT user_id
-                   FROM {$teamMemberships}
-                   WHERE team_id = :team
-                     AND valid_to IS NULL
-               )"
-        );
-        $stmt->execute(['team' => $teamId]);
-
-        return $stmt->fetchAll();
+        $this->db
+            ->prepare("DELETE FROM {$this->tableName} WHERE id = :id")
+            ->execute(['id' => $id]);
     }
 }
