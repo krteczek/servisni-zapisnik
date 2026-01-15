@@ -1,146 +1,123 @@
 <?php
 declare(strict_types=1);
 
+namespace App\Controllers;
+
+use App\Core\Controller;
 use App\Core\Url;
-use App\Core\Csrf;
+use App\Core\Config;
+use App\Models\Team;
+use App\Models\TeamMembership;
+use App\Models\UserModel;
 
-require __DIR__ . '/../layout/header.php';
+class TeamController extends Controller
+{
+    public function index(): string
+    {
+        $teamModel        = new Team();
+        $membershipModel  = new TeamMembership();
 
-$team        = $view->team;
-$rolesInTeam = $view->rolesInTeam;
-?>
+        $teams = $teamModel->all();
 
-<!-- ===================== -->
-<!-- ÚPRAVA TÝMU -->
-<!-- ===================== -->
-<form method="post" action="<?= Url::current() ?>">
-    <?= Csrf::getField(); ?>
+        foreach ($teams as $i => $team) {
+            $members = $membershipModel->currentMembers((int) $team['id']);
+            $teams[$i]['members']       = $members;
+            $teams[$i]['members_count'] = count($members);
+        }
 
-    <label>Název</label><br>
-    <input type="text" name="name" value="<?= htmlspecialchars($team['name']) ?>"><br><br>
+        $this->view->teams = $teams;
 
-    <label>Barva</label><br>
-    <input type="color" name="color" value="<?= htmlspecialchars($team['color']) ?>"><br><br>
+        return $this->render('teams/index');
+    }
 
-    <button type="submit">Uložit tým</button>
-</form>
+    public function create(): string
+    {
+        return $this->render('teams/create');
+    }
 
-<hr>
+    public function store(): string
+    {
+        $name  = trim($_POST['name'] ?? '');
+        $color = trim($_POST['color'] ?? '#2196F3');
 
-<!-- ===================== -->
-<!-- ČLENOVÉ TÝMU -->
-<!-- ===================== -->
-<h2>Členové týmu</h2>
+        if ($name === '') {
+            $this->addError('name', 'Název týmu je povinný');
+        }
 
-<table border="1" cellpadding="6">
-<thead>
-<tr>
-    <th>Jméno</th>
-    <th>Členem týmů</th>
-    <th>Role v týmu</th>
-	<th>Změna role</th>
-    <th>Akce</th>
-</tr>
-</thead>
+        $this->checkCsrf();
 
-<?php foreach ($view->members as $m): ?>
-<tr>
-    <td><?= htmlspecialchars($m['last_name'] . ' ' . $m['first_name']) ?></td>
+        if ($this->hasErrors()) {
+            return $this->render('teams/create');
+        }
 
-    <td>
-        <?php foreach ($view->userTeams[$m['id']] ?? [] as $t): ?>
-            <span
-                class="team-dot"
-                title="<?= htmlspecialchars($t['name']) ?>"
-                style="background-color: <?= htmlspecialchars($t['color']) ?>"
-            >●</span>
-        <?php endforeach; ?>
-    </td>
-		<td>
-		<?= htmlspecialchars($m['role_in_team']) ?>
-		</td>
-    <td>
-        <form method="post" action="<?= Url::current() ?>">
-            <?= Csrf::getField(); ?>
+        (new Team())->create($name, $color);
 
-            <!-- !!! DŮLEŽITÉ: membership_id -->
-            <input type="hidden" name="change_user_role" value="<?= $m['membership_id'] ?>">
+        Url::redirect('/teams');
+    }
 
-            <select name="role_in_team">
-                <?php foreach ($rolesInTeam as $key => $label): ?>
-                    <option value="<?= $key ?>"
-                        <?= $key === $m['role_in_team'] ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($label) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+    public function edit(int $id): string
+    {
+        $teamModel       = new Team();
+        $membershipModel = new TeamMembership();
+        $userModel       = new UserModel();
 
-            <button type="submit">Změnit roli</button>
-        </form>
-    </td>
+        $team = $teamModel->find($id);
+        if (!$team) {
+            return $this->forbidden();
+        }
 
-    <td>
-        <form method="post" action="<?= Url::current() ?>" style="display:inline">
-            <?= Csrf::getField(); ?>
-            <input type="hidden" name="remove_membership_id" value="<?= $m['membership_id'] ?>">
-            <button type="submit">Odebrat</button>
-        </form>
-    </td>
-</tr>
-<?php endforeach; ?>
-</table>
+        $this->view->team           = $team;
+        $this->view->members        = $membershipModel->currentMembers($id);
+        $this->view->availableUsers = $userModel->availableForTeam($id);
+        $this->view->rolesInTeam    = Config::get('roles_in_team')['roles'];
+        $this->view->userTeams      = $membershipModel->activeTeamsByUsers();
 
-<hr>
+        return $this->render('teams/edit');
+    }
 
-<!-- ===================== -->
-<!-- PŘIDÁNÍ ČLENA -->
-<!-- ===================== -->
-<h3>Přidat člena</h3>
+    public function update(int $id): string
+    {
+        $this->checkCsrf();
 
-<table border="1" cellpadding="6">
-<thead>
-<tr>
-    <th>Jméno</th>
-    <th>Členem týmů</th>
-    <th>Role</th>
-    <th>Akce</th>
-</tr>
-</thead>
+        if ($this->hasErrors()) {
+            Url::redirect('/teams/' . $id . '/edit');
+        }
 
-<?php foreach ($view->availableUsers as $u): ?>
-<tr>
-    <td><?= htmlspecialchars($u['last_name'] . ' ' . $u['first_name']) ?></td>
+        $teamModel       = new Team();
+        $membershipModel = new TeamMembership();
 
-    <td>
-        <?php foreach ($view->userTeams[$u['id']] ?? [] as $t): ?>
-            <span
-                class="team-dot"
-                title="<?= htmlspecialchars($t['name']) ?>"
-                style="background-color: <?= htmlspecialchars($t['color']) ?>"
-            >●</span>
-        <?php endforeach; ?>
-    </td>
+        /* ===== ÚPRAVA TÝMU ===== */
+        if (isset($_POST['name'], $_POST['color'])) {
+            $teamModel->updateTeam($id, [
+                'name'  => trim($_POST['name']),
+                'color' => trim($_POST['color']),
+            ]);
+        }
 
-    <td>
-        <form method="post" action="<?= Url::current() ?>">
-            <?= Csrf::getField(); ?>
-            <input type="hidden" name="add_user_id" value="<?= $u['id'] ?>">
+        /* ===== PŘIDÁNÍ ČLENA ===== */
+        elseif (isset($_POST['add_user_id'])) {
+            $membershipModel->add(
+                (int) $_POST['add_user_id'],
+                $id,
+                $_POST['role_in_team'] ?? 'member'
+            );
+        }
 
-            <select name="role_in_team">
-                <?php foreach ($rolesInTeam as $key => $label): ?>
-                    <option value="<?= $key ?>" <?= $key === 'member' ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($label) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-    </td>
+        /* ===== ZMĚNA ROLE ===== */
+        elseif (isset($_POST['change_user_role'])) {
+            $membershipModel->change_user_role(
+                (int) $_POST['change_user_role'],
+                ['role_in_team' => $_POST['role_in_team']]
+            );
+        }
 
-    <td>
-            <button type="submit">Přidat</button>
-        </form>
-    </td>
-</tr>
-<?php endforeach; ?>
-</table>
+        /* ===== ODEBRÁNÍ ČLENA ===== */
+        elseif (isset($_POST['remove_membership_id'])) {
+            $membershipModel->end(
+                (int) $_POST['remove_membership_id']
+            );
+        }
 
-<?php require __DIR__ . '/../layout/footer.php'; ?>
+        Url::redirect('/teams/' . $id . '/edit');
+    }
+}
