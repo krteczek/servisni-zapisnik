@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-//views/teams/index.php – přehled týmů
+// views/teams/index.php – přehled týmů
 
 use App\Core\Url;
 use App\Core\Access;
@@ -10,6 +10,7 @@ require __DIR__ . '/../layout/header.php';
 ?>
 
 <table border="1" cellpadding="6">
+    <thead>
     <tr>
         <th>Název</th>
         <th>Barva</th>
@@ -17,22 +18,40 @@ require __DIR__ . '/../layout/header.php';
         <th>Členové</th>
         <th>Akce</th>
     </tr>
+    </thead>
 
+    <tbody>
     <?php foreach ($view->teams as $team): ?>
         <tr>
-            <td><?= htmlspecialchars($team['name']) ?></td>
+            <td><?= e($team['name']) ?></td>
+
             <td>
-                <span style="display:inline-block;width:20px;height:20px;background:<?= $team['color'] ?>"></span>
+                <span
+                    style="display:inline-block;
+                           width:20px;
+                           height:20px;
+                           background:<?= e($team['color']) ?>">
+                </span>
             </td>
-            <td><?= $team['members_count'] ?></td>
+
+            <td><?= (int) $team['members_count'] ?></td>
+
             <td>
                 <?php foreach ($team['members'] as $m): ?>
-                    <?= htmlspecialchars($m['last_name'] . ' ' . $m['first_name']) ?><br>
-                <?php endforeach; ?>
+                    <?= e($m['last_name'] . ' ' . $m['first_name']) ?><br>
+                <?php endforeach ?>
             </td>
+
             <td>
-                <a href="<?= Url::to('/teams/' . (int)$team['id']  . '/edit') ?>">Upravit</a>
+                <?php if (Access::can('teams.edit')): ?>
+                    <a href="<?= Url::to('/teams/' . (int) $team['id'] . '/edit') ?>">
+                        Upravit
+                    </a>
+                <?php endif ?>
             </td>
         </tr>
-    <?php endforeach; ?>
+    <?php endforeach ?>
+    </tbody>
 </table>
+
+<?php require __DIR__ . '/../layout/footer.php'; ?>
