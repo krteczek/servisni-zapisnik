@@ -42,7 +42,7 @@ class Auth
 
         if (self::$cachedUser === null) {
             $model = new UserModel();
-            self::$cachedUser = $model->findById(self::id());
+            self::$cachedUser = $model->find(self::id());
         }
 
         return self::$cachedUser;
@@ -153,24 +153,24 @@ public static function hasRole(array $roles): bool
         }
     }
     
-        public static function effectiveRole(): string
-    {
-        $user = self::user();
+public static function effectiveRole(): string
+{
+    $user = self::user();
 
-        if (!$user) {
-            return '';
-        }
-
-        // admin může simulovat
-        if (
-            $user['global_role'] === 'admin'
-            && isset($_SESSION['effective_role'])
-        ) {
-            return $_SESSION['effective_role'];
-        }
-
-        return $user['global_role'];
+    if (!$user) {
+        return '';
     }
+	// admin může simulovat
+    if (
+        $user['global_role'] === 'admin'
+        && Session::has('effective_role')
+    ) {
+        return (string) Session::get('effective_role');
+    }
+
+    return $user['global_role'];
+}
+
     
     public static function hasGlobalRole(array $roles): bool
 {

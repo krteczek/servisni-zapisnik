@@ -67,3 +67,19 @@
 [2026-01-14 12:51:42] error: App\Core\Router::match(): Argument #3 ($params) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Core\Router.php on line 32
 [2026-01-14 12:51:45] error: App\Core\Router::match(): Argument #3 ($params) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Core\Router.php on line 32
 [2026-01-14 13:06:13] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
+[2026-01-15 21:02:29] error: Class "App\Models\UserModel" not found
+[2026-01-15 21:11:01] error: Class "App\Models\UserModel" not found
+[2026-01-15 21:41:39] error: Class "App\Models\UserModel" not found
+[2026-01-15 21:41:40] error: Class "App\Models\UserModel" not found
+[2026-01-15 22:01:05] error: Cannot instantiate abstract class App\Models\UserModel
+[2026-01-15 22:02:19] error: syntax error, unexpected token "final", expecting "," or ";"
+[2026-01-15 22:02:37] error: syntax error, unexpected token "final", expecting "," or ";"
+[2026-01-15 22:16:26] error: App\Models\UserModel must define protected string $table
+[2026-01-15 22:32:40] error: Call to undefined method App\Models\UserModel::findById()
+[2026-01-15 22:34:36] error: syntax error, unexpected token ";", expecting "function" or "const"
+[2026-01-15 22:35:00] error: Call to undefined method App\Models\UserModel::findById()
+[2026-01-15 22:36:10] error: Call to undefined method App\Models\UserModel::findById()
+[2026-01-15 23:02:16] error: Call to protected method App\Models\UserModel::find() from scope App\Core\Auth
+[2026-01-15 23:02:19] error: Call to protected method App\Models\UserModel::find() from scope App\Core\Auth
+[2026-01-15 23:03:43] error: Call to undefined method App\Models\UserModel::findByEmail()
+[2026-01-15 23:05:29] error: App\Models\UserModel::findByEmail(): Argument #1 ($email) must be of type int, string given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\AuthController.php on line 59
