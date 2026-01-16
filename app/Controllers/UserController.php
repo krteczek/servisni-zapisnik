@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Roles;
+use App\Core\Url;
 use App\Models\UserModel;
 
 class UserController extends Controller
@@ -14,6 +16,9 @@ class UserController extends Controller
     {
         parent::__construct($view);
         $this->users = new UserModel();
+        $this->view->roles = Roles::all();
+        $this->view->rolesDefault = Roles::default();
+        
     }
 
     /* =========================
@@ -35,6 +40,8 @@ class UserController extends Controller
     public function create(): string
     {
         $this->view->title = 'Nový uživatel';
+        
+        
         return $this->render('users/create');
     }
 
@@ -44,25 +51,24 @@ class UserController extends Controller
 
         $data = $this->sanitize($_POST);
 
-        $this->validate($data, isNew: true);
+        $this->validate($data, true);
 
         if ($this->hasErrors()) {
             $this->view->data = $data;
             return $this->render('users/create');
         }
 
-        $this->users->create([
+        $this->users->insert([
             'email'           => $data['email'],
             'employee_number' => $data['employee_number'],
-            'password_hash'   => password_hash($data['password'], PASSWORD_DEFAULT),
+            'password_hash'   => password_hash($data['new_password'], PASSWORD_DEFAULT),
             'first_name'      => $data['first_name'],
             'last_name'       => $data['last_name'],
             'global_role'     => $data['global_role'],
             'active'          => (int)$data['active'],
         ]);
 
-        header('Location: /users');
-        exit;
+        Url::redirect('/users');
     }
 
     /* =========================
@@ -78,7 +84,7 @@ class UserController extends Controller
         }
 
         $this->view->title = 'Upravit uživatele';
-        $this->view->data  = $user;
+        $this->view->old  = $user;
 
         return $this->render('users/edit');
     }
@@ -95,8 +101,8 @@ class UserController extends Controller
 
         $data = $this->sanitize($_POST);
 
-        $this->validate($data, isNew: false, userId: $id);
-
+        $this->validate($data, false);
+var_dump($data);var_dump($user);exit;
         if ($this->hasErrors()) {
             $this->view->data = array_merge($user, $data);
             return $this->render('users/edit');
@@ -125,16 +131,16 @@ class UserController extends Controller
        VALIDATION
        ========================= */
 
-    private function validate(array $data, bool $isNew, ?int $userId = null): void
+    private function validate(array $data, bool $isNew = false): void
     {
         // EMAIL
         if ($data['email'] === '') {
             $this->addError('email', 'Email je povinný');
-        } elseif (strlen($data['email']) > 255) {
+        } elseif (strlen($data['email']) > 254) {
             $this->addError('email', 'Email je příliš dlouhý');
         } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $this->addError('email', 'Neplatný formát emailu');
-        } elseif ($this->users->emailExists($data['email'], $userId)) {
+        } elseif ($this->users->emailExists($data['email'])) {
             $this->addError('email', 'Email už existuje');
         }
 
@@ -143,18 +149,27 @@ class UserController extends Controller
             $this->addError('employee_number', 'Osobní číslo je povinné');
         } elseif (strlen($data['employee_number']) > 50) {
             $this->addError('employee_number', 'Osobní číslo je příliš dlouhé');
-        } elseif ($this->users->employeeNumberExists($data['employee_number'], $userId)) {
+        } elseif ($this->users->employeeNumberExists($data['employee_number'])) {
             $this->addError('employee_number', 'Osobní číslo už existuje');
         }
 
         // PASSWORD
-        if ($isNew && $data['password'] === '') {
-            $this->addError('password', 'Heslo je povinné');
-        }
+        if ($isNew === true)
+        	{
+        		if($data['new_password'] === '') {
+            	$this->addError('password', 'Heslo je povinné. Vyplňte prosím znovu.');
+        		}
 
-        if ($data['password'] !== '' && strlen($data['password']) < 8) {
-            $this->addError('password', 'Heslo musí mít alespoň 8 znaků');
-        }
+	        if (strlen($data['new_password']) < 8) {
+	            $this->addError('password', 'Heslo musí mít alespoň 8 znaků. Vyplňte prosím znovu.');
+	        }
+	        
+	        if($data['new_password'] !== $data['new_password_confirm'] ) {
+	            $this->addError('password', 'Hesla se neshodují. Vyplňte prosím znovu.');
+	        		
+	        	
+	        }
+	       }
 
         // FIRST / LAST NAME
         if (strlen($data['first_name']) > 100) {
@@ -180,7 +195,9 @@ class UserController extends Controller
         return [
             'email'           => trim($input['email'] ?? ''),
             'employee_number' => trim($input['employee_number'] ?? ''),
-            'password'        => $input['password'] ?? '',
+            'new_password'    => $input['new_password'] ?? '',
+            'new_password_confirm'    => $input['new_password_confirm'] ?? '',
+            
             'first_name'      => trim($input['first_name'] ?? ''),
             'last_name'       => trim($input['last_name'] ?? ''),
             'global_role'     => $input['global_role'] ?? 'monter',

@@ -83,3 +83,26 @@
 [2026-01-15 23:02:19] error: Call to protected method App\Models\UserModel::find() from scope App\Core\Auth
 [2026-01-15 23:03:43] error: Call to undefined method App\Models\UserModel::findByEmail()
 [2026-01-15 23:05:29] error: App\Models\UserModel::findByEmail(): Argument #1 ($email) must be of type int, string given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\AuthController.php on line 59
+[2026-01-15 23:31:20] error: Call to protected method App\Models\UserModel::all() from scope App\Controllers\UserController
+[2026-01-15 23:39:35] error: Class "App\Controllers\Roles" not found
+[2026-01-15 23:40:42] error: Call to undefined method App\Models\UserModel::emailExists()
+[2026-01-15 23:57:45] error: syntax error, unexpected single-quoted string "SELECT 1 FROM users WHERE emai...", expecting ")"
+[2026-01-16 00:01:58] error: syntax error, unexpected single-quoted string "SELECT 1 FROM users WHERE emai...", expecting ")"
+[2026-01-16 00:04:21] error: Call to undefined method App\Models\UserModel::emailExists()
+[2026-01-16 00:04:57] error: Call to undefined method App\Models\UserModel::emailExists()
+[2026-01-16 00:05:58] error: Call to undefined method App\Models\UserModel::emailExists()
+[2026-01-16 00:06:19] error: App\Models\UserModel::emailExists(): Return value must be of type ?array, bool returned
+[2026-01-16 00:07:05] error: Call to undefined method App\Models\UserModel::employeeNumberExists()
+[2026-01-16 00:09:20] error: Call to undefined method App\Models\UserModel::employeeNumberExists()
+[2026-01-16 00:43:45] error: strlen(): Argument #1 ($string) must be of type string, null given
+[2026-01-16 00:45:05] error: Cannot assign string to property App\Core\ViewContext::$rolesDefault of type ?array
+[2026-01-16 00:45:45] error: strlen(): Argument #1 ($string) must be of type string, null given
+[2026-01-16 00:50:46] error: Call to undefined method App\Models\UserModel::create()
+[2026-01-16 00:53:01] error: Call to protected method App\Models\UserModel::insert() from scope App\Controllers\UserController
+[2026-01-16 00:57:47] error: Method App\Controllers\UserController::editForm() does not exist
+[2026-01-16 00:57:54] error: Method App\Controllers\UserController::passwordForm() does not exist
+[2026-01-16 01:00:05] error: Class "App\Controllers\Url" not found
+[2026-01-16 01:02:02] error: Method App\Controllers\UserController::editForm() does not exist
+[2026-01-16 01:09:09] error: Call to undefined function e()
+[2026-01-16 01:09:15] error: Call to undefined function e()
+[2026-01-16 01:14:29] error: App\Core\Router::__construct(): Argument #1 ($routes) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\public\index.php on line 35

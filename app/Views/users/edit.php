@@ -20,7 +20,6 @@ $errors = $view->errors ?? [];
 <?php endif ?>
 
 <form method="post"
-      action="<?= Url::to('/users/' . ($old['id'] ?? '') . '/edit') ?>"
       autocomplete="off"
       data-lpignore="true">
 

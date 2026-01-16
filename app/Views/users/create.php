@@ -5,7 +5,7 @@ use App\Core\Url;
 
 require __DIR__ . '/../layout/header.php';
 
-$old    = $view->old ?? [];
+$old    = $view->data ?? [];
 $errors = $view->errors ?? [];
 ?>
 
@@ -13,14 +13,13 @@ $errors = $view->errors ?? [];
 <ul class="errors">
     <?php foreach ($errors as $field => $messages): ?>
         <?php foreach ((array) $messages as $message): ?>
-            <li><?= $this->e($message) ?></li>
+            <li><?= e($message) ?></li>
         <?php endforeach ?>
     <?php endforeach ?>
 </ul>
 <?php endif ?>
 
 <form method="post"
-      action="<?= Url::to('/users') ?>"
       autocomplete="off"
       data-lpignore="true">
 
@@ -33,22 +32,22 @@ $errors = $view->errors ?? [];
     <label>Email</label><br>
     <input type="email"
            name="email"
-           value="<?= $this->e($old['email'] ?? '') ?>"><br><br>
+           value="<?= e($old['email'] ?? '') ?>"><br><br>
 
     <label>Číslo zaměstnance</label><br>
     <input type="text"
            name="employee_number"
-           value="<?= $this->e($old['employee_number'] ?? '') ?>"><br><br>
+           value="<?= e($old['employee_number'] ?? '') ?>"><br><br>
 
     <label>Jméno</label><br>
     <input type="text"
            name="first_name"
-           value="<?= $this->e($old['first_name'] ?? '') ?>"><br><br>
+           value="<?= e($old['first_name'] ?? '') ?>"><br><br>
 
     <label>Příjmení</label><br>
     <input type="text"
            name="last_name"
-           value="<?= $this->e($old['last_name'] ?? '') ?>"><br><br>
+           value="<?= e($old['last_name'] ?? '') ?>"><br><br>
 
     <label>Heslo</label><br>
     <input type="password"
@@ -64,10 +63,11 @@ $errors = $view->errors ?? [];
 
     <label>Role</label><br>
     <select name="global_role">
-        <?php foreach ($view->roles as $key => $label): ?>
-            <option value="<?= $this->e($key) ?>"
+        <?php //var_dump($view->roles);
+foreach ($view->roles as $key => $label): ?>
+            <option value="<?= e($key) ?>"
                 <?= $key === ($old['global_role'] ?? '') ? 'selected' : '' ?>>
-                <?= $this->e($label) ?>
+                <?= e($label) ?>
             </option>
         <?php endforeach ?>
     </select><br><br>

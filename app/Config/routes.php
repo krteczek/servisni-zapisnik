@@ -124,7 +124,7 @@ return [
 [
     'method' => 'GET',
     'path'   => '/users/{id}/edit',
-    'action' => [UserController::class, 'editForm'],
+    'action' => [UserController::class, 'edit'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
     'title'=> 'Uživatelé > Upravit uživatele',
@@ -134,7 +134,7 @@ return [
 [
     'method' => 'POST',
     'path'   => '/users/{id}/edit',
-    'action' => [UserController::class, 'edit'],
+    'action' => [UserController::class, 'update'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
     'section'=> 'users',

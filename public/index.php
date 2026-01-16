@@ -10,12 +10,15 @@ error_reporting(E_ALL);
 define('BASE_PATH', '/servisni-zapisnik/public');
 
 require dirname(__DIR__) . '/bootstrap.php';
+require dirname(__DIR__) . '/app/Core/helpers.php';
 
-$routes = require dirname(__DIR__) . '/app/Config/routes.php';
+//$routes = require dirname(__DIR__) . '/app/Config/routes.php';
 
 use App\Core\Router;
 use App\Core\Session;
 use App\Core\Logger;
+use App\Core\Config;
+
 
 Session::start();
 
@@ -30,6 +33,7 @@ if (str_starts_with($uri, BASE_PATH)) {
 
 $uri = $uri ?: '/';
 
+$routes = Config::get('routes');
 try {
     $router = new Router($routes);
     echo $router->dispatch($uri, $_SERVER['REQUEST_METHOD']);

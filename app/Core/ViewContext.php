@@ -31,6 +31,8 @@ class ViewContext
     
     public ?array $roles = null;
     
+    public ?string $rolesDefault = null;
+    
     public ?string $selectedRole = null;
 
 // TEAMS

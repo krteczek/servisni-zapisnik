@@ -38,7 +38,7 @@ final class UserModel
      * ZÁKLADNÍ SELECT – univerzální
      * ========================================================== */
 
-    protected function select(
+    public function select(
         array|string $columns = '*',
         array $where = [],
         ?string $orderBy = 'id',
@@ -85,7 +85,7 @@ final class UserModel
      * KRATŠÍ ALIASY (čitelnost v controlleru)
      * ========================================================== */
 
-    protected function all(string $orderBy = 'id'): array
+    public function all(string $orderBy = 'id'): array
     {
         return $this->select('*', [], $orderBy);
     }
@@ -93,20 +93,29 @@ final class UserModel
     public function find(int $id): ?array
     {
         $rows = $this->select('*', ['id' => $id], null, limit: 1);
+			//var_dump($rows);exit;
+
         return $rows[0] ?? null;
     }
 
-    public function findByEmail(string $email): ?array
+    public function emailExists(string $email): bool
     {
-        $rows = $this->select('*', ['email' => $email], null, limit: 1);
-        return $rows[0] ?? null;
+        $rows = $this->select('1', ['email' => $email], null, limit: 1);
+        return (BOOL) $rows;
     }
+    
+    public function employeeNumberExists($number): bool
+    {
+        $rows = $this->select('1', ['employee_number' => $number], null, limit: 1);
+        return (BOOL) $rows;
+    }
+    
 
     /* ==========================================================
      * INSERT / UPDATE
      * ========================================================== */
 
-    protected function insert(array $data): int
+    public function insert(array $data): int
     {
         if (!$data) {
             throw new LogicException('Insert data cannot be empty');
@@ -124,7 +133,7 @@ final class UserModel
         return (int)$this->db->lastInsertId();
     }
 
-    protected function update(int $id, array $data): void
+    public function update(int $id, array $data): void
     {
         if (!$data) {
             return;
