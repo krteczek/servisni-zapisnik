@@ -276,10 +276,21 @@ final class UserModel
      * @param int $id
      * @return void
      */
+     // TODO: místo DELETE použít soft delete (active = 0)
     protected function delete(int $id): void
     {
         $this->db
             ->prepare("DELETE FROM {$this->tableName} WHERE id = :id")
             ->execute(['id' => $id]);
     }
+    
+    public function active(): array
+{
+    return $this->select('*', ['active' => 1]);
+}
+
+public function inactive(): array
+{
+    return $this->select('*', ['active' => 0]);
+}
 }
