@@ -18,6 +18,10 @@ class AuthController extends Controller
 
     public function loginForm(): string
     {
+			if (Auth::check()) {
+				Url::redirect('/dashboard');
+			} 
+
         $this->view->csrf   = $this->csrfField();
         $this->view->errors = [];
         $this->view->data   = [];
@@ -27,7 +31,8 @@ class AuthController extends Controller
 
     public function login(): string
     {
-        $email    = trim($_POST['email'] ?? '');
+
+       $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
         $this->view->csrf = $this->csrfField();

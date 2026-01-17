@@ -70,9 +70,4 @@ abstract class Controller
         $this->view->title = '404 – Stránka nenalezena';
         return $this->render('errors/404');
     }
-
-    protected function e(string $text): string
-    {
-        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-    }
 }

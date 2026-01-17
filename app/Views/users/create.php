@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use App\Core\Url;
+use App\Core\Roles;
 
 require __DIR__ . '/../layout/header.php';
 
@@ -65,11 +66,10 @@ $errors = $view->errors ?? [];
     <select name="global_role">
         <?php //var_dump($view->roles);
 foreach ($view->roles as $key => $label): ?>
-            <option value="<?= e($key) ?>"
-                <?= $key === ($old['global_role'] ?? '') ? 'selected' : '' ?>>
-                <?= e($label) ?>
-            </option>
-        <?php endforeach ?>
+<option value="<?= e($key) ?>"
+    <?= $key === ($old['global_role'] ?? Roles::default()) ? 'selected' : '' ?>>
+    <?= e($label) ?>
+</option>        <?php endforeach ?>
     </select><br><br>
 
     <button type="submit">Vytvořit</button>
