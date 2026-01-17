@@ -2,12 +2,18 @@
 declare(strict_types=1);
 
 use App\Core\Url;
+use App\Core\Roles;
+use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
 $old    = $view->old ?? [];
 $errors = $view->errors ?? [];
 ?>
+<h2>Změna údajů uživatele:
+    <?= htmlspecialchars($old['first_name'] ?? '') ?>
+    <?= htmlspecialchars($old['last_name'] ?? '') ?>
+</h2>
 
 <?php if ($errors): ?>
 <ul class="errors">
@@ -23,7 +29,7 @@ $errors = $view->errors ?? [];
       autocomplete="off"
       data-lpignore="true">
 
-    <?= $this->csrfField() ?>
+    <?= Csrf::getField() ?>
 
     <!-- anti password manager -->
     <input type="text" autocomplete="username" hidden>
@@ -43,12 +49,12 @@ $errors = $view->errors ?? [];
 
     <label>Role</label><br>
     <select name="global_role">
-        <?php foreach ($view->roles as $key => $label): ?>
-            <option value="<?= e($key) ?>"
-                <?= $key === ($old['global_role'] ?? '') ? 'selected' : '' ?>>
-                <?= e($label) ?>
-            </option>
-        <?php endforeach ?>
+        <?php //var_dump($view->roles);
+foreach ($view->roles as $key => $label): ?>
+<option value="<?= e($key) ?>"
+    <?= $key === ($old['global_role'] ?? Roles::default()) ? 'selected' : '' ?>>
+    <?= e($label) ?>
+</option>        <?php endforeach ?>
     </select><br><br>
 
     <label>
@@ -58,3 +64,9 @@ $errors = $view->errors ?? [];
 
     <button type="submit">Uložit změny</button>
 </form>
+<p>
+    <a href="<?= Url::to('/users') ?>" class="btn btn-secondary">
+        ← Zpět na přehled
+    </a>
+</p>
+<?php require __DIR__ . '/../layout/footer.php'; ?>
