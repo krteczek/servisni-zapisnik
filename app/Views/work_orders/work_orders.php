@@ -31,3 +31,9 @@
 
     <button>Uložit</button>
 </form>
+<p>
+    <a href="<?= Url::to('/work-orders') ?>" class="btn btn-secondary">
+        ← Zpět na přehled
+    </a>
+</p>
+<?php require __DIR__ . '/../layout/footer.php'; ?>

@@ -1,124 +1,20 @@
-[2026-01-11 23:11:34] error: sleep(): Argument #1 ($seconds) must be of type int, float given
-[2026-01-11 23:13:52] error: sleep(): Argument #1 ($seconds) must be of type int, float given
-[2026-01-11 23:14:37] error: syntax error, unexpected identifier "min"
-[2026-01-11 23:15:53] error: sleep(): Argument #1 ($seconds) must be of type int, float given
-[2026-01-11 23:58:23] error: syntax error, unexpected identifier "Url"
-[2026-01-11 23:58:43] error: Class "Roles" not found
-[2026-01-11 23:59:58] error: Class "AdminController" not found
-[2026-01-12 00:03:13] error: Class "AdminController" not found
-[2026-01-12 00:07:52] error: Neplatná role
-[2026-01-12 00:08:15] error: Neplatná role
-[2026-01-12 22:07:59] error: PDO::__construct(): Argument #1 ($dsn) must be of type string, null given
-[2026-01-12 22:41:10] error: Call to undefined method App\Core\Database::table()
-[2026-01-12 22:44:38] error: Failed opening required '/servisni-zapisnik/public/../config/database.php' (include_path='.:/opt/lampp/lib/php')
-[2026-01-12 22:48:48] error: Typed property App\Models\BaseModel::$table must not be accessed before initialization
-[2026-01-12 23:15:10] error: App\Models\UserModel must define protected string $table
-[2026-01-12 23:18:14] error: App\Models\UserModel must define protected string $table
-[2026-01-12 23:39:22] error: App\Models\UserModel must define protected string $table
-[2026-01-12 23:39:34] error: App\Models\UserModel must define protected string $table
-[2026-01-12 23:39:37] error: App\Models\UserModel must define protected string $table
-[2026-01-12 23:41:02] error: Call to undefined method App\Models\Team::db()
-[2026-01-13 00:06:06] error: Non-static method App\Models\Team::all() cannot be called statically
-[2026-01-13 00:06:13] error: Non-static method App\Models\Team::all() cannot be called statically
-[2026-01-13 00:16:16] error: Non-static method App\Models\Team::all() cannot be called statically
-[2026-01-13 01:13:47] error: Non-static method App\Models\TeamMembership::currentMembers() cannot be called statically
-[2026-01-13 01:42:21] error: Non-static method App\Models\Team::find() cannot be called statically
-[2026-01-13 01:43:55] error: Unclosed '{' on line 53 does not match ')'
-[2026-01-13 01:44:13] error: Class "App\Models\Database" not found
-[2026-01-13 01:47:27] error: Non-static method App\Models\Team::create() cannot be called statically
-[2026-01-13 01:51:02] error: Cannot assign int to property App\Core\ViewContext::$members of type array
-[2026-01-13 08:41:41] error: SQLSTATE[HY000] [1049] Unknown database 'jelmark'
-[2026-01-13 11:18:13] error: Class "WorkOrderController" not found
-[2026-01-13 11:19:32] error: Class "WorkOrderController" not found
-[2026-01-13 11:19:57] error: Class "WorkOrderController" not found
-[2026-01-13 11:21:05] error: Class "WorkOrderController" not found
-[2026-01-13 11:23:02] error: Class "WorkOrderController" not found
-[2026-01-13 11:29:20] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 11:31:48] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 11:32:23] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 11:34:54] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 11:36:31] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 11:36:32] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/index.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 11:46:03] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-13 11:46:10] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-13 11:48:07] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-13 11:48:16] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-13 11:51:08] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-13 12:20:00] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/detail.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 12:21:02] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/detail.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 12:25:36] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/work_orders/detail.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-13 12:27:41] error: Class "Url" not found
-[2026-01-13 12:31:03] error: Class "Url" not found
-[2026-01-13 12:32:07] error: Class "Url" not found
-[2026-01-13 12:34:02] error: App\Controllers\WorkOrderController::detail(): Argument #1 ($id) must be of type int, string given
-[2026-01-13 13:03:37] error: syntax error, unexpected token "<"
-[2026-01-14 01:15:50] error: current() expects exactly 1 argument, 0 given
-[2026-01-14 01:34:40] error: Call to protected method App\Models\BaseModel::updateRow() from scope App\Controllers\TeamController
-[2026-01-14 02:01:24] error: Class "Csrf" not found
-[2026-01-14 02:13:39] error: Class "Csfr" not found
-[2026-01-14 02:13:43] error: Class "Csfr" not found
-[2026-01-14 02:35:05] error: syntax error, unexpected token "=>", expecting ")"
-[2026-01-14 02:36:02] error: Call to protected method App\Models\BaseModel::updateRow() from scope App\Controllers\TeamController
-[2026-01-14 02:38:56] error: Call to protected method App\Models\BaseModel::updateRow() from scope App\Controllers\TeamController
-[2026-01-14 02:39:02] error: Call to protected method App\Models\BaseModel::updateRow() from scope App\Controllers\TeamController
-[2026-01-14 02:39:18] error: Call to undefined method App\Models\TeamMembership::change_user_role()
-[2026-01-14 02:41:13] error: App\Models\BaseModel::updateRow(): Argument #2 ($data) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Models\TeamMembership.php on line 83
-[2026-01-14 09:41:34] error: Call to undefined method App\Models\UserModel::existsByEmail()
-[2026-01-14 12:51:42] error: App\Core\Router::match(): Argument #3 ($params) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Core\Router.php on line 32
-[2026-01-14 12:51:45] error: App\Core\Router::match(): Argument #3 ($params) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Core\Router.php on line 32
-[2026-01-14 13:06:13] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
-[2026-01-15 21:02:29] error: Class "App\Models\UserModel" not found
-[2026-01-15 21:11:01] error: Class "App\Models\UserModel" not found
-[2026-01-15 21:41:39] error: Class "App\Models\UserModel" not found
-[2026-01-15 21:41:40] error: Class "App\Models\UserModel" not found
-[2026-01-15 22:01:05] error: Cannot instantiate abstract class App\Models\UserModel
-[2026-01-15 22:02:19] error: syntax error, unexpected token "final", expecting "," or ";"
-[2026-01-15 22:02:37] error: syntax error, unexpected token "final", expecting "," or ";"
-[2026-01-15 22:16:26] error: App\Models\UserModel must define protected string $table
-[2026-01-15 22:32:40] error: Call to undefined method App\Models\UserModel::findById()
-[2026-01-15 22:34:36] error: syntax error, unexpected token ";", expecting "function" or "const"
-[2026-01-15 22:35:00] error: Call to undefined method App\Models\UserModel::findById()
-[2026-01-15 22:36:10] error: Call to undefined method App\Models\UserModel::findById()
-[2026-01-15 23:02:16] error: Call to protected method App\Models\UserModel::find() from scope App\Core\Auth
-[2026-01-15 23:02:19] error: Call to protected method App\Models\UserModel::find() from scope App\Core\Auth
-[2026-01-15 23:03:43] error: Call to undefined method App\Models\UserModel::findByEmail()
-[2026-01-15 23:05:29] error: App\Models\UserModel::findByEmail(): Argument #1 ($email) must be of type int, string given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\AuthController.php on line 59
-[2026-01-15 23:31:20] error: Call to protected method App\Models\UserModel::all() from scope App\Controllers\UserController
-[2026-01-15 23:39:35] error: Class "App\Controllers\Roles" not found
-[2026-01-15 23:40:42] error: Call to undefined method App\Models\UserModel::emailExists()
-[2026-01-15 23:57:45] error: syntax error, unexpected single-quoted string "SELECT 1 FROM users WHERE emai...", expecting ")"
-[2026-01-16 00:01:58] error: syntax error, unexpected single-quoted string "SELECT 1 FROM users WHERE emai...", expecting ")"
-[2026-01-16 00:04:21] error: Call to undefined method App\Models\UserModel::emailExists()
-[2026-01-16 00:04:57] error: Call to undefined method App\Models\UserModel::emailExists()
-[2026-01-16 00:05:58] error: Call to undefined method App\Models\UserModel::emailExists()
-[2026-01-16 00:06:19] error: App\Models\UserModel::emailExists(): Return value must be of type ?array, bool returned
-[2026-01-16 00:07:05] error: Call to undefined method App\Models\UserModel::employeeNumberExists()
-[2026-01-16 00:09:20] error: Call to undefined method App\Models\UserModel::employeeNumberExists()
-[2026-01-16 00:43:45] error: strlen(): Argument #1 ($string) must be of type string, null given
-[2026-01-16 00:45:05] error: Cannot assign string to property App\Core\ViewContext::$rolesDefault of type ?array
-[2026-01-16 00:45:45] error: strlen(): Argument #1 ($string) must be of type string, null given
-[2026-01-16 00:50:46] error: Call to undefined method App\Models\UserModel::create()
-[2026-01-16 00:53:01] error: Call to protected method App\Models\UserModel::insert() from scope App\Controllers\UserController
-[2026-01-16 00:57:47] error: Method App\Controllers\UserController::editForm() does not exist
-[2026-01-16 00:57:54] error: Method App\Controllers\UserController::passwordForm() does not exist
-[2026-01-16 01:00:05] error: Class "App\Controllers\Url" not found
-[2026-01-16 01:02:02] error: Method App\Controllers\UserController::editForm() does not exist
-[2026-01-16 01:09:09] error: Call to undefined function e()
-[2026-01-16 01:09:15] error: Call to undefined function e()
-[2026-01-16 01:14:29] error: App\Core\Router::__construct(): Argument #1 ($routes) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\public\index.php on line 35
-[2026-01-16 01:39:48] error: Call to undefined method App\Core\Access::requireRole()
-[2026-01-16 22:37:41] error: Call to undefined method App\Models\UserModel::findByEmail()
-[2026-01-16 23:01:17] error: Call to undefined method App\Core\Access::requireRole()
-[2026-01-16 23:01:27] error: Call to undefined method App\Core\Access::requireRole()
-[2026-01-16 23:01:36] error: Call to undefined method App\Core\Access::requireRole()
-[2026-01-16 23:03:29] error: syntax error, unexpected token "`"
-[2026-01-16 23:03:32] error: syntax error, unexpected token "`"
-[2026-01-16 23:03:33] error: syntax error, unexpected token "`"
-[2026-01-16 23:03:34] error: syntax error, unexpected token "`"
-[2026-01-16 23:03:46] error: syntax error, unexpected token "`"
-[2026-01-16 23:20:33] error: Call to undefined method App\Core\Access::requireRole()
-[2026-01-16 23:21:06] error: Class "App\Core\Response" not found
-[2026-01-16 23:32:14] error: Class "App\Core\Response" not found
-[2026-01-16 23:34:29] error: Call to undefined method App\Controllers\UserController::e()
-[2026-01-16 23:52:32] error: Class "Roles" not found
-[2026-01-16 23:53:40] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-17 18:53:30] error: Class "Roles" not found
+[2026-01-17 19:02:49] error: Class "Csrf" not found
+[2026-01-17 19:02:55] error: Class "Csrf" not found
+[2026-01-17 19:14:17] error: Using $this when not in object context
+[2026-01-17 19:16:42] error: mb_strlen(): Argument #1 ($string) must be of type string, null given
+[2026-01-17 19:46:31] error: syntax error, unexpected token ";", expecting "]"
+[2026-01-17 19:52:43] error: syntax error, unexpected variable "$email"
+[2026-01-17 20:09:11] error: syntax error, unexpected token "if", expecting "function" or "const"
+[2026-01-17 20:18:41] error: syntax error, unexpected token ";", expecting ")"
+[2026-01-17 20:21:52] error: Method App\Controllers\UserController::passwordForm() does not exist
+[2026-01-17 20:26:14] error: Call to a member function findById() on null
+[2026-01-17 20:28:09] error: Call to undefined method App\Models\UserModel::findById()
+[2026-01-17 20:37:38] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-17 20:38:45] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-17 20:38:53] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-17 20:38:55] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-17 20:39:00] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-17 20:40:08] error: Call to a member function updatePassword() on null
+[2026-01-17 20:43:59] error: Call to undefined method App\Models\UserModel::updatePassword()
+[2026-01-17 20:52:51] error: Unclosed '[' does not match ')'

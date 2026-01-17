@@ -35,6 +35,9 @@ use App\Core\Access;
 
     <button>Uložit</button>
 </form>
-<?php
-
-?>
+<p>
+    <a href="<?= Url::to('/work-orders') ?>" class="btn btn-secondary">
+        ← Zpět na přehled
+    </a>
+</p>
+<?php require __DIR__ . '/../layout/footer.php'; ?>

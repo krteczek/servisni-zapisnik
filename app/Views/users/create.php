@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Core\Url;
 use App\Core\Roles;
+use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
@@ -24,7 +25,7 @@ $errors = $view->errors ?? [];
       autocomplete="off"
       data-lpignore="true">
 
-    <?= $this->csrfField() ?>
+    <?= Csrf::getField() ?>
 
     <!-- fake fields for password managers -->
     <input type="text" name="username" autocomplete="username" hidden>
@@ -74,3 +75,9 @@ foreach ($view->roles as $key => $label): ?>
 
     <button type="submit">Vytvořit</button>
 </form>
+<p>
+    <a href="<?= Url::to('/users') ?>" class="btn btn-secondary">
+        ← Zpět na přehled
+    </a>
+</p>
+<?php require __DIR__ . '/../layout/footer.php'; ?>
