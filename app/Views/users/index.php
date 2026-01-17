@@ -22,17 +22,17 @@ use App\Core\Access;
 
     <?php foreach (($view->users ?? []) as $user): ?>
         <tr>
-            <td><?= $this->e($user['email']) ?></td>
+            <td><?= e($user['email']) ?></td>
 
-            <td><?= $this->e($user['employee_number']) ?></td>
+            <td><?= e($user['employee_number']) ?></td>
 
             <td>
-                <?= $this->e(trim(
+                <?= e(trim(
                     ($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')
                 )) ?>
             </td>
 
-            <td><?= $this->e($user['global_role']) ?></td>
+            <td><?= e($user['global_role']) ?></td>
 
             <td>
                 <?= $user['active'] ? 'Aktivní' : 'Neaktivní' ?>

@@ -4,87 +4,159 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Roles;
 use App\Core\Url;
+use App\Core\Roles;
+use App\Core\Flash;
 use App\Models\UserModel;
 
-class UserController extends Controller
+final class UserController extends Controller
 {
     private UserModel $users;
 
-    public function __construct(\App\Core\ViewContext $view)
+    public function __construct($view)
     {
         parent::__construct($view);
         $this->users = new UserModel();
-        $this->view->roles = Roles::all();
-        $this->view->rolesDefault = Roles::default();
-        
     }
 
-    /* =========================
-       LIST
-       ========================= */
+    /* ==========================================================
+     * LIST
+     * ========================================================== */
 
     public function index(): string
     {
-        $this->view->title = 'Uživatelé';
         $this->view->users = $this->users->all();
-
         return $this->render('users/index');
     }
 
-    /* =========================
-       CREATE
-       ========================= */
+    /* ==========================================================
+     * CREATE
+     * ========================================================== */
 
     public function create(): string
     {
-        $this->view->title = 'Nový uživatel';
-        
-        
+        $this->view->csrf = $this->csrfField();
+        $this->view->roles = Roles::all();
         return $this->render('users/create');
     }
 
-    public function store(): string
-    {
-        $this->checkCsrf();
+public function store(): string
+{
+    $this->view->roles = Roles::all();
 
-        $data = $this->sanitize($_POST);
+    $data = $_POST;
 
-        $this->validate($data, true);
+    $this->view->csrf = $this->csrfField();
+    $this->view->data = $data;
 
-        if ($this->hasErrors()) {
-            $this->view->data = $data;
-            return $this->render('users/create');
-        }
+    /* =========================
+       NORMALIZACE VSTUPŮ
+       ========================= */
 
-        $this->users->insert([
-            'email'           => $data['email'],
-            'employee_number' => $data['employee_number'],
-            'password_hash'   => password_hash($data['new_password'], PASSWORD_DEFAULT),
-            'first_name'      => $data['first_name'],
-            'last_name'       => $data['last_name'],
-            'global_role'     => $data['global_role'],
-            'active'          => (int)$data['active'],
-        ]);
+    $email = strtolower(trim($data['email'] ?? ''));
+    $employeeNumber = trim($data['employee_number'] ?? '');
+    $firstname = trim($data['first_name'] ?? '');
+    $lastname = trim($data['last_name'] ?? '');
+    $password1 = $data['new_password'] ?? '';
+    $password2 = $data['new_password_confirm'] ?? '';
+    
 
-        Url::redirect('/users');
+    /* =========================
+       VALIDACE
+       ========================= */
+
+    if ($firstname === '') {
+        $this->addError('first_name', 'Jméno je povinné.');
+    } elseif (mb_strlen($firstname) > 100) {
+        $this->addError('first_name', 'Jméno je příliš dlouhé.');
+    }
+    if ($lastname === '') {
+        $this->addError('last_name', 'Příjmení je povinné.');
+    } elseif (mb_strlen($lastname) > 100) {
+        $this->addError('last_name', 'Příjmení je příliš dlouhé.');
+    }
+
+    if ($email === '') {
+        $this->addError('email', 'Email je povinný.');
+    } elseif (mb_strlen($email) > 255) {
+        $this->addError('email', 'Email je příliš dlouhý.');
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $this->addError('email', 'Email nemá platný tvar.');
+    } elseif ($this->users->emailExists($email)) {
+        $this->addError('email', 'Email již existuje.');
+    }
+
+    if ($employeeNumber === '') {
+        $this->addError('employee_number', 'Osobní číslo je povinné.');
+    } elseif (mb_strlen($employeeNumber) > 50) {
+        $this->addError('employee_number', 'Osobní číslo je příliš dlouhé.');
+    } elseif ($this->users->employeeNumberExists($employeeNumber)) {
+        $this->addError('employee_number', 'Osobní číslo již existuje.');
+    }
+
+    if ($password1 === '') {
+        $this->addError('new_password', 'Heslo je povinné');
+    } elseif (mb_strlen($password1) < 8) {
+        $this->addError('new_password', 'Heslo musí mít alespoň 8 znaků.');
+    } 
+    if ($password1 !== $password2) {
+         $this->addError('new_password', 'Hesla nejsou shodná. Věnujte, prosím, jejich zápisu více pozornosti.');
+   	
+    }
+    
+
+    /* =========================
+       CSRF
+       ========================= */
+
+    $this->checkCsrf();
+
+    if ($this->hasErrors()) {
+        return $this->render('users/create');
     }
 
     /* =========================
-       EDIT
+       ROLE (normalizace)
        ========================= */
+
+    $role = $data['role'] ?? null;
+    if (!$role || !Roles::exists($role)) {
+        $role = Roles::default();
+    }
+
+    /* =========================
+       INSERT
+       ========================= */
+
+    $this->users->insert([
+        'email'           => $email,
+        'employee_number' => $employeeNumber,
+        'first_name'       => $firstname,
+        'last_name'       => $lastname,
+        'password_hash'   => password_hash($password1, PASSWORD_DEFAULT),
+        'global_role'     => $role,
+        'created_at'      => date('Y-m-d H:i:s'),
+    ]);
+
+    Flash::add('success', 'Uživatel byl vytvořen');
+    Url::redirect('/users');
+}
+
+    /* ==========================================================
+     * EDIT
+     * ========================================================== */
 
     public function edit(int $id): string
     {
         $user = $this->users->find($id);
 
         if (!$user) {
-            return $this->notFound();
+            Flash::add('error', 'Uživatel neexistuje');
+            Url::redirect('/users');
         }
 
-        $this->view->title = 'Upravit uživatele';
-        $this->view->old  = $user;
+        $this->view->user = $user;
+        $this->view->csrf = $this->csrfField();
 
         return $this->render('users/edit');
     }
@@ -94,114 +166,58 @@ class UserController extends Controller
         $user = $this->users->find($id);
 
         if (!$user) {
-            return $this->notFound();
+            Flash::add('error', 'Uživatel neexistuje');
+            Url::redirect('/users');
+        }
+
+        $data = $_POST;
+
+        $this->view->csrf = $this->csrfField();
+        $this->view->data = $data;
+
+        /* ===== VALIDACE ===== */
+
+        if (empty($data['name'])) {
+            $this->addError('name', 'Jméno je povinné');
+        }
+
+        if (
+            ($data['email'] ?? '') !== $user['email']
+            && $this->users->emailExists($data['email'] ?? '')
+        ) {
+            $this->addError('email', 'Email již existuje');
+        }
+
+        if (
+            ($data['employee_number'] ?? '') !== $user['employee_number']
+            && $this->users->employeeNumberExists($data['employee_number'] ?? '')
+        ) {
+            $this->addError('employee_number', 'Osobní číslo již existuje');
         }
 
         $this->checkCsrf();
 
-        $data = $this->sanitize($_POST);
-
-        $this->validate($data, false);
-var_dump($data);var_dump($user);exit;
         if ($this->hasErrors()) {
-            $this->view->data = array_merge($user, $data);
             return $this->render('users/edit');
         }
 
+        /* ===== UPDATE ===== */
+
         $update = [
-            'email'           => $data['email'],
-            'employee_number' => $data['employee_number'],
-            'first_name'      => $data['first_name'],
-            'last_name'       => $data['last_name'],
-            'global_role'     => $data['global_role'],
-            'active'          => (int)$data['active'],
+            'name'            => trim($data['name']),
+            'email'           => strtolower(trim($data['email'])),
+            'employee_number' => trim($data['employee_number']),
+            'global_role'     => $data['role'],
         ];
 
         if (!empty($data['password'])) {
-            $update['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            $update['password_hash'] =
+                password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
         $this->users->update($id, $update);
 
-        header('Location: /users');
-        exit;
-    }
-
-    /* =========================
-       VALIDATION
-       ========================= */
-
-    private function validate(array $data, bool $isNew = false): void
-    {
-        // EMAIL
-        if ($data['email'] === '') {
-            $this->addError('email', 'Email je povinný');
-        } elseif (strlen($data['email']) > 254) {
-            $this->addError('email', 'Email je příliš dlouhý');
-        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $this->addError('email', 'Neplatný formát emailu');
-        } elseif ($this->users->emailExists($data['email'])) {
-            $this->addError('email', 'Email už existuje');
-        }
-
-        // EMPLOYEE NUMBER
-        if ($data['employee_number'] === '') {
-            $this->addError('employee_number', 'Osobní číslo je povinné');
-        } elseif (strlen($data['employee_number']) > 50) {
-            $this->addError('employee_number', 'Osobní číslo je příliš dlouhé');
-        } elseif ($this->users->employeeNumberExists($data['employee_number'])) {
-            $this->addError('employee_number', 'Osobní číslo už existuje');
-        }
-
-        // PASSWORD
-        if ($isNew === true)
-        	{
-        		if($data['new_password'] === '') {
-            	$this->addError('password', 'Heslo je povinné. Vyplňte prosím znovu.');
-        		}
-
-	        if (strlen($data['new_password']) < 8) {
-	            $this->addError('password', 'Heslo musí mít alespoň 8 znaků. Vyplňte prosím znovu.');
-	        }
-	        
-	        if($data['new_password'] !== $data['new_password_confirm'] ) {
-	            $this->addError('password', 'Hesla se neshodují. Vyplňte prosím znovu.');
-	        		
-	        	
-	        }
-	       }
-
-        // FIRST / LAST NAME
-        if (strlen($data['first_name']) > 100) {
-            $this->addError('first_name', 'Jméno je příliš dlouhé');
-        }
-
-        if (strlen($data['last_name']) > 100) {
-            $this->addError('last_name', 'Příjmení je příliš dlouhé');
-        }
-
-        // ROLE
-        if (!in_array($data['global_role'], ['admin', 'mistr', 'predak', 'monter'], true)) {
-            $this->addError('global_role', 'Neplatná role');
-        }
-    }
-
-    /* =========================
-       SANITIZE
-       ========================= */
-
-    private function sanitize(array $input): array
-    {
-        return [
-            'email'           => trim($input['email'] ?? ''),
-            'employee_number' => trim($input['employee_number'] ?? ''),
-            'new_password'    => $input['new_password'] ?? '',
-            'new_password_confirm'    => $input['new_password_confirm'] ?? '',
-            
-            'first_name'      => trim($input['first_name'] ?? ''),
-            'last_name'       => trim($input['last_name'] ?? ''),
-            'global_role'     => $input['global_role'] ?? 'monter',
-            'active'          => isset($input['active']) ? 1 : 0,
-        ];
+        Flash::add('success', 'Uživatel byl uložen');
+        Url::redirect('/users');
     }
 }

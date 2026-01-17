@@ -106,3 +106,19 @@
 [2026-01-16 01:09:09] error: Call to undefined function e()
 [2026-01-16 01:09:15] error: Call to undefined function e()
 [2026-01-16 01:14:29] error: App\Core\Router::__construct(): Argument #1 ($routes) must be of type array, null given, called in C:\xampp\htdocs\servisni-zapisnik\public\index.php on line 35
+[2026-01-16 01:39:48] error: Call to undefined method App\Core\Access::requireRole()
+[2026-01-16 22:37:41] error: Call to undefined method App\Models\UserModel::findByEmail()
+[2026-01-16 23:01:17] error: Call to undefined method App\Core\Access::requireRole()
+[2026-01-16 23:01:27] error: Call to undefined method App\Core\Access::requireRole()
+[2026-01-16 23:01:36] error: Call to undefined method App\Core\Access::requireRole()
+[2026-01-16 23:03:29] error: syntax error, unexpected token "`"
+[2026-01-16 23:03:32] error: syntax error, unexpected token "`"
+[2026-01-16 23:03:33] error: syntax error, unexpected token "`"
+[2026-01-16 23:03:34] error: syntax error, unexpected token "`"
+[2026-01-16 23:03:46] error: syntax error, unexpected token "`"
+[2026-01-16 23:20:33] error: Call to undefined method App\Core\Access::requireRole()
+[2026-01-16 23:21:06] error: Class "App\Core\Response" not found
+[2026-01-16 23:32:14] error: Class "App\Core\Response" not found
+[2026-01-16 23:34:29] error: Call to undefined method App\Controllers\UserController::e()
+[2026-01-16 23:52:32] error: Class "Roles" not found
+[2026-01-16 23:53:40] error: Call to undefined method App\Controllers\WorkOrderController::e()

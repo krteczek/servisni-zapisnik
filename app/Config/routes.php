@@ -116,7 +116,7 @@ return [
 
     [
         'method' => 'POST',
-        'path'   => '/users',
+        'path'   => '/users/create',
         'action' => [UserController::class, 'store'],
         'auth'   => true,
         'roles'  => ['admin'],
