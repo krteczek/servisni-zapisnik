@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 use LogicException;
+use App\Core\AuditLogger;
 
 /**
  * UserModel
@@ -235,8 +236,16 @@ final class UserModel
             "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})"
         );
         $stmt->execute($data);
+			$id = (int) $this->db->lastInsertId();
+AuditLogger::log(
+    action: 'insert',
+    table: $this->tableName,
+    recordId: $id,
+    before: null,
+    after: $data
+);
 
-        return (int) $this->db->lastInsertId();
+        return $id;
     }
 
     /**
@@ -256,7 +265,13 @@ final class UserModel
         foreach ($data as $key => $val) {
             $set[] = "{$key} = :{$key}";
         }
-
+AuditLogger::log(
+    action: 'update',
+    table: $this->tableName,
+    recordId: $id,
+    before: $this->find($id),
+    after: $data
+);
         $sql = "UPDATE {$this->tableName}
                 SET " . implode(', ', $set) . "
                 WHERE id = :id";

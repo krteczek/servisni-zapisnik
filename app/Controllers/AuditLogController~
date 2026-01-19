@@ -1,0 +1,48 @@
+<?php
+declare(strict_types=1);
+
+n<?phpamespace App\Core;
+
+use App\Models\AuditLogModel;
+use App\Core\AuditLogger;
+use App\Core\Controller;
+
+class AuditLogController
+{
+    public function index(): void
+    {
+        Access::adminOnly();
+
+        $filters = [
+            'user_id'   => $_GET['user_id']   ?? null,
+            'action'    => $_GET['action']    ?? null,
+            'table'     => $_GET['table']     ?? null,
+            'from'      => $_GET['from']      ?? null,
+            'to'        => $_GET['to']        ?? null,
+        ];
+
+        $logs = (new AuditLogModel())->findByFilters($filters);
+
+        View::render('admin/audit/index', [
+            'logs'    => $logs,
+            'filters'=> $filters,
+        ]);
+    }
+
+    public function detail(int $id): void
+    {
+        Access::adminOnly();
+
+        $log = (new AuditLogModel())->findById($id);
+
+        if (!$log) {
+            Flash::error('Záznam nebyl nalezen');
+            Url::redirect('/admin/audit');
+            return;
+        }
+
+        View::render('admin/audit/detail', [
+            'log' => $log,
+        ]);
+    }
+}

@@ -47,4 +47,10 @@ class ViewContext
 //WORKORER
 	 public array $orders = [];
 	 public array $order = [];
+	 
+// Admin
+	 public ?array $logs = [];
+	 public ?array $filters = [];
+
+
 }
