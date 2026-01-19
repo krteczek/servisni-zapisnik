@@ -237,11 +237,9 @@ final class UserModel
         );
         $stmt->execute($data);
 			$id = (int) $this->db->lastInsertId();
-AuditLogger::log(
-    action: 'insert',
+AuditLogger::logInsert(
     table: $this->tableName,
     recordId: $id,
-    before: null,
     after: $data
 );
 
@@ -265,8 +263,8 @@ AuditLogger::log(
         foreach ($data as $key => $val) {
             $set[] = "{$key} = :{$key}";
         }
-AuditLogger::log(
-    action: 'update',
+        
+AuditLogger::logUpdate(
     table: $this->tableName,
     recordId: $id,
     before: $this->find($id),

@@ -116,11 +116,11 @@ public function store(): string
     /* =========================
        ROLE (normalizace)
        ========================= */
-    $role = $data['role'] ?? null;
+    $role = $data['global_role'] ?? null;
+
     if (!$role || !Roles::exists($role)) {
         $role = Roles::default();
     }
-
     /* =========================
        INSERT
        ========================= */
@@ -220,8 +220,7 @@ public function store(): string
     /* =========================
        ROLE (normalizace)
        ========================= */
-
-    $role = $data['role'] ?? null;
+    $role = $data['global_role'] ?? null;
     if (!$role || !Roles::exists($role)) {
         $role = Roles::default();
     }
