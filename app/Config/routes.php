@@ -6,12 +6,27 @@ use App\Controllers\UserController;
 use App\Controllers\TeamController;
 use App\Controllers\AdminController;
 use App\Controllers\WorkOrderController;
+use App\Controllers\AuditLogController;
+
 
 return [
 [
     'path'   => '/admin/switch-role/{role}',
     'method' => 'GET',
     'action' => [AdminController::class, 'switchRole'],
+    'roles'  => ['admin'],
+],
+
+[
+    'path'   => '/admin/audit',
+    'action' => [AuditLogController::class, 'index'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Audit log',
+],
+[
+    'path'   => '/admin/audit/{id}',
+    'action' => [AuditLogController::class, 'detail'],
     'roles'  => ['admin'],
 ],
 

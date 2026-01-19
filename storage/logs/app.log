@@ -18,3 +18,32 @@
 [2026-01-17 20:40:08] error: Call to a member function updatePassword() on null
 [2026-01-17 20:43:59] error: Call to undefined method App\Models\UserModel::updatePassword()
 [2026-01-17 20:52:51] error: Unclosed '[' does not match ')'
+[2026-01-19 11:08:35] error: Class "AuditLogController" not found
+[2026-01-19 11:13:49] error: Call to undefined method App\Core\Access::adminOnly()
+[2026-01-19 11:25:24] error: Call to undefined method App\Core\Database::getConnection()
+[2026-01-19 11:30:58] error: Call to undefined method App\Models\AuditLogModel::findByFilters()
+[2026-01-19 11:31:28] error: Call to undefined method App\Models\AuditLogModel::findByFilters()
+[2026-01-19 11:38:21] error: Class "App\Controllers\AuditModel" not found
+[2026-01-19 11:38:44] error: Class "App\Models\AuditModel" not found
+[2026-01-19 11:39:16] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'jelmark.audit_log' doesn't exist
+[2026-01-19 11:39:58] error: Class "App\Core\View" not found
+[2026-01-19 11:43:35] error: Attempt to assign property "logs" on null
+[2026-01-19 11:49:17] error: Attempt to assign property "logs" on null
+[2026-01-19 11:49:25] error: Attempt to assign property "logs" on null
+[2026-01-19 11:50:09] error: Attempt to assign property "logs" on null
+[2026-01-19 11:50:15] error: Attempt to assign property "logs" on null
+[2026-01-19 11:55:15] error: Attempt to assign property "logs" on null
+[2026-01-19 11:55:29] error: Attempt to assign property "logs" on null
+[2026-01-19 11:56:44] error: Attempt to assign property "logs" on null
+[2026-01-19 11:57:17] error: syntax error, unexpected token ":"
+[2026-01-19 12:52:45] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/admin/audit/index.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-19 12:59:20] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Views\admin\audit/../layout/header.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-19 14:06:36] error: syntax error, unexpected token "public", expecting end of file
+[2026-01-19 14:13:50] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
+[2026-01-19 14:15:26] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
+[2026-01-19 14:20:20] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
+[2026-01-19 14:21:54] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
+[2026-01-19 14:26:40] error: htmlspecialchars(): Argument #1 ($string) must be of type string, int given
+[2026-01-19 14:27:31] error: htmlspecialchars(): Argument #1 ($string) must be of type string, int given
+[2026-01-19 14:27:37] error: Unmatched ')'
+[2026-01-19 14:43:24] error: App\Models\UserModel::find(): Argument #1 ($id) must be of type int, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Models\UserModel.php on line 238
