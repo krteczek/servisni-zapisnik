@@ -4,10 +4,9 @@ declare(strict_types=1);
 namespace App\Core;
 
 use App\Models\AuditLogModel;
-use App\Models\AuditModel;
 use Throwable;
 
-final class AuditLogger
+final class AuditLogCore
 {
     public static function logInsert(
         string $table,
@@ -65,7 +64,7 @@ public static function logUpdate(
 		    return;
 		}
 
-    (new AuditModel())->insert([
+    (new AuditLogModel())->insert([
         'user_id'    => Auth::id(),
         'action'     => 'update',
         'entity'     => $table,

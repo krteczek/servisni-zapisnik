@@ -6,7 +6,7 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 
-class AuditModel
+class AuditLogModel
 {
     private PDO $db;
     private string $table;

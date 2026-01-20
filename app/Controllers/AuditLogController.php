@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\AuditModel;
+use App\Models\AuditLogModel;
 
 class AuditLogController extends Controller
 {
@@ -20,7 +20,7 @@ class AuditLogController extends Controller
             'user_agent' => $_GET['user_agent'] ?? null,
         ];
 
-        $logs = (new AuditModel())->findByFilters($filters,);
+        $logs = (new AuditLogModel())->findByFilters($filters);
 
         $this->view->logs    = $logs ?? [];
         $this->view->filters = $filters ?? [];
@@ -30,7 +30,7 @@ class AuditLogController extends Controller
 
     public function detail(int $id): string
     {
-        $log = (new AuditModel())->findById($id);
+        $log = (new AuditLogModel())->findById($id);
 
         if (!$log) {
             $this->view->errors[] = 'Audit záznam nebyl nalezen';

@@ -1,49 +1,38 @@
-[2026-01-17 18:53:30] error: Class "Roles" not found
-[2026-01-17 19:02:49] error: Class "Csrf" not found
-[2026-01-17 19:02:55] error: Class "Csrf" not found
-[2026-01-17 19:14:17] error: Using $this when not in object context
-[2026-01-17 19:16:42] error: mb_strlen(): Argument #1 ($string) must be of type string, null given
-[2026-01-17 19:46:31] error: syntax error, unexpected token ";", expecting "]"
-[2026-01-17 19:52:43] error: syntax error, unexpected variable "$email"
-[2026-01-17 20:09:11] error: syntax error, unexpected token "if", expecting "function" or "const"
-[2026-01-17 20:18:41] error: syntax error, unexpected token ";", expecting ")"
-[2026-01-17 20:21:52] error: Method App\Controllers\UserController::passwordForm() does not exist
-[2026-01-17 20:26:14] error: Call to a member function findById() on null
-[2026-01-17 20:28:09] error: Call to undefined method App\Models\UserModel::findById()
-[2026-01-17 20:37:38] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-17 20:38:45] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-17 20:38:53] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-17 20:38:55] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-17 20:39:00] error: Call to undefined method App\Controllers\WorkOrderController::e()
-[2026-01-17 20:40:08] error: Call to a member function updatePassword() on null
-[2026-01-17 20:43:59] error: Call to undefined method App\Models\UserModel::updatePassword()
-[2026-01-17 20:52:51] error: Unclosed '[' does not match ')'
-[2026-01-19 11:08:35] error: Class "AuditLogController" not found
-[2026-01-19 11:13:49] error: Call to undefined method App\Core\Access::adminOnly()
-[2026-01-19 11:25:24] error: Call to undefined method App\Core\Database::getConnection()
-[2026-01-19 11:30:58] error: Call to undefined method App\Models\AuditLogModel::findByFilters()
-[2026-01-19 11:31:28] error: Call to undefined method App\Models\AuditLogModel::findByFilters()
-[2026-01-19 11:38:21] error: Class "App\Controllers\AuditModel" not found
-[2026-01-19 11:38:44] error: Class "App\Models\AuditModel" not found
-[2026-01-19 11:39:16] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'jelmark.audit_log' doesn't exist
-[2026-01-19 11:39:58] error: Class "App\Core\View" not found
-[2026-01-19 11:43:35] error: Attempt to assign property "logs" on null
-[2026-01-19 11:49:17] error: Attempt to assign property "logs" on null
-[2026-01-19 11:49:25] error: Attempt to assign property "logs" on null
-[2026-01-19 11:50:09] error: Attempt to assign property "logs" on null
-[2026-01-19 11:50:15] error: Attempt to assign property "logs" on null
-[2026-01-19 11:55:15] error: Attempt to assign property "logs" on null
-[2026-01-19 11:55:29] error: Attempt to assign property "logs" on null
-[2026-01-19 11:56:44] error: Attempt to assign property "logs" on null
-[2026-01-19 11:57:17] error: syntax error, unexpected token ":"
-[2026-01-19 12:52:45] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/admin/audit/index.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-19 12:59:20] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Views\admin\audit/../layout/header.php' (include_path='C:\xampp\php\PEAR')
-[2026-01-19 14:06:36] error: syntax error, unexpected token "public", expecting end of file
-[2026-01-19 14:13:50] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
-[2026-01-19 14:15:26] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
-[2026-01-19 14:20:20] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
-[2026-01-19 14:21:54] error: htmlspecialchars(): Argument #1 ($string) must be of type string, null given
-[2026-01-19 14:26:40] error: htmlspecialchars(): Argument #1 ($string) must be of type string, int given
-[2026-01-19 14:27:31] error: htmlspecialchars(): Argument #1 ($string) must be of type string, int given
-[2026-01-19 14:27:37] error: Unmatched ')'
-[2026-01-19 14:43:24] error: App\Models\UserModel::find(): Argument #1 ($id) must be of type int, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Models\UserModel.php on line 238
+[2026-01-20 11:08:18] error: Test loggeru
+[2026-01-20 12:36:56] error: Test loggeru
+[2026-01-20 12:36:57] error: Test loggeru
+[2026-01-20 12:42:09] error: Test loggeru
+[2026-01-20 12:42:37] error: Test loggeru
+[2026-01-20 12:43:32] error: Test loggeru
+[2026-01-20 12:44:14] error: Test loggeru
+[2026-01-20 12:44:43] error: Test loggeru
+[2026-01-20 12:47:05] error: Test loggeru
+[2026-01-20 12:47:52] error: Test loggeru
+[2026-01-20 12:54:48] error: Test loggeru
+[2026-01-20 12:56:52] error: Test loggeru
+[2026-01-20 12:57:00] error: Test loggeru
+[2026-01-20 13:11:13] error: Test loggeru
+[2026-01-20 13:17:41] error: Class "App\Core\AuditLogger" not found
+[2026-01-20 13:20:32] error: Class "App\Models\AuditModel" not found
+[2026-01-20 13:39:50] error: syntax error, unexpected identifier "parent"
+[2026-01-20 13:40:07] error: syntax error, unexpected identifier "parent"
+[2026-01-20 13:41:19] error: syntax error, unexpected identifier "parent"
+[2026-01-20 13:42:23] error: syntax error, unexpected identifier "parent"
+[2026-01-20 13:52:19] error: syntax error, unexpected identifier "parent"
+[2026-01-20 13:52:41] error: syntax error, unexpected identifier "parent"
+[2026-01-20 14:09:20] error: Class "App\Models\AuditModel" not found
+[2026-01-20 14:10:21] error: Class "App\Controllers\AuditLogModel" not found
+[2026-01-20 14:10:40] error: syntax error, unexpected token ";", expecting ":"
+[2026-01-20 14:12:18] error: syntax error, unexpected token ";", expecting ":"
+[2026-01-20 14:13:47] error: syntax error, unexpected token "if"
+[2026-01-20 14:50:18] error: syntax error, unexpected token "<", expecting end of file
+[2026-01-20 14:50:47] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 39
+[2026-01-20 14:51:17] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 39
+[2026-01-20 14:52:37] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 40
+[2026-01-20 14:54:14] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 42
+[2026-01-20 14:54:30] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 42
+[2026-01-20 14:54:31] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 42
+[2026-01-20 14:54:31] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 42
+[2026-01-20 14:54:31] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 42
+[2026-01-20 14:54:31] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 42
+[2026-01-20 14:55:27] error: e(): Argument #1 ($text) must be of type string, null given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Views/admin/audit/index.php on line 42
