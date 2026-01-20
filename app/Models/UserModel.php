@@ -6,7 +6,7 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 use LogicException;
-use App\Core\AuditLogger;
+use App\Core\AuditLogCore;
 
 /**
  * UserModel
@@ -114,7 +114,6 @@ final class UserModel
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-
         return $stmt->fetchAll();
     }
 
@@ -237,7 +236,7 @@ final class UserModel
         );
         $stmt->execute($data);
 			$id = (int) $this->db->lastInsertId();
-AuditLogger::logInsert(
+AuditLogCore::logInsert(
     table: $this->tableName,
     recordId: $id,
     after: $data
@@ -264,7 +263,7 @@ AuditLogger::logInsert(
             $set[] = "{$key} = :{$key}";
         }
         
-AuditLogger::logUpdate(
+AuditLogCore::logUpdate(
     table: $this->tableName,
     recordId: $id,
     before: $this->find($id),

@@ -1,103 +1,81 @@
 <?php
 declare(strict_types=1);
 
-// views/teams/index.php – přehled týmů
+/** @var array $logs */
+/** @var array $filters */
 
 use App\Core\Url;
 $filters = $view->filters;
 $logs = $view->logs;
 require __DIR__ . '/../../layout/header.php';
-
-
 ?>
 
+<h1>Audit log</h1>
 
-<form method="get" action="">
-    <fieldset>
-        <legend>Filtr audit logu</legend>
+<?php require __DIR__ . '/_filter.php'; ?>
 
-        <label>
-            Uživatel ID:
-            <input type="number" name="user_id" value="<?= htmlspecialchars($filters['user_id'] ?? '') ?>">
-        </label>
+<table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Čas</th>
+            <th>Uživatel</th>
+            <th>Akce</th>
+            <th>Entita</th>
+            <th>ID</th>
+            <th>Změny</th>
+            <th>IP</th>
+            <th>Akce</th>
+        </tr>
+    </thead>
 
-        <label>
-            Akce:
-            <select name="action">
-                <option value="">– všechny –</option>
-                <option value="create" <?= ($filters['action'] ?? '') === 'create' ? 'selected' : '' ?>>create</option>
-                <option value="update" <?= ($filters['action'] ?? '') === 'update' ? 'selected' : '' ?>>update</option>
-                <option value="delete" <?= ($filters['action'] ?? '') === 'delete' ? 'selected' : '' ?>>delete</option>
-                <option value="error"  <?= ($filters['action'] ?? '') === 'error'  ? 'selected' : '' ?>>error</option>
-            </select>
-        </label>
-
-        <label>
-            Tabulka:
-            <input type="text" name="table" value="<?= htmlspecialchars($filters['table'] ?? '') ?>">
-        </label>
-
-        <label>
-            Od:
-            <input type="date" name="from" value="<?= htmlspecialchars($filters['from'] ?? '') ?>">
-        </label>
-
-        <label>
-            Do:
-            <input type="date" name="to" value="<?= htmlspecialchars($filters['to'] ?? '') ?>">
-        </label>
-
-        <label>
-            IP:
-            <input type="text" name="ip" value="<?= htmlspecialchars($filters['ip'] ?? '') ?>">
-        </label>
-
-        <button type="submit">Filtrovat</button>
-    </fieldset>
-</form>
-
-<table border="1" cellpadding="4">
-    <tr>
-        <th>Čas</th>
-        <th>Uživatel id</th>
-        <th>uživatel email</th>
-        <th>Akce</th>
-        <th>Řádek</th>
-        <th>Původní data</th>
-        <th>Nová data</th>
-        <th>IP</th>
-        <th>Prohlížeč</th>
-    </tr>
-
-
-    <?php foreach ($logs as $log): ?>
+    <tbody>
+    
+    <?php if(is_array($logs)):
+    	foreach ($logs as $log): ?>
+        <?php
+            $diff = json_decode($log['diff'] ?? '', true);
+        ?>
         <tr>
             <td><?= e($log['created_at']) ?></td>
-            <td><?= (int)$log['user_id'] ?></td>
-            <td><?= (int)$log['user_email'] ?></td>
-            <td><?= e($log['action']) ?></td>
-            <td><?= (int)$log['entity_id'] ?></td>
-<?php // hele nevím co s tím
-if (isset($log['password'])): ?>
-    <td><strong>Heslo:</strong> změněno</td>
-<?php else ?>
-<td><pre class="audit-json"><?= e($value) ?></pre></td>
- <?php 
-$old = json_decode($log['new_values'], true);
-if ($old !== null) {
-    $value = json_encode($old, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-}
-?>
-           <td><pre class="audit-json"><?= e($value) ?></pre></td>
-// až potud           
-            <td><?= e($log['ip_address']) ?></td>
-            <td><?= e($log['user_agent']) ?></td>
-            
-            
             <td>
-                <a href="<?= URL::to('/admin/audit/' . (int)$log['id']) ?>">detail</a>
+                <?= (int) $log['user_id'] ?><br>
+                <small><?= e($log['user_email']) ?></small>
+            </td>
+            <td><?= e($log['action']) ?></td>
+            <td><?= e($log['entity']) ?></td>
+            <td><?= (int) $log['entity_id'] ?></td>
+
+            <td>
+                <?php if (!$diff): ?>
+                    <em>– beze změn –</em>
+                <?php else: ?>
+                    <ul style="margin:0; padding-left:16px">
+                        <?php foreach ($diff as $field => $change): ?>
+                            <?php if ($field === 'password'): ?>
+                                <li><strong>heslo:</strong> změněno</li>
+                            <?php else: ?>
+                                <li>
+                                    <strong><?= e($field) ?>:</strong>
+                                    <?= e($change[0] ?? '') ?>
+                                    →
+                                    <?= e($change[1] ?? '') ?>
+                                </li>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </td>
+
+            <td><?= e($log['ip_address']) ?></td>
+
+            <td>
+                <a href="<?= Url::to('/admin/audit/' . (int)$log['id']) ?>">
+                    detail
+                </a>
             </td>
         </tr>
-    <?php endforeach; ?>
+    <?php endforeach; 
+		endif;    
+    ?>
+    </tbody>
 </table>
-
