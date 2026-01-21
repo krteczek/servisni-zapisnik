@@ -5,6 +5,8 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\AuditLogModel;
+use App\Core\Flash;
+use App\Core\Url;
 
 class AuditLogController extends Controller
 {
@@ -28,17 +30,17 @@ class AuditLogController extends Controller
         return $this->render('admin/audit/index');
     }
 
-    public function detail(int $id): string
-    {
-        $log = (new AuditLogModel())->findById($id);
+public function detail(int $id): string
+{
+    $log = (new AuditLogModel())->findById($id);
 
-        if (!$log) {
-            $this->view->errors[] = 'Audit záznam nebyl nalezen';
-            return $this->render('admin/audit/index');
-        }
-
-        $this->view->log = $log;
-
-        return $this->render('admin/audit/detail');
+    if (!$log) {
+        Flash::error('Audit záznam nebyl nalezen');
+        Url::redirect('/admin/audit');
     }
+
+    $this->view->log = $log;
+
+    return $this->render('admin/audit/detail');
+}
 }

@@ -113,3 +113,18 @@
     border-color: #888;
     box-shadow: 0 2px 6px rgba(0,0,0,.15);
 }
+
+
+.audit-json {
+    max-width: 700px;
+    max-height: 300px;
+    overflow: auto;
+
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}

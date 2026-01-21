@@ -23,12 +23,14 @@ return [
     'roles'  => ['admin'],
     'menu'   => 'Administrace',
     'submenu'=> 'Audit log',
+    'section' => 'admin',
+    'title'   => 'Admin > Audit > Audit log',
 ],
 [
     'path'   => '/admin/audit/{id}',
     'action' => [AuditLogController::class, 'detail'],
     'roles'  => ['admin'],
-],
+    'title'   => 'Admin > Audit > Detail auditního záznamu',],
 
     // ROOT (není v menu!)
 [

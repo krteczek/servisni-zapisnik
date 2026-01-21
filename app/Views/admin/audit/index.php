@@ -10,8 +10,6 @@ $logs = $view->logs;
 require __DIR__ . '/../../layout/header.php';
 ?>
 
-<h1>Audit log</h1>
-
 <?php require __DIR__ . '/_filter.php'; ?>
 
 <table border="1" cellpadding="6" cellspacing="0">
@@ -33,7 +31,10 @@ require __DIR__ . '/../../layout/header.php';
     <?php if(is_array($logs)):
     	foreach ($logs as $log): ?>
         <?php
-            $diff = json_decode($log['diff'] ?? '', true);
+            //$diff = json_decode($log['diff'] ?? '', true);
+            $diff = $log['diff']
+    ? json_decode($log['diff'], true)
+    : null;
         ?>
         <tr>
             <td><?= e($log['created_at']) ?></td>
@@ -54,12 +55,13 @@ require __DIR__ . '/../../layout/header.php';
                             <?php if ($field === 'password'): ?>
                                 <li><strong>heslo:</strong> změněno</li>
                             <?php else: ?>
-                                <li>
-                                    <strong><?= e($field) ?>:</strong>
-                                    <?= e($change[0] ?? '') ?>
-                                    →
-                                    <?= e($change[1] ?? '') ?>
-                                </li>
+                             <li>
+    <strong><?= e($field) ?>:</strong>
+<span style="color:#a00"><?= formatValue($change['from']) ?></span>
+→  
+<span style="color:#060"><span style="color:#060"><?= formatValue($change['to']) ?></span>
+
+</li>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </ul>
@@ -79,3 +81,4 @@ require __DIR__ . '/../../layout/header.php';
     ?>
     </tbody>
 </table>
+<?php require __DIR__ . '/../../layout/footer.php'; ?>
