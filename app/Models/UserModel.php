@@ -3,78 +3,23 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Core\Database;
 use PDO;
 use LogicException;
-use App\Core\AuditLogCore;
 
-/**
- * UserModel
- *
- * Model pro práci s uživateli.
- * Zodpovídá výhradně za přístup k tabulce `users`
- * a veškeré CRUD operace nad uživatelskými daty.
- *
- * Neřeší autorizaci ani aplikační logiku.
- * Vrací čistá data ve formě asociativních polí.
- */
-final class UserModel
+final class UserModel extends BaseModel
 {
-    /**
-     * PDO instance databázového spojení
-     */
-    protected PDO $db;
-
-    /**
-     * Název tabulky bez prefixu
-     */
+    /** název tabulky BEZ prefixu */
     protected string $table = 'users';
 
     /**
-     * Finální název tabulky včetně prefixu
-     */
-    protected string $tableName;
-
-    /**
      * Povolené sloupce pro ORDER BY
-     * (ochrana proti SQL injection)
      */
     protected array $orderable = ['id'];
-
-    /**
-     * Inicializace modelu a databázového spojení
-     *
-     * @throws LogicException pokud není definován název tabulky
-     */
-    public function __construct()
-    {
-        $this->db = Database::pdo();
-
-        if (!isset($this->table) || $this->table === '') {
-            throw new LogicException(
-                static::class . ' must define protected string $table'
-            );
-        }
-
-        $this->tableName = Database::table($this->table);
-    }
 
     /* ==========================================================
      * ZÁKLADNÍ SELECT – univerzální
      * ========================================================== */
 
-    /**
-     * Univerzální SELECT dotaz
-     *
-     * @param array|string $columns Sloupce k výběru
-     * @param array $where Asociativní pole WHERE podmínek
-     * @param string|null $orderBy Sloupec pro řazení
-     * @param string $direction Směr řazení ASC|DESC
-     * @param int|null $limit LIMIT
-     * @param int|null $offset OFFSET
-     *
-     * @return array Pole nalezených řádků
-     */
     public function select(
         array|string $columns = '*',
         array $where = [],
@@ -114,43 +59,28 @@ final class UserModel
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /* ==========================================================
      * KRATŠÍ ALIASY
      * ========================================================== */
 
-    /**
-     * Vrátí všechny uživatele
-     *
-     * @param string $orderBy Sloupec pro řazení
-     * @return array
-     */
     public function all(string $orderBy = 'id'): array
     {
-        return $this->select('*', [], $orderBy);
+        return $this->allRows($orderBy);
     }
 
-    /**
-     * Najde uživatele podle ID
-     *
-     * @param int $id
-     * @return array|null
-     */
     public function find(int $id): ?array
     {
-        $rows = $this->select('*', ['id' => $id], null, limit: 1);
-        return $rows[0] ?? null;
+        return $this->findRow($id);
     }
 
-    /**
-     * Ověří existenci emailu
-     *
-     * @param string $email
-     * @param int|null $ignoreId ID uživatele, který se má ignorovat
-     * @return bool
-     */
+    /* ==========================================================
+     * VALIDACE / EXISTENCE
+     * ========================================================== */
+
     public function emailExists(string $email, ?int $ignoreId = null): bool
     {
         $sql = "SELECT 1 FROM {$this->tableName} WHERE email = :email";
@@ -167,13 +97,6 @@ final class UserModel
         return (bool) $stmt->fetchColumn();
     }
 
-    /**
-     * Ověří existenci osobního čísla
-     *
-     * @param string $number
-     * @param int|null $ignoreId ID uživatele, který se má ignorovat
-     * @return bool
-     */
     public function employeeNumberExists(string $number, ?int $ignoreId = null): bool
     {
         $sql = "SELECT 1 FROM {$this->tableName} WHERE employee_number = :num";
@@ -190,22 +113,14 @@ final class UserModel
         return (bool) $stmt->fetchColumn();
     }
 
-    /**
-     * Najde uživatele podle emailu
-     *
-     * @param string $email
-     * @return array|null
-     */
     public function findByEmail(string $email): ?array
     {
         $stmt = $this->db->prepare(
-            "SELECT *
-             FROM {$this->tableName}
-             WHERE email = :email
-             LIMIT 1"
+            "SELECT * FROM {$this->tableName} WHERE email = :email LIMIT 1"
         );
 
         $stmt->execute(['email' => $email]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
@@ -213,96 +128,47 @@ final class UserModel
      * INSERT / UPDATE
      * ========================================================== */
 
-    /**
-     * Vloží nového uživatele
-     *
-     * @param array $data
-     * @return int ID nově vloženého záznamu
-     *
-     * @throws LogicException pokud jsou data prázdná
-     */
     public function insert(array $data): int
     {
         if (!$data) {
             throw new LogicException('Insert data cannot be empty');
         }
 
-        $cols = array_keys($data);
-        $fields = implode(', ', $cols);
-        $values = ':' . implode(', :', $cols);
-
-        $stmt = $this->db->prepare(
-            "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})"
-        );
-        $stmt->execute($data);
-			$id = (int) $this->db->lastInsertId();
-AuditLogCore::logInsert(
-    table: $this->tableName,
-    recordId: $id,
-    after: $data
-);
-
-        return $id;
+        return parent::insert($data);
     }
 
-    /**
-     * Aktualizuje uživatele
-     *
-     * @param int $id
-     * @param array $data
-     * @return void
-     */
     public function update(int $id, array $data): void
     {
         if (!$data) {
             return;
         }
 
-        $set = [];
-        foreach ($data as $key => $val) {
-            $set[] = "{$key} = :{$key}";
-        }
-        
-AuditLogCore::logUpdate(
-    table: $this->tableName,
-    recordId: $id,
-    before: $this->find($id),
-    after: $data
-);
-        $sql = "UPDATE {$this->tableName}
-                SET " . implode(', ', $set) . "
-                WHERE id = :id";
+        parent::updateRow($id, $data);
+    }
 
-        $data['id'] = $id;
+    /* ==========================================================
+     * STAVY
+     * ========================================================== */
 
-        $this->db->prepare($sql)->execute($data);
+    public function active(): array
+    {
+        return $this->select('*', ['active' => 1]);
+    }
+
+    public function inactive(): array
+    {
+        return $this->select('*', ['active' => 0]);
     }
 
     /* ==========================================================
      * DELETE
      * ========================================================== */
 
-    /**
-     * Smaže uživatele podle ID
-     *
-     * @param int $id
-     * @return void
-     */
-     // TODO: místo DELETE použít soft delete (active = 0)
+    // TODO: místo DELETE použít soft delete (active = 0)
     protected function delete(int $id): void
     {
         $this->db
             ->prepare("DELETE FROM {$this->tableName} WHERE id = :id")
             ->execute(['id' => $id]);
     }
-    
-    public function active(): array
-{
-    return $this->select('*', ['active' => 1]);
-}
-
-public function inactive(): array
-{
-    return $this->select('*', ['active' => 0]);
-}
 }
