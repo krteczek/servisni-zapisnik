@@ -6,6 +6,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Url;
 use App\Core\Config;
+use App\Core\Flash;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\UserModel;
@@ -50,9 +51,12 @@ class TeamController extends Controller
             return $this->render('teams/create');
         }
 
-        (new Team())->create($name, $color);
+        if((new Team())->create($name, $color)) {
+        	    Flash::add('success', 'Tým ' . $name . ' ' . $lastname . ' byl úspěšně vytvořen.');
+				Url::redirect('/teams');
+        	} 
 
-        Url::redirect('/teams');
+        
     }
 
     public function edit(int $id): string
@@ -104,12 +108,12 @@ class TeamController extends Controller
         }
 
         /* ===== ZMĚNA ROLE ===== */
-        elseif (isset($_POST['change_user_role'])) {
-            $membershipModel->change_user_role(
-                (int) $_POST['change_user_role'],
-                ['role_in_team' => $_POST['role_in_team']]
-            );
-        }
+elseif (isset($_POST['change_user_role'])) {
+    $membershipModel->changeRole(
+        (int) $_POST['change_user_role'],
+        (string) $_POST['role_in_team']
+    );
+}
 
         /* ===== ODEBRÁNÍ ČLENA ===== */
         elseif (isset($_POST['remove_membership_id'])) {

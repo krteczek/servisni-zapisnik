@@ -64,3 +64,13 @@
 [2026-01-21 14:44:34] error: Call to undefined method App\Models\UserModel::availableForTeam()
 [2026-01-21 14:46:42] error: Call to undefined method App\Models\UserModel::availableForTeam()
 [2026-01-21 14:46:55] error: Call to undefined method App\Models\UserModel::availableForTeam()
+[2026-01-21 15:10:09] error: Class "Csrf" not found
+[2026-01-21 15:11:45] error: Class "Csrf" not found
+[2026-01-21 22:31:48] error: Class "App\Controllers\Flash" not found
+[2026-01-21 22:34:10] error: Call to undefined method App\Models\UserModel::availableForTeam()
+[2026-01-21 22:37:41] error: Class "App\Models\Database" not found
+[2026-01-21 22:45:48] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'jelmark.team_members' doesn't exist
+[2026-01-21 22:50:50] error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.name' in 'order clause'
+[2026-01-21 23:02:32] error: Cannot access offset of type string on string
+[2026-01-21 23:18:31] error: Call to undefined method App\Models\TeamMembership::change_user_role()
+[2026-01-21 23:21:25] error: App\Models\TeamMembership::changeRole(): Argument #2 ($role) must be of type string, array given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\TeamController.php on line 112

@@ -27,10 +27,6 @@ $errors = $view->errors ?? [];
 
     <?= Csrf::getField() ?>
 
-    <!-- fake fields for password managers -->
-    <input type="text" name="username" autocomplete="username" hidden>
-    <input type="password" autocomplete="current-password" hidden>
-
     <label>Email</label><br>
     <input type="email"
            name="email"

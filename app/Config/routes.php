@@ -203,7 +203,7 @@ return [
 
 [
     'method' => 'POST',
-    'path'   => '/teams',
+    'path'   => '/teams/create',
     'action' => [TeamController::class, 'store'],
     'auth'   => true,
     'roles'  => ['admin'],
