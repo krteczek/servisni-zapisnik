@@ -171,4 +171,34 @@ final class UserModel extends BaseModel
             ->prepare("DELETE FROM {$this->tableName} WHERE id = :id")
             ->execute(['id' => $id]);
     }
+    
+public function availableForTeam(int $teamId): array
+{
+    // odvození názvu tabulky team_memberships ze stejného prefixu
+    $teamMembershipsTable = str_replace(
+        $this->table,
+        'team_memberships',
+        $this->tableName
+    );
+
+    $sql = "
+        SELECT u.*
+        FROM {$this->tableName} u
+        WHERE u.id NOT IN (
+            SELECT tm.user_id
+            FROM {$teamMembershipsTable} tm
+            WHERE tm.team_id = :team_id
+              AND tm.valid_to IS NULL
+        )
+        ORDER BY u.last_name, u.first_name
+    ";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([
+        'team_id' => $teamId
+    ]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }
