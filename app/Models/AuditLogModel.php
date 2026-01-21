@@ -8,13 +8,43 @@ use PDO;
 
 class AuditLogModel
 {
-    private PDO $db;
-    private string $table;
+    /**
+     * PDO instance databázového spojení
+     */
+    protected PDO $db;
 
+    /**
+     * Název tabulky bez prefixu
+     */
+    protected string $table = 'audit_logs';
+
+    /**
+     * Finální název tabulky včetně prefixu
+     */
+    protected string $tableName;
+
+    /**
+     * Povolené sloupce pro ORDER BY
+     * (ochrana proti SQL injection)
+     */
+    protected array $orderable = ['id'];
+
+    /**
+     * Inicializace modelu a databázového spojení
+     *
+     * @throws LogicException pokud není definován název tabulky
+     */
     public function __construct()
     {
-        $this->db    = Database::pdo();
-        $this->table = Database::table('audit_logs');
+        $this->db = Database::pdo();
+
+        if (!isset($this->table) || $this->table === '') {
+            throw new LogicException(
+                static::class . ' must define protected string $table'
+            );
+        }
+
+        $this->tableName = Database::table($this->table);
     }
 
     public function insert(array $data): void
@@ -76,4 +106,14 @@ class AuditLogModel
 
         return $stmt->fetchAll();
     }
+    
+    public function findById(int $id): ?array
+{
+    $stmt = $this->db->prepare(
+        "SELECT * FROM {$this->table} WHERE id = :id"
+    );
+    $stmt->execute(['id' => $id]);
+
+    return $stmt->fetch() ?: null;
+}
 }

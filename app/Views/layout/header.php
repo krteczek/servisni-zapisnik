@@ -16,6 +16,7 @@ $user = $view->user ?? null;
 
     <!-- CSS -->
     <link rel="stylesheet" href="<?= Url::to('/css/style.css') ?>">
+    
 </head>
 <body>
 

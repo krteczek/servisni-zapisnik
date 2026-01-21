@@ -16,7 +16,7 @@ final class AuditLogCore
         try {
         	unset($after['password_hash']);
 
-(new AuditModel())->insert([
+(new AuditLogModel())->insert([
     'user_id'    => Auth::id(),
     'action'     => 'insert',
     'entity'     => $table,
