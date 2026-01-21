@@ -54,7 +54,7 @@ $diff = $log['diff']
 <?php if (!$diff || $diff === []): ?>
     <p><em>Žádné změny</em></p>
 <?php else: ?>
-    <table class="audit-diff">
+    <table border="1" cellpadding="6" cellspacing="0" style="max-width:1100px">
         <thead>
             <tr>
                 <th>Položka</th>

@@ -6,13 +6,13 @@ use App\Core\Access;
 <h1>Nová zakázka</h1>
 <form method="post" action="<?= Url::to('/work-orders') ?>">
     <label>Externí číslo</label>
-    <input name="external_number" value="<?= $this->e($this->data['external_number'] ?? '') ?>">
+    <input name="external_number" value="<?= e($this->data['external_number'] ?? '') ?>">
 
     <label>Název *</label>
-    <input name="title" required value="<?= $this->e($this->data['title'] ?? '') ?>">
+    <input name="title" required value="<?= e($this->data['title'] ?? '') ?>">
 
     <label>Popis</label>
-    <textarea name="description"><?= $this->e($this->data['description'] ?? '') ?></textarea>
+    <textarea name="description"><?= e($this->data['description'] ?? '') ?></textarea>
 
     <label>Zdroj</label>
     <select name="source">
@@ -23,7 +23,7 @@ use App\Core\Access;
     </select>
 
     <label>Požadoval</label>
-    <input name="requested_by" value="<?= $this->e($this->data['requested_by'] ?? '') ?>">
+    <input name="requested_by" value="<?= e($this->data['requested_by'] ?? '') ?>">
 
     <label>Priorita</label>
     <select name="priority">

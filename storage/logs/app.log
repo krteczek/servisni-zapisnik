@@ -58,3 +58,9 @@
 [2026-01-21 01:04:16] error: Call to undefined function formatAuditValue()
 [2026-01-21 01:04:44] error: Call to undefined function formatAuditValue()
 [2026-01-21 01:05:58] error: Call to undefined function formatAuditValue()
+[2026-01-21 13:59:52] error: Unclosed '{' on line 10
+[2026-01-21 14:41:07] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-21 14:41:24] error: Call to undefined method App\Controllers\WorkOrderController::e()
+[2026-01-21 14:44:34] error: Call to undefined method App\Models\UserModel::availableForTeam()
+[2026-01-21 14:46:42] error: Call to undefined method App\Models\UserModel::availableForTeam()
+[2026-01-21 14:46:55] error: Call to undefined method App\Models\UserModel::availableForTeam()
