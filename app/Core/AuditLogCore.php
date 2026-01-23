@@ -8,31 +8,45 @@ use Throwable;
 
 final class AuditLogCore
 {
-    public static function logInsert(
-        string $table,
-        ?int $recordId = null,
-        ?array $after = null
-    ): void {
-        try {
-        	unset($after['password_hash']);
+public static function logInsert(
+    string $table,
+    ?int $recordId = null,
+    ?array $after = null
+): void {
+    try {
+        if (!$after) {
+            return;
+        }
 
-(new AuditLogModel())->insert([
-    'user_id'    => Auth::id(),
-    'action'     => 'insert',
-    'entity'     => $table,
-    'entity_id'  => $recordId,
-    'diff' 		  => $after  ? json_encode($after,  JSON_UNESCAPED_UNICODE) : null,//Celý záznam do db
-    'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
-]);
-        } catch (\Throwable $e) {
-    file_put_contents(
-        __DIR__ . '/../../storage/audit_errors.log',
-        date('Y-m-d H:i:s') . ' ' . $e->getMessage() . PHP_EOL,
-        FILE_APPEND
-    );
-}
+        unset($after['password_hash']);
+
+        $diff = [];
+
+        foreach ($after as $key => $value) {
+            $diff[$key] = [
+                'from' => null,
+                'to'   => $value,
+            ];
+        }
+
+        (new AuditLogModel())->insert([
+            'user_id'    => Auth::id(),
+            'action'     => 'insert',
+            'entity'     => $table,
+            'entity_id'  => $recordId,
+            'diff'       => json_encode($diff, JSON_UNESCAPED_UNICODE),
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ]);
+
+    } catch (Throwable $e) {
+        file_put_contents(
+            __DIR__ . '/../../storage/audit_errors.log',
+            date('Y-m-d H:i:s') . ' ' . $e->getMessage() . PHP_EOL,
+            FILE_APPEND
+        );
     }
+}
 
 public static function logUpdate(
     string $table,

@@ -184,9 +184,30 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'menu'    => 'Týmy',
-    'submenu' => 'Přehled týmů',
+    'submenu' => 'Aktivní',
     'section' => 'teams',
-    'title'   => 'Týmy',
+    'title'   => 'Přehled aktivních týmů',
+],
+[
+    'method'  => 'GET',
+    'path'    => '/teams/inactive',
+    'action'  => [TeamController::class, 'inactive'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'menu'    => 'Týmy',
+    'submenu' => 'Deaktivované',
+    'section' => 'teams',
+    'title'   => 'Přehled deaktivovaných týmů',
+],
+
+// TEAMS – změna aktivni/neaktivní (toggle)
+[
+    'method'  => 'GET',
+    'path'    => '/teams/toggle/{id}',
+    'action'  => [TeamController::class, 'toggle'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'teams',
 ],
 
 // TEAMS – create

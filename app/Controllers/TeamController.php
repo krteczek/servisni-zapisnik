@@ -13,23 +13,33 @@ use App\Models\UserModel;
 
 class TeamController extends Controller
 {
-    public function index(): string
-    {
-        $teamModel        = new Team();
-        $membershipModel  = new TeamMembership();
+private function listByActive(bool $active): string
+{
+    $teamModel       = new Team();
+    $membershipModel = new TeamMembership();
 
-        $teams = $teamModel->all();
+    $teams = $teamModel->byActive($active);
 
-        foreach ($teams as $i => $team) {
-            $members = $membershipModel->currentMembers((int) $team['id']);
-            $teams[$i]['members']       = $members;
-            $teams[$i]['members_count'] = count($members);
-        }
-
-        $this->view->teams = $teams;
-
-        return $this->render('teams/index');
+    foreach ($teams as $i => $team) {
+        $members = $membershipModel->currentMembers((int) $team['id']);
+        $teams[$i]['members']       = $members;
+        $teams[$i]['members_count'] = count($members);
     }
+
+    $this->view->teams = $teams;
+
+    return $this->render('teams/index');
+}
+
+public function index(): string
+{
+    return $this->listByActive(true);
+}
+
+public function inactive(): string
+{
+    return $this->listByActive(false);
+}
 
     public function create(): string
     {
@@ -52,7 +62,7 @@ class TeamController extends Controller
         }
 
         if((new Team())->create($name, $color)) {
-        	    Flash::add('success', 'Tým ' . $name . ' ' . $lastname . ' byl úspěšně vytvořen.');
+        	    Flash::add('success', 'Tým ' . $name . ' byl úspěšně vytvořen.');
 				Url::redirect('/teams');
         	} 
 
@@ -124,4 +134,24 @@ elseif (isset($_POST['change_user_role'])) {
 
         Url::redirect('/teams/' . $id . '/edit');
     }
+    
+    public function toggle(int $id): void
+{
+	$model = new Team();
+    $team = $model->find($id);
+
+    if (!$team) {
+        Flash::add('error', 'Tým nenalezen');
+        Url::redirect('/teams');
+    }
+
+    $model->setActive($id, !(bool) $team['active']);
+    Flash::add('success',
+        $team['active']
+            ? 'Tým: ' . $team['name'] . ' byl deaktivován'
+            : 'Tým: ' . $team['name'] . ' byl aktivován'
+    );
+
+    Url::redirect('/teams');
+}
 }

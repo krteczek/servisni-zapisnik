@@ -115,44 +115,20 @@
 }
 
 
-.audit-json {
-    max-width: 700px;
-    max-height: 300px;
-    overflow: auto;
-
-    white-space: pre-wrap;
-    word-break: break-word;
-
-    background: #f8f9fa;
-    padding: 8px;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-
 .audit-diff {
+    width: auto;
+    max-width: 100%;
     border-collapse: collapse;
-    width: 100%;
-    margin-top: 10px;
 }
 
 .audit-diff th,
 .audit-diff td {
-    border: 1px solid #ddd;
-    padding: 6px 8px;
+    padding: 6px 10px;
+    vertical-align: top;
 }
 
-.audit-diff th {
-    background: #f5f5f5;
-    text-align: left;
-}
-
-.audit-diff td.old {
-    color: #a00;
-    background: #fff5f5;
-}
-
-.audit-diff td.new {
-    color: #060;
-    background: #f5fff5;
+.audit-diff td pre {
+    max-width: 400px;
+    overflow-x: auto;
+    white-space: pre-wrap;
 }
