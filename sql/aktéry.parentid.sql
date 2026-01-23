@@ -31,3 +31,11 @@ AFTER priority;
 
 ALTER TABLE work_orders
 ADD parent_id INT UNSIGNED NULL AFTER id;
+
+
+
+ALTER TABLE work_orders
+ADD COLUMN contact varchar(255) DEFAULT NULL
+AFTER requested_by;
+
+

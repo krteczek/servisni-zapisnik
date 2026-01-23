@@ -4,6 +4,7 @@ require __DIR__ . '/../layout/header.php';
 use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Access;
+$data = $view->data; 
 ?>
 
 <style>
@@ -42,7 +43,7 @@ use App\Core\Access;
 
 <h1>Nová zakázka</h1>
 
-<form method="post" action="<?= Url::to('/work-orders/create') ?>">
+<form method="post" action="">
     <?= Csrf::getField() ?>
 
     <table class="form-table">
@@ -52,7 +53,7 @@ use App\Core\Access;
                 <input
                     id="external_number"
                     name="external_number"
-                    value="<?= e($this->data['external_number'] ?? '') ?>"
+                    value="<?= e($data['external_number'] ?? '') ?>"
                 >
             </td>
         </tr>
@@ -64,7 +65,7 @@ use App\Core\Access;
                     id="title"
                     name="title"
                     required
-                    value="<?= e($this->data['title'] ?? '') ?>"
+                    value="<?= e($data['title'] ?? '') ?>"
                 >
             </td>
         </tr>
@@ -76,7 +77,7 @@ use App\Core\Access;
                     id="description"
                     name="description"
                     rows="4"
-                ><?= e($this->data['description'] ?? '') ?></textarea>
+                ><?= e($data['description'] ?? '') ?></textarea>
             </td>
         </tr>
 
@@ -98,10 +99,22 @@ use App\Core\Access;
                 <input
                     id="requested_by"
                     name="requested_by"
-                    value="<?= e($this->data['requested_by'] ?? '') ?>"
+                    value="<?= e($data['requested_by'] ?? '') ?>"
                 >
             </td>
         </tr>
+
+        <tr>
+            <th><label for="contact">Kontaktní osoba</label></th>
+            <td>
+                <input
+                    id="contact"
+                    name="contact"
+                    value="<?= e($data['contact'] ?? '') ?>"
+                >
+            </td>
+        </tr>
+
 
         <tr>
             <th><label for="priority">Priorita</label></th>

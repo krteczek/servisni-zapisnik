@@ -67,6 +67,7 @@ abstract class BaseModel
             "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})"
         );
         $stmt->execute($data);
+        $lastId = $this->db->lastInsertId();
 
         // audit – insert = pouze nové hodnoty
         try {
@@ -79,7 +80,7 @@ abstract class BaseModel
             // audit NIKDY nesmí rozbít aplikaci
         }
 
-        return (int) $this->db->lastInsertId();
+        return (int) $lastId;
     }
 
     /* ==========================================================

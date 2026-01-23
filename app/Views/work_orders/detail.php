@@ -42,6 +42,11 @@ $order = $this->view->order;
         </tr>
 
         <tr>
+            <th>Kontakt</th>
+            <td><?= htmlspecialchars($order['contact'] ?? '—') ?></td>
+        </tr>
+
+        <tr>
             <th>Priorita</th>
             <td>
                 <span class="priority priority-<?= htmlspecialchars($order['priority']) ?>">

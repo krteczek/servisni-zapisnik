@@ -39,10 +39,10 @@ $workOrders = $view->orders;
                     <td><?= htmlspecialchars($wo['created_at']) ?></td>
                     <td>
                         <a href="<?= Url::to('/work-orders/' . (int) $wo['id']) ?>">
-                            detail
-                        </a>
+                            Podrobnosti
+                        </a><br>
                         <a href="<?= Url::to('/work-orders/update/' . (int) $wo['id']) ?>">
-                            detail
+                            Upravit zakázku
                         </a>
                     </td>
                 </tr>
