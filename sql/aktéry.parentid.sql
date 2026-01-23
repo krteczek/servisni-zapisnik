@@ -22,3 +22,8 @@ AFTER id;
 
 CREATE INDEX idx_tasks_parent
 ON tasks (parent_id);
+
+
+ALTER TABLE work_orders
+ADD estimated_hours DECIMAL(8,2) NULL
+AFTER priority;
