@@ -55,6 +55,45 @@ class WorkOrderController extends Controller
         Url::redirect('/work-orders/' . $id);
     }
 
+    public function update($id): string
+    {
+
+        $model = new WorkOrderModel();
+        $order = $model->find($id);
+        if (!$order) {
+        		Flash::add('error', 'Zakázka neexistuje');
+            Url::redirect('/work-orders');
+        }
+			
+			if()
+        $data = [
+            'external_number' => trim($_POST['external_number'] ?? ''),
+            'title'           => trim($_POST['title'] ?? ''),
+            'description'     => trim($_POST['description'] ?? ''),
+            'source'          => $_POST['source'] ?? 'personal',
+            'requested_by'    => trim($_POST['requested_by'] ?? ''),
+            'priority'        => $_POST['priority'] ?? 'normal',
+            'user_id'         => Auth::user()['id'],
+        ];
+
+        $errors = [];
+
+        if ($data['title'] === '') {
+            $errors['title'][] = 'Název je povinný';
+        }
+
+        if ($errors) {
+            $this->view->errors = $errors;
+            $this->view->data   = $data;
+            return $this->render('work_orders/create');
+        }
+
+        $model = new WorkOrderModel();
+        $id = $model->create($data);
+
+        Url::redirect('/work-orders/' . $id);
+    }
+
     public function detail(int $id): string
     {
         $model = new WorkOrderModel();

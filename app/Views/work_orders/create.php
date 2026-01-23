@@ -1,43 +1,130 @@
-<?php require __DIR__ . '/../layout/header.php';
+<?php
+require __DIR__ . '/../layout/header.php';
+
 use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Access;
 ?>
+
+<style>
+.form-table {
+    border-collapse: collapse;
+}
+
+.form-table th {
+    text-align: left;
+    padding: 6px 10px 6px 0;
+    vertical-align: top;
+    white-space: nowrap;
+}
+
+.form-table td {
+    padding: 6px 0;
+}
+
+.form-table input,
+.form-table textarea,
+.form-table select {
+    width: 100%;
+    max-width: 400px;
+}
+
+.req {
+    color: #c00;
+}
+
+.form-actions .btn {
+    margin-right: 8px;
+}
+
+</style>
+
+
 <h1>Nová zakázka</h1>
-<form method="post" action="<?= Url::to('/work-orders') ?>">
-    <label>Externí číslo</label>
-    <input name="external_number" value="<?= e($this->data['external_number'] ?? '') ?>">
 
-    <label>Název *</label>
-    <input name="title" required value="<?= e($this->data['title'] ?? '') ?>">
+<form method="post" action="<?= Url::to('/work-orders/create') ?>">
+    <?= Csrf::getField() ?>
 
-    <label>Popis</label>
-    <textarea name="description"><?= e($this->data['description'] ?? '') ?></textarea>
+    <table class="form-table">
+        <tr>
+            <th><label for="external_number">Externí číslo</label></th>
+            <td>
+                <input
+                    id="external_number"
+                    name="external_number"
+                    value="<?= e($this->data['external_number'] ?? '') ?>"
+                >
+            </td>
+        </tr>
 
-    <label>Zdroj</label>
-    <select name="source">
-        <option value="email">Email</option>
-        <option value="phone">Telefon</option>
-        <option value="personal">Osobně</option>
-        <option value="system">Systém</option>
-    </select>
+        <tr>
+            <th><label for="title">Název <span class="req">*</span></label></th>
+            <td>
+                <input
+                    id="title"
+                    name="title"
+                    required
+                    value="<?= e($this->data['title'] ?? '') ?>"
+                >
+            </td>
+        </tr>
 
-    <label>Požadoval</label>
-    <input name="requested_by" value="<?= e($this->data['requested_by'] ?? '') ?>">
+        <tr>
+            <th><label for="description">Popis</label></th>
+            <td>
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                ><?= e($this->data['description'] ?? '') ?></textarea>
+            </td>
+        </tr>
 
-    <label>Priorita</label>
-    <select name="priority">
-        <option value="low">Nízká</option>
-        <option value="normal">Normální</option>
-        <option value="high">Vysoká</option>
-        <option value="emergency">Havárie</option>
-    </select>
+        <tr>
+            <th><label for="source">Zdroj</label></th>
+            <td>
+                <select id="source" name="source">
+                    <option value="email">Email</option>
+                    <option value="phone">Telefon</option>
+                    <option value="personal">Osobně</option>
+                    <option value="system">Systém</option>
+                </select>
+            </td>
+        </tr>
 
-    <button>Uložit</button>
+        <tr>
+            <th><label for="requested_by">Požadoval</label></th>
+            <td>
+                <input
+                    id="requested_by"
+                    name="requested_by"
+                    value="<?= e($this->data['requested_by'] ?? '') ?>"
+                >
+            </td>
+        </tr>
+
+        <tr>
+            <th><label for="priority">Priorita</label></th>
+            <td>
+                <select id="priority" name="priority">
+                    <option value="low">Nízká</option>
+                    <option value="normal" selected>Normální</option>
+                    <option value="high">Vysoká</option>
+                    <option value="emergency">Havárie</option>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <th></th>
+            <td class="form-actions">
+                <button type="submit" class="btn btn-primary">Uložit</button>
+                <a href="<?= Url::to('/work-orders') ?>" class="btn btn-secondary">
+                    Zpět na přehled
+                </a>
+            </td>
+        </tr>
+    </table>
 </form>
-<p>
-    <a href="<?= Url::to('/work-orders') ?>" class="btn btn-secondary">
-        ← Zpět na přehled
-    </a>
-</p>
+
 <?php require __DIR__ . '/../layout/footer.php'; ?>

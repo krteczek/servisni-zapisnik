@@ -41,6 +41,9 @@ $workOrders = $view->orders;
                         <a href="<?= Url::to('/work-orders/' . (int) $wo['id']) ?>">
                             detail
                         </a>
+                        <a href="<?= Url::to('/work-orders/update/' . (int) $wo['id']) ?>">
+                            detail
+                        </a>
                     </td>
                 </tr>
             <?php endforeach; ?>

@@ -93,7 +93,17 @@ return [
     'path'   => '/work-orders/create',
     'action' => [WorkOrderController::class, 'create'],
     'auth'   => true,
-    'roles'  => ['admin','mistr','predak'],
+    'roles'  => ['admin','mistr'],
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/work-orders/update/{id}',
+    'action'  => [WorkOrderController::class, 'update'],
+    'auth'    => true,
+    'roles'   => ['admin','mistr'],
+    'section' => 'dashboard',
+    'title'   => 'Dashboard > Zakázka',
 ],
 
 [
