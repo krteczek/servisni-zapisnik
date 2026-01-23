@@ -27,3 +27,7 @@ ON tasks (parent_id);
 ALTER TABLE work_orders
 ADD estimated_hours DECIMAL(8,2) NULL
 AFTER priority;
+
+
+ALTER TABLE work_orders
+ADD parent_id INT UNSIGNED NULL AFTER id;
