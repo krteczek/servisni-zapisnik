@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 namespace App\Models;
-
+use \PDO;
 class Team extends BaseModel
 {
     protected string $table = 'teams';
@@ -36,4 +36,35 @@ class Team extends BaseModel
 {
     $this->updateRow($id, $data);
 }
+
+public function setActive(int $teamId, bool $active): void
+{
+    $team = $this->find($teamId);
+
+    if (!$team) {
+        throw new \RuntimeException('Tým nenalezen');
+    }
+
+    $newData = ['active' => $active ? 1 : 0];
+
+    $this->updateRow($teamId, $newData);
+  
+}
+
+public function byActive(bool $active): array
+{
+    $stmt = $this->db->prepare(
+        "SELECT *
+         FROM {$this->tableName}
+         WHERE active = :active
+         ORDER BY name"
+    );
+
+    $stmt->execute([
+        'active' => $active ? 1 : 0
+    ]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }

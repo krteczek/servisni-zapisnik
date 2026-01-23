@@ -46,7 +46,11 @@ require __DIR__ . '/../layout/header.php';
                 <?php if (Access::can('teams.edit')): ?>
                     <a href="<?= Url::to('/teams/' . (int) $team['id'] . '/edit') ?>">
                         Upravit
-                    </a>
+                    </a><br>
+                    <a href="<?= Url::to('/teams/toggle/' . $team['id']) ?>"
+   onclick="return confirm('Opravdu chcete změnit stav týmu?')">
+   <?= $team['active'] ? 'Deaktivovat' : 'Aktivovat' ?>
+</a>
                 <?php endif ?>
             </td>
         </tr>

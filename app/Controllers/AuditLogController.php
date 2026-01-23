@@ -26,7 +26,7 @@ class AuditLogController extends Controller
 
         $this->view->logs    = $logs ?? [];
         $this->view->filters = $filters ?? [];
-
+//var_dump($logs);
         return $this->render('admin/audit/index');
     }
 
