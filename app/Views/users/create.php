@@ -10,7 +10,6 @@ require __DIR__ . '/../layout/header.php';
 $old    = $view->data ?? [];
 $errors = $view->errors ?? [];
 ?>
-
 <?php if ($errors): ?>
 <ul class="errors">
     <?php foreach ($errors as $field => $messages): ?>
