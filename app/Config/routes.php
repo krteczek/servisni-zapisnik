@@ -103,7 +103,16 @@ return [
     'auth'    => true,
     'roles'   => ['admin','mistr'],
     'section' => 'dashboard',
-    'title'   => 'Dashboard > Zakázka',
+    'title'   => 'Dashboard > Upravit zakázku',
+],
+[
+    'method'  => 'POST',
+    'path'    => '/work-orders/update/{id}',
+    'action'  => [WorkOrderController::class, 'update'],
+    'auth'    => true,
+    'roles'   => ['admin','mistr'],
+    'section' => 'dashboard',
+    'title'   => 'Dashboard > Upravit zakázku',
 ],
 
 [

@@ -27,35 +27,19 @@ class WorkOrderController extends Controller
 
     public function create(): string
     {
-        $data = [
-            'external_number' => trim($_POST['external_number'] ?? ''),
-            'title'           => trim($_POST['title'] ?? ''),
-            'description'     => trim($_POST['description'] ?? ''),
-            'source'          => $_POST['source'] ?? 'personal',
-            'requested_by'    => trim($_POST['requested_by'] ?? ''),
-            'priority'        => $_POST['priority'] ?? 'normal',
-            'user_id'         => Auth::user()['id'],
-        ];
-
-        $errors = [];
-
-        if ($data['title'] === '') {
-            $errors['title'][] = 'Název je povinný';
-        }
-
-        if ($errors) {
-            $this->view->errors = $errors;
+    	 $data = $this->validate($_POST);
+			
+        if ($this->hasErrors()) {
             $this->view->data   = $data;
             return $this->render('work_orders/create');
         }
 
         $model = new WorkOrderModel();
         $id = $model->create($data);
-
         Url::redirect('/work-orders/' . $id);
     }
 
-    public function update($id): string
+    public function update(int $id): string
     {
 
         $model = new WorkOrderModel();
@@ -64,32 +48,23 @@ class WorkOrderController extends Controller
         		Flash::add('error', 'Zakázka neexistuje');
             Url::redirect('/work-orders');
         }
+        //$order['path'] = 'work_orders/update';
+        // pokud jdeme getem, načteme data puvodní z databáze
+        // a pošleme je do formuláře
+			if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+				$this->view->data   = $order;
+				return $this->render('work_orders/create');
+			}
 			
-			if()
-        $data = [
-            'external_number' => trim($_POST['external_number'] ?? ''),
-            'title'           => trim($_POST['title'] ?? ''),
-            'description'     => trim($_POST['description'] ?? ''),
-            'source'          => $_POST['source'] ?? 'personal',
-            'requested_by'    => trim($_POST['requested_by'] ?? ''),
-            'priority'        => $_POST['priority'] ?? 'normal',
-            'user_id'         => Auth::user()['id'],
-        ];
-
-        $errors = [];
-
-        if ($data['title'] === '') {
-            $errors['title'][] = 'Název je povinný';
-        }
-
-        if ($errors) {
-            $this->view->errors = $errors;
-            $this->view->data   = $data;
-            return $this->render('work_orders/create');
-        }
+			// takže jdeme postem, valiace dat:
+			$data = $this->validate($_POST);
+			if ($this->hasErrors()) {
+				$this->view->data   = $data;
+				return $this->render('work_orders/create');
+			}
 
         $model = new WorkOrderModel();
-        $id = $model->create($data);
+        $id = $model->update($id, $data);
 
         Url::redirect('/work-orders/' . $id);
     }
@@ -104,5 +79,31 @@ class WorkOrderController extends Controller
 
         $this->view->order = $order;
         return $this->render('work_orders/detail');
+    }
+    
+    private function validate(array $post): array
+    {
+
+		        $data = [
+            'external_number' => trim($post['external_number'] ?? null),
+            'title'           => trim($post['title'] ?? ''),
+            'description'     => trim($post['description'] ?? ''),
+            'source'          => $post['source'] ?? 'personal',
+            'requested_by'    => trim($post['requested_by'] ?? ''),
+            'contact'    => trim($post['contact'] ?? ''),
+            'priority'        => $post['priority'] ?? 'normal',
+            'user_id'         => Auth::user()['id'],
+            
+        ];
+        $this->checkCsrf();
+			
+        if ($data['external_number'] === '') {
+            $data['external_number'] = null;
+        }
+			if ($data['title'] === '') {
+				$this->addError('title', 'Název je povinný');
+        }
+
+			return $data;
     }
 }

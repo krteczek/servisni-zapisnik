@@ -93,3 +93,16 @@
 [2026-01-22 23:27:56] error: syntax error, unexpected token "class", expecting "," or ";"
 [2026-01-22 23:28:17] error: Call to a member function setActive() on array
 [2026-01-22 23:37:35] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Core/../Views/teams/inactive.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-23 22:29:26] error: syntax error, unexpected token ")"
+[2026-01-23 22:29:33] error: syntax error, unexpected token ")"
+[2026-01-23 22:29:38] error: syntax error, unexpected token ")"
+[2026-01-23 22:53:24] error: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'external_number'
+[2026-01-23 22:55:44] error: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'external_number'
+[2026-01-23 23:23:27] error: App\Models\WorkOrderModel::find(): Argument #1 ($id) must be of type int, string given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 65
+[2026-01-24 00:11:32] error: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'Wc-2026-003' for key 'external_number'
+[2026-01-24 00:13:40] error: syntax error, unexpected variable "$id", expecting ")"
+[2026-01-24 00:14:05] error: syntax error, unexpected variable "$data", expecting ":"
+[2026-01-24 00:15:17] error: syntax error, unexpected variable "$id", expecting ")"
+[2026-01-24 00:15:42] error: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'Wc-2026-003' for key 'external_number'
+[2026-01-24 00:21:25] error: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'Wc-2026-003' for key 'external_number'
+[2026-01-24 00:21:34] error: Call to undefined method App\Models\WorkOrderModel::update()
