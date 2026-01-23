@@ -3,3 +3,4 @@
 public/. htaccess ~
 /storage
 *.log
+sql/aktéry.parentid.sql~
