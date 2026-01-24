@@ -161,9 +161,9 @@ public function store(): string
 
     public function update(int $id): string
     {
-        $user = $this->users->find($id);
+        $old = $this->users->find($id);
 			$this->view->roles = Roles::all();
-        if (!$user) {
+        if (!$old) {
             Flash::add('error', 'Uživatel neexistuje');
             Url::redirect('/users');
         }
@@ -242,9 +242,12 @@ public function store(): string
         'active' 			  => $active,
         ];
 
-        $this->users->update($id, $update);
-
-        Flash::add('success', 'Data uživatele ' . $firstname . ' ' . $lastname . ' byla úspěšně změněna.');
+        if($this->users->update($id, $update)) {
+				Flash::add('success', 'Data uživatele ' . $firstname . ' ' . $lastname . ' byla úspěšně změněna.');
+			} else {
+				Flash::add('error', 'Data uživatele ' . $firstname . ' ' . $lastname . ' se nepodařilo změnit.');
+				
+			}
         Url::redirect('/users');
     }
     
@@ -288,9 +291,13 @@ public function passwordForm(int $id): string
 
         }
 
-        $this->users->update($id,['password_hash' => password_hash($password, PASSWORD_DEFAULT)]);
+        if($this->users->update($id, ['password_hash' => password_hash($password, PASSWORD_DEFAULT)])) {
+				Flash::add('success', 'Heslo uživatele ' . $user['first_name'] . ' ' . $user['last_name'] . ' bylo úspěšně změněno.');
+			} else {
+				Flash::add('error', 'Heslo uživatele ' . $user['first_name'] . ' ' . $user['last_name'] . ' se nepodařilo změnit.');
+				
+			}
 
-        Flash::add('success', 'Heslo uživatele ' . $user['first_name'] . ' ' . $user['last_name'] . ' bylo změněno.');
         Url::redirect('/users');
     }
     
