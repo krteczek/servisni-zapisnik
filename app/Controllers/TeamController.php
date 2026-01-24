@@ -64,7 +64,10 @@ public function inactive(): string
         if((new Team())->create($name, $color)) {
         	    Flash::add('success', 'Tým ' . $name . ' byl úspěšně vytvořen.');
 				Url::redirect('/teams');
-        	} 
+        	} else {
+        	    Flash::add('error', 'Tým ' . $name . ' se nepodařilo vytvořit.');
+			}				
+				Url::redirect('/teams');
 
         
     }
@@ -77,8 +80,9 @@ public function inactive(): string
 
         $team = $teamModel->find($id);
         if (!$team) {
-            return $this->forbidden();
-        }
+         	Flash::add('error', 'Vámi požadovaný tým neexistuje.');
+				Url::redirect('/teams');
+       }
 
         $this->view->team           = $team;
         $this->view->members        = $membershipModel->currentMembers($id);
@@ -90,15 +94,21 @@ public function inactive(): string
     }
 
     public function update(int $id): string
-    {
-        $this->checkCsrf();
-
-        if ($this->hasErrors()) {
-            Url::redirect('/teams/' . $id . '/edit');
-        }
-
+    {		
         $teamModel       = new Team();
         $membershipModel = new TeamMembership();
+    		$team = $teamModel->find($id);
+    if (!$team) {
+        Flash::add('error', 'Vámi požadovaný tám nebyl nalezen.');
+        Url::redirect('/teams');
+    }
+
+			$this->checkCsrf();
+			// jediná logovaná chyba, pokud není, návrat na formulář
+			if($this->hasErrors()) {
+        		Url::redirect('/teams/' . $id . '/edit');				
+			}
+
 
         /* ===== ÚPRAVA TÝMU ===== */
         if (isset($_POST['name'], $_POST['color'])) {
@@ -131,6 +141,7 @@ elseif (isset($_POST['change_user_role'])) {
                 (int) $_POST['remove_membership_id']
             );
         }
+        
 
         Url::redirect('/teams/' . $id . '/edit');
     }

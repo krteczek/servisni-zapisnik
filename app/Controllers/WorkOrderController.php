@@ -6,6 +6,7 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Models\WorkOrderModel;
 use App\Core\Url;
+use App\Core\Flash;
 
 class WorkOrderController extends Controller
 {
@@ -36,6 +37,14 @@ class WorkOrderController extends Controller
 
         $model = new WorkOrderModel();
         $id = $model->create($data);
+        if($model->update($id, $data))
+        {
+				Flash::add('succes', 'Zakázka ' . $data['name'] . ' byla uspěšně vytvořena.' );     
+        } else {
+				Flash::add('error', 'Zakázku ' . $data['name'] . ' se nepodařilo vytvořit.' ) ;    
+        	
+        }
+        
         Url::redirect('/work-orders/' . $id);
     }
 
@@ -64,7 +73,14 @@ class WorkOrderController extends Controller
 			}
 
         $model = new WorkOrderModel();
-        $id = $model->update($id, $data);
+        if($model->update($id, $data))
+        {
+				Flash::add('succes', 'Zakázka ' . $data['name'] . ' byla uspěšně změněna.' );     
+        } else {
+				Flash::add('error', 'Zakázku ' . $data['name'] . ' se nepodařilo změnit.' ) ;    
+        	
+        }
+        
 
         Url::redirect('/work-orders/' . $id);
     }

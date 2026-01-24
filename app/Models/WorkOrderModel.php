@@ -33,8 +33,20 @@ class WorkOrderModel extends BaseModel
     {
         return $this->findRow($id);
     }
+public function update(int $id, array $data): bool
+{
+    return $this->updateRow($id, [
+        'external_number' => $data['external_number'],
+        'title'           => $data['title'],
+        'description'     => $data['description'],
+        'source'          => $data['source'],
+        'requested_by'    => $data['requested_by'],
+        'contact'         => $data['contact'],
+        'priority'        => $data['priority'],
+    ]);
+}
     
-    public function update(int $id, array $data): void
+    public function updateOld(int $id, array $data): void
 {
     $this->updateRow($id, [
         'external_number' => $data['external_number'],

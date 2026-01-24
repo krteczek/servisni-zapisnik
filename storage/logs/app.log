@@ -106,3 +106,5 @@
 [2026-01-24 00:15:42] error: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'Wc-2026-003' for key 'external_number'
 [2026-01-24 00:21:25] error: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'Wc-2026-003' for key 'external_number'
 [2026-01-24 00:21:34] error: Call to undefined method App\Models\WorkOrderModel::update()
+[2026-01-24 00:50:03] error: syntax error, unexpected token "}"
+[2026-01-24 00:50:31] error: Class "App\Controllers\Flash" not found

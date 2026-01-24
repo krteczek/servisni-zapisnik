@@ -137,13 +137,13 @@ final class UserModel extends BaseModel
         return parent::insert($data);
     }
 
-    public function update(int $id, array $data): void
+    public function update(int $id, array $data): bool
     {
         if (!$data) {
-            return;
+            return false;
         }
 
-        parent::updateRow($id, $data);
+        return parent::updateRow($id, $data);
     }
 
     /* ==========================================================

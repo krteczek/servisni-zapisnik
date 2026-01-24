@@ -25,29 +25,30 @@ class Team extends BaseModel
         ]);
     }
 
-    public function update(int $id, string $name, string $color): void
+    public function update(int $id, string $name, string $color): bool
     {
-        $this->updateRow($id, [
+        return $this->updateRow($id, [
             'name'  => $name,
             'color'=> $color,
         ]);
     }
-    public function updateTeam(int $id, array $data): void
+    public function updateTeam(int $id, array $data): bool
 {
-    $this->updateRow($id, $data);
+    return $this->updateRow($id, $data);
 }
 
-public function setActive(int $teamId, bool $active): void
+public function setActive(int $teamId, bool $active): bool
 {
     $team = $this->find($teamId);
 
     if (!$team) {
-        throw new \RuntimeException('Tým nenalezen');
+    	return false;
+        //throw new \RuntimeException('Tým nenalezen');
     }
 
     $newData = ['active' => $active ? 1 : 0];
 
-    $this->updateRow($teamId, $newData);
+    return $this->updateRow($teamId, $newData);
   
 }
 

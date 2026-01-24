@@ -87,7 +87,42 @@ abstract class BaseModel
      * UPDATE (before + after, až po úspěchu)
      * ========================================================== */
 
-    protected function updateRow(int $id, array $data): void
+protected function updateRow(int $id, array $data): bool
+{
+    $before = $this->findRow($id);
+
+    if (!$before) {
+        return false; // záznam neexistuje
+    }
+
+    $set = [];
+    foreach ($data as $key => $val) {
+        $set[] = "{$key} = :{$key}";
+    }
+
+    $sql = "UPDATE {$this->tableName}
+            SET " . implode(', ', $set) . "
+            WHERE id = :id";
+
+    $data['id'] = $id;
+
+    $stmt = $this->db->prepare($sql);
+    $ok = $stmt->execute($data);
+
+    if ($ok) {
+        try {
+            AuditLogCore::logUpdate(
+                table: $this->table,
+                recordId: $id,
+                before: $before,
+                after: $data
+            );
+        } catch (Throwable) {}
+    }
+
+    return $ok;
+}
+    protected function updateRowOld(int $id, array $data): void
     {
         // 1️⃣ stáhneme původní stav
         $before = $this->findRow($id);
@@ -122,5 +157,5 @@ abstract class BaseModel
         } catch (Throwable) {
             // audit je best-effort
         }
-    }
+   }
 }
