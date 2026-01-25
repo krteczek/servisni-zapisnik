@@ -108,3 +108,5 @@
 [2026-01-24 00:21:34] error: Call to undefined method App\Models\WorkOrderModel::update()
 [2026-01-24 00:50:03] error: syntax error, unexpected token "}"
 [2026-01-24 00:50:31] error: Class "App\Controllers\Flash" not found
+[2026-01-25 13:37:48] error: SQLSTATE[HY000] [2002] Nemohlo být vytvořeno žádné připojení, protože cílový počítač je aktivně odmítl
+[2026-01-25 13:37:52] error: SQLSTATE[HY000] [2002] Nemohlo být vytvořeno žádné připojení, protože cílový počítač je aktivně odmítl
