@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\AccessLogger;
+
 abstract class Controller
 {
     protected ViewContext $view;
@@ -59,6 +61,7 @@ abstract class Controller
 
     public function forbidden(): string
     {
+    		AccessLogger::log('403');
         http_response_code(403);
         $this->view->title = '403 – Přístup zakázán';
         return $this->render('errors/403');
@@ -66,6 +69,7 @@ abstract class Controller
 
     public function notFound(): string
     {
+    	AccessLogger::log('404');
         http_response_code(404);
         $this->view->title = '404 – Stránka nenalezena';
         return $this->render('errors/404');
