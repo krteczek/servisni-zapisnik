@@ -110,3 +110,10 @@
 [2026-01-24 00:50:31] error: Class "App\Controllers\Flash" not found
 [2026-01-25 13:37:48] error: SQLSTATE[HY000] [2002] Nemohlo být vytvořeno žádné připojení, protože cílový počítač je aktivně odmítl
 [2026-01-25 13:37:52] error: SQLSTATE[HY000] [2002] Nemohlo být vytvořeno žádné připojení, protože cílový počítač je aktivně odmítl
+[2026-01-26 02:11:49] error: Call to undefined method App\Models\CompanyModel::findBySlug()
+[2026-01-26 02:14:34] error: Call to undefined method PDO::fetch()
+[2026-01-26 02:17:31] error: Class "App\Models\PDO" not found
+[2026-01-26 02:19:39] error: Call to undefined method App\Models\UserModel::findByEmailAndCompany()
+[2026-01-26 02:35:19] error: Class "SystemController" not found
+[2026-01-26 02:42:06] error: Class "App\Models\Database" not found
+[2026-01-26 02:44:14] error: syntax error, unexpected token "use", expecting "," or ";"

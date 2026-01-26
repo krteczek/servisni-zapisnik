@@ -7,14 +7,30 @@ use App\Controllers\TeamController;
 use App\Controllers\AdminController;
 use App\Controllers\WorkOrderController;
 use App\Controllers\AuditLogController;
+use App\Controllers\SystemController;
 
 
 return [
+
+[
+    'path'   => '/system',
+    'action' => [SystemController::class, 'index'],
+    'roles'  => ['root'],
+    'menu'   => 'Admin firemních účtů',
+    'submenu'=> '',
+    'section' => 'system',
+    'title'   => 'Systém > výpis Firem',
+        'auth'   => true,
+
+],
+
 [
     'path'   => '/admin/switch-role/{role}',
     'method' => 'GET',
     'action' => [AdminController::class, 'switchRole'],
     'roles'  => ['admin'],
+        'auth'   => true,
+
 ],
 
 [
@@ -23,6 +39,8 @@ return [
     'roles'  => ['admin'],
     'menu'   => 'Administrace',
     'submenu'=> 'Audit log',
+        'auth'   => true,
+
     'section' => 'admin',
     'title'   => 'Admin > Audit > Audit log',
 ],
@@ -30,6 +48,8 @@ return [
     'path'   => '/admin/audit/{id}',
     'action' => [AuditLogController::class, 'detail'],
     'roles'  => ['admin'],
+    'auth'   => true,
+
     'title'   => 'Admin > Audit > Detail auditního záznamu',],
 
     // ROOT (není v menu!)
@@ -60,7 +80,7 @@ return [
         'path'    => '/dashboard',
         'action'  => [DashboardController::class, 'index'],
         'auth'    => true,
-        'roles'   => ['admin', 'mistr', 'predak', 'monter'],
+        'roles'   => ['root', 'admin', 'mistr', 'predak', 'monter'],
         'menu'    => 'Dashboard',
         'section' => 'dashboard',
         'title'   => 'Úkoly',

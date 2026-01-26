@@ -201,4 +201,26 @@ public function availableForTeam(int $teamId): array
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+
+public function findByEmailAndCompany(string $email, int $companyId): ?array
+{
+    $stmt = $this->db->prepare(
+        "SELECT *
+         FROM {$this->tableName}
+         WHERE email = :email
+           AND company_id = :company_id
+           AND active = 1
+         LIMIT 1"
+    );
+
+    $stmt->execute([
+        'email'      => $email,
+        'company_id' => $companyId,
+    ]);
+
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
+
+
+
 }
