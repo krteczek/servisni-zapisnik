@@ -52,5 +52,5 @@ class ViewContext
 	 public ?array $logs = [];
 	 public ?array $filters = [];
 
-
+	 public ?array $companies = [];
 }

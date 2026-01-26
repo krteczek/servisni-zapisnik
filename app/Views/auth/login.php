@@ -17,6 +17,15 @@ require __DIR__ . '/../layout/header.php';
         <div class="error"><?= htmlspecialchars($view->errors['global'][0]) ?></div>
     <?php endif; ?>
 
+<label>
+    Firma
+    <input name="tenant" value="<?= htmlspecialchars($view->data['tenant'] ?? '') ?>">
+    <?php if (!empty($view->errors['tenant'])): ?>
+        <div class="error"><?= htmlspecialchars($view->errors['tenant'][0]) ?></div>
+    <?php endif; ?>
+</label>
+<br>
+
     <label>
         Email
         <input name="email" value="<?= htmlspecialchars($view->data['email'] ?? '') ?>">

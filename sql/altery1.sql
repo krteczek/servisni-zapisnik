@@ -1,0 +1,62 @@
+users
+teams
+work_orders
+tasks
+task_assignments
+team_memberships
+recurring_tasks
+audit_logs
+access_logs
+
+ALTER TABLE users
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_users_company (company_id);
+  
+ALTER TABLE teams
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_teams_company (company_id);
+  
+ALTER TABLE work_orders
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_work_orders_company (company_id);
+  
+ALTER TABLE tasks
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_tasks_company (company_id);
+
+ALTER TABLE task_assignments
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_task_assignments_company (company_id);
+
+ALTER TABLE team_memberships
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_team_memberships_company (company_id);
+
+ALTER TABLE recurring_tasks
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_recurring_tasks_company (company_id);
+
+ALTER TABLE audit_logs
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_audit_logs_company (company_id);
+
+ALTER TABLE access_logs
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_access_logs_company (company_id);
+
+UNIQUE (company_id, external_number)
+
+ALTER TABLE work_orders
+  ADD company_id BIGINT(20) UNSIGNED NOT NULL AFTER id,
+  ADD KEY idx_work_orders_company (company_id);
+
+ALTER TABLE work_orders
+  DROP INDEX company_id,
+  DROP INDEX external_number; 
+ 
+ 
+ ALTER TABLE users
+  ADD UNIQUE KEY uniq_company_email (company_id, email),
+  ADD UNIQUE KEY uniq_company_employee (company_id, employee_number);
+ 
+  
