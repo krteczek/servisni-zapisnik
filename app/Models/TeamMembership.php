@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Auth;
 use PDO;
 
 final class TeamMembership extends BaseModel
@@ -29,39 +30,43 @@ final class TeamMembership extends BaseModel
              FROM {$this->tableName} tm
              JOIN {$users} u ON u.id = tm.user_id
              WHERE tm.team_id = :team
+               AND tm.company_id = :company_id
                AND tm.valid_to IS NULL
              ORDER BY u.last_name, u.first_name"
         );
 
-        $stmt->execute(['team' => $teamId]);
+        $stmt->execute([
+            'team'       => $teamId,
+            'company_id' => Auth::companyId(),
+        ]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /* ==========================================================
      * PŘIDÁNÍ UŽIVATELE DO TÝMU
-     * - tiché ignorování duplicit
      * ========================================================== */
 
     public function add(int $userId, int $teamId, string $role): ?int
     {
-        // ochrana proti duplicitnímu aktivnímu členství
         $stmt = $this->db->prepare(
             "SELECT 1
              FROM {$this->tableName}
              WHERE user_id = :user
                AND team_id = :team
+               AND company_id = :company_id
                AND valid_to IS NULL
              LIMIT 1"
         );
 
         $stmt->execute([
-            'user' => $userId,
-            'team' => $teamId,
+            'user'       => $userId,
+            'team'       => $teamId,
+            'company_id' => Auth::companyId(),
         ]);
 
         if ($stmt->fetchColumn()) {
-            return null; // už je členem – nic neděláme
+            return null;
         }
 
         return $this->insert([
@@ -69,6 +74,7 @@ final class TeamMembership extends BaseModel
             'team_id'      => $teamId,
             'role_in_team' => $role,
             'valid_from'   => date('Y-m-d'),
+            'company_id'   => Auth::companyId(),
         ]);
     }
 
@@ -78,8 +84,17 @@ final class TeamMembership extends BaseModel
 
     public function end(int $membershipId): void
     {
-        $this->updateRow($membershipId, [
-            'valid_to' => date('Y-m-d'),
+        $stmt = $this->db->prepare(
+            "UPDATE {$this->tableName}
+             SET valid_to = :today
+             WHERE id = :id
+               AND company_id = :company_id"
+        );
+
+        $stmt->execute([
+            'today'      => date('Y-m-d'),
+            'id'         => $membershipId,
+            'company_id' => Auth::companyId(),
         ]);
     }
 
@@ -91,7 +106,7 @@ final class TeamMembership extends BaseModel
     {
         $teams = Database::table('teams');
 
-        $stmt = $this->db->query(
+        $stmt = $this->db->prepare(
             "SELECT
                 tm.user_id,
                 t.id   AS team_id,
@@ -99,8 +114,13 @@ final class TeamMembership extends BaseModel
                 t.color
              FROM {$this->tableName} tm
              JOIN {$teams} t ON t.id = tm.team_id
-             WHERE tm.valid_to IS NULL"
+             WHERE tm.valid_to IS NULL
+               AND tm.company_id = :company_id"
         );
+
+        $stmt->execute([
+            'company_id' => Auth::companyId(),
+        ]);
 
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -125,8 +145,17 @@ final class TeamMembership extends BaseModel
 
     public function changeRole(int $membershipId, string $role): void
     {
-        $this->updateRow($membershipId, [
-            'role_in_team' => $role,
+        $stmt = $this->db->prepare(
+            "UPDATE {$this->tableName}
+             SET role_in_team = :role
+             WHERE id = :id
+               AND company_id = :company_id"
+        );
+
+        $stmt->execute([
+            'role'       => $role,
+            'id'         => $membershipId,
+            'company_id' => Auth::companyId(),
         ]);
     }
 }

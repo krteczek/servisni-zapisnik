@@ -13,33 +13,33 @@ use App\Models\UserModel;
 
 class TeamController extends Controller
 {
-private function listByActive(bool $active): string
-{
-    $teamModel       = new Team();
-    $membershipModel = new TeamMembership();
+    private function listByActive(bool $active): string
+    {
+        $teamModel       = new Team();
+        $membershipModel = new TeamMembership();
 
-    $teams = $teamModel->byActive($active);
+        $teams = $teamModel->byActive($active);
 
-    foreach ($teams as $i => $team) {
-        $members = $membershipModel->currentMembers((int) $team['id']);
-        $teams[$i]['members']       = $members;
-        $teams[$i]['members_count'] = count($members);
+        foreach ($teams as $i => $team) {
+            $members = $membershipModel->currentMembers((int) $team['id']);
+            $teams[$i]['members']       = $members;
+            $teams[$i]['members_count'] = count($members);
+        }
+
+        $this->view->teams = $teams;
+
+        return $this->render('teams/index');
     }
 
-    $this->view->teams = $teams;
+    public function index(): string
+    {
+        return $this->listByActive(true);
+    }
 
-    return $this->render('teams/index');
-}
-
-public function index(): string
-{
-    return $this->listByActive(true);
-}
-
-public function inactive(): string
-{
-    return $this->listByActive(false);
-}
+    public function inactive(): string
+    {
+        return $this->listByActive(false);
+    }
 
     public function create(): string
     {
@@ -48,6 +48,8 @@ public function inactive(): string
 
     public function store(): string
     {
+        $this->checkCsrf();
+
         $name  = trim($_POST['name'] ?? '');
         $color = trim($_POST['color'] ?? '#2196F3');
 
@@ -55,21 +57,17 @@ public function inactive(): string
             $this->addError('name', 'Název týmu je povinný');
         }
 
-        $this->checkCsrf();
-
         if ($this->hasErrors()) {
             return $this->render('teams/create');
         }
 
-        if((new Team())->create($name, $color)) {
-        	    Flash::add('success', 'Tým ' . $name . ' byl úspěšně vytvořen.');
-				Url::redirect('/teams');
-        	} else {
-        	    Flash::add('error', 'Tým ' . $name . ' se nepodařilo vytvořit.');
-			}				
-				Url::redirect('/teams');
+        if ((new Team())->create($name, $color)) {
+            Flash::add('success', 'Tým ' . $name . ' byl úspěšně vytvořen.');
+        } else {
+            Flash::add('error', 'Tým ' . $name . ' se nepodařilo vytvořit.');
+        }
 
-        
+        Url::redirect('/teams');
     }
 
     public function edit(int $id): string
@@ -80,9 +78,9 @@ public function inactive(): string
 
         $team = $teamModel->find($id);
         if (!$team) {
-         	Flash::add('error', 'Vámi požadovaný tým neexistuje.');
-				Url::redirect('/teams');
-       }
+            Flash::add('error', 'Vámi požadovaný tým neexistuje.');
+            Url::redirect('/teams');
+        }
 
         $this->view->team           = $team;
         $this->view->members        = $membershipModel->currentMembers($id);
@@ -94,21 +92,21 @@ public function inactive(): string
     }
 
     public function update(int $id): string
-    {		
+    {
         $teamModel       = new Team();
         $membershipModel = new TeamMembership();
-    		$team = $teamModel->find($id);
-    if (!$team) {
-        Flash::add('error', 'Vámi požadovaný tám nebyl nalezen.');
-        Url::redirect('/teams');
-    }
 
-			$this->checkCsrf();
-			// jediná logovaná chyba, pokud není, návrat na formulář
-			if($this->hasErrors()) {
-        		Url::redirect('/teams/' . $id . '/edit');				
-			}
+        $team = $teamModel->find($id);
+        if (!$team) {
+            Flash::add('error', 'Vámi požadovaný tým nebyl nalezen.');
+            Url::redirect('/teams');
+        }
 
+        $this->checkCsrf();
+
+        if ($this->hasErrors()) {
+            Url::redirect('/teams/' . $id . '/edit');
+        }
 
         /* ===== ÚPRAVA TÝMU ===== */
         if (isset($_POST['name'], $_POST['color'])) {
@@ -128,12 +126,12 @@ public function inactive(): string
         }
 
         /* ===== ZMĚNA ROLE ===== */
-elseif (isset($_POST['change_user_role'])) {
-    $membershipModel->changeRole(
-        (int) $_POST['change_user_role'],
-        (string) $_POST['role_in_team']
-    );
-}
+        elseif (isset($_POST['change_user_role'])) {
+            $membershipModel->changeRole(
+                (int) $_POST['change_user_role'],
+                (string) $_POST['role_in_team']
+            );
+        }
 
         /* ===== ODEBRÁNÍ ČLENA ===== */
         elseif (isset($_POST['remove_membership_id'])) {
@@ -141,28 +139,29 @@ elseif (isset($_POST['change_user_role'])) {
                 (int) $_POST['remove_membership_id']
             );
         }
-        
 
         Url::redirect('/teams/' . $id . '/edit');
     }
-    
-    public function toggle(int $id): void
-{
-	$model = new Team();
-    $team = $model->find($id);
 
-    if (!$team) {
-        Flash::add('error', 'Tým nenalezen');
+    public function toggle(int $id): void
+    {
+        $model = new Team();
+        $team  = $model->find($id);
+
+        if (!$team) {
+            Flash::add('error', 'Tým nenalezen');
+            Url::redirect('/teams');
+        }
+
+        $model->setActive($id, !(bool) $team['active']);
+
+        Flash::add(
+            'success',
+            $team['active']
+                ? 'Tým: ' . $team['name'] . ' byl deaktivován'
+                : 'Tým: ' . $team['name'] . ' byl aktivován'
+        );
+
         Url::redirect('/teams');
     }
-
-    $model->setActive($id, !(bool) $team['active']);
-    Flash::add('success',
-        $team['active']
-            ? 'Tým: ' . $team['name'] . ' byl deaktivován'
-            : 'Tým: ' . $team['name'] . ' byl aktivován'
-    );
-
-    Url::redirect('/teams');
-}
 }

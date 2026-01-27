@@ -117,3 +117,18 @@
 [2026-01-26 02:35:19] error: Class "SystemController" not found
 [2026-01-26 02:42:06] error: Class "App\Models\Database" not found
 [2026-01-26 02:44:14] error: syntax error, unexpected token "use", expecting "," or ";"
+[2026-01-26 23:26:09] error: Call to undefined method App\Core\Roles::effective()
+[2026-01-26 23:27:44] error: Call to undefined method App\Core\Roles::effective()
+[2026-01-26 23:27:45] error: Call to undefined method App\Core\Roles::effective()
+[2026-01-26 23:32:57] error: Class "App\Controllers\Database" not found
+[2026-01-26 23:37:59] error: WORK database is not selected
+[2026-01-27 00:30:05] error: Call to undefined method App\Core\Auth::companyId()
+[2026-01-27 01:06:42] error: Call to undefined method App\Models\UserModel::availableForTeam()
+[2026-01-27 01:07:31] error: Call to undefined method App\Models\UserModel::availableForTeam()
+[2026-01-27 01:09:39] error: Class "App\Models\Database" not found
+[2026-01-27 01:11:14] error: Call to undefined method App\Models\TeamMembership::updateWhere()
+[2026-01-27 01:15:30] error: Call to undefined method App\Models\TeamMembership::updateWhere()
+[2026-01-27 01:18:28] error: Call to undefined method App\Models\BaseModel::updateWhere()
+[2026-01-27 01:24:05] error: Call to undefined method App\Models\BaseModel::updateWhere()
+[2026-01-27 01:27:55] error: Call to undefined method App\Models\UserModel::employeeNumberExists()
+[2026-01-27 01:36:30] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'admin.work_orders' doesn't exist

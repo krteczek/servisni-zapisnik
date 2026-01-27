@@ -25,4 +25,12 @@ final class Roles
     {
         return isset(self::all()[$role]);
     }
+    
+    public static function effective(): array
+    {
+        return array_diff_key(
+            self::all(),
+            ['root' => true]
+        );
+    }
 }

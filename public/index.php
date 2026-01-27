@@ -17,6 +17,8 @@ use App\Core\Config;
 use App\Core\Logger;
 use App\Core\LoggerHolder;
 use App\Core\Database;
+use App\Core\Auth;
+
 
 // -------------------------------------------------
 // Logger
@@ -33,6 +35,11 @@ Session::start();
 // -------------------------------------------------
 Database::admin();
 
+if (Auth::check() && Session::has('user.company_db_name')) {
+    Database::useWorkDatabase(
+        Session::get('user.company_db_name')
+    );
+}
 // -------------------------------------------------
 // Routing
 // -------------------------------------------------

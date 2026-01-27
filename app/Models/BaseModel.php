@@ -158,4 +158,37 @@ protected function updateRow(int $id, array $data): bool
             // audit je best-effort
         }
    }
+   
+   public function updateWhere(array $where, array $data): bool
+{
+    if ($where === [] || $data === []) {
+        throw new \InvalidArgumentException('updateWhere: prázdná data nebo podmínky');
+    }
+
+    $setParts   = [];
+    $whereParts = [];
+    $params     = [];
+
+    foreach ($data as $column => $value) {
+        $setParts[] = "{$column} = :set_{$column}";
+        $params["set_{$column}"] = $value;
+    }
+
+    foreach ($where as $column => $value) {
+        $whereParts[] = "{$column} = :where_{$column}";
+        $params["where_{$column}"] = $value;
+    }
+
+    $sql = sprintf(
+        "UPDATE %s SET %s WHERE %s",
+        $this->tableName,
+        implode(', ', $setParts),
+        implode(' AND ', $whereParts)
+    );
+
+    $stmt = $this->db->prepare($sql);
+
+    return $stmt->execute($params);
+}
+
 }
