@@ -109,4 +109,14 @@ final class Database
         self::$connections[$dbName] = $pdo;
         return $pdo;
     }
+
+    public static function connection(string $name): PDO
+    {
+        return match ($name) {
+            'admin' => self::admin(),
+            'work'  => self::work(),
+            default => throw new \RuntimeException("Unknown DB connection [$name]")
+        };
+    }
+    
 }

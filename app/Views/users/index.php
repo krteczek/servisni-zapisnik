@@ -39,6 +39,8 @@ use App\Core\Access;
             </td>
 
             <td>
+<?php if (!\App\Core\UserGuard::isProtected($user)): ?>
+    
                 <?php if (Access::can('users.edit')): ?>
                     <a href="<?= Url::to('/users/' . (int) $user['id'] . '/edit') ?>">
                         Upravit
@@ -51,6 +53,9 @@ use App\Core\Access;
                         Změnit heslo
                     </a>
                 <?php endif; ?>
+<?php else: ?>                
+         <b>Účet nelze editovat</b>      
+<?php endif; ?>
             </td>
         </tr>
     <?php endforeach; ?>

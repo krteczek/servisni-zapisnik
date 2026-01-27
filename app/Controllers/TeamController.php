@@ -11,8 +11,12 @@ use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\UserModel;
 
-class TeamController extends Controller
+final class TeamController extends Controller
 {
+    /* ==========================================================
+     * VÝPIS AKTIVNÍ / NEAKTIVNÍ
+     * ========================================================== */
+
     private function listByActive(bool $active): string
     {
         $teamModel       = new Team();
@@ -41,12 +45,16 @@ class TeamController extends Controller
         return $this->listByActive(false);
     }
 
+    /* ==========================================================
+     * VYTVOŘENÍ TÝMU
+     * ========================================================== */
+
     public function create(): string
     {
         return $this->render('teams/create');
     }
 
-    public function store(): string
+    public function store(): void
     {
         $this->checkCsrf();
 
@@ -54,21 +62,19 @@ class TeamController extends Controller
         $color = trim($_POST['color'] ?? '#2196F3');
 
         if ($name === '') {
-            $this->addError('name', 'Název týmu je povinný');
+            Flash::add('error', 'Název týmu je povinný.');
+            Url::redirect('/teams/create');
         }
 
-        if ($this->hasErrors()) {
-            return $this->render('teams/create');
-        }
+        (new Team())->create($name, $color);
 
-        if ((new Team())->create($name, $color)) {
-            Flash::add('success', 'Tým ' . $name . ' byl úspěšně vytvořen.');
-        } else {
-            Flash::add('error', 'Tým ' . $name . ' se nepodařilo vytvořit.');
-        }
-
+        Flash::add('success', 'Tým byl vytvořen.');
         Url::redirect('/teams');
     }
+
+    /* ==========================================================
+     * EDITACE TÝMU
+     * ========================================================== */
 
     public function edit(int $id): string
     {
@@ -78,7 +84,7 @@ class TeamController extends Controller
 
         $team = $teamModel->find($id);
         if (!$team) {
-            Flash::add('error', 'Vámi požadovaný tým neexistuje.');
+            Flash::add('error', 'Tým neexistuje.');
             Url::redirect('/teams');
         }
 
@@ -91,57 +97,85 @@ class TeamController extends Controller
         return $this->render('teams/edit');
     }
 
-    public function update(int $id): string
+    /* ==========================================================
+     * UPDATE – JEDNA AKCE NA JEDEN POST
+     * ========================================================== */
+
+    public function update(int $id): void
     {
+        $this->checkCsrf();
+
         $teamModel       = new Team();
         $membershipModel = new TeamMembership();
+        $userModel       = new UserModel();
 
-        $team = $teamModel->find($id);
-        if (!$team) {
-            Flash::add('error', 'Vámi požadovaný tým nebyl nalezen.');
+        if (!$teamModel->find($id)) {
+            Flash::add('error', 'Tým neexistuje.');
             Url::redirect('/teams');
         }
 
-        $this->checkCsrf();
+        $roles     = Config::get('roles_in_team')['roles'];
+        $default   = Config::get('roles_in_team')['default'];
 
-        if ($this->hasErrors()) {
+        /* ===== ÚPRAVA NÁZVU / BARVY ===== */
+        if (isset($_POST['name'], $_POST['color'])) {
+            $name  = trim($_POST['name']);
+            $color = trim($_POST['color']);
+
+            if ($name !== '') {
+                $teamModel->updateTeam($id, [
+                    'name'  => $name,
+                    'color' => $color,
+                ]);
+            }
+
             Url::redirect('/teams/' . $id . '/edit');
         }
 
-        /* ===== ÚPRAVA TÝMU ===== */
-        if (isset($_POST['name'], $_POST['color'])) {
-            $teamModel->updateTeam($id, [
-                'name'  => trim($_POST['name']),
-                'color' => trim($_POST['color']),
-            ]);
-        }
-
         /* ===== PŘIDÁNÍ ČLENA ===== */
-        elseif (isset($_POST['add_user_id'])) {
-            $membershipModel->add(
-                (int) $_POST['add_user_id'],
-                $id,
-                $_POST['role_in_team'] ?? 'member'
-            );
+        if (isset($_POST['add_user_id'])) {
+            $userId = (int) $_POST['add_user_id'];
+            $role   = $_POST['role_in_team'] ?? $default;
+
+            if (!isset($roles[$role])) {
+                $role = $default;
+            }
+
+            $user = $userModel->find($userId);
+
+            // root NIKDY
+            if (!$user || $user['global_role'] === 'root') {
+                Url::redirect('/teams/' . $id . '/edit');
+            }
+
+            $membershipModel->add($userId, $id, $role);
+            Url::redirect('/teams/' . $id . '/edit');
         }
 
         /* ===== ZMĚNA ROLE ===== */
-        elseif (isset($_POST['change_user_role'])) {
-            $membershipModel->changeRole(
-                (int) $_POST['change_user_role'],
-                (string) $_POST['role_in_team']
-            );
+        if (isset($_POST['change_user_role'], $_POST['role_in_team'])) {
+            $membershipId = (int) $_POST['change_user_role'];
+            $role         = $_POST['role_in_team'];
+
+            if (isset($roles[$role])) {
+                $membershipModel->changeRole($membershipId, $role);
+            }
+
+            Url::redirect('/teams/' . $id . '/edit');
         }
 
         /* ===== ODEBRÁNÍ ČLENA ===== */
-        elseif (isset($_POST['remove_membership_id'])) {
-            $membershipModel->end(
-                (int) $_POST['remove_membership_id']
-            );
+        if (isset($_POST['remove_membership_id'])) {
+            $membershipModel->end((int) $_POST['remove_membership_id']);
+            Url::redirect('/teams/' . $id . '/edit');
         }
 
         Url::redirect('/teams/' . $id . '/edit');
     }
+
+    /* ==========================================================
+     * AKTIVACE / DEAKTIVACE
+     * ========================================================== */
 
     public function toggle(int $id): void
     {
@@ -149,7 +183,7 @@ class TeamController extends Controller
         $team  = $model->find($id);
 
         if (!$team) {
-            Flash::add('error', 'Tým nenalezen');
+            Flash::add('error', 'Tým nenalezen.');
             Url::redirect('/teams');
         }
 
@@ -158,8 +192,8 @@ class TeamController extends Controller
         Flash::add(
             'success',
             $team['active']
-                ? 'Tým: ' . $team['name'] . ' byl deaktivován'
-                : 'Tým: ' . $team['name'] . ' byl aktivován'
+                ? 'Tým byl deaktivován.'
+                : 'Tým byl aktivován.'
         );
 
         Url::redirect('/teams');
