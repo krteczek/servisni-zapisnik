@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Core;
 
@@ -12,9 +11,7 @@ class Auth
     /** cache načteného uživatele */
     private static ?array $cachedUser = null;
 
-    /* =========================
-       ZÁKLAD
-       ========================= */
+    /* ========================= ZÁKLAD ========================= */
 
     public static function check(): bool
     {
@@ -34,6 +31,12 @@ class Auth
         return Session::get(self::USER_KEY . '.global_role');
     }
 
+    public static function companyId(): ?int
+    {
+        Session::start();
+        return Session::get(self::USER_KEY . '.company_id');
+    }
+
     public static function user(): ?array
     {
         if (!self::check()) {
@@ -48,9 +51,7 @@ class Auth
         return self::$cachedUser;
     }
 
-    /* =========================
-       JMÉNO / LABEL
-       ========================= */
+    /* ========================= JMÉNO / LABEL ========================= */
 
     public static function name(): ?string
     {
@@ -80,26 +81,19 @@ class Auth
             : ($role ? ucfirst($role) : null);
     }
 
-    /* =========================
-       ROLE
-       ========================= */
+    /* ========================= ROLE ========================= */
 
-public static function hasRole(array $roles): bool
-{
-    $role = self::effectiveRole();
+    public static function hasRole(array $roles): bool
+    {
+        return in_array(self::effectiveRole(), $roles, true);
+    }
 
-    return in_array($role, $roles, true);
-}
-
-    /* =========================
-       LOGIN / LOGOUT
-       ========================= */
+    /* ========================= LOGIN / LOGOUT ========================= */
 
     public static function login(array $userData): void
     {
         Session::start();
-        Session::regenerate(); // session fixation
-
+        Session::regenerate();
         Session::set(self::USER_KEY, $userData);
         self::$cachedUser = null;
     }
@@ -112,79 +106,42 @@ public static function hasRole(array $roles): bool
         self::$cachedUser = null;
     }
 
-    /* =========================
-       AKTUALIZACE SESSION
-       ========================= */
+    /* ========================= HELPERY ========================= */
 
-    public static function update(array $data): void
+    public static function effectiveRole(): string
     {
-        if (!self::check()) {
-            return;
+        $user = self::user();
+        if (!$user) {
+            return '';
         }
 
-        Session::start();
+        if (
+            $user['global_role'] === 'admin' &&
+            Session::has('effective_role')
+        ) {
+            $role = (string) Session::get('effective_role');
 
-        $current = Session::get(self::USER_KEY, []);
-        Session::set(self::USER_KEY, array_merge($current, $data));
-
-        self::$cachedUser = null;
-    }
-
-    /* =========================
-       HELPERY
-       ========================= */
-
-    public static function isGuest(): bool
-    {
-        return !self::check();
-    }
-
-    public static function redirectIfGuest(string $to = '/login'): void
-    {
-        if (self::isGuest()) {
-            Url::redirect($to);
+            // ⛔ root nikdy
+            if (array_key_exists($role, Roles::effective())) {
+                return $role;
+            }
         }
+
+        return $user['global_role'];
     }
 
-    public static function redirectIfLoggedIn(string $to = '/'): void
-    {
-        if (self::check()) {
-            Url::redirect($to);
-        }
-    }
-    
-public static function effectiveRole(): string
-{
-    $user = self::user();
-
-    if (!$user) {
-        return '';
-    }
-	// admin může simulovat
-    if (
-        $user['global_role'] === 'admin'
-        && Session::has('effective_role')
-    ) {
-        return (string) Session::get('effective_role');
-    }
-
-    return $user['global_role'];
-}
-
-    
     public static function hasGlobalRole(array $roles): bool
-{
-    $user = self::user();
+    {
+        $user = self::user();
+        if (!$user) {
+            return false;
+        }
 
-    if (!$user) {
-        return false;
+        return in_array($user['global_role'], $roles, true);
     }
 
-    if ($user['global_role'] === 'admin') {
-        return true;
+    public static function canSwitchRole(): bool
+    {
+        return self::hasGlobalRole(['admin']);
     }
-
-    return in_array($user['global_role'], $roles, true);
-}
-
 }

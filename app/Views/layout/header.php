@@ -29,7 +29,7 @@ $user = $view->user ?? null;
 
     <div style="background:#fee;padding:6px">
         Přepnout na pohled jako:
-        <?php foreach (Roles::all() as $key => $label): ?>
+        <?php foreach (Roles::effective() as $key => $label): ?>
             <a href="<?= Url::to('/admin/switch-role/' . $key) ?>">
                 [ <?= htmlspecialchars($label) ?> ]
             </a>&nbsp;&nbsp;

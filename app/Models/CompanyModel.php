@@ -20,22 +20,22 @@ final class CompanyModel extends BaseModel
         return (bool) $this->findRow($id);
     }
 
-    public function findBySlug(string $slug): ?array
-    {
-        $stmt = $this->db->prepare(
-            "SELECT *
-             FROM {$this->tableName}
-             WHERE slug = :slug
-               AND active = 1
-             LIMIT 1"
-        );
+public function findBySlug(string $slug): ?array
+{
+    $pdo = Database::admin();
 
-        $stmt->execute([
-            'slug' => $slug
-        ]);
+    $stmt = $pdo->prepare(
+        "SELECT *
+         FROM companies
+         WHERE slug = :slug
+           AND active = 1
+         LIMIT 1"
+    );
 
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-    }
+    $stmt->execute(['slug' => $slug]);
+
+    return $stmt->fetch() ?: null;
+}
 
     public function findAll(): array
     {
