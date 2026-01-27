@@ -13,23 +13,50 @@ abstract class BaseModel
 {
     protected PDO $db;
 
-    /** název tabulky BEZ prefixu (logická entita) */
+    /** název tabulky BEZ prefixu */
     protected string $table;
 
-    /** finální název tabulky S prefixem (DB implementace) */
+    /** finální název tabulky S prefixem */
     protected string $tableName;
+
+    /**
+     * Jaká DB se má použít:
+     * - 'admin'
+     * - 'work'
+     */
+    protected string $connection = 'admin';
 
     public function __construct()
     {
-        $this->db = Database::pdo();
-
         if (!isset($this->table) || $this->table === '') {
             throw new LogicException(
                 static::class . ' must define protected string $table'
             );
         }
 
-        $this->tableName = Database::table($this->table);
+        $this->db = $this->resolveDb();
+        $this->tableName = $this->resolveTableName();
+    }
+
+    /* ==========================================================
+     * DB RESOLUTION
+     * ========================================================== */
+
+    protected function resolveDb(): PDO
+    {
+        return match ($this->connection) {
+            'admin' => Database::admin(),
+            'work'  => Database::work(),
+            default => throw new LogicException(
+                'Unknown DB connection: ' . $this->connection
+            ),
+        };
+    }
+
+    protected function resolveTableName(): string
+    {
+        // prefix je svázaný s konkrétní DB
+        return Database::table($this->table);
     }
 
     /* ==========================================================
@@ -54,7 +81,7 @@ abstract class BaseModel
     }
 
     /* ==========================================================
-     * INSERT (jen nové data)
+     * INSERT
      * ========================================================== */
 
     protected function insert(array $data): int
@@ -67,9 +94,9 @@ abstract class BaseModel
             "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})"
         );
         $stmt->execute($data);
-        $lastId = $this->db->lastInsertId();
 
-        // audit – insert = pouze nové hodnoty
+        $lastId = (int) $this->db->lastInsertId();
+
         try {
             AuditLogCore::logInsert(
                 table: $this->table,
@@ -77,61 +104,23 @@ abstract class BaseModel
                 after: $data
             );
         } catch (Throwable) {
-            // audit NIKDY nesmí rozbít aplikaci
+            // audit nesmí nikdy shodit aplikaci
         }
 
-        return (int) $lastId;
+        return $lastId;
     }
 
     /* ==========================================================
-     * UPDATE (before + after, až po úspěchu)
+     * UPDATE
      * ========================================================== */
 
-protected function updateRow(int $id, array $data): bool
-{
-    $before = $this->findRow($id);
-
-    if (!$before) {
-        return false; // záznam neexistuje
-    }
-
-    $set = [];
-    foreach ($data as $key => $val) {
-        $set[] = "{$key} = :{$key}";
-    }
-
-    $sql = "UPDATE {$this->tableName}
-            SET " . implode(', ', $set) . "
-            WHERE id = :id";
-
-    $data['id'] = $id;
-
-    $stmt = $this->db->prepare($sql);
-    $ok = $stmt->execute($data);
-
-    if ($ok) {
-        try {
-            AuditLogCore::logUpdate(
-                table: $this->table,
-                recordId: $id,
-                before: $before,
-                after: $data
-            );
-        } catch (Throwable) {}
-    }
-
-    return $ok;
-}
-    protected function updateRowOld(int $id, array $data): void
+    protected function updateRow(int $id, array $data): bool
     {
-        // 1️⃣ stáhneme původní stav
         $before = $this->findRow($id);
-
         if (!$before) {
-            return;
+            return false;
         }
 
-        // 2️⃣ provedeme update
         $set = [];
         foreach ($data as $key => $val) {
             $set[] = "{$key} = :{$key}";
@@ -144,51 +133,52 @@ protected function updateRow(int $id, array $data): bool
         $data['id'] = $id;
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute($data);
+        $ok = $stmt->execute($data);
 
-        // 3️⃣ audit až PO úspěšném update
-        try {
-            AuditLogCore::logUpdate(
-                table: $this->table,
-                recordId: $id,
-                before: $before,
-                after: $data
-            );
-        } catch (Throwable) {
-            // audit je best-effort
+        if ($ok) {
+            try {
+                AuditLogCore::logUpdate(
+                    table: $this->table,
+                    recordId: $id,
+                    before: $before,
+                    after: $data
+                );
+            } catch (Throwable) {}
         }
-   }
-   
-   public function updateWhere(array $where, array $data): bool
-{
-    if ($where === [] || $data === []) {
-        throw new \InvalidArgumentException('updateWhere: prázdná data nebo podmínky');
+
+        return $ok;
     }
 
-    $setParts   = [];
-    $whereParts = [];
-    $params     = [];
+    public function updateWhere(array $where, array $data): bool
+    {
+        if ($where === [] || $data === []) {
+            throw new \InvalidArgumentException(
+                'updateWhere: prázdná data nebo podmínky'
+            );
+        }
 
-    foreach ($data as $column => $value) {
-        $setParts[] = "{$column} = :set_{$column}";
-        $params["set_{$column}"] = $value;
+        $setParts   = [];
+        $whereParts = [];
+        $params     = [];
+
+        foreach ($data as $column => $value) {
+            $setParts[] = "{$column} = :set_{$column}";
+            $params["set_{$column}"] = $value;
+        }
+
+        foreach ($where as $column => $value) {
+            $whereParts[] = "{$column} = :where_{$column}";
+            $params["where_{$column}"] = $value;
+        }
+
+        $sql = sprintf(
+            "UPDATE %s SET %s WHERE %s",
+            $this->tableName,
+            implode(', ', $setParts),
+            implode(' AND ', $whereParts)
+        );
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
     }
-
-    foreach ($where as $column => $value) {
-        $whereParts[] = "{$column} = :where_{$column}";
-        $params["where_{$column}"] = $value;
-    }
-
-    $sql = sprintf(
-        "UPDATE %s SET %s WHERE %s",
-        $this->tableName,
-        implode(', ', $setParts),
-        implode(' AND ', $whereParts)
-    );
-
-    $stmt = $this->db->prepare($sql);
-
-    return $stmt->execute($params);
-}
-
 }

@@ -113,6 +113,10 @@ $rolesInTeam = $view->rolesInTeam;
 
 <tbody>
 <?php foreach ($view->availableUsers as $u): ?>
+<?php if($u['global_role'] === 'root') {
+	continue;
+}
+?>
 <tr>
     <td><?= e($u['last_name'] . ' ' . $u['first_name']) ?></td>
 
