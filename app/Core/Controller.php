@@ -14,7 +14,13 @@ abstract class Controller
         $this->view = $view;
         $this->view->errors ??= [];
         $this->view->data   ??= [];
-    }
+			if (Auth::check()) {
+            $db = Session::get('user.db_name');
+            if ($db) {
+                Database::useWorkDatabase($db);
+            }
+        }
+	}
 
     protected function render(string $template): string
     {

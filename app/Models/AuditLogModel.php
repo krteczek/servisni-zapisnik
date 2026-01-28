@@ -17,6 +17,7 @@ class AuditLogModel
      * Název tabulky bez prefixu
      */
     protected string $table = 'audit_logs';
+    protected string $connection = 'admin';
 
     /**
      * Finální název tabulky včetně prefixu
@@ -34,10 +35,13 @@ class AuditLogModel
      *
      * @throws LogicException pokud není definován název tabulky
      */
+
+    
+
     public function __construct()
     {
-        $this->db = Database::pdo();
-
+        
+			$this->db = Database::connection($this->connection);
         if (!isset($this->table) || $this->table === '') {
             throw new LogicException(
                 static::class . ' must define protected string $table'

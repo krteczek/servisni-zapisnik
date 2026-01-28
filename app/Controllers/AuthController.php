@@ -90,7 +90,7 @@ public function login(): string
     }
 
     /* ===== LOGIN OK ===== */
-Database::useWorkDatabase($company['db_name']);
+//Database::useWorkDatabase($company['db_name']);
     Auth::login([
         'id'          => (int) $user['id'],
         'email'       => $user['email'],
@@ -99,6 +99,7 @@ Database::useWorkDatabase($company['db_name']);
         'company'     => $company['slug'],
         'first_name'  => $user['first_name'] ?? null,
         'last_name'   => $user['last_name'] ?? null,
+        'db_name'		 => $company['db_name'],
     ]);
 
     Flash::add(

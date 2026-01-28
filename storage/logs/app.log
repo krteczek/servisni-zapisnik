@@ -143,3 +143,36 @@
 [2026-01-27 14:57:23] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'admin.work_orders' doesn't exist
 [2026-01-27 16:14:41] error: syntax error, unexpected string content "ac]()", expecting "]"
 [2026-01-27 16:16:56] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'admin.work_orders' doesn't exist
+[2026-01-28 09:56:40] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'admin.work_orders' doesn't exist
+[2026-01-28 10:02:33] error: Call to undefined method App\Models\WorkOrderModel::useWorkDatabase()
+[2026-01-28 10:07:44] error: WORK database is not selected
+[2026-01-28 10:10:23] error: WORK database is not selected
+[2026-01-28 10:17:24] error: Class "App\Controllers\Database" not found
+[2026-01-28 10:18:00] error: SQLSTATE[HY000] [1049] Unknown database 'nazev_work_db'
+[2026-01-28 10:30:43] error: Class "App\Controllers\Sessions" not found
+[2026-01-28 10:31:14] error: Class "App\Core\Sessions" not found
+[2026-01-28 10:31:29] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 17
+[2026-01-28 10:32:08] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 17
+[2026-01-28 10:33:40] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 17
+[2026-01-28 10:35:35] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 19
+[2026-01-28 10:35:47] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 19
+[2026-01-28 10:36:16] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 19
+[2026-01-28 10:37:23] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 19
+[2026-01-28 10:37:33] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 19
+[2026-01-28 10:38:28] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 19
+[2026-01-28 10:39:07] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 19
+[2026-01-28 10:39:14] error: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, null given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 19
+[2026-01-28 10:48:14] error: Attempt to assign property "orders" on null
+[2026-01-28 10:48:38] error: Attempt to assign property "orders" on null
+[2026-01-28 10:48:42] error: Attempt to assign property "orders" on null
+[2026-01-28 10:49:10] error: Attempt to assign property "orders" on null
+[2026-01-28 10:52:38] error: Too few arguments to function App\Core\Controller::__construct(), 0 passed in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\WorkOrderController.php on line 17 and exactly 1 expected
+[2026-01-28 10:53:41] error: WORK database is not selected
+[2026-01-28 10:54:50] error: WORK database is not selected
+[2026-01-28 10:57:06] error: Call to a member function getDb() on null
+[2026-01-28 11:07:30] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'work.audit_logs' doesn't exist
+[2026-01-28 11:09:48] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'work.audit_logs' doesn't exist
+[2026-01-28 11:12:15] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'work.audit_logs' doesn't exist
+[2026-01-28 11:13:18] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'work.audit_logs' doesn't exist
+[2026-01-28 14:29:48] error: Method App\Controllers\UserController::passwordForm() does not exist
+[2026-01-28 14:33:49] error: Method App\Controllers\UserController::passwordForm() does not exist
