@@ -7,11 +7,14 @@ use App\Core\Controller;
 use App\Models\WorkOrderModel;
 use App\Core\Url;
 use App\Core\Flash;
+use App\Core\Database;
+use App\Core\Session;
 
 class WorkOrderController extends Controller
 {
     public function index(): string
     {
+    	//$this->getDb();
         $model = new WorkOrderModel();
         $this->view->orders = $model->all();
 
@@ -20,6 +23,7 @@ class WorkOrderController extends Controller
 
     public function createForm(): string
     {
+    	
         $this->view->data = [];
         $this->view->errors = [];
 
@@ -28,6 +32,7 @@ class WorkOrderController extends Controller
 
     public function create(): string
     {
+    	//$this->getDb();
     	 $data = $this->validate($_POST);
 			
         if ($this->hasErrors()) {
@@ -50,7 +55,7 @@ class WorkOrderController extends Controller
 
     public function update(int $id): string
     {
-
+			//$this->getDb();
         $model = new WorkOrderModel();
         $order = $model->find($id);
         if (!$order) {
@@ -87,6 +92,7 @@ class WorkOrderController extends Controller
 
     public function detail(int $id): string
     {
+    	//$this->getDb();
         $model = new WorkOrderModel();
         $order = $model->find($id);
         if (!$order) {

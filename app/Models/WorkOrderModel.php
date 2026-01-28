@@ -8,6 +8,8 @@ use App\Core\Database;
 class WorkOrderModel extends BaseModel
 {
     protected string $table = 'work_orders';
+    protected string $connection = 'work';
+
 
     public function create(array $data): int
     {
@@ -21,14 +23,17 @@ class WorkOrderModel extends BaseModel
             'created_by_user_id'  => $data['user_id'],
         ]);
     }
-
+public function all(): array
+{
+    return $this->allRows('created_at');
+}/**
     public function all(): array
     {
         return $this->db
             ->query("SELECT * FROM {$this->table} ORDER BY created_at DESC")
             ->fetchAll();
     }
-
+**/
     public function find(int $id): ?array
     {
         return $this->findRow($id);

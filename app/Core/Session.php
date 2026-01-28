@@ -37,9 +37,8 @@ class Session
     public static function get(string $key, mixed $default = null): mixed
     {
         self::start();
-
+//var_dump($key);
         $value = $_SESSION;
-
         foreach (explode('.', $key) as $segment) {
             if (!is_array($value) || !array_key_exists($segment, $value)) {
                 return $default;
