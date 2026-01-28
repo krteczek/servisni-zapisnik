@@ -248,4 +248,56 @@ final class UserController extends Controller
     return false;
 }
 
+
+    public function passwordForm(int $id): string
+    {
+        $user = $this->users->find($id);
+        if (!$user) Url::redirect('/users');
+
+
+
+
+
+        $this->view->data = $user;
+        return $this->render('users/password');
+
+    }
+
+    public function updatePassword(int $id): string
+    {
+        $user = $this->users->find($id);
+        if (!$user) Url::redirect('/users');
+
+
+
+        $password = $_POST['new_password'] ?? '';
+        $confirm  = $_POST['new_password_confirm'] ?? '';
+
+        $this->checkCsrf();
+
+        if ($password === '') $this->addError('password','Heslo je povinné');
+        if ($password !== $confirm) $this->addError('password','Hesla se neshodují');
+        if (mb_strlen($password) < 8) $this->addError('password','Heslo musí mít alespoň 8 znaků');
+
+
+
+
+
+        if ($this->hasErrors()) {
+            $this->view->data = $user;
+            return $this->render('users/password');
+
+        }
+
+        $this->users->update($id,['password_hash'=>password_hash($password,PASSWORD_DEFAULT)]);
+        Flash::add('success','Heslo uživatele '.$user['first_name'].' '.$user['last_name'].' bylo úspěšně změněno.');
+
+
+
+
+
+        Url::redirect('/users');
+    }
+
+
 }

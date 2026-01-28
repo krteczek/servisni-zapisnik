@@ -2,13 +2,13 @@
 declare(strict_types=1);
 
 return [
+    'enabled' => true,
+
     'auditables' => [
         'users',
         'companies',
         'roles',
         'permissions',
-
-        // work část
         'work_orders',
         'tasks',
     ],
@@ -19,3 +19,4 @@ return [
         'audit_logs',
     ],
 ];
+

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 use PDO;
+use PDOException;
 use RuntimeException;
 
 final class Database
@@ -11,112 +12,87 @@ final class Database
     /** @var array<string, PDO> */
     private static array $connections = [];
 
-    private static ?string $workDbName = null;
-    private static string $prefix = '';
-
-    /* =========================
-       PUBLIC API (LEGACY)
-       ========================= */
+    /** @var string|null */
+    private static ?string $currentWorkDb = null;
 
     /**
-     * ZPĚTNÁ KOMPATIBILITA
-     * - pokud je zvolená work DB → work()
-     * - jinak admin()
+     * ADMIN DB – vždy jedna
+     */
+    public static function admin(): PDO
+    {
+        return self::getConnection('admin');
+    }
+
+    /**
+     * WORK DB – podle loginu / domény
+     */
+    public static function work(): PDO
+    {
+        if (self::$currentWorkDb === null) {
+            throw new RuntimeException('WORK database is not selected (missing useWorkDatabase()).');
+        }
+
+        return self::getConnection('work:' . self::$currentWorkDb);
+    }
+
+    /**
+     * Nastaví aktivní WORK DB
+     */
+    public static function useWorkDatabase(string $dbName): void
+    {
+        self::$currentWorkDb = $dbName;
+    }
+
+    /**
+     * Legacy kompatibilita – směřuje na WORK pokud existuje, jinak ADMIN
      */
     public static function pdo(): PDO
     {
-        if (self::$workDbName !== null) {
-            return self::work();
+        return self::$currentWorkDb !== null
+            ? self::work()
+            : self::admin();
+    }
+
+    /**
+     * Interní factory
+     */
+    private static function getConnection(string $key): PDO
+    {
+        if (isset(self::$connections[$key])) {
+            return self::$connections[$key];
         }
 
-        return self::admin();
-    }
-
-    public static function table(string $name): string
-    {
-        self::pdo(); // init + prefix
-        return self::$prefix . $name;
-    }
-
-    /* =========================
-       CONTEXT
-       ========================= */
-
-    public static function useWorkDatabase(string $dbName): void
-    {
-        self::$workDbName = $dbName;
-    }
-
-    public static function hasWorkDatabase(): bool
-    {
-        return self::$workDbName !== null;
-    }
-
-    /* =========================
-       ADMIN DB
-       ========================= */
-
-    public static function admin(): PDO
-    {
-        return self::connect('admin');
-    }
-
-    /* =========================
-       WORK DB
-       ========================= */
-
-    public static function work(): PDO
-    {
-        if (!self::$workDbName) {
-            throw new RuntimeException('WORK database is not selected');
+        try {
+            if ($key === 'admin') {
+                $cfg = Config::get('database.admin');
+                $dsn = sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', $cfg['host'], $cfg['dbname']);
+                $pdo = new PDO($dsn, $cfg['user'], $cfg['password'], self::options());
+            } elseif (str_starts_with($key, 'work:')) {
+                $dbName = substr($key, 5);
+                $cfg = Config::get('database.work');
+                $dsn = sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', $cfg['host'], $dbName);
+                $pdo = new PDO($dsn, $cfg['user'], $cfg['password'], self::options());
+            } else {
+                throw new RuntimeException('Unknown database key: ' . $key);
+            }
+        } catch (PDOException $e) {
+            Logger::error('DB connection failed', [
+                'key' => $key,
+                'exception' => $e,
+            ]);
+            throw new RuntimeException('Database connection failed.');
         }
 
-        return self::connect(self::$workDbName);
-    }
-
-    /* =========================
-       INTERNAL
-       ========================= */
-
-    private static function connect(string $dbName): PDO
-    {
-        if (isset(self::$connections[$dbName])) {
-            return self::$connections[$dbName];
-        }
-
-        $config = Config::get('database');
-
-        // prefix bereme jen jednou (legacy chování)
-        self::$prefix = (string)($config['prefix'] ?? '');
-
-        $dsn = sprintf(
-            'mysql:host=%s;dbname=%s;charset=%s',
-            $config['host'],
-            $dbName,
-            $config['charset']
-        );
-
-        $pdo = new PDO(
-            $dsn,
-            $config['user'],
-            $config['pass'],
-            [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
-
-        self::$connections[$dbName] = $pdo;
+        self::$connections[$key] = $pdo;
         return $pdo;
     }
 
-    public static function connection(string $name): PDO
+    private static function options(): array
     {
-        return match ($name) {
-            'admin' => self::admin(),
-            'work'  => self::work(),
-            default => throw new \RuntimeException("Unknown DB connection [$name]")
-        };
+        return [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
     }
-    
 }

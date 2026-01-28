@@ -5,49 +5,26 @@ namespace App\Models;
 
 use App\Core\Database;
 use PDO;
+use LogicException;
 
-class AuditLogModel
+final class AuditLogModel
 {
-    /**
-     * PDO instance databázového spojení
-     */
     protected PDO $db;
 
-    /**
-     * Název tabulky bez prefixu
-     */
     protected string $table = 'audit_logs';
     protected string $connection = 'admin';
 
-    /**
-     * Finální název tabulky včetně prefixu
-     */
     protected string $tableName;
 
-    /**
-     * Povolené sloupce pro ORDER BY
-     * (ochrana proti SQL injection)
-     */
-    protected array $orderable = ['id'];
-
-    /**
-     * Inicializace modelu a databázového spojení
-     *
-     * @throws LogicException pokud není definován název tabulky
-     */
-
-    
+    protected array $orderable = ['id', 'created_at'];
 
     public function __construct()
     {
-        
-			$this->db = Database::connection($this->connection);
-        if (!isset($this->table) || $this->table === '') {
-            throw new LogicException(
-                static::class . ' must define protected string $table'
-            );
+        if ($this->table === '') {
+            throw new LogicException('AuditLogModel table name is empty');
         }
 
+        $this->db        = Database::connection($this->connection);
         $this->tableName = Database::table($this->table);
     }
 
@@ -57,9 +34,20 @@ class AuditLogModel
         $fields = implode(', ', $cols);
         $values = ':' . implode(', :', $cols);
 
-        $sql = "INSERT INTO {$this->table} ({$fields}) VALUES ({$values})";
+        $sql = "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})";
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute($data);
+    }
+
+    public function findById(int $id): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM {$this->tableName} WHERE id = :id"
+        );
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetch() ?: null;
     }
 
     public function findByFilters(array $filters, int $limit = 100): array
@@ -97,7 +85,7 @@ class AuditLogModel
             $params['to'] = $filters['to'] . ' 23:59:59';
         }
 
-        $sql = "SELECT * FROM {$this->table}";
+        $sql = "SELECT * FROM {$this->tableName}";
 
         if ($where) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
@@ -110,14 +98,4 @@ class AuditLogModel
 
         return $stmt->fetchAll();
     }
-    
-    public function findById(int $id): ?array
-{
-    $stmt = $this->db->prepare(
-        "SELECT * FROM {$this->table} WHERE id = :id"
-    );
-    $stmt->execute(['id' => $id]);
-
-    return $stmt->fetch() ?: null;
-}
 }
