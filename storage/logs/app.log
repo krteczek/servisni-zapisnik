@@ -176,3 +176,11 @@
 [2026-01-28 11:13:18] error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'work.audit_logs' doesn't exist
 [2026-01-28 14:29:48] error: Method App\Controllers\UserController::passwordForm() does not exist
 [2026-01-28 14:33:49] error: Method App\Controllers\UserController::passwordForm() does not exist
+[2026-01-28 14:46:07] error: Unclosed '{' on line 14
+[2026-01-28 14:48:45] error: Unmatched '}'
+[2026-01-28 15:55:21] error: Call to undefined method App\Core\Database::table()
+[2026-01-28 16:05:23] error: Call to undefined method App\Core\Database::table()
+[2026-01-28 16:05:24] error: Call to undefined method App\Core\Database::table()
+[2026-01-28 16:08:48] error: Call to undefined method App\Models\BaseModel::updateWhere()
+[2026-01-28 17:14:26] error: Call to undefined method App\Core\Database::table()
+[2026-01-28 17:15:04] error: Call to undefined method App\Core\Database::table()

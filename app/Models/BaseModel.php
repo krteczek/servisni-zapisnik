@@ -5,6 +5,7 @@ namespace App\Models;
 
 use App\Core\Database;
 use App\Core\AuditLogCore;
+use App\Core\Config;
 use PDO;
 use LogicException;
 use Throwable;
@@ -16,7 +17,7 @@ abstract class BaseModel
     /** název tabulky BEZ prefixu */
     protected string $table;
 
-    /** finální název tabulky S prefixem */
+    /** finální název tabulky (bez magie) */
     protected string $tableName;
 
     /**
@@ -34,7 +35,7 @@ abstract class BaseModel
             );
         }
 
-        $this->db = $this->resolveDb();
+        $this->db        = $this->resolveDb();
         $this->tableName = $this->resolveTableName();
     }
 
@@ -53,10 +54,33 @@ abstract class BaseModel
         };
     }
 
+    /**
+     * ŽÁDNÁ Database::table()
+     * Prefix je věc konfigurace, ne DB vrstvy
+     */
     protected function resolveTableName(): string
     {
-        // prefix je svázaný s konkrétní DB
-        return Database::table($this->table);
+        $prefix = (string) Config::get('database.prefix', '');
+        return $prefix . $this->table;
+    }
+
+    /* ==========================================================
+     * AUDIT CONTROL
+     * ========================================================== */
+
+    protected function shouldAudit(): bool
+    {
+        if ($this->connection !== 'admin') {
+            return false;
+        }
+
+        $config = Config::get('audit');
+
+        if (in_array($this->table, $config['ignores'] ?? [], true)) {
+            return false;
+        }
+
+        return in_array($this->table, $config['auditables'] ?? [], true);
     }
 
     /* ==========================================================
@@ -97,14 +121,17 @@ abstract class BaseModel
 
         $lastId = (int) $this->db->lastInsertId();
 
-        try {
-            AuditLogCore::logInsert(
-                table: $this->table,
-                recordId: null,
-                after: $data
-            );
-        } catch (Throwable) {
-            // audit nesmí nikdy shodit aplikaci
+        if ($this->shouldAudit()) {
+            try {
+                AuditLogCore::log(
+                    entity: $this->table,
+                    entityId: $lastId,
+                    action: 'insert',
+                    data: $data
+                );
+            } catch (Throwable) {
+                // audit nikdy nesmí shodit aplikaci
+            }
         }
 
         return $lastId;
@@ -126,22 +153,25 @@ abstract class BaseModel
             $set[] = "{$key} = :{$key}";
         }
 
+        $data['id'] = $id;
+
         $sql = "UPDATE {$this->tableName}
                 SET " . implode(', ', $set) . "
                 WHERE id = :id";
 
-        $data['id'] = $id;
-
         $stmt = $this->db->prepare($sql);
-        $ok = $stmt->execute($data);
+        $ok   = $stmt->execute($data);
 
-        if ($ok) {
+        if ($ok && $this->shouldAudit()) {
             try {
-                AuditLogCore::logUpdate(
-                    table: $this->table,
-                    recordId: $id,
-                    before: $before,
-                    after: $data
+                AuditLogCore::log(
+                    entity: $this->table,
+                    entityId: $id,
+                    action: 'update',
+                    data: [
+                        'before' => $before,
+                        'after'  => $data,
+                    ]
                 );
             } catch (Throwable) {}
         }
@@ -149,7 +179,11 @@ abstract class BaseModel
         return $ok;
     }
 
-    public function updateWhere(array $where, array $data): bool
+    /* ==========================================================
+     * UPDATE (WHERE) – BEZ AUDITU (záměrně)
+     * ========================================================== */
+
+    protected function updateWhere(array $where, array $data): bool
     {
         if ($where === [] || $data === []) {
             throw new \InvalidArgumentException(
@@ -181,4 +215,5 @@ abstract class BaseModel
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
     }
+
 }

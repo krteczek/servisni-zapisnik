@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Core\Database;
 use App\Core\Auth;
+use App\Core\Config;
 use PDO;
 
 final class TeamMembership extends BaseModel
@@ -12,14 +12,25 @@ final class TeamMembership extends BaseModel
     /** název tabulky BEZ prefixu */
     protected string $table = 'team_memberships';
 
+    private string $usersTable;
+    private string $teamsTable;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $prefix = (string) Config::get('database.admin.prefix', '');
+
+        $this->usersTable = $prefix . 'users';
+        $this->teamsTable = $prefix . 'teams';
+    }
+
     /* ==========================================================
      * AKTUÁLNÍ ČLENOVÉ TÝMU
      * ========================================================== */
 
     public function currentMembers(int $teamId): array
     {
-        $users = Database::table('users');
-
         $stmt = $this->db->prepare(
             "SELECT
                 tm.id AS membership_id,
@@ -28,7 +39,7 @@ final class TeamMembership extends BaseModel
                 u.last_name,
                 tm.role_in_team
              FROM {$this->tableName} tm
-             JOIN {$users} u ON u.id = tm.user_id
+             JOIN {$this->usersTable} u ON u.id = tm.user_id
              WHERE tm.team_id = :team
                AND tm.company_id = :company_id
                AND tm.valid_to IS NULL
@@ -104,8 +115,6 @@ final class TeamMembership extends BaseModel
 
     public function activeTeamsByUsers(): array
     {
-        $teams = Database::table('teams');
-
         $stmt = $this->db->prepare(
             "SELECT
                 tm.user_id,
@@ -113,7 +122,7 @@ final class TeamMembership extends BaseModel
                 t.name,
                 t.color
              FROM {$this->tableName} tm
-             JOIN {$teams} t ON t.id = tm.team_id
+             JOIN {$this->teamsTable} t ON t.id = tm.team_id
              WHERE tm.valid_to IS NULL
                AND tm.company_id = :company_id"
         );
