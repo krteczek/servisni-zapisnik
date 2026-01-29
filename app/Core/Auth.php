@@ -108,27 +108,28 @@ class Auth
 
     /* ========================= HELPERY ========================= */
 
-    public static function effectiveRole(): string
-    {
-        $user = self::user();
-        if (!$user) {
-            return '';
-        }
-
-        if (
-            $user['global_role'] === 'admin' &&
-            Session::has('effective_role')
-        ) {
-            $role = (string) Session::get('effective_role');
-
-            // ⛔ root nikdy
-            if (array_key_exists($role, Roles::effective())) {
-                return $role;
-            }
-        }
-
-        return $user['global_role'];
+public static function effectiveRole(): string
+{
+    $user = self::user();
+    if (!$user) {
+        return '';
     }
+
+    // impersonace jen pro admina
+    if (
+        $user['global_role'] === 'admin' &&
+        Session::has('auth.effective_role')
+    ) {
+        $role = (string) Session::get('auth.effective_role');
+
+        // pouze povolené role
+        if (array_key_exists($role, Roles::effective())) {
+            return $role;
+        }
+    }
+
+    return $user['global_role'];
+}
 
     public static function hasGlobalRole(array $roles): bool
     {

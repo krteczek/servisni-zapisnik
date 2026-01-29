@@ -212,6 +212,30 @@ return [
     'title'   => 'Týmy > Nový',
 ],
 
+[
+    'method'  => 'GET',
+    'path'    => '/teams/toggle/{id}',
+    'action'  => [TeamController::class, 'toggle'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'teams',
+],
+
+/*-------------------------------------
+Přepínaní rolí u admina
+-------------------------------------**/
+
+[
+    'path'   => '/admin/switch-role/{role}',
+    'method' => 'GET',
+    'action' => [AdminController::class, 'switchRole'],
+    'roles'  => ['admin'],
+        'auth'   => true,
+
+],
+
+
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN / SYSTEM
