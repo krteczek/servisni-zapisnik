@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Config;
 use App\Core\Url;
 use DomainException;
+use App\Core\Session;
 
 final class AdminController extends Controller
 {
@@ -15,6 +16,8 @@ final class AdminController extends Controller
      * Přepnutí pohledu role (jen admin)
      * /admin/switch-role/{role}
      */
+
+
 public function switchRole(string $role): void
 {
     $user = Auth::user();
@@ -23,9 +26,9 @@ public function switchRole(string $role): void
         throw new DomainException('Pouze admin může přepínat role');
     }
 
-    // RESET
-    if ($role === 'reset') {
-        unset($_SESSION['effective_role']);
+    // RESET = návrat do admina
+    if ($role === 'reset' || $role === 'admin') {
+        Session::forget('auth.effective_role');
         Url::redirect('/');
     }
 
@@ -35,8 +38,9 @@ public function switchRole(string $role): void
         throw new DomainException('Neplatná role');
     }
 
-    $_SESSION['effective_role'] = $role;
+    Session::set('auth.effective_role', $role);
 
     Url::redirect('/');
 }
+
 }

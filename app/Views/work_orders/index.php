@@ -1,45 +1,61 @@
 <?php 
+$css = '';
 require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
+
 use App\Core\Url;
-use App\Core\Csrf;
-use App\Core\Access;
+
 $workOrders = $view->orders;
 ?>
-<div class="work-orders">
+<?= $css ?>
+<main class="main">
+    <h1>Zakázky &gt; Přehled</h1>
 
-    <?php foreach ($workOrders as $wo): ?>
-        <div class="work-order-card">
+    <div class="work-orders">
+        <?php foreach ($workOrders as $wo): ?>
+            <div class="work-order-card">
 
-            <div class="wo-header">
-                <div class="wo-title">
-                    <?= htmlspecialchars($wo['title']) ?>
+                <div class="wo-header">
+                    <a
+                        href="<?= Url::to('/work-orders/' . (int)$wo['id']) ?>"
+                        class="wo-title"
+                        title="Otevřít detail zakázky"
+                    >
+                        <?= htmlspecialchars($wo['title']) ?>
+                    </a>
+
+                    <div class="wo-priority priority-<?= htmlspecialchars($wo['priority']) ?>">
+                        <?= strtoupper($wo['priority']) ?>
+                    </div>
                 </div>
 
-                <div class="wo-priority priority-<?= $wo['priority'] ?>">
-                    <?= strtoupper($wo['priority']) ?>
+                <div class="wo-meta">
+                    <span class="wo-status status-<?= htmlspecialchars($wo['status']) ?>">
+                        <?= strtoupper($wo['status']) ?>
+                    </span>
                 </div>
+
+                <div class="wo-actions">
+                    <a
+                        href="<?= Url::to('/work-orders/' . (int)$wo['id']) ?>"
+                        class="wo-action"
+                        title="Detail zakázky"
+                    >
+                        🔍
+                    </a>
+
+                    <a
+                        href="<?= Url::to('/work-orders/update/' . (int)$wo['id']) ?>"
+                        class="wo-action"
+                        title="Upravit zakázku"
+                    >
+                        ✏️
+                    </a>
+                </div>
+
             </div>
-
-            <div class="wo-meta">
-                <span class="wo-status status-<?= $wo['status'] ?>">
-                    <?= strtoupper($wo['status']) ?>
-                </span>
-            </div>
-
-            <div class="wo-actions">
-                <a href="<?= Url::to('/work-orders/' . (int)$wo['id']) ?>" class="btn btn-primary">
-                    Detail
-                </a>
-
-                <a href="<?= Url::to('/work-orders/update/' . (int)$wo['id']) ?>" class="btn btn-secondary">
-                    Upravit
-                </a>
-            </div>
-
-        </div>
-    <?php endforeach; ?>
-
-</div>
+        <?php endforeach; ?>
+    </div>
+</main>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

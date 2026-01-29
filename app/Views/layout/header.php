@@ -4,6 +4,7 @@ use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Auth;
 use App\Core\Roles;
+
 ?>
 <!doctype html>
 <html lang="cs">
@@ -13,6 +14,7 @@ use App\Core\Roles;
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="<?= Url::to('/css/style.css') ?>">
+    
 </head>
 <body>
 
@@ -26,20 +28,25 @@ use App\Core\Roles;
             </div>
         <?php endif; ?>
 
-        <?php if (Auth::hasGlobalRole(['admin'])): ?>
-            <small style="opacity:.6">
-                Pohled jako: <strong><?= Auth::effectiveRole() ?></strong>
-            </small>
+<?php if (Auth::hasGlobalRole(['admin'])): ?>
+    <div class="role-switcher">
+        <small class="role-switcher-label">
+            Pohled jako: <strong><?= Auth::effectiveRole() ?></strong>
+        </small>
 
-            <div class="role-switch">
-                <?php foreach (Roles::effective() as $key => $label): ?>
-                    <a href="<?= Url::to('/admin/switch-role/' . $key) ?>">
-                        [ <?= htmlspecialchars($label) ?> ]
-                    </a>
-                <?php endforeach; ?>
-                | <a href="<?= Url::to('/admin/switch-role/reset') ?>">Admin</a>
-            </div>
-        <?php endif; ?>
+        <div class="role-switch">
+            <?php foreach (Roles::effective() as $key => $label): ?>
+                <a
+                    href="<?= Url::to('/admin/switch-role/' . $key) ?>"
+                    class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"
+                >
+                    <?= htmlspecialchars($label) ?>
+                </a>
+            <?php endforeach; ?>
+
+        </div>
+    </div>
+<?php endif; ?>
     </header>
 
     <!-- ================= NAV ================= -->
