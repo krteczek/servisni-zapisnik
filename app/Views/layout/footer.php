@@ -1,11 +1,11 @@
-</main>
 
-<footer>
-    <hr>
-    <small>
-        Vytvořil Petr Vaněk ve spolupráci s AI pomocníkem jménem Bó. <?= date('Y') ?>
-    </small>
-</footer>
+</main>
+    <!-- ================= FOOTER ================= -->
+    <footer class="footer">
+        Vytvořil Petr Vaněk & Bó · 2026
+    </footer>
+
+</div>
 
 </body>
 </html>

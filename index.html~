@@ -1,3 +1,11 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Bó – svislý layout</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
 /* =========================
    RESET / BASE
    ========================= */
@@ -138,35 +146,66 @@ body {
   opacity: .7;
   border-top: 1px solid #ccc;
 }
+</style>
+</head>
 
-/* =========================
-   RESPONSIVE – MOBILE
-   ========================= */
-@media (max-width: 768px) {
+<body>
+<div class="app">
 
-  .app {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr auto;
-    grid-template-areas:
-      "header"
-      "nav"
-      "main"
-      "footer";
-  }
+  <!-- HEADER -->
+  <header class="header">
+    <small>Přihlášen: Petr Vaněk (admin)</small>
+  </header>
 
-  .nav {
-    padding: 8px 0;
-    border-bottom: 1px solid #bbb;
-  }
+  <!-- NAV -->
+  <nav class="nav">
+    <ul class="menu">
 
-  /* menu přes celou šířku */
-  .menu-item > a {
-    padding: 14px 16px;
-  }
+      <li class="menu-item no-submenu">
+        <a href="#">Dashboard</a>
+      </li>
 
-  /* submenu víc odsazené, ať je jasná hierarchie */
-  .submenu {
-    padding-left: 24px;
-  }
+      <li class="menu-item active has-submenu">
+        <a href="#">Zakázky</a>
 
-}
+        <ul class="submenu">
+          <li class="submenu-item active">
+            <a href="#">Přehled</a>
+          </li>
+          <li class="submenu-item">
+            <a href="#">Nová zakázka</a>
+          </li>
+          <li class="submenu-item">
+            <a href="#">Archiv</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="menu-item no-submenu">
+        <a href="#">Úkoly</a>
+      </li>
+
+      <li class="menu-item no-submenu">
+        <a href="#">Administrace</a>
+      </li>
+
+    </ul>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="main">
+    <h1>Zakázky – Přehled</h1>
+    <p>
+      Bílá stránka navazuje **jen na aktivní submenu**.  
+      Hlavní menu je „držák šanonu“.
+    </p>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    Vytvořil Petr Vaněk & Bó · 2026
+  </footer>
+
+</div>
+</body>
+</html>

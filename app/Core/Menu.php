@@ -15,31 +15,39 @@ final class Menu
                 continue;
             }
 
+            if (empty($route['menu']) && empty($route['submenu'])) {
+                continue;
+            }
+
             $routePath = Url::to($route['path']);
+            $section   = $route['section'] ?? $route['menu'] ?? $route['path'];
 
             /* ===== HLAVNÍ MENU ===== */
             if (!empty($route['menu'])) {
 
-                $section = $route['section'] ?? $route['path'];
+                if (!isset($menu[$section])) {
+                    $menu[$section] = [
+                        'label'  => $route['menu'],
+                        'path'   => $routePath,
+                        'method' => $route['method'] ?? 'GET',
+                        'active' => false,
+                        'items'  => [],
+                    ];
+                }
 
-                $menu[$section] ??= [
-                    'label'  => $route['menu'],
-                    'path'   => $routePath,
-                    'method' => $route['method'] ?? 'GET',
-                    'active' => false,
-                    'items'  => [],
-                ];
-
-                // aktivní sekce = URL začíná cestou sekce
+                // aktivní sekce – URL začíná cestou sekce
                 if (str_starts_with($currentPath, $routePath)) {
                     $menu[$section]['active'] = true;
                 }
             }
 
             /* ===== SUBMENU ===== */
-            if (!empty($route['submenu']) && !empty($route['section'])) {
-
-                $active = $currentPath === $routePath;
+            if (
+                !empty($route['submenu'])
+                && !empty($route['section'])
+                && isset($menu[$route['section']])
+            ) {
+                $active = ($currentPath === $routePath);
 
                 $menu[$route['section']]['items'][] = [
                     'label'  => $route['submenu'],
@@ -47,6 +55,7 @@ final class Menu
                     'active' => $active,
                 ];
 
+                // pokud je aktivní submenu, aktivuj i hlavní sekci
                 if ($active) {
                     $menu[$route['section']]['active'] = true;
                 }
