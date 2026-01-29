@@ -7,42 +7,6 @@ use App\Core\Access;
 $data = $view->data; 
 ?>
 
-<style>
-.form-table {
-    border-collapse: collapse;
-}
-
-.form-table th {
-    text-align: left;
-    padding: 6px 10px 6px 0;
-    vertical-align: top;
-    white-space: nowrap;
-}
-
-.form-table td {
-    padding: 6px 0;
-}
-
-.form-table input,
-.form-table textarea,
-.form-table select {
-    width: 100%;
-    max-width: 400px;
-}
-
-.req {
-    color: #c00;
-}
-
-.form-actions .btn {
-    margin-right: 8px;
-}
-
-</style>
-
-
-<h1>Nová zakázka</h1>
-
 <form method="post" action="">
     <?= Csrf::getField() ?>
 

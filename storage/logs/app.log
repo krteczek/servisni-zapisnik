@@ -184,3 +184,11 @@
 [2026-01-28 16:08:48] error: Call to undefined method App\Models\BaseModel::updateWhere()
 [2026-01-28 17:14:26] error: Call to undefined method App\Core\Database::table()
 [2026-01-28 17:15:04] error: Call to undefined method App\Core\Database::table()
+[2026-01-28 20:26:39] error: Call to undefined method App\Core\Database::connection()
+[2026-01-28 20:27:45] error: Call to undefined method App\Core\Database::connection()
+[2026-01-28 23:09:32] error: Failed opening required 'C:\xampp\htdocs\servisni-zapisnik\app\Views\work_orders/style.php' (include_path='C:\xampp\php\PEAR')
+[2026-01-28 23:14:40] error: Call to undefined method App\Core\Database::connection()
+[2026-01-28 23:14:46] error: Call to undefined method App\Core\Database::connection()
+[2026-01-29 00:47:08] error: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[2026-01-29 00:49:39] error: Call to undefined method App\Core\Database::connection()
+[2026-01-29 02:34:38] error: Call to undefined method App\Core\Database::connection()
