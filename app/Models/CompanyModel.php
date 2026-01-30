@@ -37,18 +37,16 @@ public function findBySlug(string $slug): ?array
     return $stmt->fetch() ?: null;
 }
 
-    public function findAll(): array
-    {
-        $pdo = Database::pdo();
+public function findAll(): array
+{
+    $stmt = $this->db->query(
+        "SELECT id, name, slug, created_at
+         FROM {$this->tableName}
+         ORDER BY name"
+    );
 
-        $stmt = $pdo->query(
-            'SELECT id, name, slug, created_at
-             FROM ' . Database::table('companies') . '
-             ORDER BY name'
-        );
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 
 }

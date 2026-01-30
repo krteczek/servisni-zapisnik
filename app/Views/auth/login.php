@@ -4,7 +4,6 @@ use App\Core\Url;
 require __DIR__ . '/../layout/header.php';
 ?>
 
-<h1>Přihlášení</h1>
 
 <form method="post" action="<?= Url::current() ?>">
     <?= $view->csrf ?>

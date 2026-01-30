@@ -193,3 +193,5 @@
 [2026-01-29 00:49:39] error: Call to undefined method App\Core\Database::connection()
 [2026-01-29 02:34:38] error: Call to undefined method App\Core\Database::connection()
 [2026-01-29 07:47:20] error: Call to undefined method App\Core\Database::connection()
+[2026-01-30 23:17:31] error: Call to undefined method App\Core\Database::table()
+[2026-01-30 23:32:14] error: Call to undefined method App\Core\Database::connection()

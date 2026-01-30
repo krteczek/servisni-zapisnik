@@ -51,7 +51,7 @@ return [
     'roles'   => ['root', 'admin', 'mistr', 'predak', 'monter'],
     'menu'    => 'Úkoly',
     'section' => 'tasks',
-    'title'   => 'Úkoly > Přehled',
+    'title'   => 'Úkoly: Přehled',
 ],
 
 /*

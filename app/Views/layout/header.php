@@ -10,9 +10,11 @@ use App\Core\Roles;
 <html lang="cs">
 <head>
     <meta charset="utf-8">
-    <title>Bó: <?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></title>
+    <title>Bó - <?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<link rel="icon" href="<?= Url::to('/favicon_io/favicon.ico') ?>">
+<link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
+<link rel="apple-touch-icon" href="<?= Url::to('/favicon_io/apple-touch-icon.png') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/style.css') ?>">
     
 </head>
@@ -21,34 +23,36 @@ use App\Core\Roles;
 <div class="app">
 
     <!-- ================= HEADER ================= -->
-    <header class="header">
-        <?php if (Auth::check()): ?>
-            <div class="user-info">
-                Přihlášen: <?= htmlspecialchars(Auth::label()) ?>
-            </div>
-        <?php endif; ?>
-
-<?php if (Auth::hasGlobalRole(['admin'])): ?>
-    <div class="role-switcher">
-        <small class="role-switcher-label">
-            Pohled jako: <strong><?= Auth::effectiveRole() ?></strong>
-        </small>
-
-        <div class="role-switch">
-            <?php foreach (Roles::effective() as $key => $label): ?>
-                <a
-                    href="<?= Url::to('/admin/switch-role/' . $key) ?>"
-                    class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"
-                >
-                    <?= htmlspecialchars($label) ?>
-                </a>
-            <?php endforeach; ?>
-
-        </div>
+<header class="header">
+    <div>
+       <a href="<?= Url::to('/') ?>"  class="logo">博</a>
     </div>
-<?php endif; ?>
-    </header>
 
+    <?php if (Auth::check()): ?>
+        <div class="user-info">
+            Přihlášen: <?= htmlspecialchars(Auth::label()) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (Auth::hasGlobalRole(['admin'])): ?>
+        <div class="role-switcher">
+            <small class="role-switcher-label">
+                Pohled jako: <strong><?= Auth::effectiveRole() ?></strong>
+            </small>
+
+            <div class="role-switch">
+                <?php foreach (Roles::effective() as $key => $label): ?>
+                    <a
+                        href="<?= Url::to('/admin/switch-role/' . $key) ?>"
+                        class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"
+                    >
+                        <?= htmlspecialchars($label) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+</header>
     <!-- ================= NAV ================= -->
     <nav class="nav">
         <ul class="menu">
