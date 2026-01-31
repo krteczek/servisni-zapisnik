@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Config;
 use PDO;
 use LogicException;
 
@@ -18,16 +19,23 @@ final class AuditLogModel
 
     protected array $orderable = ['id', 'created_at'];
 
-    public function __construct()
-    {
-        if ($this->table === '') {
-            throw new LogicException('AuditLogModel table name is empty');
-        }
-
-        $this->db        = Database::connection($this->connection);
-        $this->tableName = Database::table($this->table);
+public function __construct()
+{
+    if ($this->table === '') {
+        throw new LogicException('AuditLogModel table name is empty');
     }
 
+    $this->db = match ($this->connection) {
+        'admin' => Database::admin(),
+        'work'  => Database::work(),
+        default => throw new LogicException(
+            'Unknown DB connection: ' . $this->connection
+        ),
+    };
+
+    $prefix = (string) Config::get('database.prefix', '');
+    $this->tableName = $prefix . $this->table;
+}
     public function insert(array $data): void
     {
         $cols   = array_keys($data);

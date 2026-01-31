@@ -127,7 +127,7 @@ abstract class BaseModel
                     entity: $this->table,
                     entityId: $lastId,
                     action: 'insert',
-                    data: $data
+                    diff: $this->diff([], $data)
                 );
             } catch (Throwable) {
                 // audit nikdy nesmí shodit aplikaci
@@ -162,19 +162,22 @@ abstract class BaseModel
         $stmt = $this->db->prepare($sql);
         $ok   = $stmt->execute($data);
 
-        if ($ok && $this->shouldAudit()) {
-            try {
-                AuditLogCore::log(
-                    entity: $this->table,
-                    entityId: $id,
-                    action: 'update',
-                    data: [
-                        'before' => $before,
-                        'after'  => $data,
-                    ]
-                );
-            } catch (Throwable) {}
+if ($ok && $this->shouldAudit()) {
+    try {
+        $diff = $this->diff($before, $data);
+
+        if ($diff !== []) {
+            AuditLogCore::log(
+                entity: $this->table,
+                entityId: $id,
+                action: 'update',
+                diff: $diff
+            );
         }
+    } catch (Throwable) {
+        // audit nikdy nesmí shodit aplikaci
+    }
+}
 
         return $ok;
     }
@@ -215,5 +218,34 @@ abstract class BaseModel
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
     }
+protected function diff(array $before, array $after): array
+{
+    $diff = [];
+
+    $ignore = [
+        'id',
+        'created_at',
+        'updated_at',
+        'password',
+        'password_hash',
+    ];
+
+    foreach ($after as $key => $newValue) {
+        if (in_array($key, $ignore, true)) {
+            continue;
+        }
+
+        $oldValue = $before[$key] ?? null;
+
+        if ($oldValue !== $newValue) {
+            $diff[$key] = [
+                'from' => $oldValue,
+                'to'   => $newValue,
+            ];
+        }
+    }
+
+    return $diff;
+}
 
 }

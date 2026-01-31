@@ -145,4 +145,13 @@ public static function effectiveRole(): string
     {
         return self::hasGlobalRole(['admin']);
     }
+    
+public static function email(): ?string
+{
+    if (!self::check()) {
+        return null;
+    }
+
+    return Session::get(self::USER_KEY . '.email');
+}
 }
