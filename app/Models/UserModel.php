@@ -205,14 +205,15 @@ final class UserModel extends BaseModel
         if (!$data) {
             return false;
         }
-
-        return parent::updateWhere(
+			return parent::updateRow( $id, $data);
+        
+        /*return parent::updateWhere(
             [
                 'id'         => $id,
                 'company_id' => Auth::companyId(),
             ],
             $data
-        );
+        );*/
     }
 
     /* ==========================================================
