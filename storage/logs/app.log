@@ -195,3 +195,14 @@
 [2026-01-29 07:47:20] error: Call to undefined method App\Core\Database::connection()
 [2026-01-30 23:17:31] error: Call to undefined method App\Core\Database::table()
 [2026-01-30 23:32:14] error: Call to undefined method App\Core\Database::connection()
+[2026-01-30 23:38:02] error: Call to undefined method App\Core\Database::connection()
+[2026-01-30 23:48:27] error: Call to undefined method App\Core\Database::connection()
+[2026-01-31 00:09:11] error: syntax error, unexpected variable "$out"
+[2026-01-31 00:20:22] error: syntax error, unexpected token "}"
+[2026-01-31 00:50:12] error: Undefined constant App\Models\BaseModel::update
+[2026-01-31 02:40:17] error: syntax error, unexpected token ";", expecting ")"
+[2026-02-01 01:40:43] error: Method App\Controllers\UserController::detail() does not exist
+[2026-02-01 01:41:31] error: App\Models\UserModel::find(): Argument #1 ($id) must be of type int, string given, called in C:\xampp\htdocs\servisni-zapisnik\app\Controllers\UserController.php on line 280
+[2026-02-01 01:42:14] error: App\Core\Router::call(): Return value must be of type string, null returned
+[2026-02-01 01:44:57] error: syntax error, unexpected token "var", expecting end of file
+[2026-02-01 02:32:16] error: Call to undefined method App\Core\Roles::can()

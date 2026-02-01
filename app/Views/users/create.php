@@ -10,6 +10,7 @@ require __DIR__ . '/../layout/header.php';
 $old    = $view->data ?? [];
 $errors = $view->errors ?? [];
 ?>
+<p>„Uživatel po vytvoření účtu obdrží aktivační e-mail, s odkazem, pomocí kterého si nastaví heslo a dokončí vytvoření svého účtu.“</p>
 <?php if ($errors): ?>
 <ul class="errors">
     <?php foreach ($errors as $field => $messages): ?>
@@ -26,37 +27,25 @@ $errors = $view->errors ?? [];
 
     <?= Csrf::getField() ?>
 
-    <label>Email</label><br>
+    <label>Email *</label><br>
     <input type="email"
            name="email"
            value="<?= e($old['email'] ?? '') ?>"><br><br>
 
-    <label>Číslo zaměstnance</label><br>
+    <label>Číslo zaměstnance *</label><br>
     <input type="text"
            name="employee_number"
            value="<?= e($old['employee_number'] ?? '') ?>"><br><br>
 
-    <label>Jméno</label><br>
+    <label>Jméno *</label><br>
     <input type="text"
            name="first_name"
            value="<?= e($old['first_name'] ?? '') ?>"><br><br>
 
-    <label>Příjmení</label><br>
+    <label>Příjmení *</label><br>
     <input type="text"
            name="last_name"
            value="<?= e($old['last_name'] ?? '') ?>"><br><br>
-
-    <label>Heslo</label><br>
-    <input type="password"
-           name="new_password"
-           autocomplete="new-password"
-           data-lpignore="true"><br><br>
-
-    <label>Potvrzení hesla</label><br>
-    <input type="password"
-           name="new_password_confirm"
-           autocomplete="new-password"
-           data-lpignore="true"><br><br>
 
     <label>Role</label><br>
     <select name="global_role">

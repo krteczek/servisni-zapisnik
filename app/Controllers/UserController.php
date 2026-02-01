@@ -9,6 +9,7 @@ use App\Core\Roles;
 use App\Core\Flash;
 use App\Core\UserGuard;
 use App\Models\UserModel;
+use App\Services\AuthTokenService;
 
 final class UserController extends Controller
 {
@@ -50,6 +51,49 @@ final class UserController extends Controller
         return $this->render('users/create');
     }
 
+public function store(): string
+{
+    $data = $_POST;
+    $this->view->data  = $data;
+    $this->view->roles = Roles::effective();
+
+    $this->checkCsrf();
+    $this->validateUserData($data);
+
+    if ($this->hasErrors()) {
+        return $this->render('users/create');
+    }
+
+    $userId = $this->users->insert([
+        'email'           => strtolower(trim($data['email'])),
+        'employee_number' => trim($data['employee_number']),
+        'first_name'      => trim($data['first_name']),
+        'last_name'       => trim($data['last_name']),
+        'global_role'     => $data['global_role'],
+        'active'          => 0, // ⬅️ DŮLEŽITÉ: neaktivní do aktivace
+        'created_at'      => date('Y-m-d H:i:s'),
+    ]);
+
+    /* ===== AKTIVAČNÍ TOKEN ===== */
+
+    $tokenService = new AuthTokenService();
+    $token = $tokenService->create(
+        userId: $userId,
+        type: 'activate',
+        ttl: '+7 days'
+    );
+
+    // TODO: tady jen hook – vlastní MailService máš jinde
+    // MailService::sendActivationMail($data['email'], $token);
+
+    Flash::add(
+        'success',
+        'Uživatel byl vytvořen. Aktivační e-mail byl odeslán.'
+    );
+
+    Url::redirect('/users');
+}
+/*
     public function store(): string
     {
         $data = $_POST;
@@ -68,7 +112,6 @@ final class UserController extends Controller
             'employee_number' => trim($data['employee_number']),
             'first_name'      => trim($data['first_name']),
             'last_name'       => trim($data['last_name']),
-            'password_hash'   => password_hash($data['new_password'], PASSWORD_DEFAULT),
             'global_role'     => $data['global_role'],
             'created_at'      => date('Y-m-d H:i:s'),
         ]);
@@ -80,7 +123,7 @@ final class UserController extends Controller
 
         Url::redirect('/users');
     }
-
+*/
     /* =============================
      * EDIT
      * ============================= */
@@ -163,8 +206,8 @@ final class UserController extends Controller
         $firstname      = trim($data['first_name'] ?? '');
         $lastname       = trim($data['last_name'] ?? '');
 
-        $password1 = $data['new_password'] ?? '';
-        $password2 = $data['new_password_confirm'] ?? '';
+        //$password1 = $data['new_password'] ?? '';
+        //$password2 = $data['new_password_confirm'] ?? '';
 
         /* ---- jméno ---- */
 
@@ -217,22 +260,6 @@ final class UserController extends Controller
             $this->addError('global_role', 'Neplatná role.');
         }
 
-        /* ---- heslo ---- */
-
-        if ($old === null || $password1 !== '') {
-
-            if ($password1 === '') {
-                $this->addError('new_password', 'Heslo je povinné.');
-            } elseif (mb_strlen($password1) < 8) {
-                $this->addError('new_password', 'Heslo musí mít alespoň 8 znaků.');
-            } elseif (mb_strlen($password1) > self::MAX_PASSWORD_LENGTH) {
-                $this->addError('new_password', 'Heslo je příliš dlouhé.');
-            }
-
-            if ($password1 !== $password2) {
-                $this->addError('new_password', 'Hesla se neshodují.');
-            }
-        }
     }
     
     public static function isProtected(array $user): bool
@@ -248,56 +275,102 @@ final class UserController extends Controller
     return false;
 }
 
-
-    public function passwordForm(int $id): string
-    {
-        $user = $this->users->find($id);
-        if (!$user) Url::redirect('/users');
-
-
-
-
-
-        $this->view->data = $user;
-        return $this->render('users/password');
-
-    }
-
-    public function updatePassword(int $id): string
-    {
-        $user = $this->users->find($id);
-        if (!$user) Url::redirect('/users');
-
-
-
-        $password = $_POST['new_password'] ?? '';
-        $confirm  = $_POST['new_password_confirm'] ?? '';
-
-        $this->checkCsrf();
-
-        if ($password === '') $this->addError('password','Heslo je povinné');
-        if ($password !== $confirm) $this->addError('password','Hesla se neshodují');
-        if (mb_strlen($password) < 8) $this->addError('password','Heslo musí mít alespoň 8 znaků');
-
-
-
-
-
-        if ($this->hasErrors()) {
-            $this->view->data = $user;
-            return $this->render('users/password');
-
-        }
-
-        $this->users->update($id,['password_hash'=>password_hash($password,PASSWORD_DEFAULT)]);
-        Flash::add('success','Heslo uživatele '.$user['first_name'].' '.$user['last_name'].' bylo úspěšně změněno.');
-
-
-
-
-
+public function userDetail(int $id): string
+{
+    $user = $this->users->find($id);
+    if (!$user) {
+        Flash::add('error', 'Uživatel neexistuje.');
         Url::redirect('/users');
     }
+
+    if (UserGuard::isProtected($user)) {
+        Flash::add('error', 'Tento účet nelze zobrazit.');
+        Url::redirect('/users');
+    }
+
+    $this->view->user = $user;
+
+    // odvozený stav pro view
+    $this->view->accountState = match (true) {
+        $user['password_hash'] === null => 'pending_activation',
+        (int)$user['active'] === 0      => 'inactive',
+        default                         => 'active',
+    };
+
+    return $this->render('users/detail');
+}
+
+public function resendActivationEmail(int $id): string
+{
+    $user = $this->users->find($id);
+    if (!$user) {
+        Flash::error('Uživatel neexistuje.');
+        Url::redirect('/users');
+    }
+
+    if ($user['password_hash'] !== null) {
+        Flash::error('Účet je již aktivní.');
+        Url::redirect('/users/' . $id);
+    }
+
+    try {
+        (new \App\Services\AuthTokenService())->createActivationToken(
+            (int) $user['id'],
+            (int) $user['company_id']
+        );
+
+        Flash::success('Aktivační e-mail byl znovu odeslán.');
+    } catch (\Throwable $e) {
+        error_log($e);
+        Flash::error('Nepodařilo se odeslat aktivační e-mail.');
+    }
+
+    Url::redirect('/users/' . $id);
+}
+
+public function sendResetPassword(int $id): string
+{
+    $user = $this->users->find($id);
+    if (!$user) {
+        Flash::error('Uživatel neexistuje.');
+        Url::redirect('/users');
+    }
+
+    if (!$user['active'] || !$user['password_hash']) {
+        Flash::error('Tomuto uživateli nelze resetovat heslo.');
+        Url::redirect('/users/' . $id);
+    }
+
+    // oprávnění
+ if (!in_array(Auth::user('global_role'), ['root', 'admin', 'mistr'], true)) {
+    Flash::error('Na tuto akci nemáte oprávnění.');
+    Url::redirect('/users/' . $id);
+}
+
+    try {
+        $service = new AuthTokenService();
+
+        // volitelně: kontrola limitu v modelu
+        $token = $service->create(
+            (int) $user['id'],
+            (int) $user['company_id'],
+            'reset_password',
+            $_SERVER['REMOTE_ADDR'] ?? null,
+            $_SERVER['HTTP_USER_AGENT'] ?? null,
+            1 // expirace ve dnech → reálně 10–15 min řešit v service
+        );
+
+        // tady pošleš mail
+        // Mailer::sendResetPassword($user['email'], $token);
+
+        Flash::success('E-mail pro změnu hesla byl odeslán.');
+    } catch (\Throwable $e) {
+        error_log($e);
+        Flash::error('Reset hesla se nepodařilo odeslat.');
+    }
+
+    Url::redirect('/users/' . $id);
+}
 
 
 }
