@@ -39,6 +39,75 @@ return [
 
 /*
 |--------------------------------------------------------------------------
+| TOKEN / AKTIVACE / RESET HESLA (bez auth)
+|--------------------------------------------------------------------------
+*/
+
+[
+    'method' => 'GET',
+    'path'   => '/activate',
+    'action' => [AuthController::class, 'activateForm'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/activate',
+    'action' => [AuthController::class, 'activateSubmit'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/reset-password',
+    'action' => [AuthController::class, 'resetPasswordForm'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/reset-password',
+    'action' => [AuthController::class, 'resetPasswordSubmit'],
+    'auth'   => false,
+],
+
+/*
+|--------------------------------------------------------------------------
+| TOKEN / AKTIVACE / RESET HESLA
+|--------------------------------------------------------------------------
+*/
+
+[
+    'method' => 'GET',
+    'path'   => '/activate',
+    'action' => [AuthController::class, 'activate'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/activate',
+    'action' => [AuthController::class, 'activatePost'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/reset-password',
+    'action' => [AuthController::class, 'resetPassword'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/reset-password',
+    'action' => [AuthController::class, 'resetPasswordPost'],
+    'auth'   => false,
+],
+
+
+/*
+|--------------------------------------------------------------------------
 | DASHBOARD / ÚKOLY
 |--------------------------------------------------------------------------
 */
@@ -138,6 +207,29 @@ return [
 
 [
     'method'  => 'GET',
+    'path'    => '/users/{id}/detail',
+    'action'  => [UserController::class, 'userDetail'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    
+    'section' => 'users',
+    'title'   => 'Uživatelé: Detail',
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/users/{id}/send-reset-password',
+    'action'  => [UserController::class, 'sendResetPassword'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    
+    'section' => 'users',
+    'title'   => 'Resetování hesla',
+],
+
+
+[
+    'method'  => 'GET',
     'path'    => '/users/create',
     'action'  => [UserController::class, 'create'],
     'auth'    => true,
@@ -170,6 +262,24 @@ return [
     'action' => [UserController::class, 'update'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/users/{id}/password',
+    'action'  => [UserController::class, 'passwordForm'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'users',
+    'title'   => 'Změna hesla',
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/users/{id}/password',
+    'action'  => [UserController::class, 'updatePassword'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
 ],
 
 /*

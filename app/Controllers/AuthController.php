@@ -9,6 +9,7 @@ use App\Core\Database;
 use App\Core\Url;
 use App\Models\UserModel;
 use App\Models\CompanyModel;
+use App\Services\AuthTokenService;
 
 use App\Core\Flash;
 
@@ -122,4 +123,104 @@ Url::redirect(
         Auth::logout();
         Url::redirect('/login');
     }
+    
+
+
+    /* =========================
+     *  PUBLIC ROUTES
+     * ========================= */
+
+    public function activate(): string
+    {
+        return $this->handleTokenGet('activate');
+    }
+
+    public function activatePost(): string
+    {
+        return $this->handleTokenPost(
+            'activate',
+            function (int $userId, string $password): void {
+                (new UserModel())->activateUser(
+                    $userId,
+                    password_hash($password, PASSWORD_DEFAULT)
+                );
+            },
+            'Účet byl aktivován. Můžeš se přihlásit.'
+        );
+    }
+
+    public function resetPassword(): string
+    {
+        return $this->handleTokenGet('reset_password');
+    }
+
+    public function resetPasswordPost(): string
+    {
+        return $this->handleTokenPost(
+            'reset_password',
+            function (int $userId, string $password): void {
+                (new UserModel())->setPassword(
+                    $userId,
+                    password_hash($password, PASSWORD_DEFAULT)
+                );
+            },
+            'Heslo bylo změněno.'
+        );
+    }
+
+    /* =========================
+     *  PRIVATE HELPERS
+     * ========================= */
+
+    private function handleTokenGet(string $type): string
+    {
+        $token = $_GET['token'] ?? null;
+
+        if (!$token) {
+            Flash::error('Chybí token.');
+            Url::redirect('/login');
+        }
+
+        try {
+            (new AuthTokenService())->validate($token, $type);
+
+            // žádný view – frontend/formulář řešíš jinde
+            return 'OK';
+
+        } catch (\Throwable) {
+            Flash::error('Odkaz je neplatný nebo expirovaný.');
+            Url::redirect('/login');
+        }
+    }
+
+    private function handleTokenPost(
+        string $type,
+        callable $userAction,
+        string $successMessage
+    ): string {
+        $token    = $_POST['token'] ?? null;
+        $password = $_POST['password'] ?? null;
+
+        if (!$token || !$password) {
+            Flash::error('Neplatná data.');
+            Url::redirect('/login');
+        }
+
+        try {
+            $service = new AuthTokenService();
+            $row = $service->consume($token, $type);
+
+            $userAction((int) $row['user_id'], $password);
+
+            Flash::success($successMessage);
+            Url::redirect('/login');
+
+        } catch (\Throwable $e) {
+            error_log($e);
+            Flash::error('Operace se nezdařila.');
+            Url::redirect('/login');
+        }
+    }
+}
+
 }

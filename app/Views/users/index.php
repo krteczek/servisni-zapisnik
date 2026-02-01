@@ -10,11 +10,9 @@ use App\Core\Access;
 <table border="1" cellpadding="8">
     <thead>
         <tr>
-            <th>Email</th>
+            
             <th>Číslo zaměstnance</th>
             <th>Jméno</th>
-            <th>Role</th>
-            <th>Stav</th>
             <th>Akce</th>
         </tr>
     </thead>
@@ -22,7 +20,7 @@ use App\Core\Access;
 
     <?php foreach (($view->users ?? []) as $user): ?>
         <tr>
-            <td><?= e($user['email']) ?></td>
+            
 
             <td><?= e($user['employee_number']) ?></td>
 
@@ -32,16 +30,18 @@ use App\Core\Access;
                 )) ?>
             </td>
 
-            <td><?= e($user['global_role']) ?></td>
-
-            <td>
-                <?= $user['active'] ? 'Aktivní' : 'Neaktivní' ?>
-            </td>
 
             <td>
 <?php if (!\App\Core\UserGuard::isProtected($user)): ?>
     
                 <?php if (Access::can('users.edit')): ?>
+                    <a href="<?= Url::to('/users/' . (int) $user['id'] . '/detail') ?>">
+                    Detail
+                    </a>
+                <?php endif; ?>
+
+                <?php if (Access::can('users.edit')): ?>
+                |
                     <a href="<?= Url::to('/users/' . (int) $user['id'] . '/edit') ?>">
                         Upravit
                     </a>

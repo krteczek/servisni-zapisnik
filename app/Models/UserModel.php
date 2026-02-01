@@ -281,4 +281,19 @@ final class UserModel extends BaseModel
                 'company_id' => Auth::companyId(),
             ]);
     }
+public function activateUser(int $userId, string $hash): void
+{
+    $this->update($userId, [
+        'password'  => $hash,
+        'is_active' => 1,
+    ]);
+}
+
+public function setPassword(int $userId, string $hash): void
+{
+    $this->update($userId, [
+        'password' => $hash,
+    ]);
+}
+
 }
