@@ -17,7 +17,7 @@ class Router
         $this->view = new ViewContext();
         $this->view->isLogged = Auth::check();
         $this->view->user     = Auth::user();
-        $this->view->flash = Flash::get();
+        
         $this->view->menu     = Menu::build(
             $routes,
             rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/'

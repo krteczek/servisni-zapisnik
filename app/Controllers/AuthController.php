@@ -91,7 +91,6 @@ public function login(): string
     }
 
     /* ===== LOGIN OK ===== */
-//Database::useWorkDatabase($company['db_name']);
     Auth::login([
         'id'          => (int) $user['id'],
         'email'       => $user['email'],
@@ -103,9 +102,7 @@ public function login(): string
         'db_name'		 => $company['db_name'],
     ]);
 
-    Flash::add(
-        'success',
-        'Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
+    Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
     );
 Url::redirect(
     $user['global_role'] === 'root'
@@ -118,7 +115,7 @@ Url::redirect(
 
     public function logout(): string
     {
-        Flash::add('success', 'Byl jste odhlášen. Přijďte zas!');
+        Flash::success('Byl jste odhlášen. Přijďte zas!');
 
         Auth::logout();
         Url::redirect('/login');
@@ -155,7 +152,9 @@ Url::redirect(
     }
 
     public function resetPasswordPost(): string
-    {
+    {		
+        
+        
         return $this->handleTokenPost(
             'reset_password',
             function (int $userId, string $password): void {
@@ -184,8 +183,10 @@ Url::redirect(
         try {
             (new AuthTokenService())->validate($token, $type);
 
-            // žádný view – frontend/formulář řešíš jinde
-            return 'OK';
+            $this->view->token = $token;
+				$this->view->csrf  = $this->csrfField();
+
+				return $this->render('auth/reset-password');
 
         } catch (\Throwable) {
             Flash::error('Odkaz je neplatný nebo expirovaný.');
@@ -200,11 +201,19 @@ Url::redirect(
     ): string {
         $token    = $_POST['token'] ?? null;
         $password = $_POST['password'] ?? null;
-
-        if (!$token || !$password) {
-            Flash::error('Neplatná data.');
-            Url::redirect('/login');
-        }
+    		$passwordZ = $_POST['passwordZ'] ?? null;
+    		if($password === '') {
+    			$this->addError('password', 'Heslo je povinné');
+    		} elseif (mb_strlen($password) < 8) {
+    			$this->addError('password', 'Heslo je příliš krátké');
+    		} elseif($password !== $passwordZ) {
+    			$this->addError('password', 'Hesla se neshodují, věnujte zápisu více pozornosti.');
+    		}
+    		
+    		if ($this->hasErrors()) {
+    			$this->view->token = $token;
+            return $this->render('auth/reset-password');
+        }	
 
         try {
             $service = new AuthTokenService();
@@ -216,11 +225,10 @@ Url::redirect(
             Url::redirect('/login');
 
         } catch (\Throwable $e) {
-            error_log($e);
-            Flash::error('Operace se nezdařila.');
+        		$mess = '[handleTokenPost] ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString();
+            error_log($mess);
+            Flash::error('Operace se nezdařila. ' . $mess);
             Url::redirect('/login');
         }
     }
-}
-
 }

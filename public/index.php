@@ -7,7 +7,7 @@ define('APP_ENV', file_exists(__DIR__ . '/../.dev') ? 'dev' : 'prod');
 define('APP_DEBUG', APP_ENV === 'dev');
 
 define('BASE_PATH', '/servisni-zapisnik/public');
-
+//echo phpversion();exit;
 require dirname(__DIR__) . '/bootstrap.php';
 require dirname(__DIR__) . '/app/Core/helpers.php';
 

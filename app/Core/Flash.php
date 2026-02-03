@@ -3,17 +3,21 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-class Flash
+use App\Core\Session;
+final class Flash
 {
-    public static function add(string $type, string $message): void
+    public static function success(string $msg): void
     {
-        $_SESSION['flash'][$type][] = $message;
+        Session::flash('success', $msg);
     }
 
-    public static function get(): array
+    public static function error(string $msg): void
     {
-        $messages = $_SESSION['flash'] ?? [];
-        unset($_SESSION['flash']);
-        return $messages;
+        Session::flash('error', $msg);
+    }
+
+    public static function info(string $msg): void
+    {
+        Session::flash('info', $msg);
     }
 }

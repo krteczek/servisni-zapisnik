@@ -8,8 +8,10 @@ use App\Core\Url;
 use App\Core\Roles;
 use App\Core\Flash;
 use App\Core\UserGuard;
+use App\Core\Mailer;
 use App\Models\UserModel;
 use App\Services\AuthTokenService;
+use App\Core\Auth;
 
 final class UserController extends Controller
 {
@@ -86,44 +88,11 @@ public function store(): string
     // TODO: tady jen hook – vlastní MailService máš jinde
     // MailService::sendActivationMail($data['email'], $token);
 
-    Flash::add(
-        'success',
-        'Uživatel byl vytvořen. Aktivační e-mail byl odeslán.'
-    );
+    Flash::success('Uživatel byl vytvořen. Aktivační e-mail byl odeslán.');
 
     Url::redirect('/users');
 }
-/*
-    public function store(): string
-    {
-        $data = $_POST;
-        $this->view->data  = $data;
-        $this->view->roles = Roles::effective();
 
-        $this->checkCsrf();
-        $this->validateUserData($data);
-
-        if ($this->hasErrors()) {
-            return $this->render('users/create');
-        }
-
-        $this->users->insert([
-            'email'           => strtolower(trim($data['email'])),
-            'employee_number' => trim($data['employee_number']),
-            'first_name'      => trim($data['first_name']),
-            'last_name'       => trim($data['last_name']),
-            'global_role'     => $data['global_role'],
-            'created_at'      => date('Y-m-d H:i:s'),
-        ]);
-
-        Flash::add(
-            'success',
-            'Uživatel ' . $data['first_name'] . ' ' . $data['last_name'] . ' byl úspěšně vytvořen.'
-        );
-
-        Url::redirect('/users');
-    }
-*/
     /* =============================
      * EDIT
      * ============================= */
@@ -132,11 +101,11 @@ public function store(): string
     {
         $user = $this->users->find($id);
         if (!$user) {
-            Flash::add('error', 'Uživatel neexistuje.');
+            Flash::error('Uživatel neexistuje.');
             Url::redirect('/users');
         }
     	if (UserGuard::isProtected($user)) {
-			Flash::add('error','Tento účet nelze upravovat.');
+			Flash::error('Tento účet nelze upravovat.');
 			Url::redirect('/users');
 		}
 
@@ -150,11 +119,11 @@ public function store(): string
     {
        $old = $this->users->find($id);
         if (!$old) {
-            Flash::add('error', 'Uživatel neexistuje.');
+            Flash::error('Uživatel neexistuje.');
             Url::redirect('/users');
         }
     	if (UserGuard::isProtected($old)) {
-			Flash::add('error','Tento účet nelze upravovat.');
+			Flash::error('Tento účet nelze upravovat.');
 			Url::redirect('/users');
 		}
  
@@ -181,15 +150,9 @@ public function store(): string
         ];
 
         if ($this->users->update($id, $update)) {
-            Flash::add(
-                'success',
-                'Data uživatele ' . $data['first_name'] . ' ' . $data['last_name'] . ' byla změněna.'
-            );
+            Flash::success('Data uživatele ' . $data['first_name'] . ' ' . $data['last_name'] . ' byla změněna.');
         } else {
-            Flash::add(
-                'error',
-                'Data uživatele se nepodařilo změnit.'
-            );
+            Flash:error('Data uživatele se nepodařilo změnit.');
         }
 
         Url::redirect('/users');
@@ -279,12 +242,12 @@ public function userDetail(int $id): string
 {
     $user = $this->users->find($id);
     if (!$user) {
-        Flash::add('error', 'Uživatel neexistuje.');
+        Flash::error('Uživatel neexistuje.');
         Url::redirect('/users');
     }
 
     if (UserGuard::isProtected($user)) {
-        Flash::add('error', 'Tento účet nelze zobrazit.');
+        Flash::error('Tento účet nelze zobrazit.');
         Url::redirect('/users');
     }
 
@@ -310,7 +273,7 @@ public function resendActivationEmail(int $id): string
 
     if ($user['password_hash'] !== null) {
         Flash::error('Účet je již aktivní.');
-        Url::redirect('/users/' . $id);
+        Url::redirect('/users/' . $id . '/detail');
     }
 
     try {
@@ -321,11 +284,11 @@ public function resendActivationEmail(int $id): string
 
         Flash::success('Aktivační e-mail byl znovu odeslán.');
     } catch (\Throwable $e) {
-        error_log($e);
+        error_log('[resendActivationEmail] ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
         Flash::error('Nepodařilo se odeslat aktivační e-mail.');
     }
 
-    Url::redirect('/users/' . $id);
+    Url::redirect('/users/' . $id . '/detail');
 }
 
 public function sendResetPassword(int $id): string
@@ -338,15 +301,13 @@ public function sendResetPassword(int $id): string
 
     if (!$user['active'] || !$user['password_hash']) {
         Flash::error('Tomuto uživateli nelze resetovat heslo.');
-        Url::redirect('/users/' . $id);
+        Url::redirect('/users/' . $id . '/detail');
     }
-
     // oprávnění
- if (!in_array(Auth::user('global_role'), ['root', 'admin', 'mistr'], true)) {
+if (!Auth::hasRole(['admin', 'mistr'])) {
     Flash::error('Na tuto akci nemáte oprávnění.');
-    Url::redirect('/users/' . $id);
+    Url::redirect('/users/' . $id . '/detail');
 }
-
     try {
         $service = new AuthTokenService();
 
@@ -357,19 +318,20 @@ public function sendResetPassword(int $id): string
             'reset_password',
             $_SERVER['REMOTE_ADDR'] ?? null,
             $_SERVER['HTTP_USER_AGENT'] ?? null,
-            1 // expirace ve dnech → reálně 10–15 min řešit v service
+            1 // expirace ve,  dnech → reálně 10–15 min řešit v service
         );
+        $company = Auth::company();
+        //var_dump($company);exit;
 
-        // tady pošleš mail
-        // Mailer::sendResetPassword($user['email'], $token);
-
-        Flash::success('E-mail pro změnu hesla byl odeslán.');
+			Mailer::sendResetPassword($user['email'], $token, $company);
+			Flash::success('E-mail pro změnu hesla byl odeslán.');
+        	
     } catch (\Throwable $e) {
-        error_log($e);
-        Flash::error('Reset hesla se nepodařilo odeslat.');
-    }
+    	print_r('[sendResetPassword] ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());exit;
+    	Flash::error('Reset hesla se nepodařilo odeslat.');
+	}
 
-    Url::redirect('/users/' . $id);
+    Url::redirect('/users/' . $id . '/detail');
 }
 
 

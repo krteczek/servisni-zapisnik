@@ -206,3 +206,31 @@
 [2026-02-01 01:42:14] error: App\Core\Router::call(): Return value must be of type string, null returned
 [2026-02-01 01:44:57] error: syntax error, unexpected token "var", expecting end of file
 [2026-02-01 02:32:16] error: Call to undefined method App\Core\Roles::can()
+[2026-02-01 23:16:45] error: Class "App\Controllers\Auth" not found
+[2026-02-01 23:17:05] error: Class "App\Controllers\Auth" not found
+[2026-02-01 23:42:17] error: Class "App\Controllers\Auth" not found
+[2026-02-01 23:43:40] error: Call to undefined method App\Core\Flash::error()
+[2026-02-02 00:07:49] error: syntax error, unexpected token "=>"
+[2026-02-02 00:11:13] error: App\Core\Flash::get(): Return value must be of type array, null returned
+[2026-02-02 00:11:56] error: App\Core\Flash::get(): Return value must be of type array, null returned
+[2026-02-02 00:11:57] error: App\Core\Flash::get(): Return value must be of type array, null returned
+[2026-02-02 00:11:58] error: App\Core\Flash::get(): Return value must be of type array, null returned
+[2026-02-02 00:11:58] error: App\Core\Flash::get(): Return value must be of type array, null returned
+[2026-02-02 00:12:58] error: syntax error, unexpected token ":"
+[2026-02-02 00:15:39] error: Illegal offset type
+[2026-02-02 00:16:19] error: Call to undefined method App\Core\Session::add()
+[2026-02-02 00:41:21] error: Call to undefined method App\Core\Flash::get()
+[2026-02-02 00:44:21] error: syntax error, unexpected token "<", expecting end of file
+[2026-02-02 00:44:48] error: Class "Session" not found
+[2026-02-02 01:03:21] error: Unmatched '}'
+[2026-02-02 01:04:13] error: Call to undefined method App\Core\Flash::add()
+[2026-02-02 01:06:01] error: Call to undefined method App\Core\Flash::add()
+[2026-02-02 01:23:08] error: error_log(): Argument #1 ($message) must be of type string, Error given
+[2026-02-02 01:32:21] error: error_log(): Argument #1 ($message) must be of type string, Error given
+[2026-02-02 02:04:31] error: syntax error, unexpected token ";"
+[2026-02-02 12:17:15] error: Method App\Controllers\AuthController::resetPasswordForm() does not exist
+[2026-02-02 13:14:12] error: syntax error, unexpected token ";"
+[2026-02-02 13:15:22] error: error_log(): Argument #1 ($message) must be of type string, RuntimeException given
+[2026-02-02 13:20:08] error: syntax error, unexpected identifier "error_log"
+[2026-02-02 20:03:05] error: Call to undefined method App\Core\Flash::add()
+[2026-02-02 20:05:30] error: Method App\Controllers\UserController::passwordForm() does not exist
