@@ -113,4 +113,11 @@ final class AuthTokenModel extends BaseModel
 
         return $stmt->rowCount();
     }
+    
+public function createToken(array $data): int
+{
+    return $this->insert($data);
+}
+
+
 }

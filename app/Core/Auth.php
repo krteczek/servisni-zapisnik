@@ -31,6 +31,12 @@ class Auth
         return Session::get(self::USER_KEY . '.global_role');
     }
 
+    public static function company(): ?string
+    {
+        Session::start();
+        return Session::get(self::USER_KEY . '.company');
+    }
+
     public static function companyId(): ?int
     {
         Session::start();

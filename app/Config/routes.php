@@ -29,19 +29,21 @@ return [
     'path'   => '/login',
     'action' => [AuthController::class, 'loginForm'],
     'auth'   => false,
+    'title'   => 'Bó - Přihlášení',
 ],
 [
     'method' => 'POST',
     'path'   => '/login',
     'action' => [AuthController::class, 'login'],
     'auth'   => false,
+    'title'   => 'Bó - Přihlášení',
 ],
 
 /*
 |--------------------------------------------------------------------------
 | TOKEN / AKTIVACE / RESET HESLA (bez auth)
 |--------------------------------------------------------------------------
-*/
+* /
 
 [
     'method' => 'GET',
@@ -211,7 +213,6 @@ return [
     'action'  => [UserController::class, 'userDetail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
-    
     'section' => 'users',
     'title'   => 'Uživatelé: Detail',
 ],
@@ -222,9 +223,14 @@ return [
     'action'  => [UserController::class, 'sendResetPassword'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
-    
-    'section' => 'users',
-    'title'   => 'Resetování hesla',
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/users/{id}/resend-activation',
+    'action'  => [UserController::class, 'resendActivationEmail'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
 ],
 
 

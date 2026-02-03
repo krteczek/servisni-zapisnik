@@ -4,6 +4,7 @@ use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Auth;
 use App\Core\Roles;
+use App\Core\Session;
 
 ?>
 <!doctype html>
@@ -105,7 +106,12 @@ use App\Core\Roles;
     <!-- ================= MAIN ================= -->
     <main class="main">
         <h1><?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></h1>
-
-        
-    
+<?php 
+foreach (['success','error','info'] as $type): ?>
+    <?php if (Session::hasFlash($type)): ?>
+        <div class="flash <?= $type ?>">
+            <?= Session::getFlash($type) ?>
+        </div>
+    <?php endif; ?>
+<?php endforeach; ?>    
 

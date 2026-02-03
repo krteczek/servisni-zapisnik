@@ -44,19 +44,21 @@ final class AuthTokenService
         $rawToken = bin2hex(random_bytes(self::TOKEN_BYTES));
         $hash     = hash('sha256', $rawToken);
 
-        $expiresAt = (new DateTimeImmutable())
-            ->modify('+' . ($expirationDays ?? self::DEFAULT_EXPIRATION_DAYS) . ' days')
-            ->format('Y-m-d H:i:s');
-
-        $this->model->insert([
-            'user_id'     => $userId,
-            'company_id'  => $companyId,
-            'token_hash'  => $hash,
-            'type'        => $type,
-            'expires_at'  => $expiresAt,
-            'ip_created'  => $ip,
-            'user_agent'  => $userAgent,
-        ]);
+			$expiresAt = match ($type) {
+			    self::TYPE_RESET_PASSWORD => (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:s'),
+			    self::TYPE_ACTIVATE       => (new DateTimeImmutable())->modify('+7 days')->format('Y-m-d H:i:s'),
+			    default => throw new RuntimeException('Neznámý typ tokenu'),
+			};
+			
+			$this->model->createToken([
+			    'user_id'     => $userId,
+			    'company_id'  => $companyId,
+			    'token_hash'  => $hash,
+			    'type'        => $type,
+			    'expires_at'  => $expiresAt,
+			    'ip_created'  => $ip,
+			    'user_agent'  => $userAgent,
+			]);
 
         return $rawToken;
     }

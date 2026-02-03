@@ -48,7 +48,10 @@ final class Url
         header('Location: ' . self::to($path), true, $code);
         exit;
     }
-    
+    public static function base(): string
+    {
+    		return 'http://' . $_SERVER["HTTP_HOST"];
+    }
 public static function back(string $fallback = '/'): never
 {
     $referer = $_SERVER['HTTP_REFERER'] ?? null;
