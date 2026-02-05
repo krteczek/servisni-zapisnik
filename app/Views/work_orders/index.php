@@ -1,4 +1,5 @@
-<?php 
+<?php
+declare(strict_types=1); 
 $css = '';
 require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
@@ -8,16 +9,13 @@ use App\Core\Url;
 $workOrders = $view->orders;
 ?>
 <?= $css ?>
-<main class="main">
-    <h1>Zakázky &gt; Přehled</h1>
-
     <div class="work-orders">
         <?php foreach ($workOrders as $wo): ?>
             <div class="work-order-card">
 
                 <div class="wo-header">
                     <a
-                        href="<?= Url::to('/work-orders/' . (int)$wo['id']) ?>"
+                        href="<?= Url::to('/work-orders/' . (int)$wo['id'] .'/detail') ?>"
                         class="wo-title"
                         title="Otevřít detail zakázky"
                     >
@@ -37,7 +35,7 @@ $workOrders = $view->orders;
 
                 <div class="wo-actions">
                     <a
-                        href="<?= Url::to('/work-orders/' . (int)$wo['id']) ?>"
+                        href="<?= Url::to('/work-orders/' . (int)$wo['id'] . '/detail/#main') ?>"
                         class="wo-action"
                         title="Detail zakázky"
                     >
@@ -45,7 +43,7 @@ $workOrders = $view->orders;
                     </a>
 
                     <a
-                        href="<?= Url::to('/work-orders/update/' . (int)$wo['id']) ?>"
+                        href="<?= Url::to('/work-orders/' . (int)$wo['id']  . '/edit/#main')?>"
                         class="wo-action"
                         title="Upravit zakázku"
                     >
@@ -56,6 +54,6 @@ $workOrders = $view->orders;
             </div>
         <?php endforeach; ?>
     </div>
-</main>
+
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

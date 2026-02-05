@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
@@ -8,7 +9,7 @@ use App\Controllers\AdminController;
 use App\Controllers\WorkOrderController;
 use App\Controllers\AuditLogController;
 use App\Controllers\SystemController;
-
+use App\Controllers\TaskController;
 return [
 
 /*
@@ -39,43 +40,10 @@ return [
     'title'   => 'Bó - Přihlášení',
 ],
 
-/*
-|--------------------------------------------------------------------------
-| TOKEN / AKTIVACE / RESET HESLA (bez auth)
-|--------------------------------------------------------------------------
-* /
-
-[
-    'method' => 'GET',
-    'path'   => '/activate',
-    'action' => [AuthController::class, 'activateForm'],
-    'auth'   => false,
-],
-
-[
-    'method' => 'POST',
-    'path'   => '/activate',
-    'action' => [AuthController::class, 'activateSubmit'],
-    'auth'   => false,
-],
-
-[
-    'method' => 'GET',
-    'path'   => '/reset-password',
-    'action' => [AuthController::class, 'resetPasswordForm'],
-    'auth'   => false,
-],
-
-[
-    'method' => 'POST',
-    'path'   => '/reset-password',
-    'action' => [AuthController::class, 'resetPasswordSubmit'],
-    'auth'   => false,
-],
 
 /*
 |--------------------------------------------------------------------------
-| TOKEN / AKTIVACE / RESET HESLA
+| TOKEN / AKTIVACE / RESET HESLA / bez Auth!
 |--------------------------------------------------------------------------
 */
 
@@ -125,6 +93,56 @@ return [
     'title'   => 'Úkoly: Přehled',
 ],
 
+
+/*
+|--------------------------------------------------------------------------
+| TASKY
+|--------------------------------------------------------------------------
+*/
+
+[
+    'method'  => 'GET',
+    'path'    => '/tasks',
+    'action'  => [TaskController::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr', 'predak', 'monter'],
+    'menu'    => 'Úkoly',
+    'section' => 'tasks',
+	'title'   => 'Úkoly > Přehled',
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/tasks/create',
+    'action' => [TaskController::class, 'createForm'],
+    'auth'   => true,
+    'roles'   => ['admin', 'mistr', 'predak', 'monter'],
+    'submenu'    => 'Nový úkol',
+    'section' => 'tasks',
+    'title'   => 'Úkoly > Nový úkol',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/tasks/create',
+    'action' => [TaskController::class, 'create'],
+    'auth'   => true,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/tasks/{taskId}/done',
+    'action' => [TaskController::class, 'done'],
+    'auth'   => true,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/tasks/{taskId}/cancel',
+    'action' => [TaskController::class, 'cancel'],
+    'auth'   => true,
+],
+
 /*
 |--------------------------------------------------------------------------
 | ZAKÁZKY
@@ -159,12 +177,12 @@ return [
     'path'   => '/work-orders/create',
     'action' => [WorkOrderController::class, 'create'],
     'auth'   => true,
-    'roles'  => ['admin', 'mistr'],
+    'roles'  => ['admin', 'mistr', 'predak'],
 ],
 
 [
     'method'  => 'GET',
-    'path'    => '/work-orders/{id}',
+    'path'    => '/work-orders/{orderId}/detail',
     'action'  => [WorkOrderController::class, 'detail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
@@ -174,17 +192,33 @@ return [
 
 [
     'method'  => 'GET',
-    'path'    => '/work-orders/update/{id}',
-    'action'  => [WorkOrderController::class, 'update'],
+    'path'    => '/work-orders/{orderId}/edit',
+    'action'  => [WorkOrderController::class, 'edit'],
     'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
+    'roles'   => ['admin', 'mistr', 'predak'],
     'section' => 'workorders',
     'title'   => 'Zakázky > Upravit',
 ],
 [
     'method'  => 'POST',
-    'path'    => '/work-orders/update/{id}',
+    'path'    => '/work-orders/{orderId}/edit',
     'action'  => [WorkOrderController::class, 'update'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr', 'predak'],
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/work-orders/{orderId}/close/canceled',
+    'action'  => [WorkOrderController::class, 'closeCanceled'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/work-orders/{orderId}/close/done',
+    'action'  => [WorkOrderController::class, 'closeDone'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
 ],
@@ -269,7 +303,7 @@ return [
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
 ],
-
+/* momentálně zrušeno, řeší se jinak
 [
     'method'  => 'GET',
     'path'    => '/users/{id}/password',
@@ -287,7 +321,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
 ],
-
+*/
 /*
 |--------------------------------------------------------------------------
 | TÝMY

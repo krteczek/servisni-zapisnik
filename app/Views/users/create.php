@@ -20,7 +20,7 @@ $errors = $view->errors ?? [];
     <?php endforeach ?>
 </ul>
 <?php endif ?>
-
+<br>
 <form method="post"
       autocomplete="off"
       data-lpignore="true">

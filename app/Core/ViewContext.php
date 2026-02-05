@@ -53,4 +53,6 @@ class ViewContext
 	 public ?array $filters = [];
 
 	 public ?array $companies = [];
+	 
+	 public ?bool $canCloseOrder = false;
 }
