@@ -61,7 +61,7 @@ final class UserModel extends BaseModel
             $sql .= ' OFFSET ' . (int) $offset;
         }
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db()->prepare($sql);
         $stmt->execute($params);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -78,7 +78,7 @@ final class UserModel extends BaseModel
 
     public function find(int $id): ?array
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT *
              FROM {$this->tableName}
              WHERE id = :id
@@ -115,7 +115,7 @@ final class UserModel extends BaseModel
             $params['id'] = $ignoreId;
         }
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db()->prepare($sql);
         $stmt->execute($params);
 
         return (bool) $stmt->fetchColumn();
@@ -142,7 +142,7 @@ final class UserModel extends BaseModel
 
         $sql .= " LIMIT 1";
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db()->prepare($sql);
         $stmt->execute($params);
 
         return (bool) $stmt->fetchColumn();
@@ -150,7 +150,7 @@ final class UserModel extends BaseModel
 
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT *
              FROM {$this->tableName}
              WHERE email = :email
@@ -168,7 +168,7 @@ final class UserModel extends BaseModel
 
     public function findByEmailAndCompany(string $email, int $companyId): ?array
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT *
              FROM {$this->tableName}
              WHERE email = :email
@@ -255,7 +255,7 @@ final class UserModel extends BaseModel
             ORDER BY u.last_name, u.first_name
         ";
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db()->prepare($sql);
         $stmt->execute([
             'team_id'    => $teamId,
             'company_id' => Auth::companyId(),
@@ -270,7 +270,7 @@ final class UserModel extends BaseModel
 
     protected function delete(int $id): void
     {
-        $this->db
+        $this->db()
             ->prepare(
                 "DELETE FROM {$this->tableName}
                  WHERE id = :id

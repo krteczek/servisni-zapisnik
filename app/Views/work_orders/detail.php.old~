@@ -1,0 +1,131 @@
+<?php 
+require __DIR__ . '/../layout/header.php';
+use App\Core\Url;
+use App\Core\Csrf;
+use App\Core\Access;
+/** @var array $order */
+$workOrder = $this->view->order;
+
+$canCloseDone = $workOrder['canCloseDone'];
+$canCloseCanceled = $workOrder['canCloseCanceled'];
+
+?>
+<div class="card">
+
+    <table class="table table-detail">
+        <tr>
+            <th>ID</th>
+            <td><?= (int) $workOrder['id'] ?></td>
+        </tr>
+
+        <tr>
+            <th>Externí číslo</th>
+            <td><?= htmlspecialchars($workOrder['external_number'] ?? '—') ?></td>
+        </tr>
+
+        <tr>
+            <th>Název</th>
+            <td><strong><?= htmlspecialchars($workOrder['title']) ?></strong></td>
+        </tr>
+
+        <tr>
+            <th>Popis</th>
+            <td><?= nl2br(htmlspecialchars($workOrder['description'] ?? '')) ?></td>
+        </tr>
+
+        <tr>
+            <th>Zdroj</th>
+            <td><?= htmlspecialchars($workOrder['source']) ?></td>
+        </tr>
+
+        <tr>
+            <th>Požadoval</th>
+            <td><?= htmlspecialchars($workOrder['requested_by'] ?? '—') ?></td>
+        </tr>
+
+        <tr>
+            <th>Kontakt</th>
+            <td><?= htmlspecialchars($workOrder['contact'] ?? '—') ?></td>
+        </tr>
+
+        <tr>
+            <th>Priorita</th>
+            <td>
+                <span class="priority priority-<?= htmlspecialchars($order['priority']) ?>">
+                    <?= htmlspecialchars($workOrder['priority']) ?>
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <th>Stav</th>
+            <td>
+                <span class="status status-<?= htmlspecialchars($order['status']) ?>">
+                    <?= htmlspecialchars($workOrder['status']) ?>
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <th>Vytvořeno</th>
+            <td><?= htmlspecialchars($workOrder['created_at']) ?></td>
+        </tr>
+
+        <tr>
+            <th>Uzavřeno</th>
+            <td>
+                <?= $workOrder['closed_at']
+                    ? htmlspecialchars($workOrder['closed_at'])
+                    : '<em>neuzavřeno</em>' ?>
+            </td>
+        </tr>
+    </table>
+    <br>
+<?php if ($canCloseDone): ?>
+
+ 	<p> V případě, že má zakázka všechny své úkoly uzavřené (hotové, ukončené), je možné ji ukončit. 
+	Tento krok je nevratný. 
+	V případě, že chcete přidat další úkoly k této zakázce, následující tlačítko, prosím, ignorujte.</p>
+   <form method="post" action="<?= Url::to('/work-orders/' . $workOrder['id'] . '/close/done') ?>">
+        <button class="btn btn-success">
+            Dokončit zakázku
+        </button>
+    </form>
+<?php endif; ?>
+
+<?php if ($canCloseCanceled): ?>
+<br>
+	<p> V případě, že zakázka nemá žádné úkoly nebo má jen úkoly stornované, je možné zakázku zrušit.
+	Tento krok je nevratný. 
+	V případě, že chcete přidat další úkoly k této zakázce, následující tlačítko, prosím, ignorujte.</p>
+    <form method="post"
+          action="<?= Url::to('/work-orders/' . $workOrder['id'] . '/close/canceled') ?>"
+          onsubmit="return confirm('Opravdu chcete zakázku zrušit? Tento krok je nevratný.');">
+        <button class="btn btn-danger">
+            Zrušit (stornovat) zakázku
+        </button>
+    </form>
+<?php endif; ?>
+
+<?php if ($canCloseOrder): ?>
+	<p> V případě, že má zakázka všechny své úkoly uzavřené (hotové, ukončené), je možné ji ukončit. 
+	Tento krok je nevratný. V případě, že chcete přidat další úkoly k této zakázce, následující tlačítko prosím ignorujte.</p>
+    <form 
+    method="post" 
+    action="<?= Url::to('/work-orders/' . $workOrder['id'] . '/close/done') ?>"
+    onsubmit="return confirm('Opravdu chcete zakázku ukončit? Tento krok je nevratný.');"
+    >
+        <?= Csrf::getField() ?>
+        <button class="btn btn-success">
+            Ukončit zakázku
+        </button>
+    </form>
+<?php endif; ?>
+
+</div>
+
+<p>
+    <a href="<?= Url::to('/work-orders') ?>/#main" class="btn btn-secondary">
+        ← Zpět na přehled
+    </a>
+</p>

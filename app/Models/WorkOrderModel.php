@@ -3,64 +3,62 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Core\Database;
+use PDO;
 
-class WorkOrderModel extends BaseModel
+class WorkOrderModel extends TenantModel
 {
     protected string $table = 'work_orders';
     protected string $connection = 'work';
 
+		//přepínání mezi stavy zakázky
+public function recomputeStatus(int $orderId): void
+{
+    $taskModel = new TaskModel();
+    $stats = $taskModel->statsForWorkOrder($orderId);
 
-    public function create(array $data): int
-    {
-        return $this->insert([
-            'external_number'     => $data['external_number'],
-            'title'               => $data['title'],
-            'description'         => $data['description'],
-            'source'              => $data['source'],
-            'requested_by'        => $data['requested_by'],
-            'priority'            => $data['priority'],
-            'created_by_user_id'  => $data['user_id'],
-        ]);
+    if ($stats['total'] === 0) {
+        $this->update($orderId, ['status' => 'new']);
+        return;
     }
-public function all(): array
-{
-    return $this->allRows('created_at');
-}/**
-    public function all(): array
-    {
-        return $this->db
-            ->query("SELECT * FROM {$this->table} ORDER BY created_at DESC")
-            ->fetchAll();
+
+    if ($stats['open'] > 0) {
+        $this->update($orderId, ['status' => 'in_progress']);
+        return;
     }
-**/
-    public function find(int $id): ?array
-    {
-        return $this->findRow($id);
+
+    if ($stats['done'] > 0) {
+        $this->update($orderId, ['status' => 'done']);
+        return;
     }
-public function update(int $id, array $data): bool
-{
-    return $this->updateRow($id, [
-        'external_number' => $data['external_number'],
-        'title'           => $data['title'],
-        'description'     => $data['description'],
-        'source'          => $data['source'],
-        'requested_by'    => $data['requested_by'],
-        'contact'         => $data['contact'],
-        'priority'        => $data['priority'],
-    ]);
+
+    // zbývá jen cancelled
+    $this->update($orderId, ['status' => 'cancelled']);
 }
-    
-    public function updateOld(int $id, array $data): void
+
+public function isClosed(array $order): bool
 {
-    $this->updateRow($id, [
-        'external_number' => $data['external_number'],
-        'title'           => $data['title'],
-        'description'     => $data['description'],
-        'source'          => $data['source'],
-        'requested_by'    => $data['requested_by'],
-        'contact'         => $data['contact'],
-        'priority'        => $data['priority'],
-    ]);
+    return in_array($order['status'], ['done', 'cancelled', 'exported'], true);
 }
+
+public function canAddTask(array $order): bool
+{
+    return !$this->isClosed($order);
+}
+
+public function canBeCancelled(array $order, array $taskStats): bool
+{
+    return
+        $order['status'] === 'new' || $order['status'] === 'in_progress'
+        && $taskStats['open'] === 0
+        && $taskStats['done'] === 0;
+}
+
+public function canBeDone(array $order, array $taskStats): bool
+{
+    return
+        ($order['status'] === 'new' || $order['status'] === 'in_progress')
+        && $taskStats['open'] === 0
+        && $taskStats['done'] > 0;
+}
+
 }

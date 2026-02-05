@@ -80,7 +80,7 @@ use App\Core\Session;
                             </button>
                         </form>
                     <?php else: ?>
-                        <a href="<?= $section['path'] ?>">
+                        <a href="<?= $section['path'] ?>/#main">
                             <?= htmlspecialchars($section['label']) ?>
                         </a>
                     <?php endif; ?>
@@ -89,7 +89,7 @@ use App\Core\Session;
                         <ul class="submenu">
                             <?php foreach ($section['items'] as $item): ?>
                                 <li class="submenu-item <?= $item['active'] ? 'active' : '' ?>">
-                                    <a href="<?= $item['path'] ?>">
+                                    <a href="<?= $item['path'] ?>/#main">
                                         <?= htmlspecialchars($item['label']) ?>
                                     </a>
                                 </li>
@@ -104,7 +104,7 @@ use App\Core\Session;
     </nav>
 
     <!-- ================= MAIN ================= -->
-    <main class="main">
+    <main id="main" class="main">
         <h1><?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></h1>
 <?php 
 foreach (['success','error','info'] as $type): ?>

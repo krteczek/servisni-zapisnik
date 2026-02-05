@@ -104,11 +104,12 @@ public function store(): string
             Flash::error('Uživatel neexistuje.');
             Url::redirect('/users');
         }
+        /* uživateli jde editovat jen některé položky
     	if (UserGuard::isProtected($user)) {
 			Flash::error('Tento účet nelze upravovat.');
 			Url::redirect('/users');
 		}
-
+*/
         $this->view->old   = $user;
         $this->view->roles = Roles::effective();
 
@@ -122,11 +123,12 @@ public function store(): string
             Flash::error('Uživatel neexistuje.');
             Url::redirect('/users');
         }
+        /* uživateli jde editovat jen některé položky
     	if (UserGuard::isProtected($old)) {
 			Flash::error('Tento účet nelze upravovat.');
 			Url::redirect('/users');
 		}
- 
+ */
         $data = $_POST;
 
         $this->view->data  = $data;
@@ -245,12 +247,12 @@ public function userDetail(int $id): string
         Flash::error('Uživatel neexistuje.');
         Url::redirect('/users');
     }
-
+/*
     if (UserGuard::isProtected($user)) {
         Flash::error('Tento účet nelze zobrazit.');
         Url::redirect('/users');
     }
-
+*/
     $this->view->user = $user;
 
     // odvozený stav pro view

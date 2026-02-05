@@ -67,17 +67,10 @@ Poslat aktivační e-mail
 
 
 <?php else: ?>
-<!-- reset password -->
-<form method="post" action="<?= Url::to('/users/' . (int) $user['id'] . '/send-reset-password') ?>">
-<?= Csrf::getField() ?>
-<button class="btn btn-secondary">
-Poslat e-mail pro změnu hesla
-</button>
-</form>
 <?php endif; ?>
 
 
-<a href="<?= Url::to('/users') ?>" class="btn btn-link">← zpět na seznam</a>
+<a href="<?= Url::to('/users') ?>/#main" class="btn btn-link">← zpět na seznam</a>
 </section>
 
 

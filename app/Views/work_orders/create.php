@@ -1,4 +1,8 @@
 <?php
+declare(strict_types=1);
+$css = '';
+require __DIR__ . '/style.php';
+
 require __DIR__ . '/../layout/header.php';
 
 use App\Core\Url;
@@ -6,7 +10,9 @@ use App\Core\Csrf;
 use App\Core\Access;
 $data = $view->data; 
 ?>
-
+<style>
+<?= $css ?>
+</style>
 <form method="post" action="">
     <?= Csrf::getField() ?>
 
@@ -96,7 +102,7 @@ $data = $view->data;
             <th></th>
             <td class="form-actions">
                 <button type="submit" class="btn btn-primary">Uložit</button>
-                <a href="<?= Url::to('/work-orders') ?>" class="btn btn-secondary">
+                <a href="<?= Url::to('/work-orders') ?>/#main" class="btn btn-secondary">
                     Zpět na přehled
                 </a>
             </td>

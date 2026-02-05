@@ -80,4 +80,23 @@ abstract class Controller
         $this->view->title = '404 – Stránka nenalezena';
         return $this->render('errors/404');
     }
+    
+    protected function maxLength(
+										    string $field,
+										    ?string $value,
+										    int $max,
+										    string $label
+											): void {
+	    if ($value === null) {
+	        return;
+	    }
+	
+	    if (mb_strlen($value, 'UTF-8') > $max) {
+	        $this->addError(
+	            $field,
+	            "{$label} může mít maximálně {$max} znaků"
+	        );
+	    }
+	}
+
 }

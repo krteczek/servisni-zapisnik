@@ -12,7 +12,7 @@ use Throwable;
 
 abstract class BaseModel
 {
-    protected PDO $db;
+		protected ?PDO $db = null;
 
     /** název tabulky BEZ prefixu */
     protected string $table;
@@ -27,17 +27,19 @@ abstract class BaseModel
      */
     protected string $connection = 'admin';
 
-    public function __construct()
-    {
-        if (!isset($this->table) || $this->table === '') {
-            throw new LogicException(
-                static::class . ' must define protected string $table'
-            );
-        }
-
-        $this->db        = $this->resolveDb();
-        $this->tableName = $this->resolveTableName();
-    }
+		public function __construct()
+		{
+		    if (!isset($this->table) || $this->table === '') {
+		        throw new LogicException(
+		            static::class . ' must define protected string $table'
+		        );
+		    }
+		
+		    // ❌ NEOTEVÍRAT DB TADY
+		    // $this->db = $this->resolveDb();
+		
+		    $this->tableName = $this->resolveTableName();
+		}
 
     /* ==========================================================
      * DB RESOLUTION
@@ -89,14 +91,14 @@ abstract class BaseModel
 
     protected function allRows(string $orderBy = 'id'): array
     {
-        return $this->db
+        return $this->db()
             ->query("SELECT * FROM {$this->tableName} ORDER BY {$orderBy}")
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
     protected function findRow(int $id): ?array
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT * FROM {$this->tableName} WHERE id = :id LIMIT 1"
         );
         $stmt->execute(['id' => $id]);
@@ -114,12 +116,12 @@ abstract class BaseModel
         $fields = implode(', ', $cols);
         $values = ':' . implode(', :', $cols);
 
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})"
         );
         $stmt->execute($data);
 
-        $lastId = (int) $this->db->lastInsertId();
+        $lastId = (int) $this->db()->lastInsertId();
 
         if ($this->shouldAudit()) {
             try {
@@ -159,7 +161,7 @@ abstract class BaseModel
                 SET " . implode(', ', $set) . "
                 WHERE id = :id";
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db()->prepare($sql);
         $ok   = $stmt->execute($data);
 
 if ($ok && $this->shouldAudit()) {
@@ -215,7 +217,7 @@ if ($ok && $this->shouldAudit()) {
             implode(' AND ', $whereParts)
         );
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db()->prepare($sql);
         return $stmt->execute($params);
     }
 protected function diff(array $before, array $after): array
@@ -247,5 +249,46 @@ protected function diff(array $before, array $after): array
 
     return $diff;
 }
+
+
+protected function fetchAll(string $sql, array $params = []): array
+{
+    $stmt = $this->db()->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+protected function db(): PDO
+{
+    if ($this->db === null) {
+        $this->db = $this->resolveDb();
+    }
+
+    return $this->db;
+}
+
+protected function fetchOne(string $sql, array $params = []): ?array
+{
+    $stmt = $this->db()->prepare($sql);
+    $stmt->execute($params);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $row !== false ? $row : null;
+}
+
+
+public function findOrFail(int $id): array
+{
+    $row = $this->find($id);
+
+    if (!$row) {
+        throw new LogicException('Záznam nenalezen');
+    }
+
+    return $row;
+}
+
 
 }
