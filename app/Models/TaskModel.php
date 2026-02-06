@@ -167,5 +167,52 @@ public function statsForWorkOrder(int $workOrderId): array
 
     return $stats;
 }
+    public function forWorkOrderWithStats(int $orderId): array
+    {
+        $sql = "
+            SELECT *
+            FROM {$this->tableName}
+            WHERE work_order_id = :order
+              AND {$this->tenantColumn()} = :tenant
+            ORDER BY
+                status IN ('done','cancelled'),  -- otevřené nahoře
+                created_at DESC
+        ";
 
+        $tasks = $this->fetchAll($sql, [
+            'order'  => $orderId,
+            'tenant'=> $this->tenantId(),
+        ]);
+
+        if ($tasks === []) {
+            return [];
+        }
+
+        $taskIds = array_column($tasks, 'id');
+
+        $assignmentModel = new AssignmentModel();
+        $statsMap = $assignmentModel->statsForTasks($taskIds);
+
+        foreach ($tasks as $i => $task) {
+            $stats = $statsMap[$task['id']] ?? [
+                'open' => 0, 'done' => 0, 'cancelled' => 0, 'total' => 0
+            ];
+
+            $tasks[$i]['stats'] = $stats;
+            $tasks[$i]['can_cancel'] = $this->canBeCancelled($stats);
+            $tasks[$i]['can_close']  = $this->canBeDone($stats);
+        }
+
+        return $tasks;
+    }
+
+    private function canBeCancelled(array $stats): bool
+    {
+        return $stats['total'] === 0;
+    }
+
+    private function canBeDone(array $stats): bool
+    {
+        return $stats['open'] === 0 && $stats['done'] > 0;
+    }
 }

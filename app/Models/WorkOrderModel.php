@@ -21,6 +21,36 @@ public function recomputeStatus(int $orderId): void
         return;
     }
 
+    if ($stats['done'] > 0 && $stats['open'] === 0) {
+        $this->update($orderId, [
+            'status'    => 'done',
+            'closed_at'=> date('Y-m-d H:i:s'),
+        ]);
+        return;
+    }
+
+    if ($stats['canceled'] === $stats['total']) {
+        $this->update($orderId, [
+            'status'    => 'cancelled',
+            'closed_at'=> date('Y-m-d H:i:s'),
+        ]);
+        return;
+    }
+
+    $this->update($orderId, ['status' => 'in_progress']);
+}
+
+
+public function recomputeStatusOld(int $orderId): void
+{
+    $taskModel = new TaskModel();
+    $stats = $taskModel->statsForWorkOrder($orderId);
+
+    if ($stats['total'] === 0) {
+        $this->update($orderId, ['status' => 'new']);
+        return;
+    }
+
     if ($stats['open'] > 0) {
         $this->update($orderId, ['status' => 'in_progress']);
         return;

@@ -10,6 +10,7 @@ use App\Core\viewContext;
 use App\Core\Url;
 use App\Models\WorkOrderModel;
 use App\Models\TaskModel;
+use App\Models\Team;
 
 class WorkOrderController extends Controller
 {
@@ -77,7 +78,7 @@ public function index(): string
 			$ok = $this->model->update($orderId, $data);
 			$add = $ok ? 'success' : 'error';
 			if(!$ok){
-				$this->addErrors('Zakázku se nepodařilo změnit.');
+				$this->addErrors('global','Zakázku se nepodařilo změnit.');
 				$this->view->data = $data;
 				return $this->render('work_orders/create');
 			}
@@ -85,78 +86,97 @@ public function index(): string
         Flash::success('Zakázka byla úspěšně změněna.');
         Url::redirect('/work-orders/' . $orderId . '/detail');
     }
-
-	public function detail(int $orderId)
-	{
-		$workOrderModel = new WorkOrderModel();
-		$taskModel      = new TaskModel();
     
-    	$workOrder = $this->getOrderOrRedirect($orderId);
-    	$stats = $taskModel->statsForWorkOrder($orderId);
-		
-		// vytáhneme tasky
-		$tasks = $taskModel->forWorkOrderWithStats($orderId);
-		/* vrátí array:
-		[
-  [
-    'id' => 1,
-    'title' => 'Výměna čerpadla',
-    'status' => 'open',
-    'created_at' => '...',
-    'stats' => [
-        'open' => 1,
-        'done' => 2,
-        'cancelled' => 0,
-        'total' => 3,
-    ],
-    'can_cancel' => false,
-    'can_close'  => true,
-  ],
-*/
-		
-		$tasks = $taskModel->byWorkOrder($orderId);
-		foreach ($tasks as &$task) 
-		{
-    		$task['stats'] = $assignmentModel->statsForTask($task['id']);
-		}
-
-		$stats = $task['stats'];
-		$canCancel = $stats['total'] === 0;
-		//vrátí bool true/false
-		$canClose =
-			$stats['done'] > 0
-			&& $stats['open'] === 0
-			&& $task['status'] === 'open';
-					
-		 /*
-		 Pravidla (zatím jen pro hlavu):
-		
-		 DONE:
-		 - žádný open
-		 - aspoň jeden done
-		
-		 CANCELED:
-		 - žádný open
-		 - žádný done
-		 */
-		$this->view->order = $workOrder;
-		
-		$canCloseCanceled = $workOrderModel->canBeCancelled($workOrder, $stats);
-		$canCloseDone     = $workOrderModel->canBeDone($workOrder, $stats);
-//var_dump($canCloseCanceled);
-//var_dump($canCloseDone);
-    // 🧪 FEJK (aby sis mohl hrát v UI)
-    // --------------------------------
-    // $canCloseDone     = true;
-    // $canCloseCanceled = false;
-		$this->view->order                        = $workOrder;
-		$this->view->order['taskStats']           = $taskStats;
-		$this->view->order['canCloseDone']        = $canCloseDone;
-		$this->view->order['canCloseCanceled']    = $canCloseCanceled;
-		
-		return $this->render('work_orders/detail');
+    public function detail(int $orderId): string
+{
+	
+	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+		//ověříme data v pomocné metodě
+		$post = $this->createTask($orderId);//array
 	}
+    $order = $this->getOrderOrRedirect($orderId);
 
+    $taskModel = new TaskModel();
+    $tasks = $taskModel->forWorkOrderWithStats($orderId);
+
+    $teamModel = new Team();
+    $teams = $teamModel->byActive(true);
+
+    $this->view->order = $order;
+    $this->view->tasks = $tasks;
+    $this->view->teams = $teams;
+
+    // data formuláře (pro sticky input / chyby)
+    $this->view->taskFormData   = $this->view->taskFormData   ?? [];
+    $this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
+
+    return $this->render('work_orders/detail');
+}
+
+//metoda ověří POST data, provede uložení a vrátí array
+private function createTask(int $orderId): array
+{
+    $this->checkCsrf();
+    
+    $data = [
+        'work_order_id' => $orderId,
+        'team_id'       => (int)($_POST['team_id'] ?? 0),
+        'title'         => trim($_POST['title'] ?? ''),
+        'description'   => trim($_POST['description'] ?? ''),
+        'is_urgent' 		=> (int) ($_POST['is_urgent'] ?? 0),
+        'created_by_user_id' => Auth::id(),
+    ];
+	//ověření existence týmu
+    $teamModel = new Team();
+    $team = $teamModel->find($data['team_id']);
+        if (!$team) {
+            $this->addErrors('team_id', 'Tým neexistuje.');
+        }
+	//ověření povinného názvu úkolu
+    if ($data['title'] === '') 
+    {
+			$this->addErrors('title','Název zakázky je povinný.');
+        
+    } elseif(mb_strlen($data['title'] ) >= 255 )
+    {
+			$this->addErrors('title','Název úkolu je příliš dlouhý.');
+    }
+    
+    //Ověření max délky description 10000 znaků
+    if(mb_strlen($data['description'] ) >= 10000 )
+    {
+			$this->addErrors('description','Popis úkolu je příliš dlouhý.');
+    }
+    $data['is_urgent'] = $data['is_urgent'] === 1 ? 1 : 0;
+    
+    if($this->hasErrors()) {
+    		$data['ok'] = false;
+    		return $data;
+    }
+    $taskModel = new TaskModel();
+    $data['task_id'] = $taskModel->create($data);
+    if(is_int($data['task_id']) ) {
+    	$data['ok'] = true;
+    } else {
+    	$data['ok'] = false;
+    }
+    return $data;
+}
+
+
+
+public function detailold(int $orderId)
+{
+    $order = $this->getOrderOrRedirect($orderId);
+
+    $taskModel = new TaskModel();
+    $tasks = $taskModel->forWorkOrderWithStats($orderId);
+
+    $this->view->order = $order;
+    $this->view->tasks = $tasks;
+
+    return $this->render('work_orders/detail');
+}
     /* ==========================
        PRIVATE HELPERS
        ========================== */
@@ -279,4 +299,26 @@ public function closeDone(int $orderId)
     $this->flashSuccess('Zakázka byla dokončena.');
     return $this->redirect('/work-orders#main');
 }
+
+public function closeTaskDone(int $orderId, int $taskId): void
+{
+    $taskModel = new TaskModel();
+
+    if (!$taskModel->belongsToOrder($taskId, $orderId)) {
+        throw new LogicException('Neplatný kontext úkolu');
+    }
+
+    $taskModel->markDone($taskId);
+
+    $this->recomputeOrder($orderId);
+
+    Redirect::back();
+}
+
+private function recomputeOrder(int $orderId): void
+{
+    $workOrderModel = new WorkOrderModel();
+    $workOrderModel->recomputeStatus($orderId);
+}
+
 }
