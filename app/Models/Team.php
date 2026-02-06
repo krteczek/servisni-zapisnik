@@ -17,7 +17,7 @@ class Team extends BaseModel
 
     public function find(int $id): ?array
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT *
              FROM {$this->tableName}
              WHERE id = :id
@@ -82,7 +82,7 @@ class Team extends BaseModel
 
     public function byActive(bool $active): array
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT *
              FROM {$this->tableName}
              WHERE active = :active

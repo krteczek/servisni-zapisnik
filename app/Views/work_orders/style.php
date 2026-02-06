@@ -404,4 +404,123 @@ $css .= '
 
 </style>
 ';
+$css .= '
+<style type="text/css">
+<!-- -->
+.task-box {
+    border: 1px solid #ddd;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.task-stats span {
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+
+.task-actions {
+    margin-top: 8px;
+}
+
+/* =========================
+   TASK – CREATE FORM
+   ========================= */
+
+.task-form {
+    max-width: 900px;
+    margin: 1.5rem auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1.25rem;
+}
+
+.task-form h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #222;
+}
+
+.task-form .form-group {
+    margin-bottom: .9rem;
+}
+
+.task-form label {
+    display: block;
+    font-size: .8rem;
+    font-weight: 700;
+    margin-bottom: .25rem;
+    color: #444;
+}
+
+.task-form input,
+.task-form textarea,
+.task-form select {
+    width: 100%;
+    padding: .45rem .55rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: .9rem;
+}
+
+.task-form textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+.task-form .hint {
+    font-size: .7rem;
+    color: #777;
+    margin-top: .2rem;
+}
+
+/* checkbox */
+.task-form .checkbox {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+}
+
+/* actions */
+.task-form .form-actions {
+    margin-top: 1.25rem;
+    display: flex;
+    gap: .5rem;
+    justify-content: flex-end;
+}
+
+/* =========================
+   TASK – VISUAL CONTEXT
+   ========================= */
+
+.task-form-context {
+    font-size: .75rem;
+    color: #666;
+    margin-bottom: .75rem;
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 700px) {
+    .task-form {
+        margin: 1rem;
+        padding: 1rem;
+    }
+}
+
+</style>
+
+
+';
+
 ?>

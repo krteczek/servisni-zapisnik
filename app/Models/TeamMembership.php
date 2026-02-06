@@ -31,7 +31,7 @@ final class TeamMembership extends BaseModel
 
     public function currentMembers(int $teamId): array
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT
                 tm.id AS membership_id,
                 u.id,
@@ -60,7 +60,7 @@ final class TeamMembership extends BaseModel
 
     public function add(int $userId, int $teamId, string $role): ?int
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT 1
              FROM {$this->tableName}
              WHERE user_id = :user
@@ -95,7 +95,7 @@ final class TeamMembership extends BaseModel
 
     public function end(int $membershipId): void
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "UPDATE {$this->tableName}
              SET valid_to = :today
              WHERE id = :id
@@ -115,7 +115,7 @@ final class TeamMembership extends BaseModel
 
     public function activeTeamsByUsers(): array
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT
                 tm.user_id,
                 t.id   AS team_id,
@@ -154,7 +154,7 @@ final class TeamMembership extends BaseModel
 
     public function changeRole(int $membershipId, string $role): void
     {
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "UPDATE {$this->tableName}
              SET role_in_team = :role
              WHERE id = :id

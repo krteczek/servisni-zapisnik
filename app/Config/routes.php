@@ -222,6 +222,30 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
 ],
+// routy pro přidání tasku k zakázce
+[
+    'method'  => 'POST',
+    'path'    => '/work-orders/{orderId}/tasks/create',
+    'action'  => [WorkOrderController::class, 'detail'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr', 'predak'],
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/work-orders/{orderId}/tasks/{taskId}/done',
+    'action'  => [WorkOrderController::class, 'closeTaskDone'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/work-orders/{orderId}/tasks/{taskId}/cancel',
+    'action'  => [WorkOrderController::class, 'closeTaskCanceled'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+],
 
 /*
 |--------------------------------------------------------------------------
