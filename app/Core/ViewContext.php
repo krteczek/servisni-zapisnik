@@ -44,9 +44,10 @@ class ViewContext
 	 public array $userTeams = [];
 
 
-//WORKORER
+//WORKORDER
 	 public array $orders = [];
 	 public array $order = [];
+	 public array $post = [];
 	 
 // Admin
 	 public ?array $logs = [];

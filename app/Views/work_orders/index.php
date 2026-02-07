@@ -32,7 +32,9 @@ $workOrders = $view->orders;
                         <?= strtoupper($wo['status']) ?>
                     </span>
                 </div>
+<div class="wo-kontext">
 
+</div>
                 <div class="wo-actions">
                     <a
                         href="<?= Url::to('/work-orders/' . (int)$wo['id'] . '/detail/#main') ?>"

@@ -210,7 +210,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/work-orders/{orderId}/close/canceled',
-    'action'  => [WorkOrderController::class, 'closeCanceled'],
+    'action'  => [WorkOrderController::class, 'closeOrderCanceled'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
 ],
@@ -218,7 +218,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/work-orders/{orderId}/close/done',
-    'action'  => [WorkOrderController::class, 'closeDone'],
+    'action'  => [WorkOrderController::class, 'closeOrderDone'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
 ],

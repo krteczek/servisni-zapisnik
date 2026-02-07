@@ -6,8 +6,9 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Flash;
-use App\Core\viewContext;
+use App\Core\ViewContext;
 use App\Core\Url;
+use App\Core\Logger;
 use App\Models\WorkOrderModel;
 use App\Models\TaskModel;
 use App\Models\Team;
@@ -47,7 +48,7 @@ public function index(): string
         $orderId = $this->model->create($data);
         $this->model->recomputeStatus($orderId);
 			if(!$orderId) {
-				$this->addError('global', 'Zakázku se nepodařilo vytvořit.');
+				$this->addErrors('global', 'Zakázku se nepodařilo vytvořit.');
             return $this->render('work_orders/create');
 			
 			}
@@ -89,7 +90,7 @@ public function index(): string
     
     public function detail(int $orderId): string
 {
-	
+	$post = [];
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		//ověříme data v pomocné metodě
 		$post = $this->createTask($orderId);//array
@@ -105,7 +106,8 @@ public function index(): string
     $this->view->order = $order;
     $this->view->tasks = $tasks;
     $this->view->teams = $teams;
-
+    $this->view->post = $post;
+	
     // data formuláře (pro sticky input / chyby)
     $this->view->taskFormData   = $this->view->taskFormData   ?? [];
     $this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
@@ -123,7 +125,7 @@ private function createTask(int $orderId): array
         'team_id'       => (int)($_POST['team_id'] ?? 0),
         'title'         => trim($_POST['title'] ?? ''),
         'description'   => trim($_POST['description'] ?? ''),
-        'is_urgent' 		=> (int) ($_POST['is_urgent'] ?? 0),
+        
         'created_by_user_id' => Auth::id(),
     ];
 	//ověření existence týmu
@@ -147,14 +149,15 @@ private function createTask(int $orderId): array
     {
 			$this->addErrors('description','Popis úkolu je příliš dlouhý.');
     }
-    $data['is_urgent'] = $data['is_urgent'] === 1 ? 1 : 0;
     
+   // var_dump($this->view->errors);
     if($this->hasErrors()) {
     		$data['ok'] = false;
     		return $data;
     }
     $taskModel = new TaskModel();
     $data['task_id'] = $taskModel->create($data);
+    
     if(is_int($data['task_id']) ) {
     	$data['ok'] = true;
     } else {
@@ -163,20 +166,6 @@ private function createTask(int $orderId): array
     return $data;
 }
 
-
-
-public function detailold(int $orderId)
-{
-    $order = $this->getOrderOrRedirect($orderId);
-
-    $taskModel = new TaskModel();
-    $tasks = $taskModel->forWorkOrderWithStats($orderId);
-
-    $this->view->order = $order;
-    $this->view->tasks = $tasks;
-
-    return $this->render('work_orders/detail');
-}
     /* ==========================
        PRIVATE HELPERS
        ========================== */
@@ -200,12 +189,7 @@ private function getOrderOrRedirect(int $orderId): array
     private function validate(array $post): array
     {
         $this->checkCsrf();
-  
-  
-  //`status` enum('new','in_progress','done','exported','cancelled') NOT NULL DEFAULT 'new',
-  //`created_by_user_id` bigint(20) UNSIGNED NOT NULL,
-  //`created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  //`closed_at` datetime DEFAULT NULL
+
         $data = [
             'external_number' 	=> trim($post['external_number'] ?? '') ?: null,
             'title'           	=> trim($post['title'] ?? ''),
@@ -247,7 +231,8 @@ private function getOrderOrRedirect(int $orderId): array
 
         return $data;
     }
- public function closeCanceled(int $orderId)
+    
+ public function closeOrderCanceled(int $orderId)
 {
     $taskModel = new TaskModel();
     $woModel   = new WorkOrderModel();
@@ -255,10 +240,10 @@ private function getOrderOrRedirect(int $orderId): array
     $stats = $taskModel->statsForWorkOrder($orderId);
 
     if ($stats['open'] > 0 || $stats['done'] > 0) {
-        $this->flashError(
+        Flash::error(
             'Zakázku nelze zrušit, protože obsahuje otevřené nebo dokončené úkoly.'
         );
-        return $this->redirect("/work-orders/{$orderId}#main");
+        Url::redirect("/work-orders/{$orderId}/detail/#main");
     }
 
     $woModel->update($orderId, [
@@ -266,11 +251,11 @@ private function getOrderOrRedirect(int $orderId): array
         'closed_at'=> date('Y-m-d H:i:s'),
     ]);
 
-    $this->flashSuccess('Zakázka byla zrušena.');
-    return $this->redirect('/work-orders#main');
+    Flash::success('Zakázka byla zrušena.');
+    Url::redirect('work-orders/#main');
 }
 
-public function closeDone(int $orderId)
+public function closeOrderDone(int $orderId)
 {
     $taskModel = new TaskModel();
     $woModel   = new WorkOrderModel();
@@ -278,17 +263,17 @@ public function closeDone(int $orderId)
     $stats = $taskModel->statsForWorkOrder($orderId);
 
     if ($stats['open'] > 0) {
-        $this->flashError(
+        Flash::error(
             'Zakázku nelze dokončit, dokud existují otevřené úkoly.'
         );
-        return $this->redirect("/work-orders/{$orderId}#main");
+        Url::redirect("/work-orders/{$orderId}/detail/#main");
     }
 
     if ($stats['done'] === 0) {
-        $this->flashError(
+        Flash::error(
             'Zakázku nelze dokončit, protože nemá žádný dokončený úkol.'
         );
-        return $this->redirect("/work-orders/{$orderId}#main");
+        Url::redirect("/work-orders/{$orderId}/detail/#main");
     }
 
     $woModel->update($orderId, [
@@ -296,29 +281,54 @@ public function closeDone(int $orderId)
         'closed_at'=> date('Y-m-d H:i:s'),
     ]);
 
-    $this->flashSuccess('Zakázka byla dokončena.');
-    return $this->redirect('/work-orders#main');
-}
-
-public function closeTaskDone(int $orderId, int $taskId): void
-{
-    $taskModel = new TaskModel();
-
-    if (!$taskModel->belongsToOrder($taskId, $orderId)) {
-        throw new LogicException('Neplatný kontext úkolu');
-    }
-
-    $taskModel->markDone($taskId);
-
-    $this->recomputeOrder($orderId);
-
-    Redirect::back();
+    Flash::success('Zakázka byla dokončena.');
+    Url::redirect('/work-orders/' . $orderId . '/detail/#main');
 }
 
 private function recomputeOrder(int $orderId): void
 {
     $workOrderModel = new WorkOrderModel();
     $workOrderModel->recomputeStatus($orderId);
+}
+
+
+public function closeTaskCanceled(int $orderId, int $taskId): void
+{
+    $this->closeTask($orderId, $taskId, 'canceled');
+}
+
+public function closeTaskDone(int $orderId, int $taskId): void
+{
+    $this->closeTask($orderId, $taskId, 'done');
+}
+
+private function closeTask(int $orderId, int $taskId, string $status): void
+{
+    try {
+        $taskModel = new TaskModel();
+
+        // 🔐 KONTEXTOVÁ KONTROLA (TADY JE SPRÁVNĚ)
+        if (!$taskModel->belongsToOrder($taskId, $orderId)) {
+            throw new \LogicException('Úkol nepatří k této zakázce.');
+        }
+
+        if (!$taskModel->canBeClosed($taskId, $status)) {
+            Flash::error('Úkol nelze v tomto stavu uzavřít.');
+            Url::redirect('/work-orders/' . $orderId);
+        }
+
+        $taskModel->closeTask($taskId, $status);
+
+        $this->recomputeOrder($orderId);
+
+        Flash::success('Úkol byl úspěšně uzavřen.');
+        Url::redirect('/work-orders/' . $orderId);
+
+    } catch (\Throwable $e) {
+        Logger::error($e);
+        Flash::error('Nepodařilo se uzavřít úkol.');
+        Url::redirect('/work-orders/' . $orderId);
+    }
 }
 
 }

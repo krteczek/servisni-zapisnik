@@ -17,10 +17,11 @@ $workOrder = $this->view->order;
 $tasks = $this->view->tasks ?? [];
 $order = $view->order;
 $teams = $view->teams;
+$post = $view->post;
 $canCloseDone = $workOrder['canCloseDone'];
 $canCloseCanceled = $workOrder['canCloseCanceled'];
 
-
+$err = $view->errors; 
 ?>
 <?= $css ?>
 
@@ -84,16 +85,30 @@ $canCloseCanceled = $workOrder['canCloseCanceled'];
 
     <h2>Nový úkol</h2>
 
-    <form method="post" action="<?= Url::to('/work-orders/' . $order['id'] . '/tasks/create') ?>">
+<?php
+$ch = '';
+if ($err) {
+    foreach ($err as $field => $messages) {
+        foreach ($messages as $msg) {
+            $ch .= '
+<p>' . e($msg) . '</p>
+';
+        }
+    }
+}	
+?>
 
+    <form method="post" action="<?= Url::to('/work-orders/' . $order['id'] . '/tasks/create') ?>">
+    <?= Csrf::getField() ?>
+<?= e($ch) ?>
         <div class="form-group">
             <label>Název úkolu <span class="req">*</span></label>
-            <input type="text" name="title" required>
+            <input type="text" name="title" value="<?= e($post['title']) ?>"  required>
         </div>
 
         <div class="form-group">
             <label>Popis</label>
-            <textarea name="description"></textarea>
+            <textarea name="description"><?= e($post['description']) ?></textarea>
         </div>
 
         <div class="form-group">
@@ -103,7 +118,7 @@ $canCloseCanceled = $workOrder['canCloseCanceled'];
             <?php foreach ($teams as $team): ?>
                 <option
                     value="<?= $team['id'] ?>"
-                    <?= (($old['team_id'] ?? null) == $team['id']) ? 'selected' : '' ?>
+                    <?= (($post['team_id'] ?? null) == $team['id']) ? 'selected' : '' ?>
                 >
                     <?= htmlspecialchars($team['name']) ?>
                 </option>
@@ -132,7 +147,7 @@ $canCloseCanceled = $workOrder['canCloseCanceled'];
             <!-- HLAVIČKA TASKU -->
             <div class="task-header">
                 <strong>
-                    #<?= (int) $task['id'] ?>
+                    
                     <?= htmlspecialchars($task['title'] ?? 'Bez názvu') ?>
                 </strong>
 
@@ -144,16 +159,18 @@ $canCloseCanceled = $workOrder['canCloseCanceled'];
             <!-- META -->
             <div class="task-meta">
                 Vytvořeno:
-                <?= htmlspecialchars($task['created_at']) ?>
+                <?= htmlspecialchars(formatCzDate($task['created_at'])) ?>
             </div>
 
             <!-- STATISTIKY ASSIGNMENTŮ -->
-            <div class="task-stats">
-                <span>Celkem: <?= $task['stats']['total'] ?></span>
-                <span>Otevřené: <?= $task['stats']['open'] ?></span>
-                <span>Hotové: <?= $task['stats']['done'] ?></span>
-                <span>Storno: <?= $task['stats']['cancelled'] ?></span>
-            </div>
+            
+<!-- tady potřebuji ty hodiny a kilometry --> 
+<div class="task-stats">
+    <span>Záznamy: <?= $task['stats']['total'] ?></span>
+    <span>Čas: <?= formatMinutes($task['stats']['minutes'] ?? 0) ?></span>
+    <span>Km: <?= $task['stats']['kilometers'] ?? 0 ?></span>
+</div>
+            
 
             <!-- AKCE NAD TASKEM -->
             <div class="task-actions">
