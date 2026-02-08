@@ -5,8 +5,9 @@ namespace App\Models;
 
 use PDO;
 use App\Core\Auth;
+use App\Core\Database;
 
-class Team extends BaseModel
+class TeamModel extends BaseModel
 {
     protected string $table = 'teams';
 
@@ -97,4 +98,39 @@ class Team extends BaseModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+public function getColorsByIds(array $teamIds): array
+{
+    // 🔒 očista vstupu
+    $teamIds = array_values(array_unique(
+        array_filter(
+            array_map('intval', $teamIds)
+        )
+    ));
+
+    if ($teamIds === []) {
+        return [];
+    }
+
+    $in = implode(',', array_fill(0, count($teamIds), '?'));
+
+    $sql = "
+        SELECT id, color
+        FROM teams
+        WHERE id IN ($in)
+    ";
+
+    $db = Database::admin();
+    $stmt = $db->prepare($sql);
+    $stmt->execute($teamIds);
+
+    $out = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $out[(int)$row['id']] = $row['color'];
+    }
+
+    return $out;
+}
+
+
 }

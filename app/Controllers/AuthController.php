@@ -17,7 +17,7 @@ class AuthController extends Controller
 {
     public function root(): string
     {
-        Url::redirect(Auth::check() ? '/dashboard' : '/login');
+        Url::redirect(Auth::check() ? '/tasks' : '/login');
     }
 
     public function loginForm(): string
@@ -107,7 +107,7 @@ public function login(): string
 Url::redirect(
     $user['global_role'] === 'root'
         ? '/system'
-        : '/dashboard'
+        : '/tasks'
 );
 
 }

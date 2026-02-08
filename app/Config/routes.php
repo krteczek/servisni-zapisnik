@@ -81,7 +81,7 @@ return [
 | DASHBOARD / ÚKOLY
 |--------------------------------------------------------------------------
 */
-
+/*
 [
     'method'  => 'GET',
     'path'    => '/dashboard',
@@ -93,7 +93,7 @@ return [
     'title'   => 'Úkoly: Přehled',
 ],
 
-
+*/
 /*
 |--------------------------------------------------------------------------
 | TASKY
@@ -110,7 +110,17 @@ return [
     'section' => 'tasks',
 	'title'   => 'Úkoly > Přehled',
 ],
-
+[
+    'method'  => 'GET',
+    'path'    => '/tasks',
+    'action'  => [TaskController::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr', 'predak', 'monter'],
+    'submenu'    => 'Přehled',
+    'section' => 'tasks',
+	'title'   => 'Úkoly > Přehled',
+],
+/*
 [
     'method' => 'GET',
     'path'   => '/tasks/create',
@@ -121,7 +131,7 @@ return [
     'section' => 'tasks',
     'title'   => 'Úkoly > Nový úkol',
 ],
-
+*/
 [
     'method' => 'POST',
     'path'   => '/tasks/create',
@@ -247,6 +257,58 @@ return [
     'roles'   => ['admin', 'mistr'],
 ],
 
+
+/*
+|--------------------------------------------------------------------------
+| TÝMY
+|--------------------------------------------------------------------------
+*/
+
+[
+    'method'  => 'GET',
+    'path'    => '/teams',
+    'action'  => [TeamController::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'menu'    => 'Týmy',
+    'submenu' => 'Aktivní',
+    'section' => 'teams',
+    'title'   => 'Týmy > Aktivní',
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/teams/inactive',
+    'action'  => [TeamController::class, 'inactive'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'submenu' => 'Deaktivované',
+    'section' => 'teams',
+    'title'   => 'Týmy > Deaktivované',
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/teams/create',
+    'action'  => [TeamController::class, 'create'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'submenu' => 'Vytvořit tým',
+    'section' => 'teams',
+    'title'   => 'Týmy > Nový',
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/teams/toggle/{id}',
+    'action'  => [TeamController::class, 'toggle'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'teams',
+],
+
+
+
 /*
 |--------------------------------------------------------------------------
 | UŽIVATELÉ
@@ -327,74 +389,6 @@ return [
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
 ],
-/* momentálně zrušeno, řeší se jinak
-[
-    'method'  => 'GET',
-    'path'    => '/users/{id}/password',
-    'action'  => [UserController::class, 'passwordForm'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'users',
-    'title'   => 'Změna hesla',
-],
-
-[
-    'method'  => 'POST',
-    'path'    => '/users/{id}/password',
-    'action'  => [UserController::class, 'updatePassword'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-],
-*/
-/*
-|--------------------------------------------------------------------------
-| TÝMY
-|--------------------------------------------------------------------------
-*/
-
-[
-    'method'  => 'GET',
-    'path'    => '/teams',
-    'action'  => [TeamController::class, 'index'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'menu'    => 'Týmy',
-    'submenu' => 'Aktivní',
-    'section' => 'teams',
-    'title'   => 'Týmy > Aktivní',
-],
-
-[
-    'method'  => 'GET',
-    'path'    => '/teams/inactive',
-    'action'  => [TeamController::class, 'inactive'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'submenu' => 'Deaktivované',
-    'section' => 'teams',
-    'title'   => 'Týmy > Deaktivované',
-],
-
-[
-    'method'  => 'GET',
-    'path'    => '/teams/create',
-    'action'  => [TeamController::class, 'create'],
-    'auth'    => true,
-    'roles'   => ['admin'],
-    'submenu' => 'Vytvořit tým',
-    'section' => 'teams',
-    'title'   => 'Týmy > Nový',
-],
-
-[
-    'method'  => 'GET',
-    'path'    => '/teams/toggle/{id}',
-    'action'  => [TeamController::class, 'toggle'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'teams',
-],
-
 /*-------------------------------------
 Přepínaní rolí u admina
 -------------------------------------**/
