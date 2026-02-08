@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use LogicException;
+use PDO;
 
 class TaskModel extends TenantModel
 {
@@ -249,5 +250,33 @@ public function belongsToOrder(int $taskId, int $orderId): bool
 
     return $row !== null;
 }
+
+public function forIndex(): array
+{
+    $sql = "
+        SELECT
+            t.id,
+            t.title,
+            t.status,
+            t.team_id,
+            t.description,
+            COUNT(ta.id) AS reports_count,
+            COALESCE(SUM(ta.minutes_spent), 0) AS minutes_spent,
+            COALESCE(SUM(ta.kilometers), 0) AS kilometers
+        FROM tasks t
+        LEFT JOIN task_assignments ta
+            ON ta.task_id = t.id
+           AND ta.company_id = t.company_id
+        WHERE t.{$this->tenantColumn()} = ?
+        GROUP BY t.id
+        ORDER BY t.created_at DESC
+    ";
+
+    $stmt = $this->db()->prepare($sql);
+    $stmt->execute([$this->tenantId()]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
 }

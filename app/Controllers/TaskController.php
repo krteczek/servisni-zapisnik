@@ -4,18 +4,30 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
+
 use App\Models\TaskModel;
+use App\Models\TeamModel;
 use App\Core\Url;
 
 class TaskController extends Controller
 {
-    public function index(): string
-    {
-        $tasks = (new TaskModel())->all();
+public function index(): string
+{
+    $tasks = (new TaskModel())->forIndex();
 
-        $this->view->tasks = $tasks;
-        return $this->render('tasks/index');
+    $teamIds = array_unique(
+        array_filter(array_column($tasks, 'team_id'))
+    );
+
+    $teamColors = (new TeamModel())->getColorsByIds($teamIds);
+
+    foreach ($tasks as &$task) {
+        $task['team_color'] = $teamColors[$task['team_id']] ?? '#999';
     }
+
+    $this->view->tasks = $tasks;
+    return $this->render('tasks/index');
+}
 
     public function createForm(?int $orderId = null): string
     {

@@ -7,7 +7,7 @@ use App\Core\Controller;
 use App\Core\Url;
 use App\Core\Config;
 use App\Core\Flash;
-use App\Models\Team;
+use App\Models\TeamModel;
 use App\Models\TeamMembership;
 use App\Models\UserModel;
 
@@ -19,7 +19,7 @@ final class TeamController extends Controller
 
     private function listByActive(bool $active): string
     {
-        $teamModel       = new Team();
+        $teamModel       = new TeamModel();
         $membershipModel = new TeamMembership();
 
         $teams = $teamModel->byActive($active);
@@ -66,7 +66,7 @@ final class TeamController extends Controller
             Url::redirect('/teams/create');
         }
 
-        (new Team())->create($name, $color);
+        (new TeamModel())->create($name, $color);
 
         Flash::add('success', 'Tým byl vytvořen.');
         Url::redirect('/teams');
@@ -78,7 +78,7 @@ final class TeamController extends Controller
 
     public function edit(int $id): string
     {
-        $teamModel       = new Team();
+        $teamModel       = new TeamModel();
         $membershipModel = new TeamMembership();
         $userModel       = new UserModel();
 
@@ -105,7 +105,7 @@ final class TeamController extends Controller
     {
         $this->checkCsrf();
 
-        $teamModel       = new Team();
+        $teamModel       = new TeamModel();
         $membershipModel = new TeamMembership();
         $userModel       = new UserModel();
 
@@ -179,7 +179,7 @@ final class TeamController extends Controller
 
     public function toggle(int $id): void
     {
-        $model = new Team();
+        $model = new TeamModel();
         $team  = $model->find($id);
 
         if (!$team) {
