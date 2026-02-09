@@ -1,16 +1,14 @@
-<!doctype html>
-<html lang="cs">
-<head>
-    <meta charset="utf-8">
-    <title>Chyba aplikace</title>
-</head>
-<?php echo $text; ?>
-<body>
-<footer>
+<?php require __DIR__ . '/../layout/header.php'; ?>
+<h1>Jejda… něco se pokazilo</h1>
+
+<p>
+Omlouváme se, došlo k technické chybě.
+Vývojář byl informován a pravděpodobně už pije kafe s výrazem „aha…“.
+</p>
+
+<?php if (!empty($view->exception)): ?>
     <hr>
-    <small>
-        Vytvořil Petr Vaněk ve spolupráci s AI pomocníkem jménem Bó. <?= date('Y') ?>
-    </small>
-</footer>
-</body>
-</html>
+    <h3>Debug informace</h3>
+    <pre><?= htmlspecialchars((string) $view->exception) ?></pre>
+<?php endif; ?>
+<?php require __DIR__ . '/../layout/footer.php'; ?>

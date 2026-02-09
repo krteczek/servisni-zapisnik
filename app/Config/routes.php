@@ -141,14 +141,14 @@ return [
 
 [
     'method' => 'POST',
-    'path'   => '/tasks/{taskId}/done',
+    'path'   => '/tasks/{taskId:\d+}/done',
     'action' => [TaskController::class, 'done'],
     'auth'   => true,
 ],
 
 [
     'method' => 'POST',
-    'path'   => '/tasks/{taskId}/cancel',
+    'path'   => '/tasks/{taskId:\d+}/cancel',
     'action' => [TaskController::class, 'cancel'],
     'auth'   => true,
 ],
@@ -192,7 +192,7 @@ return [
 
 [
     'method'  => 'GET',
-    'path'    => '/work-orders/{orderId}/detail',
+    'path'    => '/work-orders/{orderId:\d+}/detail',
     'action'  => [WorkOrderController::class, 'detail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
@@ -202,7 +202,7 @@ return [
 
 [
     'method'  => 'GET',
-    'path'    => '/work-orders/{orderId}/edit',
+    'path'    => '/work-orders/{orderId:\d+}/edit',
     'action'  => [WorkOrderController::class, 'edit'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak'],
@@ -211,7 +211,7 @@ return [
 ],
 [
     'method'  => 'POST',
-    'path'    => '/work-orders/{orderId}/edit',
+    'path'    => '/work-orders/{orderId:\d+}/edit',
     'action'  => [WorkOrderController::class, 'update'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak'],
@@ -219,7 +219,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/work-orders/{orderId}/close/canceled',
+    'path'    => '/work-orders/{orderId:\d+}/close/canceled',
     'action'  => [WorkOrderController::class, 'closeOrderCanceled'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -227,7 +227,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/work-orders/{orderId}/close/done',
+    'path'    => '/work-orders/{orderId:\d+}/close/done',
     'action'  => [WorkOrderController::class, 'closeOrderDone'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -235,7 +235,7 @@ return [
 // routy pro přidání tasku k zakázce
 [
     'method'  => 'POST',
-    'path'    => '/work-orders/{orderId}/tasks/create',
+    'path'    => '/work-orders/{orderId:\d+}/tasks/create',
     'action'  => [WorkOrderController::class, 'detail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak'],
@@ -243,7 +243,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/work-orders/{orderId}/tasks/{taskId}/done',
+    'path'    => '/work-orders/{orderId:\d+}/tasks/{taskId:\d+}/done',
     'action'  => [WorkOrderController::class, 'closeTaskDone'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -251,7 +251,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/work-orders/{orderId}/tasks/{taskId}/cancel',
+    'path'    => '/work-orders/{orderId:\d+}/tasks/{taskId:\d+}/cancel',
     'action'  => [WorkOrderController::class, 'closeTaskCanceled'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -299,8 +299,41 @@ return [
 ],
 
 [
+    'method'  => 'POST',
+    'path'    => '/teams/create',
+    'action'  => [TeamController::class, 'store'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'teams',
+    'title'   => 'Týmy > Nový',
+],
+
+[
     'method'  => 'GET',
-    'path'    => '/teams/toggle/{id}',
+    'path'    => '/teams/{id:\d+}/edit',
+    'action'  => [TeamController::class, 'edit'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    
+    'section' => 'teams',
+    'title'   => 'Týmy > Upravit tým',
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/teams/{id:\d+}/edit',
+    'action'  => [TeamController::class, 'update'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+
+    'section' => 'teams',
+    'title'   => 'Týmy > Upravit tým',
+],
+
+
+[
+    'method'  => 'GET',
+    'path'    => '/teams/toggle/{id:\d+}',
     'action'  => [TeamController::class, 'toggle'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -329,7 +362,7 @@ return [
 
 [
     'method'  => 'GET',
-    'path'    => '/users/{id}/detail',
+    'path'    => '/users/{id:\d+}/detail',
     'action'  => [UserController::class, 'userDetail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -339,7 +372,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/users/{id}/send-reset-password',
+    'path'    => '/users/{id:\d+}/send-reset-password',
     'action'  => [UserController::class, 'sendResetPassword'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -347,7 +380,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/users/{id}/resend-activation',
+    'path'    => '/users/{id:\d+}/resend-activation',
     'action'  => [UserController::class, 'resendActivationEmail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -375,7 +408,7 @@ return [
 
 [
     'method' => 'GET',
-    'path'   => '/users/{id}/edit',
+    'path'   => '/users/{id:\d+}/edit',
     'action' => [UserController::class, 'edit'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
@@ -384,7 +417,7 @@ return [
 
 [
     'method' => 'POST',
-    'path'   => '/users/{id}/edit',
+    'path'   => '/users/{id:\d+}/edit',
     'action' => [UserController::class, 'update'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
@@ -392,7 +425,22 @@ return [
 /*-------------------------------------
 Přepínaní rolí u admina
 -------------------------------------**/
-
+[
+    'method'        => 'GET',
+    'path'          => '/admin/switch-role/{role:admin|mistr|predak|monter}',
+    'action'        => [AdminController::class, 'switchRole'],
+    'global_roles'  => ['admin'],
+    'auth'          => true,
+],
+/*
+[
+    'method' => 'GET',
+    'path'   => '/admin/switch-role/{role:admin|mistr|predak|monter}',
+    'action' => [AdminController::class, 'switchRole'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+],
+/*
 [
     'path'   => '/admin/switch-role/{role}',
     'method' => 'GET',
@@ -401,6 +449,7 @@ Přepínaní rolí u admina
         'auth'   => true,
 
 ],
+*/
 
 
 

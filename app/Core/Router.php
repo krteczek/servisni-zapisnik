@@ -4,91 +4,129 @@ declare(strict_types=1);
 namespace App\Core;
 
 use App\Controllers\ErrorController;
+use Throwable;
+use App\Core\LoggerHolder;
 
-class Router
+final class Router
 {
-    private array $routes;
+    private array $routes = [];
     private ViewContext $view;
 
     public function __construct(array $routes)
     {
-        $this->routes = $routes;
-
+        // shared view context
         $this->view = new ViewContext();
         $this->view->isLogged = Auth::check();
         $this->view->user     = Auth::user();
-        
-        $this->view->menu     = Menu::build(
+
+        foreach ($routes as $route) {
+            $this->routes[] = [
+                ...$route,
+                'method' => strtoupper($route['method'] ?? 'GET'),
+                'regex'  => $this->compilePath($route['path']),
+            ];
+        }
+
+        // menu
+        $this->view->menu = Menu::build(
             $routes,
             rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/'
         );
     }
 
-    public function dispatch(string $path, string $method): string
+    public function dispatch(string $uri, string $method): string
     {
-        $path = rtrim($path, '/') ?: '/';
+        $path = rtrim(parse_url($uri, PHP_URL_PATH), '/') ?: '/';
 
         foreach ($this->routes as $route) {
 
-            $params = [];
-
-            if (!self::match($route['path'], $path, $params)) {
+            if ($route['method'] !== strtoupper($method)) {
                 continue;
             }
 
-            if (($route['method'] ?? 'GET') !== $method) {
+            if (!preg_match($route['regex'], $path, $matches)) {
                 continue;
             }
 
+            // auth
             if (($route['auth'] ?? false) && !Auth::check()) {
                 Url::redirect('/login');
                 exit;
             }
 
+            // roles
             if (!empty($route['roles']) && !Auth::hasGlobalRole($route['roles'])) {
                 return (new ErrorController($this->view))->forbidden();
             }
 
+            // params
+            $params = [];
+            foreach ($matches as $k => $v) {
+                if (is_string($k)) {
+                    $params[$k] = $v;
+                }
+            }
+
             $this->resolveTitle($route);
 
-            return $this->call($route['action']);
+            try {
+                return $this->call($route['action'], $params);
+            } catch (Throwable $e) {
+                return $this->handleError(500, $e);
+            }
         }
 
         return (new ErrorController($this->view))->notFound();
     }
 
-    protected function call(array $action): string
+    private function call(array $action, array $params): string
     {
-        [$controllerClass, $method] = $action;
-        $controller = new $controllerClass($this->view);
+        [$class, $method] = $action;
+        $controller = new $class($this->view);
 
-        $reflection = new \ReflectionMethod($controller, $method);
+        //return $controller->$method(...array_values($params));
         $args = [];
 
-        foreach ($reflection->getParameters() as $param) {
-            $name = $param->getName();
-
-            if (isset($_GET[$name])) {
-                $args[] = $_GET[$name];
-            } elseif ($param->isDefaultValueAvailable()) {
-                $args[] = $param->getDefaultValue();
-            } else {
-                throw new \RuntimeException("Missing route parameter: $name");
-            }
-        }
-
-        return $reflection->invokeArgs($controller, $args);
+foreach ($params as $value) {
+    if (ctype_digit($value)) {
+        $args[] = (int) $value;
+    } else {
+        $args[] = $value;
     }
+}
+
+return $controller->$method(...$args);
+
+    }
+
+
+
+private function handleError(int $code, ?Throwable $e = null): string
+{
+    if ($e !== null) {
+        LoggerHolder::get()->error(
+            'Router exception',
+            [
+                'code'    => $code,
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]
+        );
+    }
+
+    $view  = new ViewContext();
+    $error = new ErrorController($view);
+
+    return $error->renderError($code, $e);
+}
 
     private function resolveTitle(array $route): void
     {
         if (isset($route['title'])) {
             $this->view->title = $route['title'];
-            return;
-        }
-
-        if (isset($route['menu'], $route['submenu'])) {
-            $this->view->title = $route['menu'] . ' > ' . $route['submenu'];
+        } elseif (isset($route['menu'], $route['submenu'])) {
+            $this->view->title = "{$route['menu']} > {$route['submenu']}";
         } elseif (isset($route['menu'])) {
             $this->view->title = $route['menu'];
         } else {
@@ -96,23 +134,14 @@ class Router
         }
     }
 
-    private static function match(string $routePath, string $requestPath, array &$params): bool
+    private function compilePath(string $path): string
     {
-        $pattern = preg_replace('#\{([\w]+)\}#', '(?P<$1>[^/]+)', $routePath);
-        $pattern = '#^' . $pattern . '$#';
+        $regex = preg_replace_callback(
+            '#\{(\w+)(?::([^}]+))?\}#',
+            fn($m) => '(?P<' . $m[1] . '>' . ($m[2] ?? '[^/]+') . ')',
+            $path
+        );
 
-        if (!preg_match($pattern, $requestPath, $matches)) {
-            return false;
-        }
-
-        foreach ($matches as $key => $value) {
-            if (!is_int($key)) {
-                $params[$key] = $value;
-            }
-        }
-
-        $_GET = array_merge($_GET, $params);
-
-        return true;
+        return '#^' . $regex . '$#';
     }
 }

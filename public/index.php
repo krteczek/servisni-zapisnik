@@ -19,7 +19,6 @@ use App\Core\LoggerHolder;
 use App\Core\Database;
 use App\Core\Auth;
 
-
 // -------------------------------------------------
 // Logger
 // -------------------------------------------------
@@ -59,31 +58,25 @@ try {
     echo $router->dispatch($uri, $_SERVER['REQUEST_METHOD']);
 } catch (Throwable $e) {
 
-    LoggerHolder::get()->error(
-        $e->getMessage(),
-        [
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-        ]
-    );
+	$message = '
+	message: ' . $e->getMessage() . '
+	file: ' . $e->getFile() . '
+	line: ' . $e->getLine();
+    // úplné selhání frameworku
+    LoggerHolder::get()->critical($message);
 
-    if (APP_DEBUG) {
-        $text = '
-<h1>Něco se posralo, koukni se co a koukej to spravit</h1>
-<div>
-<pre>' . $e . '</pre>
-</div>
-';
+    //http_response_code(500);
+    if(APP_ENV === 'dev') 
+    {
+    	echo "<h1>Framework crash</h1>
+    	<pre>
+    	";
+    	var_dump($message);
+    	
+    	echo "
+    	</pre>
+    	";
     } else {
-        $text = '
-<h1>Něco se pokazilo</h1>
-<p>Omlouváme se, došlo k technické chybě.</p>
-<p>Situace byla zaznamenána a budeme se jí zabývat.</p>
-<p>Zkuste prosím akci zopakovat později.</p>
-<p>V případě potřeby můžete kontaktovat administrátora na telefonu: +420 704 142 511.</p>
-';
-    }
-
-    require dirname(__DIR__) . '/app/Views/errors/500.php';
-    http_response_code(500);
+    echo 'Kritická chyba aplikace.';
+ }
 }
