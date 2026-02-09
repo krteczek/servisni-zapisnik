@@ -11,7 +11,7 @@ use App\Core\Url;
 use App\Core\Logger;
 use App\Models\WorkOrderModel;
 use App\Models\TaskModel;
-use App\Models\Team;
+use App\Models\TeamModel;
 
 class WorkOrderController extends Controller
 {
@@ -100,7 +100,7 @@ public function index(): string
     $taskModel = new TaskModel();
     $tasks = $taskModel->forWorkOrderWithStats($orderId);
 
-    $teamModel = new Team();
+    $teamModel = new TeamModel();
     $teams = $teamModel->byActive(true);
 
     $this->view->order = $order;
@@ -129,7 +129,7 @@ private function createTask(int $orderId): array
         'created_by_user_id' => Auth::id(),
     ];
 	//ověření existence týmu
-    $teamModel = new Team();
+    $teamModel = new TeamModel();
     $team = $teamModel->find($data['team_id']);
         if (!$team) {
             $this->addErrors('team_id', 'Tým neexistuje.');

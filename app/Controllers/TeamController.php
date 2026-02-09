@@ -62,13 +62,13 @@ final class TeamController extends Controller
         $color = trim($_POST['color'] ?? '#2196F3');
 
         if ($name === '') {
-            Flash::add('error', 'Název týmu je povinný.');
+            Flash::error('Název týmu je povinný.');
             Url::redirect('/teams/create');
         }
 
         (new TeamModel())->create($name, $color);
 
-        Flash::add('success', 'Tým byl vytvořen.');
+        Flash::success('Tým byl vytvořen.');
         Url::redirect('/teams');
     }
 
@@ -84,7 +84,7 @@ final class TeamController extends Controller
 
         $team = $teamModel->find($id);
         if (!$team) {
-            Flash::add('error', 'Tým neexistuje.');
+            Flash::error('Tým neexistuje.');
             Url::redirect('/teams');
         }
 
@@ -110,7 +110,7 @@ final class TeamController extends Controller
         $userModel       = new UserModel();
 
         if (!$teamModel->find($id)) {
-            Flash::add('error', 'Tým neexistuje.');
+            Flash::error('Tým neexistuje.');
             Url::redirect('/teams');
         }
 
@@ -122,13 +122,16 @@ final class TeamController extends Controller
             $name  = trim($_POST['name']);
             $color = trim($_POST['color']);
 
-            if ($name !== '') {
+            if ($name !== '' && $color !== '') {
                 $teamModel->updateTeam($id, [
                     'name'  => $name,
                     'color' => $color,
                 ]);
+					Flash::success('Data týmu byla změněna.');
+            } else {
+            	Flash::success('Data týmu se nepodařilo změnit');
             }
-
+				
             Url::redirect('/teams/' . $id . '/edit');
         }
 
@@ -183,15 +186,14 @@ final class TeamController extends Controller
         $team  = $model->find($id);
 
         if (!$team) {
-            Flash::add('error', 'Tým nenalezen.');
+            Flash::error('Tým nenalezen.');
             Url::redirect('/teams');
         }
 
         $model->setActive($id, !(bool) $team['active']);
 
-        Flash::add(
-            'success',
-            $team['active']
+        Flash::success(
+          $team['active']
                 ? 'Tým byl deaktivován.'
                 : 'Tým byl aktivován.'
         );

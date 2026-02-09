@@ -117,6 +117,25 @@ class Auth
 public static function effectiveRole(): string
 {
     $user = self::user();
+
+    if (
+        $user['global_role'] === 'admin' &&
+        Session::has('auth.effective_role')
+    ) {
+        $role = (string) Session::get('auth.effective_role');
+
+        if (array_key_exists($role, Roles::effective())) {
+            return $role;
+        }
+    }
+
+    return $user['global_role'];
+}
+
+
+public static function effectiveRoleOld(): string
+{
+    $user = self::user();
     if (!$user) {
         return '';
     }
