@@ -15,7 +15,7 @@ $workOrders = $view->orders;
 
                 <div class="wo-header">
                     <a
-                        href="<?= Url::to('/work-orders/' . (int)$wo['id'] .'/detail') ?>"
+                        href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id'] .'/detail') ?>"
                         class="wo-title"
                         title="Otevřít detail zakázky"
                     >
@@ -37,7 +37,7 @@ $workOrders = $view->orders;
 </div>
                 <div class="wo-actions">
                     <a
-                        href="<?= Url::to('/work-orders/' . (int)$wo['id'] . '/detail/#main') ?>"
+                        href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id'] . '/detail/#main') ?>"
                         class="wo-action"
                         title="Detail zakázky"
                     >
@@ -45,7 +45,7 @@ $workOrders = $view->orders;
                     </a>
 
                     <a
-                        href="<?= Url::to('/work-orders/' . (int)$wo['id']  . '/edit/#main')?>"
+                        href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id']  . '/edit/#main')?>"
                         class="wo-action"
                         title="Upravit zakázku"
                     >

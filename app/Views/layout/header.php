@@ -44,7 +44,7 @@ use App\Core\Session;
             <div class="role-switch">
                 <?php foreach (Roles::effective() as $key => $label): ?>
                     <a
-                        href="<?= Url::to('/admin/switch-role/' . $key) ?>"
+                        href="<?= Url::to('/' . Auth::tenantSlug() . '/admin/switch-role/' . $key) ?>"
                         class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"
                     >
                         <?= htmlspecialchars($label) ?>

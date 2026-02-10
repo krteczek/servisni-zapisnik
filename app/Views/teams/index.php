@@ -6,56 +6,67 @@ declare(strict_types=1);
 use App\Core\Url;
 use App\Core\Access;
 
+$css = '';
+require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
+
+/** @var string $view->mode 'active' | 'inactive' */
+$mode = $view->mode ?? 'active';
 ?>
 
-<table border="1" cellpadding="6">
-    <thead>
-    <tr>
-        <th>Název</th>
-        <th>Barva</th>
-        <th>Počet členů</th>
-        <th>Členové</th>
-        <th>Akce</th>
-    </tr>
-    </thead>
+<?= $css ?>
 
-    <tbody>
-    <?php foreach ($view->teams as $team): ?>
-        <tr>
-            <td><?= e($team['name']) ?></td>
+<h1>
+    <?= $mode === 'inactive' ? 'Deaktivované týmy' : 'Týmy' ?>
+</h1>
 
-            <td>
-                <span
-                    style="display:inline-block;
-                           width:20px;
-                           height:20px;
-                           background:<?= e($team['color']) ?>">
-                </span>
-            </td>
+<div class="teams-list compact">
 
-            <td><?= (int) $team['members_count'] ?></td>
+<?php foreach ($view->teams as $team): ?>
+    <div class="team-item <?= $team['active'] ? '' : 'is-inactive' ?>">
 
-            <td>
-                <?php foreach ($team['members'] as $m): ?>
-                    <?= e($m['last_name'] . ' ' . $m['first_name']) ?><br>
-                <?php endforeach ?>
-            </td>
+        <!-- HLAVIČKA -->
+        <div class="team-header">
+            <div class="team-title">
+                <span class="team-color"
+                      style="--team-color: <?= e($team['color']) ?>"></span>
 
-            <td>
-                <?php if (Access::can('teams.edit')): ?>
-                    <a href="<?= Url::to('/teams/' . (int) $team['id'] . '/edit') ?>">
-                        Upravit
-                    </a><br>
-                    <a href="<?= Url::to('/teams/toggle/' . $team['id']) ?>"
-   onclick="return confirm('Opravdu chcete změnit stav týmu?')">
-   <?= $team['active'] ? 'Deaktivovat' : 'Aktivovat' ?>
-</a>
-                <?php endif ?>
-            </td>
-        </tr>
-    <?php endforeach ?>
-    </tbody>
-</table>
+                <strong class="team-name">
+                    <?= e($team['name']) ?>
+                </strong>
+            </div>
+        </div>
+
+        <!-- ČLENOVÉ -->
+        <div class="team-members">
+            <?php foreach ($team['members'] as $m): ?>
+                <div class="member-line role-<?= e($m['role_in_team']) ?>">
+                    <?= e($m['last_name'] . ' ' . $m['first_name']) ?>
+                </div>
+            <?php endforeach ?>
+        </div>
+
+        <!-- AKCE -->
+        <div class="team-actions">
+            <?php if ($mode === 'active' && Access::can('teams.edit')): ?>
+                <a class="action-link edit"
+                   href="<?= Url::to('/{tenant}/teams/' . (int)$team['id'] . '/edit/#main') ?>">
+                    Upravit tým
+                </a>
+            <?php endif ?>
+
+            <?php if (Access::can('teams.edit')): ?>
+                <a class="action-link toggle"
+                   href="<?= Url::to('/{tenant}/teams/toggle/' . (int)$team['id']) ?>"
+                   onclick="return confirm('Opravdu chcete změnit stav týmu?')">
+                    <?= $team['active'] ? 'Deaktivovat tým' : 'Aktivovat tým' ?>
+                </a>
+            <?php endif ?>
+        </div>
+
+    </div>
+<?php endforeach ?>
+
+</div>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

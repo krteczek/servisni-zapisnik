@@ -42,13 +42,13 @@ $tasks = $view->tasks ?? [];
 
             <div class="task-actions">
                 <a
-                    href="<?= Url::to('/tasks/' . (int)$task['id'] . '/edit') ?>"
+                    href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit') ?>"
                     class="task-action"
                     title="Upravit úkol"
                 >✏️</a>
 
                 <a
-                    href="<?= Url::to('/tasks/' . (int)$task['id'] . '/report') ?>"
+                    href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report') ?>"
                     class="task-action"
                     title="Přidat report"
                 >📝</a>

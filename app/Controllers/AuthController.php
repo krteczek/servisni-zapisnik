@@ -17,13 +17,14 @@ class AuthController extends Controller
 {
     public function root(): string
     {
-        Url::redirect(Auth::check() ? '/tasks' : '/login');
+    		$url = '/' . Auth::tenantSlug() . (Auth::check() ? '/tasks' : '/login');
+        Url::redirect($url);
     }
 
     public function loginForm(): string
     {
 			if (Auth::check()) {
-				Url::redirect('/dashboard');
+				Url::redirect('/' . Auth::tenantSlug() . '/tasks');
 			} 
 
         $this->view->csrf   = $this->csrfField();
@@ -96,7 +97,8 @@ public function login(): string
         'email'       => $user['email'],
         'global_role' => $user['global_role'],
         'company_id'  => (int) $company['id'],
-        'company'     => $company['slug'],
+        'company_name'     => $company['name'],
+			'tenant_slug'     => $company['slug'],
         'first_name'  => $user['first_name'] ?? null,
         'last_name'   => $user['last_name'] ?? null,
         'db_name'		 => $company['db_name'],
@@ -104,11 +106,8 @@ public function login(): string
 
     Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
     );
-Url::redirect(
-    $user['global_role'] === 'root'
-        ? '/system'
-        : '/tasks'
-);
+    $url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : '/tasks' );
+    Url::redirect($url);
 
 }
     

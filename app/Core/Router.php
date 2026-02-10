@@ -67,37 +67,71 @@ final class Router
                 }
             }
 
-            $this->resolveTitle($route);
+				// tenant guard – dokud tenant existuje
+				if (isset($params['tenant']) && Auth::check()) {
+				    $current = Auth::tenantSlug();
+				
+				    if ($params['tenant'] !== $current) {
+				
+				        // vezmeme PATH, ne current URL (hash, query atd.)
+				        $cleanPath = preg_replace(
+				            '#^/' . preg_quote($params['tenant'], '#') . '#',
+				            '',
+				            $path
+				        );
+				
+				        Url::redirect('/' . $current . $cleanPath);
+				        exit;
+				    }
+				}
 
-            try {
-                return $this->call($route['action'], $params);
-            } catch (Throwable $e) {
-                return $this->handleError(500, $e);
-            }
+				// TENANT = kontext, ne argument
+				if (isset($params['tenant'])) {
+				    unset($params['tenant']);
+				} 
+				
+           
+				$this->resolveTitle($route);
+				
+				try {
+				    $response = $this->call($route['action'], $params);
+				
+				    if ($response !== null && !is_string($response)) {
+				        throw new LogicException(
+				            'Controller must return string or null'
+				        );
+				    }
+				
+				    if ($response !== null) {
+				    		// ------- tady by to mělo podle mne být ------
+				    		Session::set('last_page', $path);
+				    		
+				        return $response;
+				    }
+				
+				    // akční route (redirect, toggle, POST…)
+				    return '';
+				
+				} catch (Throwable $e) {
+				    return $this->handleError(500, $e);
+				}
         }
 
         return (new ErrorController($this->view))->notFound();
     }
 
-    private function call(array $action, array $params): string
-    {
-        [$class, $method] = $action;
-        $controller = new $class($this->view);
+private function call(array $action, array $params): ?string
+{
+    [$class, $method] = $action;
+    $controller = new $class($this->view);
 
-        //return $controller->$method(...array_values($params));
-        $args = [];
-
-foreach ($params as $value) {
-    if (ctype_digit($value)) {
-        $args[] = (int) $value;
-    } else {
-        $args[] = $value;
+    $args = [];
+    foreach ($params as $value) {
+        $args[] = ctype_digit($value) ? (int)$value : $value;
     }
+
+    return $controller->$method(...$args);
 }
-
-return $controller->$method(...$args);
-
-    }
 
 
 

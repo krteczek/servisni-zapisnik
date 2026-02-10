@@ -179,4 +179,32 @@ public static function email(): ?string
 
     return Session::get(self::USER_KEY . '.email');
 }
+public static function tenantSlug(): ?string
+{
+    return Session::get('user.tenant_slug');
+}
+
+public static function switchRole(string $role): void
+{
+    Session::start();
+
+    if (!self::canSwitchRole()) {
+        throw new DomainException('Pouze admin může přepínat role');
+    }
+
+    // reset = návrat na admina
+    if ($role === 'admin' || $role === 'reset') {
+        Session::forget('auth.effective_role');
+        return;
+    }
+
+    // povolené role
+    if (!array_key_exists($role, Roles::effective())) {
+        throw new DomainException('Neplatná role');
+    }
+
+    Session::set('auth.effective_role', $role);
+}
+
+
 }
