@@ -8,7 +8,7 @@ require __DIR__ . '/../layout/header.php';
 $team        = $view->team;
 $rolesInTeam = $view->rolesInTeam;
 ?>
-
+<?= $css ?>
 <!-- ===================== -->
 <!-- ÚPRAVA TÝMU -->
 <!-- ===================== -->

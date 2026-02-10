@@ -63,13 +63,13 @@ final class TeamController extends Controller
 
         if ($name === '') {
             Flash::error('Název týmu je povinný.');
-            Url::redirect('/teams/create');
+            Url::redirect('/{tenant}/teams/create');
         }
 
         (new TeamModel())->create($name, $color);
 
         Flash::success('Tým byl vytvořen.');
-        Url::redirect('/teams');
+        Url::redirect('/{tenant}/teams');
     }
 
     /* ==========================================================
@@ -85,7 +85,7 @@ final class TeamController extends Controller
         $team = $teamModel->find($id);
         if (!$team) {
             Flash::error('Tým neexistuje.');
-            Url::redirect('/teams');
+            Url::redirect('/{tenant}/teams');
         }
 
         $this->view->team           = $team;
@@ -111,7 +111,7 @@ final class TeamController extends Controller
 
         if (!$teamModel->find($id)) {
             Flash::error('Tým neexistuje.');
-            Url::redirect('/teams');
+            Url::redirect('/{tenant}/teams');
         }
 
         $roles     = Config::get('roles_in_team')['roles'];
@@ -132,7 +132,7 @@ final class TeamController extends Controller
             	Flash::success('Data týmu se nepodařilo změnit');
             }
 				
-            Url::redirect('/teams/' . $id . '/edit');
+            Url::redirect('/{tenant}/teams/' . $id . '/edit');
         }
 
         /* ===== PŘIDÁNÍ ČLENA ===== */
@@ -148,11 +148,11 @@ final class TeamController extends Controller
 
             // root NIKDY
             if (!$user || $user['global_role'] === 'root') {
-                Url::redirect('/teams/' . $id . '/edit');
+                Url::redirect('/{tenant}/teams/' . $id . '/edit');
             }
 
             $membershipModel->add($userId, $id, $role);
-            Url::redirect('/teams/' . $id . '/edit');
+            Url::redirect('/{tenant}/teams/' . $id . '/edit');
         }
 
         /* ===== ZMĚNA ROLE ===== */
@@ -164,16 +164,16 @@ final class TeamController extends Controller
                 $membershipModel->changeRole($membershipId, $role);
             }
 
-            Url::redirect('/teams/' . $id . '/edit');
+            Url::redirect('/{tenant}/teams/' . $id . '/edit');
         }
 
         /* ===== ODEBRÁNÍ ČLENA ===== */
         if (isset($_POST['remove_membership_id'])) {
             $membershipModel->end((int) $_POST['remove_membership_id']);
-            Url::redirect('/teams/' . $id . '/edit');
+            Url::redirect('/{tenant}/teams/' . $id . '/edit');
         }
 
-        Url::redirect('/teams/' . $id . '/edit');
+        Url::redirect('/{tenant}/teams/' . $id . '/edit');
     }
 
     /* ==========================================================
@@ -187,7 +187,7 @@ final class TeamController extends Controller
 
         if (!$team) {
             Flash::error('Tým nenalezen.');
-            Url::redirect('/teams');
+            Url::redirect('/{tenant}/teams');
         }
 
         $model->setActive($id, !(bool) $team['active']);
@@ -198,6 +198,6 @@ final class TeamController extends Controller
                 : 'Tým byl aktivován.'
         );
 
-        Url::redirect('/teams');
+        Url::redirect('/{tenant}/teams');
     }
 }

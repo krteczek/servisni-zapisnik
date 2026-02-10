@@ -9,7 +9,7 @@ use App\Core\Csrf;
 require __DIR__ . '/../layout/header.php';
 ?>
 
-
+<?= $css ?>
 <?php if (!empty($view->error)): ?>
     <p style="color:red"><?= htmlspecialchars($view->error) ?></p>
 <?php endif; ?>

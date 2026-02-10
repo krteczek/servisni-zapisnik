@@ -37,14 +37,14 @@ use App\Core\Access;
 ?>
     
                 <?php if (Access::can('users.edit')): ?>
-                    <a href="<?= Url::to('/users/' . (int) $user['id'] . '/detail/#main') ?>">
+                    <a href="<?= Url::to('/{tenant}/users/' . (int) $user['id'] . '/detail/#main') ?>">
                     Detail
                     </a>
                 <?php endif; ?>
 
                 <?php if (Access::can('users.edit')): ?>
                 |
-                    <a href="<?= Url::to('/users/' . (int) $user['id'] . '/edit/#main') ?>">
+                    <a href="<?= Url::to('/{tenant}/users/' . (int) $user['id'] . '/edit/#main') ?>">
                         Upravit
                     </a>
                 <?php endif; ?>

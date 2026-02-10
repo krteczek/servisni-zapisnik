@@ -98,7 +98,7 @@ if ($err) {
 }	
 ?>
 
-    <form method="post" action="<?= Url::to('/work-orders/' . $order['id'] . '/tasks/create') ?>">
+    <form method="post" action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create') ?>">
     <?= Csrf::getField() ?>
 <?= e($ch) ?>
         <div class="form-group">
@@ -176,19 +176,19 @@ if ($err) {
             <div class="task-actions">
 
                 <a class="btn btn-sm btn-secondary"
-							href="<?= Url::to('/work-orders/' . $order['id'] . '/tasks/' . $task['id']) ?>">
+							href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/' . $task['id']) ?>">
 							Detail / assignmenty
 					</a>
 
 
 					<a class="btn btn-sm btn-primary"
-					   href="<?= Url::to('/work-orders/' . $order['id'] . '/tasks/' . $task['id'] . '/edit') ?>">
+					   href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/' . $task['id'] . '/edit') ?>">
 					    Upravit
 					</a>
 <?php if ($task['can_cancel']) : ?>
                 <form method="post"
 								action="<?= Url::to(
-								'/work-orders/' . $order['id'] . '/tasks/' . $task['id'] . '/cancel'
+								'/{tenant}/work-orders/' . $order['id'] . '/tasks/' . $task['id'] . '/cancel'
 								) ?>"
 								onsubmit="return confirm('Opravdu chcete úkol stornovat?');"
 								style="display:inline">
@@ -203,7 +203,7 @@ if ($err) {
 <?php if ($task['can_close']) : ?>
                 <form method="post"
 								action="<?= Url::to(
-								'/work-orders/' . $order['id'] . '/tasks/' . $task['id'] . '/done'
+								'/{tenant}/work-orders/' . $order['id'] . '/tasks/' . $task['id'] . '/done'
 								) ?>"
 								onsubmit="return confirm('Opravdu chcete úkol uzavřít jako hotový?');"
 								style="display:inline">
@@ -226,7 +226,7 @@ if ($err) {
 </div>
 
 <p>
-    <a href="<?= Url::to('/work-orders') ?>/#main" class="btn btn-secondary">
+    <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
         ← Zpět na přehled
     </a>
 </p>

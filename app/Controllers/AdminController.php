@@ -17,30 +17,10 @@ final class AdminController extends Controller
      * /admin/switch-role/{role}
      */
 
-
 public function switchRole(string $role): void
 {
-    $user = Auth::user();
-
-    if (!$user || $user['global_role'] !== 'admin') {
-        throw new DomainException('Pouze admin může přepínat role');
-    }
-
-    // RESET = návrat do admina
-    if ($role === 'reset' || $role === 'admin') {
-        Session::forget('auth.effective_role');
-        Url::redirect('/');
-    }
-
-    $roles = array_keys(Config::get('roles')['roles']);
-
-    if (!in_array($role, $roles, true)) {
-        throw new DomainException('Neplatná role');
-    }
-
-    Session::set('auth.effective_role', $role);
-
-    Url::redirect('/');
+    Auth::switchRole($role);
+    Url::back('/');
 }
 
 }

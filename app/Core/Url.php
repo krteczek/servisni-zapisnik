@@ -17,12 +17,20 @@ final class Url
         self::$basePath = rtrim(str_replace('/index.php', '', $scriptName), '/');
     }
 
-    public static function to(string $path = ''): string
-    {
-        self::init();
+public static function to(string $path = ''): string
+{
+    self::init();
 
-        return self::$basePath . '/' . ltrim($path, '/');
+    if (str_starts_with($path, '/{tenant}')) {
+        $tenant = Auth::tenantSlug();
+
+        if ($tenant) {
+            $path = '/' . $tenant . substr($path, 9);
+        }
     }
+
+    return self::$basePath . '/' . ltrim($path, '/');
+}
 
     public static function current(): string
     {
@@ -62,6 +70,11 @@ public static function back(string $fallback = '/'): never
         self::redirect($fallback);
     }
 
+    exit;
+}
+public static function refresh(int $code = 302): never
+{
+    header('Location: ' . $_SERVER['REQUEST_URI'], true, $code);
     exit;
 }
 

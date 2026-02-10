@@ -102,7 +102,7 @@ $data = $view->data;
             <th></th>
             <td class="form-actions">
                 <button type="submit" class="btn btn-primary">Uložit</button>
-                <a href="<?= Url::to('/work-orders') ?>/#main" class="btn btn-secondary">
+                <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
                     Zpět na přehled
                 </a>
             </td>
