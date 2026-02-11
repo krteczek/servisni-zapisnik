@@ -2,156 +2,163 @@
 declare(strict_types=1);
 
 use App\Core\Url;
+use App\Core\Csrf;
 
-require __DIR__ . '/../layout/header.php';
-
+$css = '';
 $team        = $view->team;
 $rolesInTeam = $view->rolesInTeam;
+
+require __DIR__ . '/style.php';
+require __DIR__ . '/../layout/header.php';
+
 ?>
 <?= $css ?>
+<!-- měl jsem na mysli tohle -->
+<div class="team-intro">
+<p>
+    Na této stránce spravuješ nastavení týmu.
+</p>
+<ul>
+    <li>upravíš název a barvu týmu,</li>
+    <li>nastavíš, kdo v týmu je a jakou má roli,</li>
+    <li>můžeš přidávat nebo odebírat lidi (jeden člověk může být ve více týmech).</li>
+</ul>
+</div>
+
 <!-- ===================== -->
 <!-- ÚPRAVA TÝMU -->
 <!-- ===================== -->
 <form method="post" action="<?= Url::current() ?>">
     <?= $this->csrfField() ?>
 
-    <label>Název</label><br>
-    <input type="text" name="name" value="<?= e($team['name']) ?>"><br><br>
+    <table class="form-table">
+        <tr>
+            <th>
+                <label for="name">Název týmu <span class="req">*</span></label>
+            </th>
+            <td>
+                <input
+                    id="name"
+                    name="name"
+                    required
+                    value="<?= e($team['name']) ?>"
+                >
+            </td>
+        </tr>
 
-    <label>Barva</label><br>
-    <input type="color" name="color" value="<?= e($team['color']) ?>"><br><br>
+        <tr>
+            <th>
+                <label for="color">Barva týmu</label>
+            </th>
+            <td>
+                <input
+                    id="color"
+                    type="color"
+                    name="color"
+                    value="<?= e($team['color']) ?>"
+                    style="height:38px; padding:2px;"
+                >
+            </td>
+        </tr>
 
-    <button type="submit">Uložit tým</button>
+        <tr>
+            <th></th>
+            <td class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Uložit tým
+                </button>
+            </td>
+        </tr>
+    </table>
 </form>
 
 <hr>
-
+<br>
 <!-- ===================== -->
 <!-- ČLENOVÉ TÝMU -->
 <!-- ===================== -->
-<h2>Členové týmu</h2>
 
-<table border="1" cellpadding="6">
-<thead>
-<tr>
-    <th>Jméno</th>
-    <th>Členem týmů</th>
-    <th>Role</th>
-    <th>Změna role</th>
-    <th>Akce</th>
-</tr>
-</thead>
+<h2 id="userlist">Členové týmu</h2>
+<p class="hint">
+    Změň roli člena týmu pomocí rozbalovací nabídky.
+    Přidání nebo odebrání člověka provedeš kliknutím na šipky.
+</p>
 
-<tbody>
-<?php foreach ($view->members as $m): ?>
-<tr>
-    <td><?= e($m['last_name'] . ' ' . $m['first_name']) ?></td>
+<div class="user-dual-list">
 
-    <td>
-        <?php foreach ($view->userTeams[$m['id']] ?? [] as $t): ?>
-            <span class="team-dot"
-                  title="<?= e($t['name']) ?>"
-                  style="background-color: <?= e($t['color']) ?>">
-                ●
-            </span>
+    <!-- V TÝMU -->
+    <div class="user-list">
+        <h3>V týmu</h3>
+
+        <?php if (empty($view->members)): ?>
+            <div class="empty-list">V tomhle týmu nikdo není</div>
+        <?php endif; ?>
+
+        <?php foreach ($view->members as $m): ?>
+        <div class="user-row">
+    <form method="post" action="<?= Url::current() ?>#main" class="inline-form">
+        <?= Csrf::getField() ?>
+
+        <input type="hidden"
+               name="change_user_role"
+               value="<?= (int) $m['membership_id'] ?>">
+
+        <select name="role_in_team" onchange="this.form.submit()">
+            <?php foreach ($rolesInTeam as $key => $label): ?>
+                <option value="<?= e($key) ?>"
+                    <?= $key === $m['role_in_team'] ? 'selected' : '' ?>>
+                    <?= e($label) ?>
+                </option>
+            <?php endforeach ?>
+        </select>
+    </form>
+
+    <span class="user-name"><?= e($m['last_name'].' '.$m['first_name']) ?></span>
+
+    <form method="post" action="<?= Url::current() ?>#main" class="inline-form remove-form">
+        <?= Csrf::getField() ?>
+        <input type="hidden" name="remove_membership_id" value="<?= (int) $m['membership_id'] ?>">
+        <button class="btn danger"> → </button>
+    </form>
+</div>
+
         <?php endforeach ?>
-    </td>
+    </div>
 
-    <td><?= e($m['role_in_team']) ?></td>
+    <!-- K DISPOZICI -->
+    <div class="user-list">
+        <h3>K dispozici</h3>
 
-    <td>
-        <form method="post" action="<?= Url::current() ?>">
-            <?= $this->csrfField() ?>
+        <?php if (empty($view->availableUsers)): ?>
+            <div class="empty-list">Žádní další uživatelé</div>
+        <?php endif; ?>
 
-            <input type="hidden"
-                   name="change_user_role"
-                   value="<?= (int) $m['membership_id'] ?>">
+        <?php foreach ($view->availableUsers as $u): ?>
+            <form method="post" class="user-row">
+                <?= Csrf::getField() ?>
+                <input type="hidden"
+                       name="add_user_id"
+                       value="<?= (int)$u['id'] ?>">
+                <input type="hidden"
+                       name="role_in_team"
+                       value="member">
 
-            <select name="role_in_team">
-                <?php foreach ($rolesInTeam as $key => $label): ?>
-                    <option value="<?= e($key) ?>"
-                        <?= $key === $m['role_in_team'] ? 'selected' : '' ?>>
-                        <?= e($label) ?>
-                    </option>
-                <?php endforeach ?>
-            </select>
+                <button class="btn btn-sm btn-secondary">
+                    ←
+                </button>
 
-            <button type="submit">Změnit</button>
-        </form>
-    </td>
-
-    <td>
-        <form method="post" action="<?= Url::current() ?>">
-            <?= $this->csrfField() ?>
-            <input type="hidden"
-                   name="remove_membership_id"
-                   value="<?= (int) $m['membership_id'] ?>">
-            <button type="submit">Odebrat</button>
-        </form>
-    </td>
-</tr>
-<?php endforeach ?>
-</tbody>
-</table>
-
-<hr>
-
-<!-- ===================== -->
-<!-- PŘIDÁNÍ ČLENA -->
-<!-- ===================== -->
-<h3>Přidat člena</h3>
-
-<table border="1" cellpadding="6">
-<thead>
-<tr>
-    <th>Jméno</th>
-    <th>Členem týmů</th>
-    <th>Role</th>
-    <th>Akce</th>
-</tr>
-</thead>
-
-<tbody>
-<?php foreach ($view->availableUsers as $u): ?>
-<?php if($u['global_role'] === 'root') {
-	continue;
-}
-?>
-<tr>
-    <td><?= e($u['last_name'] . ' ' . $u['first_name']) ?></td>
-
-    <td>
-        <?php foreach ($view->userTeams[$u['id']] ?? [] as $t): ?>
-            <span class="team-dot"
-                  title="<?= e($t['name']) ?>"
-                  style="background-color: <?= e($t['color']) ?>">
-                ●
-            </span>
+                <span class="user-name">
+                    <?= e($u['last_name'].' '.$u['first_name']) ?>
+                </span>
+            </form>
         <?php endforeach ?>
-    </td>
+    </div>
+<p>
+    <a href="<?= Url::to('/{tenant}/teams') ?>/#main" class="btn btn-secondary">
+        ← Zpět na přehled
+    </a>
+</p>
+</div>
 
-    <td>
-        <form method="post" action="<?= Url::current() ?>">
-            <?= $this->csrfField() ?>
-            <input type="hidden" name="add_user_id" value="<?= (int) $u['id'] ?>">
-
-            <select name="role_in_team">
-                <?php foreach ($rolesInTeam as $key => $label): ?>
-                    <option value="<?= e($key) ?>"
-                        <?= $key === 'member' ? 'selected' : '' ?>>
-                        <?= e($label) ?>
-                    </option>
-                <?php endforeach ?>
-            </select>
-    </td>
-
-    <td>
-            <button type="submit">Přidat</button>
-        </form>
-    </td>
-</tr>
-<?php endforeach ?>
-</tbody>
-</table>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

@@ -6,21 +6,66 @@ declare(strict_types=1);
 use App\Core\Url;
 use App\Core\Csrf;
 
+$css = '';
+require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
 ?>
 
 <?= $css ?>
+
 <?php if (!empty($view->error)): ?>
-    <p style="color:red"><?= htmlspecialchars($view->error) ?></p>
+    <p style="color:#c62828; max-width:900px; margin:1rem auto;">
+        <?= htmlspecialchars($view->error) ?>
+    </p>
 <?php endif; ?>
 
 <form method="post" action="">
-<?= Csrf::getField() ?>
-    <label>Název týmu</label><br>
-    <input type="text" name="name"><br><br>
+    <?= Csrf::getField() ?>
 
-    <label>Barva</label><br>
-    <input type="color" name="color" value="#2196F3"><br><br>
+    <table class="form-table">
+        <tr>
+            <th>
+                <label for="name">Název týmu <span class="req">*</span></label>
+            </th>
+            <td>
+                <input
+                    id="name"
+                    name="name"
+                    required
+                    value="<?= e($view->data['name'] ?? '') ?>"
+                >
+            </td>
+        </tr>
 
-    <button type="submit">Vytvořit</button>
+        <tr>
+            <th>
+                <label for="color">Barva týmu</label>
+            </th>
+            <td>
+                <input
+                    id="color"
+                    type="color"
+                    name="color"
+                    value="<?= e($view->data['color'] ?? '#2196F3') ?>"
+                    style="height: 38px; padding: 2px;"
+                >
+            </td>
+        </tr>
+
+        <tr>
+            <th></th>
+            <td class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Vytvořit tým
+                </button>
+
+                <a href="<?= Url::to('/{tenant}/teams') ?>/#main"
+                   class="btn btn-secondary">
+                    Zpět na přehled
+                </a>
+            </td>
+        </tr>
+    </table>
 </form>
+
+<?php require __DIR__ . '/../layout/footer.php'; ?>
