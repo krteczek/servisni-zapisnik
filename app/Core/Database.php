@@ -7,18 +7,43 @@ use PDO;
 use PDOException;
 use RuntimeException;
 
+/**
+ * Správce databázových připojení s podporou multi-tenancy.
+ * Poskytuje oddělená připojení pro admin databázi (globální) a work databáze (tenant-specific).
+ * Implementuje connection pooling na úrovni requestu.
+ */
 final class Database
 {
-    /** @var array<string, PDO> */
+    /**
+     * @var array<string, PDO> Cache otevřených PDO připojení [connection_key => PDO]
+     */
     private static array $connections = [];
 
-    /** @var string|null */
+    /**
+     * @var string|null Název aktuální tenant databáze pro work kontext
+     */
     private static ?string $currentWorkDb = null;
+
+    // TODO: [PERFORMANCE] Přidat connection pooling pro vysokou zátěž
+    // TODO: [OBSERVABILITY] Přidat metriky pro počet připojení a dobu života
 
     /* ==========================================================
      * ADMIN DB – vždy jedna
      * ========================================================== */
 
+    /**
+     * Vrátí připojení ke globální admin databázi.
+     * Admin DB obsahuje systémové tabulky (uživatelé, tenanty, audit logy).
+     *
+     * Očekává:
+     * - Konfigurační klíč 'database.admin' s host, dbname, user, password
+     *
+     * TODO: [SECURITY] Zvážit použití read-only repliky pro admin dotazy
+     * TODO: [BACKUP] Přidat automatické backupování admin DB
+     *
+     * @return PDO PDO připojení k admin databázi
+     * @throws RuntimeException Pokud se připojení nepovede
+     */
     public static function admin(): PDO
     {
         return self::getConnection('admin');
@@ -28,6 +53,21 @@ final class Database
      * WORK DB – explicitně nebo přes kontext
      * ========================================================== */
 
+    /**
+     * Vrátí připojení k tenant-specific work databázi.
+     * Pokud není zadán název DB, použije se aktuálně nastavená work DB.
+     *
+     * Očekává:
+     * - Konfigurační klíč 'database.work' s host, user, password
+     * - Název databáze musí existovat na serveru
+     *
+     * TODO: [SECURITY] Validovat název databáze proti whitelistu nebo patternu
+     * TODO: [PERFORMANCE] Přidat připojení k replikám pro read-only operace
+     *
+     * @param string|null $dbName Název tenant databáze (volitelné)
+     * @return PDO PDO připojení k work databázi
+     * @throws RuntimeException Pokud work DB není nastavena nebo připojení selže
+     */
     public static function work(?string $dbName = null): PDO
     {
         $dbName ??= self::$currentWorkDb;
@@ -42,7 +82,18 @@ final class Database
     }
 
     /**
-     * Nastaví výchozí WORK DB (volitelné, ne povinné)
+     * Nastaví výchozí WORK DB pro aktuální request.
+     * Používá se pro automatické přepínání do tenant databáze při přihlášení.
+     *
+     * Vedlejší efekty:
+     * - Mění statický stav třídy
+     * - Ovlivňuje následná volání Database::work() bez parametru
+     *
+     * TODO: [MAINTENANCE] Přidat validaci, že zadaná databáze existuje
+     * TODO: [FEATURE] Přidat možnost nastavit work DB pouze pro scope (callback)
+     *
+     * @param string $dbName Název tenant databáze
+     * @return void
      */
     public static function useWorkDatabase(string $dbName): void
     {
@@ -50,7 +101,11 @@ final class Database
     }
 
     /**
-     * Legacy kompatibilita
+     * Legacy kompatibilita – vrátí aktuální work DB nebo admin DB.
+     * Používá se tam, kde není jasné, zda jde o tenant nebo admin data.
+     *
+     * @deprecated Použijte explicitně admin() nebo work()
+     * @return PDO PDO připojení k aktuální databázi
      */
     public static function pdo(): PDO
     {
@@ -63,6 +118,17 @@ final class Database
      * Interní factory
      * ========================================================== */
 
+    /**
+     * Vytvoří nebo vrátí cached PDO připojení podle klíče.
+     * Implementuje lazy loading a connection pooling na úrovni requestu.
+     *
+     * TODO: [PERFORMANCE] Přidat TTL pro připojení a automatické uzavírání starých
+     * TODO: [SECURITY] Přidat SSL/TLS podporu pro připojení k externí DB
+     *
+     * @param string $key Identifikátor připojení ('admin' nebo 'work:dbname')
+     * @return PDO PDO připojení
+     * @throws RuntimeException Pokud připojení selže nebo klíč je neplatný
+     */
     private static function getConnection(string $key): PDO
     {
         if (isset(self::$connections[$key])) {
@@ -94,6 +160,7 @@ final class Database
             }
 
         } catch (PDOException $e) {
+            // TODO: [OBSERVABILITY] Integrovat s externím monitoringem (Sentry, NewRelic)
             Logger::error('DB connection failed', [
                 'key' => $key,
                 'exception' => $e,
@@ -105,6 +172,15 @@ final class Database
         return $pdo;
     }
 
+    /**
+     * Vrátí společné PDO options pro všechna připojení.
+     * Zajišťuje konzistentní chování napříč aplikací.
+     *
+     * TODO: [PERFORMANCE] Přidat PDO::MYSQL_ATTR_USE_BUFFERED_QUERY pro velké výsledky
+     * TODO: [RELIABILITY] Přidat PDO::ATTR_TIMEOUT pro prevenci nekonečného čekání
+     *
+     * @return array PDO options
+     */
     private static function options(): array
     {
         return [

@@ -13,10 +13,20 @@ use App\Models\UserModel;
 
 final class TeamController extends Controller
 {
+    // TODO: [SECURITY] Po implementaci ACL přidat kontrolu oprávnění pro všechny metody tohoto controlleru.
+    // TODO: [PERFORMANCE] Při více než 50 týmech zvážit přidání stránkování do metod `index()` a `inactive()`.
+
     /* ==========================================================
      * VÝPIS AKTIVNÍ / NEAKTIVNÍ
      * ========================================================== */
 
+    /**
+     * Získá a zobrazí seznam týmů podle jejich aktivního stavu.
+     * Načte členy každého týmu a spočítá jejich počet.
+     *
+     * @param bool $active TRUE pro aktivní týmy, FALSE pro neaktivní
+     * @return string HTML výstup šablony teams/index
+     */
     private function listByActive(bool $active): string
     {
         $teamModel       = new TeamModel();
@@ -35,11 +45,23 @@ final class TeamController extends Controller
         return $this->render('teams/index');
     }
 
+    /**
+     * Zobrazí seznam aktivních týmů.
+     * Veřejná wrapper metoda pro `listByActive(true)`.
+     *
+     * @return string HTML výstup šablony teams/index
+     */
     public function index(): string
     {
         return $this->listByActive(true);
     }
 
+    /**
+     * Zobrazí seznam neaktivních týmů.
+     * Veřejná wrapper metoda pro `listByActive(false)`.
+     *
+     * @return string HTML výstup šablony teams/index
+     */
     public function inactive(): string
     {
         return $this->listByActive(false);
@@ -49,11 +71,28 @@ final class TeamController extends Controller
      * VYTVOŘENÍ TÝMU
      * ========================================================== */
 
+    /**
+     * Zobrazí formulář pro vytvoření nového týmu.
+     *
+     * @return string HTML výstup šablony teams/create
+     */
     public function create(): string
     {
         return $this->render('teams/create');
     }
 
+    /**
+     * Zpracuje POST požadavek na vytvoření nového týmu.
+     * Validuje název týmu, vytvoří tým s výchozí barvou a přesměruje.
+     *
+     * Vedlejší efekty:
+     * - Vytvoří nový záznam v tabulce týmů
+     * - Nastaví flash zprávu
+     * - Mění stav databáze
+     *
+     * @return void
+     * @throws \Exception Pokud selže kontrola CSRF tokenu
+     */
     public function store(): void
     {
         $this->checkCsrf();
@@ -76,6 +115,16 @@ final class TeamController extends Controller
      * EDITACE TÝMU
      * ========================================================== */
 
+    /**
+     * Zobrazí editační formulář pro konkrétní tým.
+     * Načte tým, jeho členy, dostupné uživatele a konfiguraci rolí.
+     *
+     * Očekává:
+     * - Platné ID existujícího týmu
+     *
+     * @param int $id ID týmu k editaci
+     * @return string HTML výstup šablony teams/edit
+     */
     public function edit(int $id): string
     {
         $teamModel       = new TeamModel();
@@ -101,6 +150,28 @@ final class TeamController extends Controller
      * UPDATE – JEDNA AKCE NA JEDEN POST
      * ========================================================== */
 
+    /**
+     * Zpracuje všechny POST akce pro úpravu týmu (multiplexor).
+     * Rozlišuje 4 typy operací podle přítomnosti POST parametrů.
+     *
+     * Vedlejší efekty:
+     * - Mění data týmu (název, barva)
+     * - Přidává/odebíra členy týmu
+     * - Mění role členů
+     * - Nastavuje flash zprávy
+     * - Mění stav databáze
+     *
+     * Očekává:
+     * - Platné CSRF token
+     * - Existující ID týmu
+     * - Konzistentní POST data pro danou operaci
+     *
+     * TODO: [REFACTOR] Při příští úpravě rozdělit tuto metodu na menší specializované metody (SRP).
+     * TODO: [SECURITY] Přidat validaci, že uživatel má oprávnění měnit role (např. pouze admin může nastavit 'leader').
+     *
+     * @param int $id ID týmu k úpravě
+     * @return void
+     */
     public function update(int $id): void
     {
         $this->checkCsrf();
@@ -127,11 +198,11 @@ final class TeamController extends Controller
                     'name'  => $name,
                     'color' => $color,
                 ]);
-					Flash::success('Data týmu byla změněna.');
+                Flash::success('Data týmu byla změněna.');
             } else {
-            	Flash::success('Data týmu se nepodařilo změnit');
+                Flash::success('Data týmu se nepodařilo změnit');
             }
-				
+
             Url::redirect('/{tenant}/teams/' . $id . '/edit/#main');
         }
 
@@ -180,6 +251,20 @@ final class TeamController extends Controller
      * AKTIVACE / DEAKTIVACE
      * ========================================================== */
 
+    /**
+     * Přepne aktivní stav týmu (aktivace/deaktivace).
+     * Deaktivace týmu by měla zachovat historická data.
+     *
+     * Vedlejší efekty:
+     * - Mění stav `active` v tabulce týmů
+     * - Nastavuje flash zprávu
+     * - Může ovlivnit fungování závislých funkcí (např. přiřazování úkolů)
+     *
+     * TODO: [BUSINESS] Po zavedení workflow pravidel zkontrolovat, zda lze deaktivovat tým s otevřenými úkoly.
+     *
+     * @param int $id ID týmu k přepnutí stavu
+     * @return void
+     */
     public function toggle(int $id): void
     {
         $model = new TeamModel();
