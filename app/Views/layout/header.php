@@ -30,10 +30,19 @@ use App\Core\Session;
     </div>
 
     <?php if (Auth::check()): ?>
-        <div class="user-info">
-            Přihlášen: <?= htmlspecialchars(Auth::label()) ?>
-        </div>
-    <?php endif; ?>
+<div class="identity">
+    <div class="identity-company">
+        <?= htmlspecialchars(Auth::company()) ?>
+    </div>
+
+    <div class="identity-user">
+        <?= htmlspecialchars(Auth::name() ?? 'Uživatel') ?>
+    </div>
+
+    <div class="identity-role">
+        <?= htmlspecialchars(Auth::effectiveRole()) ?>
+    </div>
+</div>    <?php endif; ?>
 
     <?php if (Auth::hasGlobalRole(['admin'])): ?>
         <div class="role-switcher">

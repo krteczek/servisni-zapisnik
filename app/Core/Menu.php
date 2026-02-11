@@ -3,8 +3,39 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+/**
+ * Dynamický builder pro navigační menu aplikace.
+ * Generuje hierarchickou strukturu menu na základě rout a aktuální URL.
+ * Automaticky řeší aktivní stav položek a kontrolu oprávnění uživatele.
+ */
 final class Menu
 {
+    // TODO: [PERFORMANCE] Přidat caching sestaveného menu na úrovni uživatele + role
+    // TODO: [FEATURE] Přidat podporu pro ikony menu a badge (notifikace, počty)
+
+    /**
+     * Sestaví hierarchické navigační menu z definovaných rout.
+     * Kontroluje oprávnění uživatele a označuje aktivní položky.
+     *
+     * Vedlejší efekty:
+     * - Volá Auth::check() a Auth::hasRole() pro kontrolu oprávnění
+     * - Generuje URL pomocí Url::to()
+     *
+     * TODO: [MAINTENANCE] Přidat možnost konfigurovat pořadí položek menu (weight/order)
+     * TODO: [FEATURE] Přidat podporu pro víceúrovňové menu (hlavní → sekce → submenu → ...)
+     *
+     * @param array $routes Pole všech rout z konfigurace
+     * @param string $currentPath Aktuální URL cesta pro detekci aktivní položky
+     * @return array Hierarchická struktura menu ve formátu:
+     *               [
+     *                 'section' => [
+     *                   'label' => 'Hlavní',
+     *                   'path' => '/url',
+     *                   'active' => true,
+     *                   'items' => [['label' => 'Submenu', 'path' => '/sub', 'active' => false]]
+     *                 ]
+     *               ]
+     */
     public static function build(array $routes, string $currentPath): array
     {
         $menu = [];
@@ -35,6 +66,7 @@ final class Menu
                     ];
                 }
 
+                // TODO: [UX] Zvážit fuzzy matching pro aktivní stav (regex, wildcards)
                 // aktivní sekce – URL začíná cestou sekce
                 if (str_starts_with($currentPath, $routePath)) {
                     $menu[$section]['active'] = true;
@@ -65,6 +97,16 @@ final class Menu
         return $menu;
     }
 
+    /**
+     * Ověří, zda má aktuální uživatel přístup k dané routě/menu položce.
+     * Kontroluje autentizaci a globální role.
+     *
+     * TODO: [SECURITY] Přidat kontrolu na týmové role pro menu položky
+     * TODO: [FEATURE] Přidat podporu pro dynamické podmínky (např. 'if' callback)
+     *
+     * @param array $route Konfigurace routy z routes.php
+     * @return bool TRUE pokud má uživatel přístup, jinak FALSE
+     */
     private static function isAllowed(array $route): bool
     {
         if (($route['auth'] ?? false) && !Auth::check()) {

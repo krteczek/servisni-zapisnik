@@ -3,10 +3,36 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+/**
+ * Služba pro správu konfigurace aplikace s podporou dot notation a lazy loading.
+ * Načítá konfigurační soubory z adresáře Config a cachuje je pro celý request.
+ *
+ * Implementuje fail-fast přístup - vyhazuje výjimku při chybějících konfiguračních souborech.
+ */
 final class Config
 {
+    /**
+     * @var array Cache načtených konfiguračních souborů [filename => data]
+     */
     private static array $cache = [];
 
+    /**
+     * Získá konfigurační hodnotu pomocí dot notation (např. 'database.host').
+     * Soubory se načítají pouze při prvním přístupu a cachují se pro celý request.
+     *
+     * Očekává:
+     * - Konfigurační soubory jsou v adresáři ../Config/
+     * - Soubory mají příponu .php a vracejí pole
+     * - Klíč obsahuje alespoň jeden segment (file.key)
+     *
+     * TODO: [PERFORMANCE] Přidat opcode caching (OPcache) pro konfigurační soubory
+     * TODO: [FEATURE] Přidat podporu pro prostředí (dev/staging/prod) s dědičností konfigurací
+     *
+     * @param string $key Klíč v dot notation (např. 'database.connections.mysql.host')
+     * @param mixed $default Výchozí hodnota pokud klíč neexistuje
+     * @return mixed Konfigurační hodnota nebo výchozí hodnota
+     * @throws \RuntimeException Pokud konfigurační soubor neexistuje
+     */
     public static function get(string $key, mixed $default = null): mixed
     {
         [$file, $path] = self::parseKey($key);
@@ -18,6 +44,8 @@ final class Config
                 throw new \RuntimeException("Config soubor {$file} neexistuje");
             }
 
+            // TODO: [SECURITY] Zvážit validaci struktury načtené konfigurace
+            // TODO: [MAINTENANCE] Přidat logování načtených konfigurací v dev prostředí
             self::$cache[$file] = require $configPath;
         }
 
@@ -33,6 +61,16 @@ final class Config
         return $value;
     }
 
+    /**
+     * Parsuje dot notation klíč na název souboru a cestu v poli.
+     * Např. 'database.connections.mysql' → ['database', ['connections', 'mysql']]
+     *
+     * TODO: [SECURITY] Přidat sanitizaci názvu souboru pro prevenci path traversal
+     * TODO: [MAINTENANCE] Zvážit podporu pro složitější cesty (např. s čísly)
+     *
+     * @param string $key Klíč v dot notation
+     * @return array Pole obsahující [název_souboru, pole_cesty]
+     */
     private static function parseKey(string $key): array
     {
         $parts = explode('.', $key);

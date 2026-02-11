@@ -94,12 +94,10 @@ body {
     align-items: center;
 
     height: 72px;
-    padding: 0 16px;
+    padding-left: 16px;
 
-    font-size: 14px;
-    color: #444;
-
-    border-left: 1px solid rgba(0,0,0,.15);
+    font-size: 13px;
+    color: #666;
 }
 
 .role-switcher {
