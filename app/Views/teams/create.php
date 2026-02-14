@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 use App\Core\Url;
 use App\Core\Csrf;
-
+$team['color'] = "#FFF";
 $css = '';
 require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
@@ -15,7 +15,7 @@ require __DIR__ . '/../layout/header.php';
 
 <?php if (!empty($view->error)): ?>
     <p style="color:#c62828; max-width:900px; margin:1rem auto;">
-        <?= htmlspecialchars($view->error) ?>
+        <?= htmlspecialchars($view->errors) ?>
     </p>
 <?php endif; ?>
 

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use Psr\Log\LoggerInterface;
+//use Psr\Log\LoggerInterface;
 
 /**
  * Service locator/holder pro PSR-3 kompatibilní logger.

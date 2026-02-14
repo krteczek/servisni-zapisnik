@@ -3,59 +3,80 @@ declare(strict_types=1);
 
 use App\Core\Url;
 
-$css = '';
-require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
 
 $tasks = $view->tasks ?? [];
+//var_dump($tasks);
 ?>
 
-<?= $css ?>
+<?php if (empty($tasks)): ?>
+    <div class="ui-alert ui-alert-warning">
+        <strong>Žádné úkoly</strong>
+        <p>Zatím zde není žádný úkol. Nový úkol vytvoříte <a href="<?= Url::to('/{tenant}/tasks/create/#main') ?>">zde</a>.</p>
+    </div>
+<?php else: ?>
 
-<div class="tasks">
+<div class="entity-grid">
     <?php foreach ($tasks as $task): ?>
-        <div class="task-card">
-
-            <div class="task-header">
-                <span class="task-title">
+        <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
+            <!-- HLAVIČKA KARTY -->
+            <div class="card-header">
+                <span class="card-title"><a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
+                   class="card-title"
+                   title="Upravit úkol">
                     <?= htmlspecialchars($task['title']) ?>
-                </span>
-
-                <span class="task-status status-<?= htmlspecialchars($task['status']) ?>">
+                </a></span>
+                <span class="badge badge-status-<?= htmlspecialchars($task['status']) ?>">
                     <?= strtoupper($task['status']) ?>
                 </span>
             </div>
 
-            <div class="task-meta">
-                <?php if (!empty($task['work_order_id'])): ?>
-                    <span class="task-order">
-                        Zakázka #<?= (int)$task['work_order_id'] ?>: <?= htmlspecialchars($task['work_order_title']) ?>
-                    </span>
-                <?php endif; ?>
+            <!-- TĚLO KARTY -->
+            <div class="card-body">
+                <div class="meta-list">
+                    <?php if (!empty($task['work_order_id'])): ?>
+                        <div class="meta-item">
+                            <span class="meta-label">Zakázka</span>
+                            <span class="meta-value">
+                                <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$task['work_order_id'] . '/detail/#main') ?>">
+                                    #<?= (int)$task['work_order_id'] ?>: <?= htmlspecialchars($task['work_order_title']) ?>
+                                </a>
+                            </span>
+                        </div>
+                    <?php endif; ?>
+							<div class="meta-item">
+								<span class="meta-label">Počer reportů: </span>
+								<span class="meta-value"><?= (int)$task['reports_count'] ?></span>
+							</div>
+							<div class="meta-item">
+								<span class="meta-label">Počet hodin: </span>
+								<span class="meta-value"><?= (int)$task['minutes_spent'] ?></span>
+							</div>
+							<div class="meta-item">
+								<span class="meta-label">Počet kilometrů: </span>
+								<span class="meta-value"><?= (int)$task['kilometers'] ?></span>
+							</div>
+						</div>
+					</div>
 
-                <?php if (!empty($task['team_name'])): ?>
-                    <span class="task-team">
-                        Tým: <?= htmlspecialchars($task['team_name']) ?>
-                    </span>
-                <?php endif; ?>
+            <!-- PATIČKA KARTY -->
+            <div class="card-footer">
+                <div class="actions">
+                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
+                       class="btn btn-secondary" 
+                       title="Upravit úkol">
+                        ✏️ Upravit
+                    </a>
+                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>" 
+                       class="btn btn-secondary" 
+                       title="Přidat report">
+                        📝 Report
+                    </a>
+                </div>
             </div>
-
-            <div class="task-actions">
-                <a
-                    href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit') ?>"
-                    class="task-action"
-                    title="Upravit úkol"
-                >✏️</a>
-
-                <a
-                    href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report') ?>"
-                    class="task-action"
-                    title="Přidat report"
-                >📝</a>
-            </div>
-
         </div>
     <?php endforeach; ?>
 </div>
+<?php endif; ?>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

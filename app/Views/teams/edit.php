@@ -12,6 +12,15 @@ require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
 
 ?>
+
+<?php if (!empty($view->error)): ?>
+    <p style="color:#c62828; max-width:900px; margin:1rem auto;">
+        <?= htmlspecialchars($view->errors) ?>
+    </p>
+<?php endif; ?>
+
+
+
 <?= $css ?>
 <!-- měl jsem na mysli tohle -->
 <div class="team-intro">

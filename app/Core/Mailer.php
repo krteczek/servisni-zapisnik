@@ -32,7 +32,7 @@ final class Mailer
      * @return void
      * @throws \RuntimeException Pokud se nepodaří e-mail odeslat
      */
-    public static function sendActivation(
+    public static function sendActivationEmail(
         string $email,
         string $token,
         string $tenant

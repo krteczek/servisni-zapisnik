@@ -7,6 +7,8 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Core\Url;
+use App\Core\Sessions;
+use App\Core\Mailer;
 use App\Models\UserModel;
 use App\Models\CompanyModel;
 use App\Services\AuthTokenService;
@@ -87,7 +89,7 @@ public function login(): string
         !$user ||
         !password_verify($password, $user['password_hash'])
     ) {
-        $this->addError('global', 'Neplatné přihlašovací údaje.');
+        $this->addError('global', 'Neplatné přihlašovací údaje. Pokud problém přetrvává, kontaktujte správce vašeho prostoru.');
         return $this->render('auth/login');
     }
 
@@ -150,6 +152,7 @@ public function login(): string
         return $this->handleTokenGet('reset_password');
     }
 
+
     public function resetPasswordPost(): string
     {		
         
@@ -166,6 +169,69 @@ public function login(): string
         );
     }
 
+	/* Zapomenuté heslo */
+	public function forgotPassword(): string
+	{
+		return $this->render('auth/forgot-password');
+	}
+
+	public function forgotPasswordPost(): string
+	{
+			$this->checkCsrf();
+			//email, tenant
+			$tenant   = trim($_POST['tenant'] ?? '');
+			$email    = trim($_POST['email'] ?? '');
+
+			if ($tenant === '') {
+				$this->addError('tenant', 'Firma je povinná');
+			}
+			
+			if ($email === '') {
+				$this->addError('email', 'Email je povinný');
+			}
+
+			if ($this->hasErrors()) {
+				return $this->render('auth/forgot-password');
+			}
+			$user = null;
+			$company = null;
+			
+			/* jdeme se zeptat db, zda něco takového (komninace emailu a tenantu) existuje */
+			
+		$company = (new CompanyModel())->findBySlug($tenant);
+
+		if ($company) {
+		    $user = (new UserModel())->findByEmailAndCompany(
+		        $email,
+		        (int) $company['id']
+		    );
+		
+		    if ($user) {
+		        try {
+		            $token = (new AuthTokenService())->create(
+		                userId: $user['id'],
+		                type: AuthTokenService::TYPE_RESET_PASSWORD
+		            );
+		
+		            Mailer::sendResetPassword(
+		                $email,
+		                $token,
+		                $company['name']
+		            );
+		
+		        } catch (\Throwable $e) {
+		            error_log($e->getMessage());
+		        }
+		    }
+		}
+		
+		Flash::success(
+		    'Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.'
+		);
+		
+		Url::redirect('/login');
+	}
+
     /* =========================
      *  PRIVATE HELPERS
      * ========================= */
@@ -180,14 +246,16 @@ public function login(): string
         }
 
         try {
-            (new AuthTokenService())->validate($token, $type);
+        		
+            $user = (new AuthTokenService())->validate($token, $type);
 
             $this->view->token = $token;
 				$this->view->csrf  = $this->csrfField();
 
 				return $this->render('auth/reset-password');
 
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+        	//var_dump($e);exit;
             Flash::error('Odkaz je neplatný nebo expirovaný.');
             Url::redirect('/login');
         }
@@ -198,8 +266,10 @@ public function login(): string
         callable $userAction,
         string $successMessage
     ): string {
-        $token    = $_POST['token'] ?? null;
-        $password = $_POST['password'] ?? null;
+    	
+			$this->checkCsrf();
+			$token    = $_POST['token'] ?? null;
+			$password = $_POST['password'] ?? null;
     		$passwordZ = $_POST['passwordZ'] ?? null;
     		if($password === '') {
     			$this->addError('password', 'Heslo je povinné');
@@ -217,7 +287,19 @@ public function login(): string
         try {
             $service = new AuthTokenService();
             $row = $service->consume($token, $type);
+            
+				$userModel = new UserModel();
 
+				/* načteme usera bez tenant omezení */
+				$user = $userModel->findRawById((int)$row['user_id']);
+
+				if (!$user) {
+					throw new \LogicException('User not found');
+				}
+
+				/* bootstrap tenant do session */
+				Session::set('user.company_id', (int)$user['company_id']);
+				
             $userAction((int) $row['user_id'], $password);
 
             Flash::success($successMessage);
@@ -228,6 +310,8 @@ public function login(): string
             error_log($mess);
             Flash::error('Operace se nezdařila. ' . $mess);
             Url::redirect('/login');
+        } finally {
+				Session::forget('user.company_id');
         }
     }
 }

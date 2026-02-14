@@ -309,7 +309,9 @@ private function closeTask(int $orderId, int $taskId, string $status): void
 
         // 🔐 KONTEXTOVÁ KONTROLA (TADY JE SPRÁVNĚ)
         if (!$taskModel->belongsToOrder($taskId, $orderId)) {
-            throw new \LogicException('Úkol nepatří k této zakázce.');
+        		Flash::error('Úkol nepatří k této zakázce.');
+        		Url::redirect('/work-orders/' . $orderId);
+            //throw new \LogicException('Úkol nepatří k této zakázce.');
         }
 
         if (!$taskModel->canBeClosed($taskId, $status)) {

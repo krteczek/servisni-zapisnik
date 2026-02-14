@@ -1,0 +1,25 @@
+/* =====================================================
+   META DATA – univerzální pro zobrazení informací
+   ===================================================== */
+.meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.meta-label {
+    font-weight: 600;
+    color: #666;
+    min-width: 120px;  /* Zarovná hodnoty */
+    font-size: 0.85rem;
+}
+
+.meta-value {
+    color: #222;
+}

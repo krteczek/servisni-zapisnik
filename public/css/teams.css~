@@ -1,0 +1,46 @@
+/* =====================================================
+   TEAMS – barevný levý border
+   ===================================================== */
+
+.team-card {
+    border-left: 4px solid var(--team-color) !important;
+}
+
+/* Členové týmu */
+.member-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 2px 0;
+}
+/* Tečky za jménem - bez textu, jen barva */
+.team-dot {
+    display: inline-block;
+    width: 14px;  /* o trochu menší, ať neukousnou moc místa */
+    height: 14px;
+    border-radius: 50%;
+    background-color: currentColor;  /* použije barvu z style */
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+        cursor: default;  /* nebo pointer */
+    vertical-align: middle;
+}
+
+/* Zalamování teček */
+.member-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.member-name {
+    margin-right: 4px;
+}
+
+.team-dots {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}

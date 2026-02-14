@@ -246,23 +246,27 @@ public static function label(): ?string
      *
      * @return string Efektivní role uživatele
      */
-    public static function effectiveRole(): string
-    {
-        $user = self::user();
+ public static function effectiveRole(): string
+{
+    $user = self::user();
 
-        if (
-            $user['global_role'] === 'admin' &&
-            Session::has('auth.effective_role')
-        ) {
-            $role = (string) Session::get('auth.effective_role');
-
-            if (array_key_exists($role, Roles::effective())) {
-                return $role;
-            }
-        }
-
-        return $user['global_role'];
+    if (!$user) {
+        return 'guest';
     }
+
+    if (
+        $user['global_role'] === 'admin' &&
+        Session::has('auth.effective_role')
+    ) {
+        $role = (string) Session::get('auth.effective_role');
+
+        if (array_key_exists($role, Roles::effective())) {
+            return $role;
+        }
+    }
+
+    return $user['global_role'] ?? 'guest';
+}
 
 
     /**

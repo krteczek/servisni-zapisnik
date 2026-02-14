@@ -52,6 +52,7 @@ return [
     'path'   => '/activate',
     'action' => [AuthController::class, 'activate'],
     'auth'   => false,
+    'title'  => 'Bó - Aktivace uživatele',
 ],
 
 [
@@ -59,6 +60,8 @@ return [
     'path'   => '/activate',
     'action' => [AuthController::class, 'activatePost'],
     'auth'   => false,
+    'title'  => 'Bó - Aktivace uživatele',
+
 ],
 
 [
@@ -66,6 +69,8 @@ return [
     'path'   => '/reset-password',
     'action' => [AuthController::class, 'resetPassword'],
     'auth'   => false,
+    'title'  => 'Bó - Reset hesla uživatele',
+
 ],
 
 [
@@ -73,8 +78,27 @@ return [
     'path'   => '/reset-password',
     'action' => [AuthController::class, 'resetPasswordPost'],
     'auth'   => false,
+    'title'  => 'Bó - Reset hesla uživatele',
+
 ],
 
+[
+    'method' => 'GET',
+    'path'   => '/forgot-password',
+    'action' => [AuthController::class, 'forgotPassword'],
+    'auth'   => false,
+    'title'  => 'Bó - Zapomenuté heslo',
+
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/forgot-password',
+    'action' => [AuthController::class, 'forgotPasswordPost'],
+    'auth'   => false,
+    'title'  => 'Bó - Zapomenuté heslo',
+
+],
 
 /*
 |--------------------------------------------------------------------------
@@ -395,7 +419,7 @@ teprve potom je možno vytvořit úkol
     'roles'   => ['admin'],
     'submenu' => 'Přidat uživatele',
     'section' => 'users',
-    'title'   => 'Uživatelé > Nový',
+    'title'   => 'Uživatelé > Vytvoření nového uživatele ',
 ],
 
 [

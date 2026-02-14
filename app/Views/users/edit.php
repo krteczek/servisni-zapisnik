@@ -6,77 +6,137 @@ use App\Core\Roles;
 use App\Core\Csrf;
 use App\Core\UserGuard;
 
+$css = '';
+//require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
 
 $old    = $view->old ?? [];
 $errors = $view->errors ?? [];
+
+$fullName = trim(
+    ($old['first_name'] ?? '') . ' ' . ($old['last_name'] ?? '')
+);
 ?>
-<h2>Změna údajů uživatele:
-    <?= htmlspecialchars($old['first_name'] ?? '') ?>
-    <?= htmlspecialchars($old['last_name'] ?? '') ?>
-</h2>
+<?= $css ?>
 
-<?php if ($errors): ?>
-<ul class="errors">
-    <?php foreach ($errors as $field => $messages): ?>
-        <?php foreach ((array) $messages as $message): ?>
-            <li><?= e($message) ?></li>
-        <?php endforeach ?>
-    <?php endforeach ?>
-</ul>
-<?php endif ?>
+<div class="ui-alert ui-alert-warning">
+    <strong>Upozornění:</strong>
+    Uživatelé označení jako neaktivní se nemohou přihlásit.
+</div>
 
-<form method="post"
-      autocomplete="off"
-      data-lpignore="true">
+<div class="user-edit-wrapper">
 
-    <?= Csrf::getField() ?>
+    <h2 class="user-edit-title">
+        Změna údajů uživatele
+        <span><?= e($fullName ?: '—') ?></span>
+    </h2>
 
-    <!-- anti password manager -->
-    <input type="text" autocomplete="username" hidden>
-    <input type="password" autocomplete="current-password" hidden>
-<?php if (!\App\Core\UserGuard::isProtected($old)): ?>
-    <label>Email</label><br>
-    <input name="email" value="<?= e($old['email'] ?? '') ?>"><br><br>
-<?php else: ?>
-    <label>Email (u tohoto účtu nelze změnit email)</label><br>
-    <?= e($old['email'] ?? '') ?><br><br>
-<?php endif; ?>
-    <label>Číslo zaměstnance</label><br>
-    <input name="employee_number" value="<?= e($old['employee_number'] ?? '') ?>"><br><br>
+    <?php if ($errors): ?>
+        <div class="ui-alert ui-alert-error">
+            <strong>Formulář obsahuje chyby:</strong>
+            <ul>
+                <?php foreach ($errors as $messages): ?>
+                    <?php foreach ((array)$messages as $message): ?>
+                        <li><?= e($message) ?></li>
+                    <?php endforeach ?>
+                <?php endforeach ?>
+            </ul>
+        </div>
+    <?php endif ?>
 
-    <label>Jméno</label><br>
-    <input name="first_name" value="<?= e($old['first_name'] ?? '') ?>"><br><br>
+    <form method="post"
+          class="user-form"
+          autocomplete="off"
+          data-lpignore="true">
 
-    <label>Příjmení</label><br>
-    <input name="last_name" value="<?= e($old['last_name'] ?? '') ?>"><br><br>
-<?php if (!\App\Core\UserGuard::isProtected($old)): ?>
-    <label>Role</label><br>
-    <select name="global_role">
-        <?php //var_dump($view->roles);
-foreach ($view->roles as $key => $label): ?>
-<option value="<?= e($key) ?>"
-    <?= $key === ($old['global_role'] ?? Roles::default()) ? 'selected' : '' ?>>
-    <?= e($label) ?>
-</option>        <?php endforeach ?>
-    </select><br><br>
-    <label>
-        <input type="checkbox" name="active" <?= !empty($old['active']) ? 'checked' : '' ?>>
-        Aktivní účet
-    </label><br><br>
+        <?= Csrf::getField() ?>
 
+        <!-- anti password manager -->
+        <input type="text" autocomplete="username" hidden>
+        <input type="password" autocomplete="current-password" hidden>
 
-<?php else: ?>
-    <label>Role (u tohoto účtu nelze změnit roli)</label><br>
-    <?= e($old['global_role'] ?? '') ?><br><br>
-    Aktivní účet (tento účet nelze deaktivovat)<br><br>
-<?php endif; ?>
+        <!-- EMAIL -->
+        <div class="form-group">
+            <label>Email</label>
 
-    <button type="submit">Uložit změny</button>
-</form>
-<p>
-    <a href="<?= Url::to('/users') ?>/#main" class="btn btn-secondary">
-        ← Zpět na přehled
-    </a>
-</p>
+            <?php if (!UserGuard::isProtected($old)): ?>
+                <input name="email"
+                       value="<?= e($old['email'] ?? '') ?>">
+            <?php else: ?>
+                <div class="form-static">
+                    <?= e($old['email'] ?? '') ?>
+                    <small>Email u tohoto účtu nelze změnit.</small>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- EMPLOYEE NUMBER -->
+        <div class="form-group">
+            <label>Číslo zaměstnance</label>
+            <input name="employee_number"
+                   value="<?= e($old['employee_number'] ?? '') ?>">
+        </div>
+
+        <!-- FIRST NAME -->
+        <div class="form-group">
+            <label>Jméno</label>
+            <input name="first_name"
+                   value="<?= e($old['first_name'] ?? '') ?>">
+        </div>
+
+        <!-- LAST NAME -->
+        <div class="form-group">
+            <label>Příjmení</label>
+            <input name="last_name"
+                   value="<?= e($old['last_name'] ?? '') ?>">
+        </div>
+
+        <!-- ROLE + ACTIVE -->
+        <div class="form-group">
+
+            <?php if (!UserGuard::isProtected($old)): ?>
+
+                <label>Role</label>
+                <select name="global_role">
+                    <?php foreach ($view->roles as $key => $label): ?>
+                        <option value="<?= e($key) ?>"
+                            <?= $key === ($old['global_role'] ?? Roles::default()) ? 'selected' : '' ?>>
+                            <?= e($label) ?>
+                        </option>
+                    <?php endforeach ?>
+                </select>
+
+                <label class="checkbox">
+                    <input type="checkbox"
+                           name="active"
+                           <?= !empty($old['active']) ? 'checked' : '' ?>>
+                    Aktivní účet
+                </label>
+
+            <?php else: ?>
+
+                <div class="form-static">
+                    <strong>Role:</strong>
+                    <?= e($old['global_role'] ?? '') ?><br>
+                    <small>Tento účet nelze upravovat ani deaktivovat.</small>
+                </div>
+
+            <?php endif; ?>
+
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">
+                Uložit změny
+            </button>
+
+            <a href="<?= Url::to('/{tenant}/users') ?>/#main"
+               class="btn-secondary">
+                ← Zpět na výpis uživatelů
+            </a>
+        </div>
+
+    </form>
+</div>
+
 <?php require __DIR__ . '/../layout/footer.php'; ?>

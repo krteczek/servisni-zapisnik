@@ -1,6 +1,7 @@
 <?php
 use App\Core\Url;
 use App\Core\Csrf;
+
 require __DIR__ . '/../layout/header.php';
 ?>
 <p>Zadejte údaje pro přístup do Vašeho pracovního prostoru.</p>
