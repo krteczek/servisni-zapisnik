@@ -5,7 +5,7 @@ namespace App\Models;
 
 use PDO;
 
-class WorkOrderModel extends TenantModel
+class WorkOrderModel extends BaseModel
 {
     protected string $table = 'work_orders';
     protected string $connection = 'work';

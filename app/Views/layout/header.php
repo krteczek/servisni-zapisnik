@@ -16,8 +16,26 @@ use App\Core\Session;
 <link rel="icon" href="<?= Url::to('/favicon_io/favicon.ico') ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
 <link rel="apple-touch-icon" href="<?= Url::to('/favicon_io/apple-touch-icon.png') ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/style.css') ?>">
-    
+ <!--   <link rel="stylesheet" href="<?= Url::to('/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/buttons.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/badge.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/card.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/form.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/list.css') ?>">
+    -->
+ <style>
+ <?php
+ require __DIR__ . '/../../../public/css/style.css';
+ require __DIR__ . '/../../../public/css/buttons.css';
+ require __DIR__ . '/../../../public/css/badge.css';
+ require __DIR__ . '/../../../public/css/card.css';
+ require __DIR__ . '/../../../public/css/form.css';
+ require __DIR__ . '/../../../public/css/grid.css';
+ require __DIR__ . '/../../../public/css/metadata.css';
+ require __DIR__ . '/../../../public/css/colors.css';
+ require __DIR__ . '/../../../public/css/teams.css';
+ ?>
+ </style>
 </head>
 <body>
 
@@ -26,7 +44,7 @@ use App\Core\Session;
     <!-- ================= HEADER ================= -->
 <header class="header">
     <div>
-       <a href="<?= Url::to('/') ?>"  class="logo">博</a>
+       <a href="<?= Url::to('/{tenant}/tasks') ?>"  class="logo">博</a>
     </div>
 
     <?php if (Auth::check()): ?>
@@ -115,12 +133,19 @@ use App\Core\Session;
     <!-- ================= MAIN ================= -->
     <main id="main" class="main">
         <h1><?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></h1>
-<?php 
-foreach (['success','error','info'] as $type): ?>
-    <?php if (Session::hasFlash($type)): ?>
-        <div class="flash <?= $type ?>">
-            <?= Session::getFlash($type) ?>
-        </div>
-    <?php endif; ?>
-<?php endforeach; ?>    
+
+<?php if (!empty($_SESSION['flash'] ?? [])): ?>
+    <div class="flash-wrapper">
+        <?php foreach (['success','error','info'] as $type): ?>
+            <?php if (Session::hasFlash($type)): ?>
+                <div class="flash flash-<?= $type ?>">
+                    <span class="flash-message">
+                        <?= Session::getFlash($type) ?>
+                    </span>
+                    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 

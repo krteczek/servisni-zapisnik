@@ -267,6 +267,69 @@ přepínač pohledu rolí pro admina
     font-size: 0.8rem;
     color: #666;
 }
+/* =====================================================
+   UI ALERT
+   ===================================================== */
+
+.ui-alert {
+    margin: 1rem 0;
+    padding: .85rem 1rem;
+    border-radius: 6px;
+    font-size: .9rem;
+    line-height: 1.4;
+}
+
+.ui-alert-warning {
+    background: #fff8e1;
+    border: 1px solid #f0c36d;
+    border-left: 4px solid #f9a825;
+    color: #6d4c00;
+}
+
+
+.flash-wrapper {
+    width: 100%;
+}
+
+.flash {
+    position: relative;
+    padding: 16px 20px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.flash-success {
+    background: #e6f9f0;
+    color: #1e7e4f;
+}
+
+.flash-error {
+    background: #fdecea;
+    color: #a71d2a;
+}
+
+.flash-info {
+    background: #e8f4fd;
+    color: #0c5460;
+}
+
+.flash-close {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.flash-close:hover {
+    opacity: 1;
+}
+
+
 
 /* =========================
    RESPONSIVE – MOBILE
@@ -299,3 +362,5 @@ přepínač pohledu rolí pro admina
   }
 
 }
+
+

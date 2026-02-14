@@ -3,107 +3,116 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Core\Database;
-use App\Core\Config;
-use PDO;
-use LogicException;
-
-final class AuditLogModel
+/**
+ * Model pro práci s auditním logem v admin databázi.
+ * Poskytuje filtrování a prohlížení historie změn entit.
+ *
+ * Audit log uchovává všechny změny auditovaných tabulek
+ * (CREATE, UPDATE, DELETE) včetně detailu změn (diff).
+ */
+final class AuditLogModel extends BaseModel
 {
-    protected PDO $db;
-
+    /**
+     * Název tabulky bez prefixu.
+     *
+     * @var string
+     */
     protected string $table = 'audit_logs';
+
+    /**
+     * Připojení k admin databázi (centrální audit log pro všechny tenanty).
+     *
+     * @var string
+     */
     protected string $connection = 'admin';
 
-    protected string $tableName;
-
+    /**
+     * Sloupce, podle kterých lze řadit – pro budoucí implementaci řazení.
+     *
+     * TODO: [FEATURE] Implementovat dynamické řazení podle zvoleného sloupce
+     *
+     * @var array
+     */
     protected array $orderable = ['id', 'created_at'];
 
-public function __construct()
-{
-    if ($this->table === '') {
-        throw new LogicException('AuditLogModel table name is empty');
-    }
-
-    $this->db = match ($this->connection) {
-        'admin' => Database::admin(),
-        'work'  => Database::work(),
-        default => throw new LogicException(
-            'Unknown DB connection: ' . $this->connection
-        ),
-    };
-
-    $prefix = (string) Config::get('database.prefix', '');
-    $this->tableName = $prefix . $this->table;
-}
-    public function insert(array $data): void
-    {
-        $cols   = array_keys($data);
-        $fields = implode(', ', $cols);
-        $values = ':' . implode(', :', $cols);
-
-        $sql = "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($data);
-    }
-
-    public function findById(int $id): ?array
-    {
-        $stmt = $this->db->prepare(
-            "SELECT * FROM {$this->tableName} WHERE id = :id"
-        );
-        $stmt->execute(['id' => $id]);
-
-        return $stmt->fetch() ?: null;
-    }
-
+    /**
+     * Vyhledá záznamy v audit logu podle zadaných filtrů.
+     * Filtry jsou volitelné – metoda použije pouze ty, které jsou vyplněny.
+     *
+     * Podporované filtry:
+     * - user_id  → ID uživatele, který provedl akci
+     * - action   → typ akce ('insert', 'update', 'delete')
+     * - table    → název entity/tabulky (např. 'users', 'teams')
+     * - ip       → IP adresa uživatele
+     * - from     → datum od (formát YYYY-MM-DD)
+     * - to       → datum do (formát YYYY-MM-DD)
+     *
+     * Automaticky aplikuje:
+     * - Tenant izolaci (company_id)
+     * - Řazení od nejnovějších po nejstarší
+     * - Omezení počtu výsledků (prevence přetížení)
+     *
+     * Očekává:
+     * - Platný tenant kontext (Auth::companyId())
+     * - Pokud není zadán limit, vrací max 100 záznamů
+     *
+     * TODO: [PERFORMANCE] Přidat stránkování místo pevného LIMIT
+     * TODO: [FEATURE] Přidat fulltext vyhledávání v JSON diff
+     * TODO: [FEATURE] Přidat možnost exportu do CSV
+     *
+     * @param array $filters Asociativní pole filtrů
+     * @param int $limit Maximální počet vrácených záznamů (výchozí 100)
+     * @return array Seznam auditních záznamů
+     */
     public function findByFilters(array $filters, int $limit = 100): array
     {
-        $where  = [];
-        $params = [];
+        $where  = $this->applyTenant([]);
+        $params = $where;
 
+        // Aplikace volitelných filtrů
         if (!empty($filters['user_id'])) {
-            $where[] = 'user_id = :user_id';
-            $params['user_id'] = (int) $filters['user_id'];
+            $where['user_id'] = (int) $filters['user_id'];
         }
 
         if (!empty($filters['action'])) {
-            $where[] = 'action = :action';
-            $params['action'] = $filters['action'];
+            $where['action'] = $filters['action'];
         }
 
         if (!empty($filters['table'])) {
-            $where[] = 'entity = :entity';
-            $params['entity'] = $filters['table'];
+            $where['entity'] = $filters['table'];
         }
 
         if (!empty($filters['ip'])) {
-            $where[] = 'ip_address = :ip';
-            $params['ip'] = $filters['ip'];
+            $where['ip_address'] = $filters['ip'];
         }
 
+        $sql = "SELECT * FROM {$this->tableName}";
+        $clauses = [];
+
+        // Sestavení WHERE podmínek
+        foreach ($where as $col => $val) {
+            $clauses[] = "{$col} = :{$col}";
+            $params[$col] = $val;
+        }
+
+        // Datové rozmezí
         if (!empty($filters['from'])) {
-            $where[] = 'created_at >= :from';
+            $clauses[] = 'created_at >= :from';
             $params['from'] = $filters['from'] . ' 00:00:00';
         }
 
         if (!empty($filters['to'])) {
-            $where[] = 'created_at <= :to';
+            $clauses[] = 'created_at <= :to';
             $params['to'] = $filters['to'] . ' 23:59:59';
         }
 
-        $sql = "SELECT * FROM {$this->tableName}";
-
-        if ($where) {
-            $sql .= ' WHERE ' . implode(' AND ', $where);
+        if ($clauses) {
+            $sql .= ' WHERE ' . implode(' AND ', $clauses);
         }
 
+        // Řazení a limit
         $sql .= ' ORDER BY created_at DESC LIMIT ' . (int) $limit;
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-
-        return $stmt->fetchAll();
+        return $this->fetchAll($sql, $params);
     }
 }

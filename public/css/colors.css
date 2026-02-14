@@ -1,0 +1,48 @@
+/* =====================================================
+   BAREVNÉ OZNAČENÍ – univerzální pro cokoliv
+   ===================================================== */
+
+/* Základní třída pro barevný prvek */
+.color-dot {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--color, #ccc);  /* --color nastavíme v HTML */
+    border: 1px solid rgba(0,0,0,0.1);
+    flex-shrink: 0;  /* Aby se nescvrkával */
+}
+
+/* Varianta pro větší barevný prvek */
+.color-dot--medium {
+    width: 20px;
+    height: 20px;
+}
+
+/* Varianta pro čtvereček (třeba u zakázek) */
+.color-square {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background-color: var(--color, #ccc);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Barevný proužek na okraji karty */
+.color-strip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--color, #ccc);
+    border-radius: 6px 0 0 6px;
+}
+
+/* Pomocná třída pro flex řadu s odsazením */
+.color-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

@@ -4,17 +4,18 @@ use App\Core\Csrf;
 require __DIR__ . '/../layout/header.php';
 $token = $view->token ?? '';
 $errors = $view->errors ?? [];
+
+$ch = '';
+if ($errors) {
+    foreach ($errors as $field => $messages) {
+        foreach ($messages as $msg) {
+            ?> <p><?= e($msg) ?></p><?php
+        }
+    }
+}	
 ?>
-<h1>Nastavení nového hesla</h1>
-<?php if ($errors): ?>
-<ul class="errors">
-    <?php foreach ($errors as $field => $messages): ?>
-        <?php foreach ((array) $messages as $message): ?>
-            <li><?= e($message) ?></li>
-        <?php endforeach ?>
-    <?php endforeach ?>
-</ul>
-<?php endif ?>
+
+<?= htmlspecialchars($ch) ?>
 
 <form method="post" action="">
     <?= Csrf::getField() ?>

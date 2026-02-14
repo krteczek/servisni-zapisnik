@@ -38,7 +38,9 @@ final class TeamController extends Controller
             $members = $membershipModel->currentMembers((int) $team['id']);
             $teams[$i]['members']       = $members;
             $teams[$i]['members_count'] = count($members);
-        }
+            //$teams[$i]['members_teams_colors'] = 
+         }
+        $this->view->userTeams      = $membershipModel->activeTeamsByUsers();
 
         $this->view->teams = $teams;
 
@@ -105,8 +107,10 @@ final class TeamController extends Controller
             Url::redirect('/{tenant}/teams/create/#main');
         }
 
-        (new TeamModel())->create($name, $color);
-
+        (new TeamModel())->create([
+        'name'  => $name,
+        'color' => $color,
+    ]);
         Flash::success('Tým byl vytvořen.');
         Url::redirect('/{tenant}/teams/#main');
     }
@@ -194,7 +198,7 @@ final class TeamController extends Controller
             $color = trim($_POST['color']);
 
             if ($name !== '' && $color !== '') {
-                $teamModel->updateTeam($id, [
+                $teamModel->update($id, [
                     'name'  => $name,
                     'color' => $color,
                 ]);

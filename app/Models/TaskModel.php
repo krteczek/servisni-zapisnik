@@ -3,148 +3,154 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use LogicException;
-use PDO;
+use DateTime;
 
-class TaskModel extends TenantModel
+final class TaskModel extends BaseModel
 {
-    protected string $connection = 'work';
     protected string $table = 'tasks';
+    protected string $connection = 'work';
+    protected bool $tenantAware = true;
 
-    /* =========================
-       SELECTY
-       ========================= */
-
-    public function byWorkOrder(int $orderId): array
+    /**
+     * Najde úkol podle ID (tenant-aware přes BaseModel)
+     */
+    public function findById(int $taskId): ?array
     {
-        $sql = "
-            SELECT *
-            FROM {$this->tableName}
-            WHERE work_order_id = :order
-              AND company_id = :tenant
-            ORDER BY id DESC
-        ";
-
-        return $this->fetchAll($sql, [
-            'order'  => $orderId,
-            'tenant' => $this->tenantId(),
-        ]);
+        return $this->findRow($taskId);
     }
 
-    public function unassigned(): array
+    /**
+     * Vrátí statistiky k úkolu potřebné pro validaci
+     */
+    public function getTaskStats(int $taskId): array
     {
-        $sql = "
-            SELECT *
-            FROM {$this->tableName}
-            WHERE work_order_id IS NULL
-              AND company_id = :tenant
-            ORDER BY id DESC
-        ";
-
-        return $this->fetchAll($sql, [
-            'tenant' => $this->tenantId(),
-        ]);
+        return [
+            'assignments_count' => (int) $this->fetchValue(
+                "SELECT COUNT(*) 
+                 FROM task_assignments 
+                 WHERE task_id = :task_id 
+                   AND company_id = :company_id",
+                [
+                    'task_id' => $taskId,
+                    'company_id' => $this->tenantId()
+                ]
+            ),
+        ];
     }
 
-    /* =========================
-       DOMÉNOVÉ OPERACE
-       ========================= */
-
-    public function markDone(int $taskId): bool
+    /**
+     * Obecná validační metoda
+     */
+    public function canBeClosed(array $task, string $newStatus): bool
     {
-        return $this->update($taskId, [
-            'status'  => 'done',
-            'done_at' => date('Y-m-d H:i:s'),
-        ]);
+        if ($task['status'] !== 'open') {
+            return false;
+        }
+
+        $stats = $this->getTaskStats((int)$task['id']);
+
+        return match ($newStatus) {
+            'done'      => $this->canBeDone($stats),
+            'cancelled' => $this->canBeCancelled($stats),
+            default     => false,
+        };
     }
 
-    public function cancel(int $taskId): bool
+    private function canBeDone(array $stats): bool
     {
-        return $this->update($taskId, [
-            'status' => 'cancelled',
-        ]);
+        // Příklad logiky:
+        // Úkol může být hotový jen pokud existuje alespoň jedno plnění
+        return $stats['assignments_count'] > 0;
     }
 
-    public function assignToOrder(int $taskId, int $orderId): bool
+    private function canBeCancelled(array $stats): bool
     {
-        return $this->update($taskId, [
-            'work_order_id' => $orderId,
-        ]);
+        // Například: můžeš zrušit jen pokud nemá žádné plnění
+        return $stats['assignments_count'] === 0;
+    }
+
+    /**
+     * Uzavře úkol změnou statusu
+     */
+    public function closeTask(int $taskId, string $newStatus): bool
+    {
+        $task = $this->findById($taskId);
+
+        if (!$task) {
+            return false;
+        }
+
+        if (!$this->canBeClosed($task, $newStatus)) {
+            return false;
+        }
+
+        $data = [
+            'status' => $newStatus,
+        ];
+
+        if ($newStatus === 'done') {
+            $data['done_at'] = (new DateTime())->format('Y-m-d H:i:s');
+        }
+
+        if ($newStatus === 'cancelled') {
+            $data['done_at'] = null;
+        }
+
+        return $this->update($taskId, $data);
+    }
+
+    /**
+     * Vrátí všechny otevřené úkoly pro tým
+     */
+    public function getOpenTasksByTeam(int $teamId): array
+    {
+        return $this->fetchAll(
+            "SELECT *
+             FROM {$this->tableName}
+             WHERE team_id = :team_id
+               AND status = 'open'
+               AND company_id = :company_id
+             ORDER BY created_at DESC",
+            [
+                'team_id' => $teamId,
+                'company_id' => $this->tenantId()
+            ]
+        );
     }
     
-    public function countByWorkOrder(int $orderId): int
+    public function forIndex(): array
 {
     $sql = "
-        SELECT COUNT(*) AS cnt
-        FROM {$this->tableName}
-        WHERE work_order_id = :order
-          AND company_id = :tenant
+        SELECT
+            t.id,
+            t.title,
+            t.status,
+            t.team_id,
+            t.description,
+            COUNT(ta.id) AS reports_count,
+            COALESCE(SUM(ta.minutes_spent), 0) AS minutes_spent,
+            COALESCE(SUM(ta.kilometers), 0) AS kilometers
+        FROM {$this->tableName} t
+        LEFT JOIN task_assignments ta
+            ON ta.task_id = t.id
+           AND ta.company_id = t.company_id
+        WHERE t.company_id = :company_id
+        GROUP BY t.id
+        ORDER BY t.created_at DESC
     ";
 
-    $row = $this->fetchOne($sql, [
-        'order'  => $orderId,
-        'tenant' => $this->tenantId(),
+    return $this->fetchAll($sql, [
+        'company_id' => $this->tenantId()
     ]);
-
-    return (int) ($row['cnt'] ?? 0);
 }
 
-public function allDoneByWorkOrder(int $orderId): bool
-{
-    $sql = "
-        SELECT COUNT(*) AS open_cnt
-        FROM {$this->tableName}
-        WHERE work_order_id = :order
-          AND company_id = :tenant
-          AND status != 'done'
-    ";
-
-    $row = $this->fetchOne($sql, [
-        'order'  => $orderId,
-        'tenant' => $this->tenantId(),
-    ]);
-
-    return ((int) ($row['open_cnt'] ?? 0)) === 0;
-}
-   
-
-
-public function statsForWorkOrder(int $workOrderId): array
-{
-    $sql = "
-        SELECT status, COUNT(*) AS cnt
-        FROM {$this->tableName}
-        WHERE company_id = :company
-          AND work_order_id = :wo
-        GROUP BY status
-    ";
-
-    $rows = $this->fetchAll($sql, [
-        'company' => $this->tenantId(),
-        'wo'      => $workOrderId,
-    ]);
-
-    $stats = [
-        'open'      => 0,
-        'done'      => 0,
-        'cancelled'=> 0,
-        'total'     => 0,
-    ];
-
-    foreach ($rows as $row) {
-        $stats[$row['status']] = (int) $row['cnt'];
-        $stats['total'] += (int) $row['cnt'];
-    }
-
-    return $stats;
-}
     public function forWorkOrderWithStats(int $orderId): array
     {
         $sql = "
             SELECT *
             FROM {$this->tableName}
             WHERE work_order_id = :order
-              AND {$this->tenantColumn()} = :tenant
+              AND {$this->tenantColumn} = :tenant
             ORDER BY
                 status IN ('done','cancelled'),  -- otevřené nahoře
                 created_at DESC
@@ -178,105 +184,5 @@ public function statsForWorkOrder(int $workOrderId): array
 
         return $tasks;
     }
-private function canBeCancelled(array $task, array $stats): bool
-{
-    // úkol lze zrušit jen pokud:
-    // - není done
-    // - nemá žádná plnění
-    return $task['status'] === 'open'
-        && $stats['total'] === 0;
-}
-
-private function canBeDone(array $task, array $stats): bool
-{
-    // úkol lze uzavřít jako hotový pokud:
-    // - je otevřený
-    // - má alespoň jedno plnění
-    return $task['status'] === 'open'
-        && $stats['total'] > 0;
-}
-
-public function closeCanceledByWorkOrder(int $workOrderId): void
-{
-    $sql = "
-        UPDATE task_assignments
-        SET status = 'closed'
-        WHERE work_order_id = :wo
-          AND status = 'canceled'
-          AND tenant_id = :tenant
-    ";
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([
-        'wo'     => $workOrderId,
-        'tenant'=> $this->tenantId(),
-    ]);
-}
-
-
-public function closeTask(int $taskId, string $status): void
-{
-    $sql = "
-        UPDATE task_assignments
-        SET status = :status
-        WHERE id = :id
-          AND tenant_id = :tenant
-    ";
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([
-        'status' => $status,
-        'id'     => $taskId,
-        'tenant' => $this->tenantId(),
-    ]);
-}
-
-public function belongsToOrder(int $taskId, int $orderId): bool
-{
-    $sql = "
-        SELECT 1
-        FROM {$this->tableName}
-        WHERE id = :task
-          AND work_order_id = :order
-          AND {$this->tenantColumn()} = :tenant
-        LIMIT 1
-    ";
-
-    $row = $this->fetchOne($sql, [
-        'task'   => $taskId,
-        'order'  => $orderId,
-        'tenant' => $this->tenantId(),
-    ]);
-
-    return $row !== null;
-}
-
-public function forIndex(): array
-{
-    $sql = "
-        SELECT
-            t.id,
-            t.title,
-            t.status,
-            t.team_id,
-            t.description,
-            COUNT(ta.id) AS reports_count,
-            COALESCE(SUM(ta.minutes_spent), 0) AS minutes_spent,
-            COALESCE(SUM(ta.kilometers), 0) AS kilometers
-        FROM tasks t
-        LEFT JOIN task_assignments ta
-            ON ta.task_id = t.id
-           AND ta.company_id = t.company_id
-        WHERE t.{$this->tenantColumn()} = ?
-        GROUP BY t.id
-        ORDER BY t.created_at DESC
-    ";
-
-    $stmt = $this->db()->prepare($sql);
-    $stmt->execute([$this->tenantId()]);
-
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
+    
 }

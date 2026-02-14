@@ -17,10 +17,6 @@ final class UserController extends Controller
 {
     private UserModel $users;
 
-    /* =============================
-     * DB LIMITY
-     * ============================= */
-
     private const MAX_EMAIL_LENGTH           = 255;
     private const MAX_EMPLOYEE_NUMBER_LENGTH = 50;
     private const MAX_FIRST_NAME_LENGTH      = 100;
@@ -53,45 +49,66 @@ final class UserController extends Controller
         return $this->render('users/create');
     }
 
-public function store(): string
-{
-    $data = $_POST;
-    $this->view->data  = $data;
-    $this->view->roles = Roles::effective();
+    /**
+     * NOVÁ verze (správná)
+     */
+	public function store(): string
+	{
+	    $data = $_POST;
+	    $this->view->data  = $data;
+	    $this->view->roles = Roles::effective();
+	
+	    $this->checkCsrf();
+	    $this->validateUserData($data);
+	
+	    if ($this->hasErrors()) {
+	        return $this->render('users/create');
+	    }
+	
+	    $userId = $this->users->create([
+	        'email'           => strtolower(trim($data['email'])),
+	        'employee_number' => trim($data['employee_number']),
+	        'first_name'      => trim($data['first_name']),
+	        'last_name'       => trim($data['last_name']),
+	        'global_role'     => $data['global_role'],
+	        'active'          => 0,
+	        'password_hash'   => null,
+	    ]);
+	
+	    if (!$userId || (int)$userId <= 0) {
+	        $this->addError('Litujeme, uživatele se nepodařilo vytvořit');
+	        return $this->render('users/create');
+	    }
+	
+	    try {
+				$token = (new AuthTokenService())->create(
+				    userId: $userId,
+				    type: AuthTokenService::TYPE_ACTIVATE
+				);
+	
+	        Mailer::sendActivationEmail(
+	            $data['email'],
+	            $token,
+	            Auth::company()
+	        );
+	
+	        Flash::success(
+	            'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
+	            ' byl úspěšně vytvořen. Aktivační e-mail byl odeslán.'
+	        );
+	
+	    } catch (\Throwable $e) {
+	var_dump($e);
+	        // ideálně logovat $e
+	        Flash::error(
+	            'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
+	            ' byl vytvořen, ale aktivační e-mail se nepodařilo odeslat.' 
+	        );
+	    }
+	
+	    Url::redirect('/{tenant}/users/' . (int)$userId . '/detail/#main');
+	}
 
-    $this->checkCsrf();
-    $this->validateUserData($data);
-
-    if ($this->hasErrors()) {
-        return $this->render('users/create');
-    }
-
-    $userId = $this->users->insert([
-        'email'           => strtolower(trim($data['email'])),
-        'employee_number' => trim($data['employee_number']),
-        'first_name'      => trim($data['first_name']),
-        'last_name'       => trim($data['last_name']),
-        'global_role'     => $data['global_role'],
-        'active'          => 0, // ⬅️ DŮLEŽITÉ: neaktivní do aktivace
-        'created_at'      => date('Y-m-d H:i:s'),
-    ]);
-
-    /* ===== AKTIVAČNÍ TOKEN ===== */
-
-    $tokenService = new AuthTokenService();
-    $token = $tokenService->create(
-        userId: $userId,
-        type: 'activate',
-        ttl: '+7 days'
-    );
-
-    // TODO: tady jen hook – vlastní MailService máš jinde
-    // MailService::sendActivationMail($data['email'], $token);
-
-    Flash::success('Uživatel byl vytvořen. Aktivační e-mail byl odeslán.');
-
-    Url::redirect('/users');
-}
 
     /* =============================
      * EDIT
@@ -102,14 +119,9 @@ public function store(): string
         $user = $this->users->find($id);
         if (!$user) {
             Flash::error('Uživatel neexistuje.');
-            Url::redirect('/users');
+            Url::redirect('/{tenant}/users');
         }
-        /* uživateli jde editovat jen některé položky
-    	if (UserGuard::isProtected($user)) {
-			Flash::error('Tento účet nelze upravovat.');
-			Url::redirect('/users');
-		}
-*/
+
         $this->view->old   = $user;
         $this->view->roles = Roles::effective();
 
@@ -118,17 +130,12 @@ public function store(): string
 
     public function update(int $id): string
     {
-       $old = $this->users->find($id);
+        $old = $this->users->find($id);
         if (!$old) {
             Flash::error('Uživatel neexistuje.');
-            Url::redirect('/users');
+            Url::redirect('/{tenant}/users');
         }
-        /* uživateli jde editovat jen některé položky
-    	if (UserGuard::isProtected($old)) {
-			Flash::error('Tento účet nelze upravovat.');
-			Url::redirect('/users');
-		}
- */
+
         $data = $_POST;
 
         $this->view->data  = $data;
@@ -152,12 +159,12 @@ public function store(): string
         ];
 
         if ($this->users->update($id, $update)) {
-            Flash::success('Data uživatele ' . $data['first_name'] . ' ' . $data['last_name'] . ' byla změněna.');
+            Flash::success('Data byla změněna.');
         } else {
-            Flash:error('Data uživatele se nepodařilo změnit.');
+            Flash::error('Data se nepodařilo změnit.');
         }
 
-        Url::redirect('/users');
+        Url::redirect('/{tenant}/users');
     }
 
     /* =============================
@@ -171,170 +178,124 @@ public function store(): string
         $firstname      = trim($data['first_name'] ?? '');
         $lastname       = trim($data['last_name'] ?? '');
 
-        //$password1 = $data['new_password'] ?? '';
-        //$password2 = $data['new_password_confirm'] ?? '';
-
-        /* ---- jméno ---- */
-
         if ($firstname === '') {
             $this->addError('first_name', 'Jméno je povinné.');
-        } elseif (mb_strlen($firstname) > self::MAX_FIRST_NAME_LENGTH) {
-            $this->addError('first_name', 'Jméno je příliš dlouhé.');
         }
 
         if ($lastname === '') {
             $this->addError('last_name', 'Příjmení je povinné.');
-        } elseif (mb_strlen($lastname) > self::MAX_LAST_NAME_LENGTH) {
-            $this->addError('last_name', 'Příjmení je příliš dlouhé.');
         }
 
-        /* ---- email ---- */
-
-        if ($email === '') {
-            $this->addError('email', 'Email je povinný.');
-        } elseif (mb_strlen($email) > self::MAX_EMAIL_LENGTH) {
-            $this->addError('email', 'Email je příliš dlouhý.');
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->addError('email', 'Email nemá platný formát.');
-        } elseif (
-            !$old && $this->users->emailExists($email)
-            || $old && $email !== $old['email'] && $this->users->emailExists($email, (int) $old['id'])
-        ) {
-            $this->addError('email', 'Email již existuje.');
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->addError('email', 'Neplatný email.');
         }
-
-        /* ---- osobní číslo ---- */
 
         if ($employeeNumber === '') {
             $this->addError('employee_number', 'Osobní číslo je povinné.');
-        } elseif (mb_strlen($employeeNumber) > self::MAX_EMPLOYEE_NUMBER_LENGTH) {
-            $this->addError('employee_number', 'Osobní číslo je příliš dlouhé.');
-        } elseif (
-            !$old && $this->users->employeeNumberExists($employeeNumber)
-            || $old && $employeeNumber !== $old['employee_number']
-                && $this->users->employeeNumberExists($employeeNumber, (int) $old['id'])
-        ) {
-            $this->addError('employee_number', 'Osobní číslo již existuje.');
+        }
+    }
+
+    /* =============================
+     * DETAIL
+     * ============================= */
+
+    public function userDetail(int $id): string
+    {
+        $user = $this->users->find($id);
+        if (!$user) {
+            Flash::error('Uživatel neexistuje.');
+            Url::redirect('/{tenant}/users');
         }
 
-        /* ---- role (bez root) ---- */
+        $this->view->user = $user;
 
-        $role = $data['global_role'] ?? Roles::default();
+        $this->view->accountState = match (true) {
+            $user['password_hash'] === null => 'pending_activation',
+            (int)$user['active'] === 0      => 'inactive',
+            default                         => 'active',
+        };
 
-        if (!isset(Roles::effective()[$role])) {
-            $this->addError('global_role', 'Neplatná role.');
+        return $this->render('users/detail');
+    }
+
+    /* =============================
+     * RESEND ACTIVATION
+     * ============================= */
+
+    public function resendActivationEmail(int $id): string
+    {
+        $user = $this->users->find($id);
+//var_dump($user);exit;
+        if (!$user) {
+            Flash::error('Uživatel neexistuje.');
+            Url::redirect('/{tenant}/users');
         }
 
-    }
-    
-    public static function isProtected(array $user): bool
-{
-    if ($user['global_role'] === 'root') {
-        return true;
-    }
-
-    if (($user['domain_admin'] ?? 0) === 1) {
-        return true;
-    }
-
-    return false;
-}
-
-public function userDetail(int $id): string
-{
-    $user = $this->users->find($id);
-    if (!$user) {
-        Flash::error('Uživatel neexistuje.');
-        Url::redirect('/users');
-    }
-/*
-    if (UserGuard::isProtected($user)) {
-        Flash::error('Tento účet nelze zobrazit.');
-        Url::redirect('/users');
-    }
-*/
-    $this->view->user = $user;
-
-    // odvozený stav pro view
-    $this->view->accountState = match (true) {
-        $user['password_hash'] === null => 'pending_activation',
-        (int)$user['active'] === 0      => 'inactive',
-        default                         => 'active',
-    };
-
-    return $this->render('users/detail');
-}
-
-public function resendActivationEmail(int $id): string
-{
-    $user = $this->users->find($id);
-    if (!$user) {
-        Flash::error('Uživatel neexistuje.');
-        Url::redirect('/users');
+        if ($user['password_hash'] !== null) {
+            Flash::error('Účet je již aktivní.');
+            Url::redirect('/{tenant}/users/' . $id . '/detail');
+        }
+        
+	    try {
+				$token = (new AuthTokenService())->create(
+				    userId: $id,
+				    type: AuthTokenService::TYPE_ACTIVATE
+				);
+//var_dump($token);exit;
+	        Mailer::sendActivationEmail(
+	            $user['email'],
+	            $token,
+	            Auth::company()
+	        );
+	
+	        Flash::success(
+	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
+	            ' byl aktivační e-mail úspěšně odeslán.'
+	        );
+	
+	    } catch (\Throwable $e) {
+	var_dump($e);exit;
+	        // ideálně logovat $e
+	        Flash::error(
+	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
+	            ' se aktivační e-mail nepodařilo odeslat.'
+	        );
+	    }
+	
+	    Url::redirect('/{tenant}/users/' . $id . '/detail/#main');
     }
 
-    if ($user['password_hash'] !== null) {
-        Flash::error('Účet je již aktivní.');
-        Url::redirect('/users/' . $id . '/detail');
+
+    /* =============================
+     * RESET PASSWORD
+     * ============================= */
+
+    public function sendResetPassword(int $id): string
+    {
+        $user = $this->users->find($id);
+        if (!$user) {
+            Flash::error('Uživatel neexistuje.');
+            Url::redirect('/{tenant}/users');
+        }
+
+        if (!Auth::hasRole(['admin', 'mistr'])) {
+            Flash::error('Na tuto akci nemáte oprávnění.');
+            Url::redirect('/{tenant}/users/' . $id . '/detail');
+        }
+	        $token = (new AuthTokenService())->create(
+	            userId: (int)$user['id'],
+	            companyId: Auth::company(),
+	            type: AuthTokenService::TYPE_ACTIVATE
+	        );
+
+        Mailer::sendResetPassword($user['email'], $token, Auth::company());
+
+        Flash::success('E-mail pro změnu hesla byl odeslán.');
+        Url::redirect('/{tenant}/users/' . $id . '/detail');
     }
 
-    try {
-        (new \App\Services\AuthTokenService())->createActivationToken(
-            (int) $user['id'],
-            (int) $user['company_id']
-        );
-
-        Flash::success('Aktivační e-mail byl znovu odeslán.');
-    } catch (\Throwable $e) {
-        error_log('[resendActivationEmail] ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
-        Flash::error('Nepodařilo se odeslat aktivační e-mail.');
+    public function sendResetPasswordOld(int $id): string
+    {
+        return '';
     }
-
-    Url::redirect('/users/' . $id . '/detail');
-}
-
-public function sendResetPassword(int $id): string
-{
-    $user = $this->users->find($id);
-    if (!$user) {
-        Flash::error('Uživatel neexistuje.');
-        Url::redirect('/users');
-    }
-
-    if (!$user['active'] || !$user['password_hash']) {
-        Flash::error('Tomuto uživateli nelze resetovat heslo.');
-        Url::redirect('/users/' . $id . '/detail');
-    }
-    // oprávnění
-if (!Auth::hasRole(['admin', 'mistr'])) {
-    Flash::error('Na tuto akci nemáte oprávnění.');
-    Url::redirect('/users/' . $id . '/detail');
-}
-    try {
-        $service = new AuthTokenService();
-
-        // volitelně: kontrola limitu v modelu
-        $token = $service->create(
-            (int) $user['id'],
-            (int) $user['company_id'],
-            'reset_password',
-            $_SERVER['REMOTE_ADDR'] ?? null,
-            $_SERVER['HTTP_USER_AGENT'] ?? null,
-            1 // expirace ve,  dnech → reálně 10–15 min řešit v service
-        );
-        $company = Auth::company();
-        //var_dump($company);exit;
-
-			Mailer::sendResetPassword($user['email'], $token, $company);
-			Flash::success('E-mail pro změnu hesla byl odeslán.');
-        	
-    } catch (\Throwable $e) {
-    	print_r('[sendResetPassword] ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());exit;
-    	Flash::error('Reset hesla se nepodařilo odeslat.');
-	}
-
-    Url::redirect('/users/' . $id . '/detail');
-}
-
-
 }

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use Psr\Log\LogLevel;
+//use Psr\Log\LogLevel;
 
 /**
  * Jednoduchá implementace PSR-3 loggeru, který zapisuje do souboru.

@@ -30,38 +30,35 @@ final class AuthTokenService
      * CREATE (invalidate old + create new)
      * ========================================================== */
 
-    public function create(
-        int $userId,
-        int $companyId,
-        string $type,
-        ?string $ip = null,
-        ?string $userAgent = null,
-        ?int $expirationDays = null
-    ): string {
-        // zrušíme staré tokeny stejného typu
-        $this->model->invalidateForUser($userId, $companyId, $type);
+public function create(
+    int $userId,
+    string $type,
+    ?string $ip = null,
+    ?string $userAgent = null
+): string {
 
-        $rawToken = bin2hex(random_bytes(self::TOKEN_BYTES));
-        $hash     = hash('sha256', $rawToken);
+    $this->model->invalidateForUser($userId, $type);
 
-			$expiresAt = match ($type) {
-			    self::TYPE_RESET_PASSWORD => (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:s'),
-			    self::TYPE_ACTIVATE       => (new DateTimeImmutable())->modify('+7 days')->format('Y-m-d H:i:s'),
-			    default => throw new RuntimeException('Neznámý typ tokenu'),
-			};
-			
-			$this->model->createToken([
-			    'user_id'     => $userId,
-			    'company_id'  => $companyId,
-			    'token_hash'  => $hash,
-			    'type'        => $type,
-			    'expires_at'  => $expiresAt,
-			    'ip_created'  => $ip,
-			    'user_agent'  => $userAgent,
-			]);
+    $rawToken = bin2hex(random_bytes(self::TOKEN_BYTES));
+    $hash     = hash('sha256', $rawToken);
 
-        return $rawToken;
-    }
+    $expiresAt = match ($type) {
+        self::TYPE_RESET_PASSWORD => (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:s'),
+        self::TYPE_ACTIVATE       => (new DateTimeImmutable())->modify('+7 days')->format('Y-m-d H:i:s'),
+        default => throw new RuntimeException('Neznámý typ tokenu'),
+    };
+
+    $this->model->createToken([
+        'user_id'     => $userId,
+        'token_hash'  => $hash,
+        'type'        => $type,
+        'expires_at'  => $expiresAt,
+        'ip_created'  => $ip,
+        'user_agent'  => $userAgent,
+    ]);
+
+    return $rawToken;
+}
 
     /* ==========================================================
      * VALIDATE
@@ -69,7 +66,7 @@ final class AuthTokenService
 
     public function validate(string $rawToken, string $type): array
     {
-        $hash = hash('sha256', $rawToken);
+        $hash = hash('sha256', trim($rawToken));
 
         $row = $this->model->findValidByHash($hash, $type);
 

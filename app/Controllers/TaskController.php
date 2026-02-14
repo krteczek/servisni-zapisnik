@@ -7,6 +7,7 @@ use App\Core\Controller;
 
 use App\Models\TaskModel;
 use App\Models\TeamModel;
+use App\Models\WorkOrderModel;
 use App\Core\Url;
 
 class TaskController extends Controller
@@ -24,7 +25,10 @@ public function index(): string
     foreach ($tasks as &$task) {
         $task['team_color'] = $teamColors[$task['team_id']] ?? '#999';
     }
-
+    
+    //nutno přidat název zakázky, ke které tento úkol patří
+		//$wo = new WorkOrderModel();
+		//$order = $wo->getOrderOrRedirect($orderId)
     $this->view->tasks = $tasks;
     return $this->render('tasks/index');
 }
