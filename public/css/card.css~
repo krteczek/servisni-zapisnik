@@ -83,8 +83,15 @@
 }
 
 
-.task-card {
-    border-left: 4px solid var(--task-color) !important;
+/* =====================================================
+   TASKS – barevný levý border podle týmu
+   ===================================================== */
+.card.task-card {
+    border-left: 4px solid var(--task-color);
 }
 
-
+/* zalomení slov když se nevejdou do keret */
+/* zkrácení slov když se nevejdou do keret */
+.card-title {
+    word-break: break-word;
+}

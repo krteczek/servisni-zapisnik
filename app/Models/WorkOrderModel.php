@@ -91,4 +91,44 @@ public function canBeDone(array $order, array $taskStats): bool
         && $taskStats['done'] > 0;
 }
 
+
+public function getNamesByIds(array $ids): array
+{
+    if (empty($ids)) {
+        return [];
+    }
+    
+    $companyId = parent::tenantId();
+    $params = [];
+    $placeholders = [];
+
+    foreach ($ids as $i => $id) {
+        $key = "id_$i";
+        $placeholders[] = ":$key";
+        $params[$key] = (int) $id; // Parametry pro ID
+    }
+
+    // Přidáme company_id do parametrů
+    $params['company_id'] = $companyId;
+
+    $sql = "
+        SELECT id, title
+        FROM {$this->tableName}
+        WHERE id IN (" . implode(',', $placeholders) . ")
+        AND company_id = :company_id
+    ";
+    
+    $rows = $this->fetchAll($sql, $params); // Teď posíláme ID i company_id
+
+    $result = [];
+
+    foreach ($rows as $row) {
+        $result[(int) $row['id']] = [
+            'name' => $row['title'], // Opraveno - používáme 'title' místo 'name'
+        ];
+    }
+
+    return $result;
+}
+
 }

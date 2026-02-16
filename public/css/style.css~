@@ -140,6 +140,7 @@ přepínač pohledu rolí pro admina
 }
 
 
+
 /* =========================
    NAV (MENU)
    ========================= */
@@ -221,6 +222,22 @@ přepínač pohledu rolí pro admina
   border-left-color: #999;
 }
 
+.menu-item form {
+  margin: 0;
+}
+
+.menu-item button {
+  display: block;
+  width: 100%;
+  padding: 14px 18px;
+  background: #cfcfcf;
+  border: none;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+
 /* =========================
    MAIN CONTENT
    ========================= */
@@ -287,40 +304,6 @@ přepínač pohledu rolí pro admina
 }
 
 
-
-/* =========================
-   RESPONSIVE – MOBILE
-   ========================= */
-@media (max-width: 768px) {
-
-  .app {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr auto;
-    grid-template-areas:
-      "header"
-      "nav"
-      "main"
-      "footer";
-  }
-
-  .nav {
-    padding: 8px 0;
-    border-bottom: 1px solid #bbb;
-  }
-
-  /* menu přes celou šířku */
-  .menu-item > a {
-    padding: 14px 16px;
-  }
-
-  /* submenu víc odsazené, ať je jasná hierarchie */
-  .submenu {
-    padding-left: 24px;
-  }
-
-}
-
-
 .flash-wrapper {
     width: 100%;
 }
@@ -363,3 +346,67 @@ přepínač pohledu rolí pro admina
     opacity: 1;
 }
 
+
+
+/* =========================
+   RESPONSIVE – MOBILE
+   ========================= */
+@media (max-width: 768px) {
+
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      "header"
+      "nav"
+      "main"
+      "footer";
+  }
+
+  .nav {
+    padding: 8px 0;
+    border-bottom: 1px solid #bbb;
+  }
+
+  /* menu přes celou šířku */
+  .menu-item > a {
+    padding: 14px 16px;
+  }
+
+  /* submenu víc odsazené, ať je jasná hierarchie */
+  .submenu {
+    padding-left: 24px;
+  }
+
+}
+@media (max-width: 768px) {
+
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .user-info,
+  .identity {
+    padding-left: 0;
+  }
+
+}
+
+a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.card,
+.card-body,
+.meta-value {
+  min-width: 0;
+}
+
+.entity-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+html {
+  font-size: 112.5%; /* 18px místo 16px */
+}

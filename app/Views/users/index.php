@@ -31,7 +31,7 @@ require __DIR__ . '/../layout/header.php';
 
         $isActive = (bool)($user['active'] ?? true);
     ?>
-<div class="card">
+<div class="card  <?= !$user['active'] ? 'is-inactive' : '' ?>">
     <div class="card-header">
         <span class="card-title"><a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/detail/#main') ?>"><?= e($fullName ?: 'Bez jména') ?></a></span>
         <span class="badge badge-<?= $isActive ? 'active' : 'inactive' ?>"><?= $isActive ? 'Aktivní' : 'Neaktivní' ?></span>
@@ -51,10 +51,8 @@ require __DIR__ . '/../layout/header.php';
     </div>
     
     <div class="card-footer">
-        <div class="actions">
-            <a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/edit/#main') ?>" class="btn btn-secondary">✏️ Upravit</a>
+                    <a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/edit/#main') ?>" class="btn btn-secondary">✏️ Upravit</a>
             <a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/detail/#main') ?>" class="btn btn-secondary">🔍 Detail</a>
-        </div>
     </div>
 </div>
 

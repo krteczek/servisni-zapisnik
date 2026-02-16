@@ -92,10 +92,20 @@ public function activateUser(int $id, string $hash): bool
 
     $stmt = $this->db()->prepare($sql);
 
-    return $stmt->execute([
+     $ok = $stmt->execute([
         'hash' => $hash,
         'id'   => $id,
     ]);
+    	error_log('DB name: ' . $this->db()->query('select database()')->fetchColumn());
+		error_log('Table: ' . $this->tableName);
+		
+		if (!$ok) {
+			return false;
+		}
+
+		return $stmt->rowCount() === 1;
+		//return $ok;
+
 }
 
     public function setPassword(int $id, string $hash): bool
@@ -128,6 +138,8 @@ public function activateUser(int $id, string $hash): bool
 	
 	    return $stmt->fetch() ?: null;
 	}
+
+
 public function findRawById(int $id): ?array
 {
     $this->tenantAware = false;

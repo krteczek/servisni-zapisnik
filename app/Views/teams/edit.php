@@ -21,8 +21,8 @@ require __DIR__ . '/../layout/header.php';
 
 
 
-<?= $css ?>
-<!-- měl jsem na mysli tohle -->
+
+
 <div class="team-intro">
 <p>
     Na této stránce spravuješ nastavení týmu.
@@ -38,7 +38,7 @@ require __DIR__ . '/../layout/header.php';
 <!-- ÚPRAVA TÝMU -->
 <!-- ===================== -->
 <form method="post" action="<?= Url::current() ?>">
-    <?= $this->csrfField() ?>
+    <?= Csrf::getField() ?>
 
     <table class="form-table">
         <tr>
