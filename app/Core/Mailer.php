@@ -123,17 +123,35 @@ TEXT;
         string $subject,
         string $message
     ): void {
-        $headers = [
-            'From: Bó - Servisní zápisník <noreply@krteczek.cz>',
-            'Reply-To: podpora@krteczek.cz',
-            'MIME-Version: 1.0',
-            'Content-Type: text/plain; charset=UTF-8'
-        ];
+		try {
+				$headers = [
+					'From: Bó - Servisní zápisník <noreply@krteczek.cz>',
+					'Reply-To: podpora@krteczek.cz',
+					'MIME-Version: 1.0',
+					'Content-Type: text/plain; charset=UTF-8'
+					];
+$connection = @fsockopen('127.0.0.1', 1025, $errno, $errstr, 1);
 
-        // TODO: [DEBUG] Přidat logování odeslaných e-mailů v dev prostředí
-        if (!mail($to, $subject, $message, implode("\r\n", $headers))) {
-            // TODO: [OBSERVABILITY] Logovat detaily selhání (error_get_last())
-            throw new \RuntimeException('Odeslání e-mailu selhalo.');
-        }
-    }
+if (!$connection) {
+    throw new RuntimeException(
+        "SMTP server na 127.0.0.1:1025 není dostupný.\n" .
+        "👉 Zapni Mailpit (mailpit)."
+    );
+}
+
+fclose($connection);
+
+					mail($to, $subject, $message, implode("\r\n", $headers));
+			} catch (\Throwable $e) {
+
+					if ($_ENV['APP_ENV'] === 'dev') {
+						throw new \RuntimeException(
+							"SMTP server není dostupný.\n\n" .
+							"👉 Pravděpodobně neběží Mailpit.\n" .
+							"Spusť ho příkazem: mailpit\n\n" .
+							"Původní chyba: " . $e->getMessage()
+						);
+					}
+			}
+		}
 }

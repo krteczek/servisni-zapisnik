@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use DateTime;
+use App\Core\Auth;
 
 final class TaskModel extends BaseModel
 {
@@ -117,32 +118,321 @@ final class TaskModel extends BaseModel
             ]
         );
     }
-    
-    public function forIndex(): array
+ 
+/**
+ * Vrátí statistiky pro seznam úkolů
+ */
+public function getStatsForTasks(array $taskIds): array
 {
+    if (empty($taskIds)) {
+        return [];
+    }
+
+    $placeholders = [];
+    $params = ['company_id' => $this->tenantId()];
+
+    foreach ($taskIds as $i => $id) {
+        $key = "task_$i";
+        $placeholders[] = ":$key";
+        $params[$key] = (int) $id;
+    }
+
     $sql = "
-        SELECT
-            t.id,
-            t.title,
-            t.status,
-            t.team_id,
-            t.description,
-            COUNT(ta.id) AS reports_count,
-            COALESCE(SUM(ta.minutes_spent), 0) AS minutes_spent,
-            COALESCE(SUM(ta.kilometers), 0) AS kilometers
-        FROM {$this->tableName} t
-        LEFT JOIN task_assignments ta
-            ON ta.task_id = t.id
-           AND ta.company_id = t.company_id
-        WHERE t.company_id = :company_id
-        GROUP BY t.id
-        ORDER BY t.created_at DESC
+        SELECT 
+            ta.task_id,
+            COUNT(DISTINCT ta.id) AS reports_count,
+            COALESCE(SUM(ta.kilometers), 0) AS total_km,
+            COALESCE(SUM(ta.minutes_spent), 0) AS total_minutes,
+            COUNT(DISTINCT tap.user_id) AS workers_count
+        FROM task_assignments ta
+        LEFT JOIN task_assignment_participants tap 
+            ON tap.assignment_id = ta.id 
+            AND tap.company_id = ta.company_id
+        WHERE ta.task_id IN (" . implode(',', $placeholders) . ")
+            AND ta.company_id = :company_id
+        GROUP BY ta.task_id
     ";
 
-    return $this->fetchAll($sql, [
-        'company_id' => $this->tenantId()
-    ]);
+    $stats = $this->fetchAll($sql, $params);
+
+    $result = [];
+    foreach ($stats as $stat) {
+        $result[(int)$stat['task_id']] = [
+            'reports_count' => (int)$stat['reports_count'],
+            'total_km' => (int)$stat['total_km'],
+            'total_minutes' => (int)$stat['total_minutes'],
+            'workers_count' => (int)$stat['workers_count']
+        ];
+    }
+
+    return $result;
 }
+
+/**
+ * Upravený forIndex, který používá samostatnou metodu pro statistiky
+ */
+ 
+public function forIndex(): array
+{
+    $userId    = Auth::id();
+    $role      = Auth::role();
+    $companyId = Auth::companyId();
+
+    // 🔹 základní dotaz pro work DB
+    $sql = "
+        SELECT *
+        FROM {$this->tableName}
+        WHERE company_id = :company_id
+    ";
+
+    $params = ['company_id' => $companyId];
+
+    // 🔹 Předák / monter – jen úkoly ve svých týmech
+    if (in_array($role, ['predak', 'monter'], true)) {
+        $teamIds = (new TeamMembership())->activeTeamIdsForUser($userId);
+
+        if (empty($teamIds)) {
+            return []; // nic nevidí
+        }
+
+        $in = [];
+        foreach ($teamIds as $i => $teamId) {
+            $key = "team_$i";
+            $in[] = ":$key";
+            $params[$key] = $teamId;
+        }
+
+        $sql .= " AND team_id IN (" . implode(',', $in) . ")";
+    }
+
+    // 🔹 Admin / mistr – vidí vše, seřazeno podle toho, kdo úkol vytvořil
+    if (in_array($role, ['admin', 'mistr'], true)) {
+        $sql .= "
+            ORDER BY 
+                (created_by_user_id = :user_id) DESC,
+                id DESC
+        ";
+        $params['user_id'] = $userId;
+    } else {
+        $sql .= " ORDER BY id DESC";
+    }
+
+    // 🔹 Načteme úkoly
+    $tasks = $this->fetchAll($sql, $params);
+
+    if (empty($tasks)) {
+        return [];
+    }
+
+    // 🔹 Separátně načíst týmy z admin DB
+    $teamIds = array_unique(array_column($tasks, 'team_id'));
+    $teams = (new TeamModel())->getColorsAndNamesByIds($teamIds); 
+
+    // 🔹 Separátně načíst zakázky z work DB
+    $workOrderIds = array_unique(array_filter(array_column($tasks, 'work_order_id')));
+    $workOrders = (new WorkOrderModel())->getNamesByIds($workOrderIds); 
+
+    // 🔹 Pro každý úkol načteme statistiky z task_assignments
+    foreach ($tasks as &$task) {
+        $tid = $task['team_id'];
+        $wid = $task['work_order_id'];
+
+        $task['team_name'] = $teams[$tid]['name'] ?? '';
+        $task['team_color'] = $teams[$tid]['color'] ?? '#999';
+        $task['work_order_name'] = $workOrders[$wid]['name'] ?? '';
+
+        // 🔹 Statistiky z task_assignments
+        $stats = $this->fetchOne(
+            "SELECT 
+                COUNT(*) AS reports_count,
+                COALESCE(SUM(kilometers), 0) AS total_km,
+                COALESCE(SUM(minutes_spent), 0) AS total_minutes
+             FROM task_assignments 
+             WHERE task_id = :task_id 
+               AND company_id = :company_id",
+            [
+                'task_id' => $task['id'],
+                'company_id' => $companyId
+            ]
+        );
+
+        $task['reports_count'] = (int) ($stats['reports_count'] ?? 0);
+        $task['total_km'] = (int) ($stats['total_km'] ?? 0);
+        $task['total_minutes'] = (int) ($stats['total_minutes'] ?? 0);
+        $task['total_hours'] = round($task['total_minutes'] / 60, 1);
+        $task['total_hours_formatted'] = floor($task['total_minutes'] / 60) . 'h ' . ($task['total_minutes'] % 60) . 'm';
+    }
+
+    return $tasks;
+}
+public function forIndexOOld(): array
+{
+    $userId    = Auth::id();
+    $role      = Auth::role();
+    $companyId = Auth::companyId();
+
+    // 🔹 Základní dotaz jen pro úkoly (bez JOINů)
+    $sql = "
+        SELECT *
+        FROM {$this->tableName}
+        WHERE company_id = :company_id
+    ";
+
+    $params = ['company_id' => $companyId];
+
+    // 🔹 Filtrování podle role
+    if (in_array($role, ['predak', 'monter'], true)) {
+        $teamIds = (new TeamMembership())->activeTeamIdsForUser($userId);
+        if (empty($teamIds)) {
+            return [];
+        }
+
+        $in = [];
+        foreach ($teamIds as $i => $teamId) {
+            $key = "team_$i";
+            $in[] = ":$key";
+            $params[$key] = $teamId;
+        }
+        $sql .= " AND team_id IN (" . implode(',', $in) . ")";
+    }
+
+    // 🔹 Řazení
+    if (in_array($role, ['admin', 'mistr'], true)) {
+        $sql .= " ORDER BY (created_by_user_id = :user_id) DESC, id DESC";
+        $params['user_id'] = $userId;
+    } else {
+        $sql .= " ORDER BY id DESC";
+    }
+
+    // 🔹 Načteme úkoly
+    $tasks = $this->fetchAll($sql, $params);
+
+    if (empty($tasks)) {
+        return [];
+    }
+
+    // 🔹 Načteme týmy
+    $teamIds = array_unique(array_column($tasks, 'team_id'));
+    $teams = (new TeamModel())->getColorsAndNamesByIds($teamIds);
+
+    // 🔹 Načteme zakázky
+    $workOrderIds = array_unique(array_filter(array_column($tasks, 'work_order_id')));
+    $workOrders = (new WorkOrderModel())->getNamesByIds($workOrderIds);
+
+    // 🔹 Načteme statistiky pro všechny úkoly najednou
+    $taskIds = array_column($tasks, 'id');
+    $statsMap = $this->getStatsForTasks($taskIds);
+
+    // 🔹 Doplnění dat
+    foreach ($tasks as &$task) {
+        $tid = $task['team_id'];
+        $wid = $task['work_order_id'];
+        $stats = $statsMap[$task['id']] ?? [
+            'reports_count' => 0,
+            'total_km' => 0,
+            'total_minutes' => 0,
+            'workers_count' => 0
+        ];
+
+        $task['team_name'] = $teams[$tid]['name'] ?? '';
+        $task['team_color'] = $teams[$tid]['color'] ?? '#999';
+        $task['work_order_name'] = $workOrders[$wid]['name'] ?? '';
+
+        // Statistiky
+        $task['reports_count'] = $stats['reports_count'];
+        $task['total_km'] = $stats['total_km'];
+        $task['total_minutes'] = $stats['total_minutes'];
+        $task['workers_count'] = $stats['workers_count'];
+
+        // Formátované hodnoty pro zobrazení
+        $task['total_hours'] = round($stats['total_minutes'] / 60, 1);
+        $task['total_hours_formatted'] = floor($stats['total_minutes'] / 60) . 'h ' . ($stats['total_minutes'] % 60) . 'm';
+    }
+
+    return $tasks;
+}
+
+
+public function forIndexOld(): array
+{
+    $userId    = Auth::id();
+    $role      = Auth::role();
+    $companyId = Auth::companyId();
+
+    // 🔹 základní dotaz pro work DB
+    $sql = "
+        SELECT *
+        FROM {$this->tableName}
+        WHERE company_id = :company_id
+    ";
+
+    $params = ['company_id' => $companyId];
+
+    // 🔹 Předák / monter – jen úkoly ve svých týmech
+    if (in_array($role, ['predak', 'monter'], true)) {
+        $teamIds = (new TeamMembership())->activeTeamIdsForUser($userId);
+
+        if (empty($teamIds)) {
+            return []; // nic nevidí
+        }
+
+        $in = [];
+        foreach ($teamIds as $i => $teamId) {
+            $key = "team_$i";
+            $in[] = ":$key";
+            $params[$key] = $teamId;
+        }
+
+        $sql .= " AND team_id IN (" . implode(',', $in) . ")";
+    }
+
+    // 🔹 Admin / mistr – vidí vše, seřazeno podle toho, kdo úkol vytvořil
+    if (in_array($role, ['admin', 'mistr'], true)) {
+        $sql .= "
+            ORDER BY 
+                (created_by_user_id = :user_id) DESC,
+                id DESC
+        ";
+        $params['user_id'] = $userId;
+    } else {
+        $sql .= " ORDER BY id DESC";
+    }
+
+    // 🔹 Načteme úkoly
+    $tasks = $this->fetchAll($sql, $params);
+
+    if (empty($tasks)) {
+        return [];
+    }
+
+    // 🔹 Separátně načíst týmy z admin DB
+    $teamIds = array_unique(array_column($tasks, 'team_id'));
+    $teams = (new TeamModel())->getColorsAndNamesByIds($teamIds); 
+    // metoda by měla vracet např. [11 => ['name'=>'Montážní tým', 'color'=>'#123456'], ...]
+
+    // 🔹 Separátně načíst zakázky z work DB
+    $workOrderIds = array_unique(array_filter(array_column($tasks, 'work_order_id')));
+    $workOrders = (new WorkOrderModel())->getNamesByIds($workOrderIds); 
+    // metoda by měla vracet např. [106 => ['name'=>'Zakázka ABC'], ...]
+
+    // 🔹 Prolétnout úkoly a doplnit názvy a barvy
+    foreach ($tasks as &$task) {
+        $tid = $task['team_id'];
+        $wid = $task['work_order_id'];
+
+        $task['team_name'] = $teams[$tid]['name'] ?? '';
+        $task['team_color'] = $teams[$tid]['color'] ?? '#999';
+        $task['work_order_name'] = $workOrders[$wid]['name'] ?? 'nevrací??';
+
+        // volitelné součty (pokud máš reports/hours/km)
+        $task['reports_count'] = $task['reports_count'] ?? 0;
+        $task['total_hours'] = $task['total_hours'] ?? 0;
+        $task['total_km'] = $task['total_km'] ?? 0;
+    }
+
+    return $tasks;
+}
+   
 
     public function forWorkOrderWithStats(int $orderId): array
     {

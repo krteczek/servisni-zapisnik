@@ -12,7 +12,7 @@ use App\Core\Session;
 <head>
     <meta charset="utf-8">
     <title>Bó - <?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="<?= Url::to('/favicon_io/favicon.ico') ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
 <link rel="apple-touch-icon" href="<?= Url::to('/favicon_io/apple-touch-icon.png') ?>">
@@ -21,7 +21,11 @@ use App\Core\Session;
     <link rel="stylesheet" href="<?= Url::to('/css/badge.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/card.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/form.css') ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/list.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/grig.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/metadata.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/colors.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/teams.css') ?>">
+
     -->
  <style>
  <?php
@@ -42,6 +46,7 @@ use App\Core\Session;
 <div class="app">
 
     <!-- ================= HEADER ================= -->
+    
 <header class="header">
     <div>
        <a href="<?= Url::to('/{tenant}/tasks') ?>"  class="logo">博</a>

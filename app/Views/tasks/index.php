@@ -21,12 +21,11 @@ $tasks = $view->tasks ?? [];
         <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
-                <span class="card-title"><a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
-                   class="card-title"
+                <span class="card-title"><a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>"
                    title="Upravit úkol">
                     <?= htmlspecialchars($task['title']) ?>
                 </a></span>
-                <span class="badge badge-status-<?= htmlspecialchars($task['status']) ?>">
+                <span class="badge badge-status-<?= e($task['status']) ?>">
                     <?= strtoupper($task['status']) ?>
                 </span>
             </div>
@@ -39,7 +38,7 @@ $tasks = $view->tasks ?? [];
                             <span class="meta-label">Zakázka</span>
                             <span class="meta-value">
                                 <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$task['work_order_id'] . '/detail/#main') ?>">
-                                    #<?= (int)$task['work_order_id'] ?>: <?= htmlspecialchars($task['work_order_title']) ?>
+                                    #<?= (int)$task['work_order_id'] ?>: <?= e($task['work_order_name']) ?>
                                 </a>
                             </span>
                         </div>
@@ -50,11 +49,11 @@ $tasks = $view->tasks ?? [];
 							</div>
 							<div class="meta-item">
 								<span class="meta-label">Počet hodin: </span>
-								<span class="meta-value"><?= (int)$task['minutes_spent'] ?></span>
+								<span class="meta-value"><?= e($task['total_hours_formatted']) ?></span>
 							</div>
 							<div class="meta-item">
 								<span class="meta-label">Počet kilometrů: </span>
-								<span class="meta-value"><?= (int)$task['kilometers'] ?></span>
+								<span class="meta-value"><?= (int)$task['total_km'] ?></span>
 							</div>
 						</div>
 					</div>
@@ -62,6 +61,7 @@ $tasks = $view->tasks ?? [];
             <!-- PATIČKA KARTY -->
             <div class="card-footer">
                 <div class="actions">
+						
                     <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Upravit úkol">

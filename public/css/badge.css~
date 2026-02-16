@@ -87,3 +87,9 @@
     color: #c62828;
     border: 1px solid #ef9a9a;
 }
+
+.badge-status-open {
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #90caf9;
+}

@@ -7,7 +7,7 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Core\Url;
-use App\Core\Sessions;
+use App\Core\Session;
 use App\Core\Mailer;
 use App\Models\UserModel;
 use App\Models\CompanyModel;
@@ -38,6 +38,7 @@ class AuthController extends Controller
 
 public function login(): string
 {
+		//var_dump($_POST);
     $tenant   = trim($_POST['tenant'] ?? '');
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -76,13 +77,14 @@ public function login(): string
     $company = $companyModel->findBySlug($tenant);
 
     $user = null;
-
+//var_dump($company);
     if ($company) {
         $userModel = new UserModel();
         $user = $userModel->findByEmailAndCompany(
             $email,
             (int) $company['id']
         );
+        //var_dump($user);
     }
 
     if (

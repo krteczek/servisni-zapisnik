@@ -134,6 +134,7 @@ return [
     'section' => 'tasks',
 	'title'   => 'Úkoly > Přehled',
 ],
+/*
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/tasks',
@@ -144,19 +145,34 @@ return [
     'section' => 'tasks',
 	'title'   => 'Úkoly > Přehled',
 ],
-/* Vytváří se jen u zakázek. Nejprve je nutno vytvořit zakázku, 
-teprve potom je možno vytvořit úkol
-[
-    'method' => 'GET',
-    'path'   => '/tasks/create',
-    'action' => [TaskController::class, 'createForm'],
-    'auth'   => true,
-    'roles'   => ['admin', 'mistr', 'predak', 'monter'],
-    'submenu'    => 'Nový úkol',
-    'section' => 'tasks',
-    'title'   => 'Úkoly > Nový úkol',
-],
 */
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/tasks/{id}/report',
+    'action'  => [TaskController::class, 'addTaskReportGet'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr', 'predak', 'monter'],
+    'section' => 'tasks',
+	'title'   => 'Úkoly > Přidat report',
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/tasks/{id}/report',
+    'action'  => [TaskController::class, 'addTaskReportPost'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr', 'predak', 'monter'],
+    'section' => 'tasks',
+	'title'   => 'Úkoly > Přidat report',
+],
+
+
+
+
+
+
+
+
 [
     'method' => 'POST',
     'path'   => '/{tenant}/tasks/create',

@@ -58,36 +58,35 @@ final class TeamMembership extends BaseModel
      * PŘIDÁNÍ UŽIVATELE DO TÝMU
      * ========================================================== */
 
-    public function add(int $userId, int $teamId, string $role): ?int
-    {
-        $stmt = $this->db()->prepare(
-            "SELECT 1
-             FROM {$this->tableName}
-             WHERE user_id = :user
-               AND team_id = :team
-               AND company_id = :company_id
-               AND valid_to IS NULL
-             LIMIT 1"
-        );
+public function add(int $userId, int $teamId, string $role): ?int
+{
+    $stmt = $this->db()->prepare(
+        "SELECT 1
+         FROM {$this->tableName}
+         WHERE user_id = :user
+           AND team_id = :team
+           AND company_id = :company_id
+           AND valid_to IS NULL
+         LIMIT 1"
+    );
 
-        $stmt->execute([
-            'user'       => $userId,
-            'team'       => $teamId,
-            'company_id' => Auth::companyId(),
-        ]);
+    $stmt->execute([
+        'user'       => $userId,
+        'team'       => $teamId,
+        'company_id' => Auth::companyId(),
+    ]);
 
-        if ($stmt->fetchColumn()) {
-            return null;
-        }
-
-        return $this->insert([
-            'user_id'      => $userId,
-            'team_id'      => $teamId,
-            'role_in_team' => $role,
-            'valid_from'   => date('Y-m-d'),
-            'company_id'   => Auth::companyId(),
-        ]);
+    if ($stmt->fetchColumn()) {
+        return null;
     }
+
+    return $this->create([
+        'user_id'      => $userId,
+        'team_id'      => $teamId,
+        'role_in_team' => $role,
+        'valid_from'   => date('Y-m-d'),
+    ]);
+}
 
     /* ==========================================================
      * UKONČENÍ ČLENSTVÍ (SOFT REMOVE)
@@ -167,4 +166,28 @@ final class TeamMembership extends BaseModel
             'company_id' => Auth::companyId(),
         ]);
     }
+    
+public function activeTeamIdsForUser(int $userId): array
+{
+    $stmt = $this->db()->prepare(
+        "SELECT team_id
+         FROM {$this->tableName}
+         WHERE user_id = :user
+           AND valid_to IS NULL
+           AND company_id = :company_id"
+    );
+
+    $stmt->execute([
+        'user'       => $userId,
+        'company_id' => Auth::companyId(),
+    ]);
+
+    return array_map(
+        'intval',
+        $stmt->fetchAll(PDO::FETCH_COLUMN)
+    );
+}
+    
+    
+    
 }
