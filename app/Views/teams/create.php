@@ -5,67 +5,137 @@ declare(strict_types=1);
 
 use App\Core\Url;
 use App\Core\Csrf;
-$team['color'] = "#FFF";
+
 $css = '';
 require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
+
+$old    = $view->data ?? [];
+$errors = $view->errors ?? [];
 ?>
 
-<?= $css ?>
+<!-- HLAVNÍ KONTEJNER (grid 2:1) -->
+<div class="create-container">
 
-<?php if (!empty($view->error)): ?>
-    <p style="color:#c62828; max-width:900px; margin:1rem auto;">
-        <?= htmlspecialchars($view->errors) ?>
-    </p>
-<?php endif; ?>
+    <!-- LEVÝ SLOUPEC – FORMULÁŘ -->
+    <div class="card">
+        <!-- INFO ALERT (stejný koncept jako u user) -->
+        <div class="ui-alert ui-alert-info">
+            <strong>Informace:</strong>
+            Tým slouží pro sdružení pracovníků (montérů, předáků) do pracovních part.
+            Každý tým může mít přiřazené úkoly a zakázky.
+        </div>
 
-<form method="post" action="">
-    <?= Csrf::getField() ?>
+        <!-- Zobrazení chyb -->
+        <?php if (!empty($errors)): ?>
+            <div class="ui-alert ui-alert-danger">
+                <ul style="margin:0;">
+                    <?php foreach ($errors as $field => $error): ?>
+                        <?php if (is_array($error)): ?>
+                            <?php foreach ($error as $message): ?>
+                                <li><?= e($message) ?></li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <li><?= e($error) ?></li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
 
-    <table class="form-table">
-        <tr>
-            <th>
-                <label for="name">Název týmu <span class="req">*</span></label>
-            </th>
-            <td>
-                <input
-                    id="name"
-                    name="name"
-                    required
-                    value="<?= e($view->data['name'] ?? '') ?>"
-                >
-            </td>
-        </tr>
+        <div class="card-body">
+            <form method="post" action="">
+                <?= Csrf::getField() ?>
 
-        <tr>
-            <th>
-                <label for="color">Barva týmu</label>
-            </th>
-            <td>
-                <input
-                    id="color"
-                    type="color"
-                    name="color"
-                    value="<?= e($view->data['color'] ?? '#2196F3') ?>"
-                    style="height: 38px; padding: 2px;"
-                >
-            </td>
-        </tr>
+                <!-- NÁZEV TÝMU -->
+                <div class="form-group <?= isset($errors['name']) ? 'has-error' : '' ?>">
+                    <label for="name">Název týmu <span class="req">*</span></label>
+                    <input type="text"
+                           id="name"
+                           name="name"
+                           class="form-control"
+                           value="<?= e($old['name'] ?? '') ?>"
+                           placeholder="např. Montéři východ"
+                           required>
+                    <?php if (isset($errors['name'])): ?>
+                        <span class="error-message"><?= e($errors['name']) ?></span>
+                    <?php endif; ?>
+                </div>
 
-        <tr>
-            <th></th>
-            <td class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    Vytvořit tým
-                </button>
+                <!-- BARVA TÝMU (speciální input) -->
+                <div class="form-group <?= isset($errors['color']) ? 'has-error' : '' ?>">
+                    <label for="color">Barva týmu</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color"
+                               id="color"
+                               name="color"
+                               value="<?= e($old['color'] ?? '#2196F3') ?>"
+                               style="width: 60px; height: 40px; padding: 2px; border-radius: 6px; border: 1px solid #cfd6de; background: transparent; cursor: pointer;">
+                        <span style="color: #4b5563; font-size:0.9rem;">
+                            (vyber barvu pro označení týmů)
+                        </span>
+                    </div>
+                    <?php if (isset($errors['color'])): ?>
+                        <span class="error-message"><?= e($errors['color']) ?></span>
+                    <?php endif; ?>
+                </div>
 
-                <a href="<?= Url::to('/{tenant}/teams') ?>/#main"
-                   class="btn btn-secondary">
-                    Zpět na přehled
-                </a>
-            </td>
-        </tr>
-    </table>
-</form>
+                <!-- FORMULÁŘOVÁ TLAČÍTKA -->
+                <div class="form-actions" style="margin-top: 32px;">
+                    <button type="submit" class="btn btn-primary">
+                        Vytvořit tým
+                    </button>
+
+                    <a href="<?= Url::to('/{tenant}/teams') ?>/#main"
+                       class="btn btn-secondary">
+                        <span class="btn-icon">←</span>
+                        Zpět na přehled týmů
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- PRAVÝ SLOUPEC – NÁPOVĚDA -->
+    <div class="card card-help" id="helpCard">
+        <div class="card-body">
+            <h3>O týmech</h3>
+
+            <h4>K čemu jsou týmy?</h4>
+            <p>
+                Týmy sdružují pracovníky (montéry, předáky) do pracovních part.
+                Můžeš jim pak hromadně přiřazovat úkoly nebo zakázky.
+            </p>
+
+            <h4>Barva týmu</h4>
+            <p>
+                Barva se zobrazuje v přehledech a kalendáři – usnadňuje orientaci,
+                který tým má co na starosti.
+            </p>
+
+            <h4>Tip</h4>
+            <p>
+                Pokud týmy barevně odlišíš (např. modrá – elektro, zelená – voda,
+                červená – stavba), bude systém přehlednější.
+            </p>
+
+            <hr style="margin:20px 0; border:0; border-top:1px solid #e5e7eb;">
+
+            <h4>Filozofie projektu</h4>
+            <details>
+                <summary style="cursor:pointer; font-weight:600;">Zobrazit</summary>
+                <p style="margin-top:12px;">
+                    Zakázka je Bůh. Aby se Bůh mohl realizovat, zažít, naplnit,
+                    sestoupil k nám a rozpadl se na jednotlivé úkoly.
+                    Skrze splnění těchto úkolů (reporty o vykonané práci),
+                    se Bůh, čili zakázka realizuje. Aby se úkoly mohly splnit,
+                    je potřeba (ještě stále) lidi – a ti pracují v týmech.
+                </p>
+            </details>
+        </div>
+    </div>
+
+</div> <!-- /.create-container -->
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

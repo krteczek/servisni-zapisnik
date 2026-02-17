@@ -1,0 +1,158 @@
+/* =========================
+   CSS/FORM.CSS
+   ========================= */
+
+
+/* =========================
+   FORM LAYOUT
+   ========================= */
+
+.create-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .create-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   FORM CARD
+   ========================= */
+
+.card.form-card {
+}
+
+/* víc vzduchu */
+.card.card-body {
+  padding: 32px 36px;
+  background: #f3f4f6;
+  border: 1px solid #d6dbe3;
+}
+
+/* =========================
+   FORM STRUCTURE
+   ========================= */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   LABELS
+   ========================= */
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.req {
+  color: #c62828;
+  font-weight: 700;
+}
+
+/* =========================
+   INPUTS
+   ========================= */
+
+.form-control {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cfd6de;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background: #fff;
+}
+
+/* focus */
+.form-control:focus {
+  outline: none;
+  border-color: #4A6FA5;
+  box-shadow: 0 0 0 3px rgba(25,118,210,0.15);
+}
+
+/* =========================
+   SELECT
+   ========================= */
+
+select.form-control {
+  cursor: pointer;
+}
+
+/* =========================
+   ERROR STATE
+   ========================= */
+
+.form-group.has-error .form-control {
+  border-color: #c62828;
+  background: #fff5f5;
+}
+
+.error-message {
+  font-size: 0.8rem;
+  color: #c62828;
+  margin-top: 4px;
+}
+
+/* =========================
+   FORM ACTIONS
+   ========================= */
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.card-help {
+  background: #fafbfc;
+  border: 1px solid #e5e7eb;
+}
+
+.card-help h3,
+.card-help h4 {
+  margin-top: 0;
+}
+
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+details[open] summary {
+  margin-bottom: 12px;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.checkbox input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}

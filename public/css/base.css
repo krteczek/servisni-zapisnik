@@ -123,3 +123,13 @@ a:hover {
 
 }
 
+h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #111827;
+}
+h1 {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+}

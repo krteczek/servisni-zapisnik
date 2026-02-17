@@ -223,11 +223,11 @@ final class TeamController extends Controller
 
             // root NIKDY
             if (!$user || $user['global_role'] === 'root') {
-                Url::redirect('/{tenant}/teams/' . $id . '/edit/#userlist');
+                Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
             }
 
             $membershipModel->add($userId, $id, $role);
-            Url::redirect('/{tenant}/teams/' . $id . '/edit/#userlist');
+            Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
         }
 
         /* ===== ZMĚNA ROLE ===== */
@@ -239,16 +239,16 @@ final class TeamController extends Controller
                 $membershipModel->changeRole($membershipId, $role);
             }
 
-            Url::redirect('/{tenant}/teams/' . $id . '/edit/#userlist');
+            Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
         }
 
         /* ===== ODEBRÁNÍ ČLENA ===== */
         if (isset($_POST['remove_membership_id'])) {
             $membershipModel->end((int) $_POST['remove_membership_id']);
-            Url::redirect('/{tenant}/teams/' . $id . '/edit/#userlist');
+            Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
         }
 
-        Url::redirect('/{tenant}/teams/' . $id . '/edit/#userlist');
+        Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
     }
 
     /* ==========================================================

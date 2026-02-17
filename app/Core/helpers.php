@@ -101,3 +101,34 @@ function formatCzDate(string $datetime): string
         $dt->format('H:i')
     );
 }
+
+function t(string $key): string
+{
+	
+	$statuses = [
+		'new' 			=> 'Nový',
+		'in_progress' 	=> 'Probíhá',
+		'done' 			=> 'Hotovo',
+		'canceled'		=> 'Zrušeno',
+		'open'			=> 'Otevřeno',
+		'normal'			=> 'Normální',
+		'high'			=> 'Vysoká',
+		'emergency'		=> 'Naléhavé',
+		'low'				=> 'Nízká',
+		'mistr'			=> 'Mistr',
+		'admin'			=> 'Admin',
+		'predak'			=> 'Předák',
+		'monter'			=> 'Montér',
+		'active'			=> 'Aktivní',
+		'inactive'		=> 'Neaktivní',
+		'pending'		=> 'Čeká...',
+		
+	];
+	$key = strtolower(trim($key));
+	return e($statuses[$key] ?? $key);
+}
+
+function te(string $key): string
+{
+    return e(t($key));
+}
