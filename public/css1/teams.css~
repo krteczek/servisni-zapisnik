@@ -1,11 +1,10 @@
-/* =========================
-   CSS/TEAMS.CSS
-   ========================= */
-
-
 /* =====================================================
    TEAMS – barevný levý border
    ===================================================== */
+
+.team-card {
+    border-left: 4px solid var(--team-color) !important;
+}
 
 /* Členové týmu */
 .member-line {
@@ -24,7 +23,7 @@
     background-color: currentColor;  /* použije barvu z style */
     border: 2px solid white;
     box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
-        cursor: default;  /* nebo pointer, help... */
+        cursor: default;  /* nebo pointer */
     vertical-align: middle;
 }
 

@@ -1,3 +1,23 @@
+/* =========================
+   CSS/MENU.CSS
+   ========================= */
+
+
+/* =========================
+   NAV (MENU)
+   ========================= */
+
+.nav {
+  grid-area: nav;
+  background: #f3f4f6;              /* světlý neutrální základ */
+  padding: 12px 0;
+  border-right: 1px solid #cfd6de;  /* jemné oddělení od obsahu */
+}
+
+/* =========================
+   MAIN MENU
+   ========================= */
+
 .menu {
   list-style: none;
   margin: 0;
@@ -5,27 +25,123 @@
 }
 
 .menu-item {
-  background: #cfcfcf;
-  border-top: 1px solid #bbb;
+  border-top: 1px solid #e5e7eb;
 }
 
+/* hlavní odkazy */
 .menu-item > a,
-.menu-item button {
+.menu-item > button {
   display: block;
   width: 100%;
-  padding: 14px 18px;
+  padding: 14px 20px;
   text-decoration: none;
-  color: #000;
-  font-weight: 600;
   background: transparent;
   border: none;
   text-align: left;
+  cursor: pointer;
+
+  color: #374151;        /* dostatečný kontrast */
+  font-weight: 500;
+  font-size: 15px;
+
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.menu-item:hover {
-  background: #bfbfbf;
+/* hover */
+.menu-item > a:hover,
+.menu-item > button:hover {
+  background: #e5e7eb;
 }
 
-.menu-item.active.no-submenu {
-  background: #fff;
+/* =========================
+   ACTIVE MAIN ITEM
+   ========================= */
+
+.menu-item.active > a,
+.menu-item.active > button {
+  background: #e1e5ea;
+  color: #111827;
+  font-weight: 600;
+}
+
+/* =========================
+   SUBMENU
+   ========================= */
+
+.submenu {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0 10px 20px;   /* odsazení bez box efektu */
+}
+
+/* položky submenu */
+.submenu-item a {
+  display: block;
+  padding: 8px 16px;
+  text-decoration: none;
+
+  background: transparent;
+  border: none;
+
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* hover submenu */
+.submenu-item a:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* aktivní submenu */
+.submenu-item.active a {
+  background: #e1e5ea;
+  color: #111827;
+  font-weight: 600;
+  border-left: 3px solid #c7cdd4;   /* neutrální indikátor */
+  padding-left: 13px;               /* kompenzace borderu */
+}
+
+/* =========================
+   ACCESSIBILITY (FOCUS)
+   ========================= */
+
+.menu-item > a:focus,
+.menu-item > button:focus,
+.submenu-item a:focus {
+  outline: 2px solid #9ca3af;
+  outline-offset: 2px;
+}
+
+/* =========================
+   MAIN MENU – větší klikací plocha
+   ========================= */
+
+.menu-item > a,
+.menu-item > button {
+  padding: 18px 22px;   /* bylo 14px */
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+/* =========================
+   SUBMENU – také větší
+   ========================= */
+
+.submenu {
+  padding: 8px 0 14px 22px;
+}
+
+.submenu-item a {
+  padding: 12px 18px;   /* bylo 8px */
+  font-size: 15px;      /* lehce větší */
+  line-height: 1.4;
+}
+
+/* kompenzace borderu u aktivní */
+.submenu-item.active a {
+  padding-left: 15px;
 }

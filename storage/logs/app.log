@@ -246,3 +246,5 @@
 	message: Failed opening required '/opt/lampp/htdocs/servisni-zapisnik/app/Views/layout/../../../public/css/badge.css' (include_path='.:/opt/lampp/lib/php')
 	file: /opt/lampp/htdocs/servisni-zapisnik/app/Views/layout/header.php
 	line: 34
+[2026-02-16 22:52:08] error: Router exception
+[2026-02-16 22:55:36] error: Router exception

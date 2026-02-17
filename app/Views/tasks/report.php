@@ -15,7 +15,7 @@ $errors = $view->errors ?? []; // chyby validace
 ?>
 
 <div class="task-detail">
-    <h2>Úkol: <?= e($task['title']); ?></h2>
+    
     
     <?php if (!empty($task['description'])): ?>
         <div class="task-description card">

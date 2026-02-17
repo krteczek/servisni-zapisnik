@@ -1,12 +1,16 @@
-/* RESET */
+/* =========================
+   CSS/BASE.CSS
+   ========================= */
+
+
+/* =========================
+   RESET
+   ========================= */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-html {
-  font-size: 112.5%; /* 18px base */
+ 
 }
 
 body {
@@ -14,9 +18,108 @@ body {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   background: #f6f7f9;
   color: #222;
+  line-height: 1.5;
 }
 
 a {
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  color: inherit;
+  text-decoration: none;
 }
+
+a:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================
+   APP GRID
+   ========================= */
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 240px 1fr;
+  grid-template-areas:
+    "header header"
+    "nav    main"
+    "footer footer";
+}
+
+/* oblasti */
+.header { grid-area: header; }
+.nav    { grid-area: nav; }
+.main   { grid-area: main; }
+.footer { grid-area: footer; }
+
+/* header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+}
+
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+}
+
+
+.main {
+  background: #fff;
+  padding: 20px;
+}
+
+/* patička */
+.footer {
+  background: #f0f0f0;
+  padding: 10px 16px;
+  font-size: 13px;
+  opacity: .7;
+  border-top: 1px solid #ccc;
+}
+
+@media (max-width: 768px) {
+
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      "header"
+      "nav"
+      "main"
+      "footer";
+  }
+
+  /* větší základní text */
+  body {
+ font-size: clamp(16px, 1.1vw, 18px);
+  }
+
+  /* hlavní menu */
+  .menu-item > a,
+  .menu-item > button {
+    padding: 20px 24px;
+    font-size: 18px;
+  }
+
+  /* submenu */
+  .submenu {
+    padding-left: 26px;
+  }
+
+  .submenu-item a {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+
+}
+
