@@ -58,7 +58,7 @@ $mode = $view->mode ?? 'active';
                 <div class="meta-list">
                     <!-- ČLENOVÉ JAKO METADATA -->
                     <div class="meta-item">
-                        <span class="meta-label">Členové</span>
+                        <span class="meta-label-header">Členové</span>
                         <div class="meta-value">
                             <?php if (empty($team['members'])): ?>
                                 <span class="team-members-empty">Zatím nikdo</span>

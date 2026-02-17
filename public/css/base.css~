@@ -104,6 +104,28 @@ a:hover {
  font-size: clamp(16px, 1.1vw, 18px);
   }
 
+  /* hlavní menu */
+  .menu-item > a,
+  .menu-item > button {
+    padding: 20px 24px;
+    font-size: 18px;
+  }
+
+  /* submenu */
+  .submenu {
+    padding-left: 26px;
+  }
+
+  .submenu-item a {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
 
 }
 
+h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #111827;
+}

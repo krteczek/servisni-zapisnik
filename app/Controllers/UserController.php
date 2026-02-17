@@ -68,6 +68,8 @@ final class UserController extends Controller
 	    $userId = $this->users->create([
 	        'email'           => strtolower(trim($data['email'])),
 	        'employee_number' => trim($data['employee_number']),
+	        'telefon' => trim($data['telefon']),
+	        
 	        'first_name'      => trim($data['first_name']),
 	        'last_name'       => trim($data['last_name']),
 	        'global_role'     => $data['global_role'],
@@ -175,6 +177,7 @@ final class UserController extends Controller
     {
         $email          = strtolower(trim($data['email'] ?? ''));
         $employeeNumber = trim($data['employee_number'] ?? '');
+		  $telefon        = trim($data['telefon'] ?? '');
         $firstname      = trim($data['first_name'] ?? '');
         $lastname       = trim($data['last_name'] ?? '');
 

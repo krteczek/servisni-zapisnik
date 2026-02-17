@@ -1,3 +1,8 @@
+/* =========================
+   CSS/BUTTONS.CSS
+   ========================= */
+
+
 /* =====================================================
    BUTTONS
    ===================================================== */
@@ -23,12 +28,12 @@
 /* Primary */
 
 .btn-primary {
-    background: #1976d2;
+    background: #4A6FA5;
     color: #fff;
 }
 
 .btn-primary:hover {
-    background: #1565c0;
+    background: #3A5A80;
 }
 
 /* Secondary */
@@ -42,6 +47,14 @@
     background: #e0e0e0;
 }
 
+.btn-secondary {
+    background: #eef2f6;  /* ještě jemnější než původní e1e5ea */
+    color: #2c3e4f;       /* tmavě šedomodrá, hezky ladí s primární */
+    border-color: #d0d9e3;
+}
+.btn-secondary:hover {
+    background: #e2e8f0;
+}
 /* Danger */
 
 .btn-danger {

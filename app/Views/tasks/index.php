@@ -23,10 +23,10 @@ $tasks = $view->tasks ?? [];
             <div class="card-header">
                 <span class="card-title"><a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>"
                    title="Upravit úkol">
-                    <?= htmlspecialchars($task['title']) ?>
+                    <?= e($task['title']) ?>
                 </a></span>
                 <span class="badge badge-status-<?= e($task['status']) ?>">
-                    <?= strtoupper($task['status']) ?>
+                    <?= te($task['status']) ?>
                 </span>
             </div>
 

@@ -12,9 +12,6 @@
   flex-direction: column;
 }
 
-.card:hover {
-  
-}
 
 .card-header {
   padding: 16px 18px;
@@ -48,3 +45,10 @@
     border-left: 4px solid var(--task-color) !important;
 }
 
+.card-title a {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

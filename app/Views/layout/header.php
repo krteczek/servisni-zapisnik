@@ -16,7 +16,7 @@ use App\Core\Session;
 <link rel="icon" href="<?= Url::to('/favicon_io/favicon.ico') ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
 <link rel="apple-touch-icon" href="<?= Url::to('/favicon_io/apple-touch-icon.png') ?>">
-	 <link rel="stylesheet" href="<?= Url::to('/css/base.css') ?>">
+<!--	 <link rel="stylesheet" href="<?= Url::to('/css/base.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/logo.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/menu.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/grid.css') ?>">
@@ -25,19 +25,24 @@ use App\Core\Session;
     <link rel="stylesheet" href="<?= Url::to('/css/ui.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/buttons.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/teams.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/form.css') ?>">
 
     -->
  <style>
  <?php
-//require __DIR__ . '/../../../public/css/base.css';
-//require __DIR__ . '/../../../public/css/logo.css';
-//require __DIR__ . '/../../../public/css/menu.css';
-//require __DIR__ . '/../../../public/css/grid.css';
-//require __DIR__ . '/../../../public/css/card.css';
-//require __DIR__ . '/../../../public/css/badge.css';
-//require __DIR__ . '/../../../public/css/ui.css';
-//require __DIR__ . '/../../../public/css/buttons.css';
-//require __DIR__ . '/../../../public/css/teams.css';
+require __DIR__ . '/../../../public/css/base.css';
+require __DIR__ . '/../../../public/css/logo.css';
+require __DIR__ . '/../../../public/css/menu.css';
+require __DIR__ . '/../../../public/css/grid.css';
+require __DIR__ . '/../../../public/css/card.css';
+require __DIR__ . '/../../../public/css/badge.css';
+require __DIR__ . '/../../../public/css/ui.css';
+require __DIR__ . '/../../../public/css/buttons.css';
+require __DIR__ . '/../../../public/css/teams.css';
+require __DIR__ . '/../../../public/css/meta.css';
+require __DIR__ . '/../../../public/css/form.css';
+
+
 ?>
  </style>
 </head>
@@ -135,7 +140,7 @@ use App\Core\Session;
 
     <!-- ================= MAIN ================= -->
     <main id="main" class="main">
-        <h1><?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></h1>
+        <h1>Bó - <?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></h1>
 
 <?php if (!empty($_SESSION['flash'] ?? [])): ?>
     <div class="flash-wrapper">

@@ -12,13 +12,14 @@ $teamMembers = $view->teamMembers ?? []; // pole lidí z týmu
 $reports = $view->reports ?? [];
 $oldData = $view->oldData ?? []; // stará data z POST při chybě
 $errors = $view->errors ?? []; // chyby validace
+
+//var_dump($task);
 ?>
 
 <div class="task-detail">
-    
-    
     <?php if (!empty($task['description'])): ?>
         <div class="task-description card">
+<h3><?= e($task['title']) ?></h3>
             <div class="card-body">
                 <?= nl2br(e($task['description'])); ?>
             </div>
@@ -38,6 +39,7 @@ $errors = $view->errors ?? []; // chyby validace
 
 <!-- Formulář -->
 <div class="form-container">
+
     <form method="POST" class="form">
         <?= Csrf::getField() ?>
         

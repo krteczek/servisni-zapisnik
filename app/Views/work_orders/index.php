@@ -18,10 +18,10 @@ $workOrders = $view->orders;
                 <span class="card-title">  <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id'] . '/detail/#main') ?>" 
                    class="card-title"
                    title="Otevřít detail zakázky">
-                    <?= htmlspecialchars($wo['title']) ?>
+                    <?= e($wo['title']) ?>
                 </a></span>
                 <span class="badge badge-priority-<?= htmlspecialchars($wo['priority']) ?>">
-                    <?= strtoupper($wo['priority']) ?>
+                    <?= te($wo['priority']) ?>
                 </span>
             </div>
 
@@ -31,7 +31,7 @@ $workOrders = $view->orders;
                     <div class="meta-item">
                         <span class="meta-label">Status</span>
                         <span class="badge badge-status-<?= htmlspecialchars($wo['status']) ?>">
-                            <?= strtoupper($wo['status']) ?>
+                            <?= te($wo['status']) ?>
                         </span>
                     </div>
                     <!-- Sem můžeš přidat další metadata, až budou -->

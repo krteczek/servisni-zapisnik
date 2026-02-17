@@ -13,7 +13,7 @@
     padding: 0.3rem 0.65rem;
     border-radius: 16px;
     font-weight: 600;
-    border: 1px solid transparent;
+    border: 1px solid;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -76,6 +76,12 @@
     border-color: #e5c2c2;
 }
 
+/* čeká na aktivaci */
+.badge-pending {
+    background: #fff3cd;      /* světle žlutá / oranžová */
+    color: #856404;
+    border-color: #ffeeba;
+}
 
 .badge-active {
     background: #edf6ee;
@@ -83,18 +89,19 @@
     border-color: #cfe3d2;
 }
 
+.badge-inactive {
+    background: #fbeaea;
+    color: #8f1d1d;
+    border-color: #e5c2c2;
+}
+
 .badge-active,
 .badge-inactive {
-  background: transparent;
-  border: 1px solid currentColor;
   border-radius: 16px;
   font-weight: 600;
   font-size: 0.75rem;
   padding: 0.3rem 0.65rem;
 }
-
-.badge-active { color: #2e7d32; }
-.badge-inactive { color: #c62828; }
 
 .badge-active::before {
     background: #2e7d32;
@@ -104,3 +111,4 @@
 .badge-inactive::before {
     background: #c62828;
 }
+

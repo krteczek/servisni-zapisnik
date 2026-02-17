@@ -248,3 +248,14 @@
 	line: 34
 [2026-02-16 22:52:08] error: Router exception
 [2026-02-16 22:55:36] error: Router exception
+[2026-02-17 17:03:58] error: Router exception
+[2026-02-17 17:03:59] critical: 
+	message: Failed opening required '/opt/lampp/htdocs/servisni-zapisnik/app/Views/layout/../../../public/css/form.css' (include_path='.:/opt/lampp/lib/php')
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Views/layout/header.php
+	line: 43
+[2026-02-17 17:04:02] error: Router exception
+[2026-02-17 17:04:02] critical: 
+	message: Failed opening required '/opt/lampp/htdocs/servisni-zapisnik/app/Views/layout/../../../public/css/form.css' (include_path='.:/opt/lampp/lib/php')
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Views/layout/header.php
+	line: 43
+[2026-02-17 21:55:46] error: Router exception

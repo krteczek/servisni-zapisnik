@@ -30,14 +30,14 @@ return [
     'path'   => '/login',
     'action' => [AuthController::class, 'loginForm'],
     'auth'   => false,
-    'title'  => 'Bó - Přihlášení',
+    'title'  => 'Bó: Přihlášení',
 ],
 [
     'method' => 'POST',
     'path'   => '/login',
     'action' => [AuthController::class, 'login'],
     'auth'   => false,
-    'title'  => 'Bó - Přihlášení',
+    'title'  => 'Bó: Přihlášení',
 ],
 
 
@@ -52,7 +52,7 @@ return [
     'path'   => '/activate',
     'action' => [AuthController::class, 'activate'],
     'auth'   => false,
-    'title'  => 'Bó - Aktivace uživatele',
+    'title'  => 'Bó: Aktivace uživatele',
 ],
 
 [
@@ -60,7 +60,7 @@ return [
     'path'   => '/activate',
     'action' => [AuthController::class, 'activatePost'],
     'auth'   => false,
-    'title'  => 'Bó - Aktivace uživatele',
+    'title'  => 'Bó: Aktivace uživatele',
 
 ],
 
@@ -69,7 +69,7 @@ return [
     'path'   => '/reset-password',
     'action' => [AuthController::class, 'resetPassword'],
     'auth'   => false,
-    'title'  => 'Bó - Reset hesla uživatele',
+    'title'  => 'Bó: Reset hesla uživatele',
 
 ],
 
@@ -78,7 +78,7 @@ return [
     'path'   => '/reset-password',
     'action' => [AuthController::class, 'resetPasswordPost'],
     'auth'   => false,
-    'title'  => 'Bó - Reset hesla uživatele',
+    'title'  => 'Bó: Reset hesla uživatele',
 
 ],
 
@@ -96,7 +96,7 @@ return [
     'path'   => '/forgot-password',
     'action' => [AuthController::class, 'forgotPasswordPost'],
     'auth'   => false,
-    'title'  => 'Bó - Zapomenuté heslo',
+    'title'  => 'Bó: Zapomenuté heslo',
 
 ],
 
@@ -132,7 +132,7 @@ return [
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
     'menu'    => 'Úkoly',
     'section' => 'tasks',
-	'title'   => 'Úkoly > Přehled',
+	'title'   => 'Úkoly: Přehled',
 ],
 /*
 [
@@ -153,7 +153,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
     'section' => 'tasks',
-	'title'   => 'Úkoly > Přidat report',
+	'title'   => 'Úkoly: Přidat report',
 ],
 
 [
@@ -163,7 +163,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
     'section' => 'tasks',
-	'title'   => 'Úkoly > Přidat report',
+	'title'   => 'Úkoly: Přidat report',
 ],
 
 
@@ -209,7 +209,7 @@ return [
     'menu'    => 'Zakázky',
     'submenu' => 'Přehled',
     'section' => 'workorders',
-    'title'   => 'Zakázky > Přehled',
+    'title'   => 'Zakázky: Přehled',
 ],
 
 [
@@ -220,7 +220,7 @@ return [
     'roles'   => ['admin', 'mistr', 'predak'],
     'submenu' => 'Nová zakázka',
     'section' => 'workorders',
-    'title'   => 'Zakázky > Nová',
+    'title'   => 'Zakázky: Nová',
 ],
 
 [
@@ -238,7 +238,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
     'section' => 'workorders',
-    'title'   => 'Zakázky > Detail',
+    'title'   => 'Zakázky: Detail',
 ],
 
 [
@@ -248,7 +248,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak'],
     'section' => 'workorders',
-    'title'   => 'Zakázky > Upravit',
+    'title'   => 'Zakázky: Upravit',
 ],
 [
     'method'  => 'POST',
@@ -314,7 +314,7 @@ return [
     'menu'    => 'Týmy',
     'submenu' => 'Aktivní',
     'section' => 'teams',
-    'title'   => 'Týmy > Aktivní',
+    'title'   => 'Týmy: Aktivní',
 ],
 
 [
@@ -325,7 +325,7 @@ return [
     'roles'   => ['admin', 'mistr'],
     'submenu' => 'Deaktivované',
     'section' => 'teams',
-    'title'   => 'Týmy > Deaktivované',
+    'title'   => 'Týmy: Deaktivované',
 ],
 
 [
@@ -336,7 +336,7 @@ return [
     'roles'   => ['admin', 'mistr'],
     'submenu' => 'Vytvořit tým',
     'section' => 'teams',
-    'title'   => 'Týmy > Nový',
+    'title'   => 'Týmy: Nový',
 ],
 
 [
@@ -346,7 +346,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'teams',
-    'title'   => 'Týmy > Nový',
+    'title'   => 'Týmy: Nový',
 ],
 
 [
@@ -356,7 +356,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],    
     'section' => 'teams',
-    'title'   => 'Týmy > Upravit tým',
+    'title'   => 'Týmy: Upravit tým',
 ],
 
 [
@@ -367,7 +367,7 @@ return [
     'roles'   => ['admin', 'mistr'],
 
     'section' => 'teams',
-    'title'   => 'Týmy > Upravit tým',
+    'title'   => 'Týmy: Upravit tým',
 ],
 
 
@@ -397,7 +397,7 @@ return [
     'menu'    => 'Uživatelé',
     'submenu' => 'Přehled',
     'section' => 'users',
-    'title'   => 'Uživatelé > Přehled',
+    'title'   => 'Uživatelé: Přehled',
 ],
 
 [
@@ -435,7 +435,7 @@ return [
     'roles'   => ['admin'],
     'submenu' => 'Přidat uživatele',
     'section' => 'users',
-    'title'   => 'Uživatelé > Vytvoření nového uživatele ',
+    'title'   => 'Uživatelé: Vytvoření nového uživatele ',
 ],
 
 [
