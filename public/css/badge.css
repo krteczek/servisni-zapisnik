@@ -1,86 +1,111 @@
+/* =========================
+   CSS/badge.CSS
+   ========================= */
+
+
+
 /* =====================================================
    BADGE – základ
    ===================================================== */
 
 .badge {
-    font-size: .75rem;
-    padding: .25rem .6rem;
-    border-radius: 20px;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 16px;
     font-weight: 600;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* =====================================================
-   OBECNÉ STAVY (aktivita)
-   ===================================================== */
-
-.badge-active {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.badge-inactive {
-    background: #eeeeee;
-    color: #666;
-}
-
-.badge-pending {
-    background: #fff8e1;
-    color: #f57f17;
-}
-
-/* =====================================================
-   PRIORITY (zakázky)
+   PRIORITY
    ===================================================== */
 
 .badge-priority-high {
-    background: #ffebee;
-    color: #c62828;
-    border: 1px solid #ef9a9a;
+    background: #fbeaea;
+    color: #8f1d1d;
+    border-color: #e5c2c2;
 }
 
 .badge-priority-normal {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #a5d6a7;
+    background: #edf6ee;
+    color: #1f5e2b;
+    border-color: #cfe3d2;
 }
 
 .badge-priority-low {
-    background: #e8eaf6;
-    color: #283593;
-    border: 1px solid #9fa8da;
+    background: #eef0f8;
+    color: #2b3f7a;
+    border-color: #cfd6ee;
 }
 
 /* =====================================================
-   STATUS (sjednoceno – používá novější hodnoty)
+   STATUS
    ===================================================== */
 
 .badge-status-new,
 .badge-status-open {
-    background: #e3f2fd;
-    color: #1565c0;
-    border: 1px solid #90caf9;
+    background: #edf4fb;
+    color: #184e8a;
+    border-color: #c9dbf2;
 }
 
 .badge-status-todo {
-    background: #f5f5f5;
-    color: #666;
-    border: 1px solid #ddd;
+    background: #f4f4f5;
+    color: #555;
+    border-color: #ddd;
 }
 
 .badge-status-in_progress {
-    background: #fff8e1;
-    color: #f57f17;
-    border: 1px solid #ffe082;
+    background: #fbf6e8;
+    color: #8a5b14;
+    border-color: #ead9a8;
 }
 
 .badge-status-done {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #a5d6a7;
+    background: #edf6ee;
+    color: #1f5e2b;
+    border-color: #cfe3d2;
 }
 
 .badge-status-blocked {
-    background: #ffebee;
-    color: #c62828;
-    border: 1px solid #ef9a9a;
+    background: #fbeaea;
+    color: #8f1d1d;
+    border-color: #e5c2c2;
 }
+
+
+.badge-active {
+    background: #edf6ee;
+    color: #1f5e2b;
+    border-color: #cfe3d2;
+}
+
+.badge-inactive {
+    background: #fbeaea;
+    color: #8f1d1d;
+    border-color: #e5c2c2;
+}
+
+.badge-active,
+.badge-inactive {
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+}
+
+.badge-active { color: #2e7d32; }
+.badge-inactive { color: #c62828; }
+
+.badge-active::before {
+    background: #2e7d32;
+}
+
+
+.badge-inactive::before {
+    background: #c62828;
+}
+

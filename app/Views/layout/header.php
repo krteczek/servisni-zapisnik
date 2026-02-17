@@ -16,29 +16,29 @@ use App\Core\Session;
 <link rel="icon" href="<?= Url::to('/favicon_io/favicon.ico') ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
 <link rel="apple-touch-icon" href="<?= Url::to('/favicon_io/apple-touch-icon.png') ?>">
- <!--   <link rel="stylesheet" href="<?= Url::to('/css/style.css') ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/buttons.css') ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/badge.css') ?>">
+	 <link rel="stylesheet" href="<?= Url::to('/css/base.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/logo.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/menu.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/grid.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/card.css') ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/form.css') ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/grig.css') ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/metadata.css') ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/colors.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/badge.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/ui.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/buttons.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/teams.css') ?>">
 
     -->
  <style>
  <?php
- require __DIR__ . '/../../../public/css/style.css';
- require __DIR__ . '/../../../public/css/buttons.css';
- require __DIR__ . '/../../../public/css/badge.css';
- require __DIR__ . '/../../../public/css/card.css';
- require __DIR__ . '/../../../public/css/form.css';
- require __DIR__ . '/../../../public/css/grid.css';
- require __DIR__ . '/../../../public/css/metadata.css';
- require __DIR__ . '/../../../public/css/colors.css';
- require __DIR__ . '/../../../public/css/teams.css';
- ?>
+//require __DIR__ . '/../../../public/css/base.css';
+//require __DIR__ . '/../../../public/css/logo.css';
+//require __DIR__ . '/../../../public/css/menu.css';
+//require __DIR__ . '/../../../public/css/grid.css';
+//require __DIR__ . '/../../../public/css/card.css';
+//require __DIR__ . '/../../../public/css/badge.css';
+//require __DIR__ . '/../../../public/css/ui.css';
+//require __DIR__ . '/../../../public/css/buttons.css';
+//require __DIR__ . '/../../../public/css/teams.css';
+?>
  </style>
 </head>
 <body>
@@ -48,9 +48,7 @@ use App\Core\Session;
     <!-- ================= HEADER ================= -->
     
 <header class="header">
-    <div>
-       <a href="<?= Url::to('/{tenant}/tasks') ?>"  class="logo">博</a>
-    </div>
+    <a href="<?= Url::to('/{tenant}/tasks') ?>"  class="logo">博</a>
 
     <?php if (Auth::check()): ?>
 <div class="identity">

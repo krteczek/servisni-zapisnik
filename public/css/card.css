@@ -1,41 +1,50 @@
+/* =========================
+   CSS/CARD.CSS
+   ========================= */
+
+
+
 .card {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 1rem;
+  background: #f3f4f6;
+  border: 1px solid #cfd6de;   /* tmavší než dřív */
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: .75rem;
 }
 
 .card:hover {
-  box-shadow: 0 4px 10px rgba(0,0,0,.06);
+  
 }
 
 .card-header {
+  padding: 16px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #eee;
-  padding-bottom: .5rem;
-  flex-wrap: wrap;
-  gap: .5rem;
+  border-bottom: 1px solid #cfd6de;
 }
-
-.card-title {
-  font-size: 1.1rem;
+.card-title a {
   font-weight: 600;
-  word-break: break-word;
+  color: #111827;
 }
 
 .card-body {
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
+  padding: 16px 18px;
 }
 
 .card-footer {
-  margin-top: auto;
-  border-top: 1px solid #eee;
-  padding-top: .75rem;
+  padding: 14px 18px;
+  border-top: 1px solid #cfd6de;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
+
+.team-card {
+    border-left: 4px solid var(--team-color) !important;
+}
+
+.task-card {
+    border-left: 4px solid var(--task-color) !important;
+}
+

@@ -1,0 +1,97 @@
+/* =====================================================
+   CARD – univerzální komponenta
+   ===================================================== */
+.card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    display: flex;           /* Přidáme flex pro lepší strukturu */
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .06);
+}
+
+.card.is-inactive {
+    filter: grayscale(.6);
+    opacity: .7;
+}
+
+/* Hlavička karty – univerzální */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Tělo karty – pro metadata, popis, cokoliv */
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Patička karty – vždy pro akce */
+.card-footer {
+    margin-top: auto;
+    border-top: 1px solid #eee;
+    padding-top: 0.75rem;
+}
+
+.card-title a {
+    color: #222;  /* stejná jako běžný text */
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.card-title a:hover {
+    color: #000;  /* trochu tmavší při najetí */
+    text-decoration: underline;
+    text-decoration-color: #999;
+    text-underline-offset: 2px;
+}
+
+.member-line {
+    padding-right: .5rem;
+    border-right: 3px solid transparent;
+}
+
+
+.team-card .meta-item {
+    flex-direction: column;  /* label nad seznamem */
+    align-items: flex-start;
+    gap: 0.25rem;
+}
+
+.team-card .meta-label {
+    min-width: auto;  /* zrušíme fixed width */
+}
+
+.team-card .meta-value {
+    width: 100%;  /* seznam zabere celou šířku */
+}
+
+
+/* =====================================================
+   TASKS – barevný levý border podle týmu
+   ===================================================== */
+.card.task-card {
+    border-left: 4px solid var(--task-color);
+}
+
+/* zalomení slov když se nevejdou do keret */
+/* zkrácení slov když se nevejdou do keret */
+.card-title {
+    word-break: break-word;
+}

@@ -1,3 +1,8 @@
+/* =========================
+   CSS/BUTTONS.CSS
+   ========================= */
+
+
 /* =====================================================
    BUTTONS
    ===================================================== */
@@ -13,7 +18,7 @@
     font-weight: 500;
 
     border-radius: 6px;
-    border: none;
+    border: 1px solid #cfd6de;
     cursor: pointer;
     text-decoration: none;
 
@@ -34,7 +39,7 @@
 /* Secondary */
 
 .btn-secondary {
-    background: #f0f0f0;
+    background: #e1e5ea;
     color: #333;
 }
 
