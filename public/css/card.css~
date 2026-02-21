@@ -27,6 +27,7 @@
 
 .card-body {
   padding: 16px 18px;
+  flex: 1;
 }
 
 .card-footer {

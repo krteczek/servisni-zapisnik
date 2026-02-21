@@ -11,12 +11,26 @@ use App\Core\Session;
 use App\Core\Mailer;
 use App\Models\UserModel;
 use App\Models\CompanyModel;
-use App\Services\AuthTokenService;
+use App\Models\RegistrationRequestModel;
 
+use App\Services\AuthTokenService;
+use App\Services\RegistrationTokenService;
+use App\Services\RegistrationService;
+use App\Services\ActivationMail;
 use App\Core\Flash;
 
 class AuthController extends Controller
 {
+    private const MAX_EMAIL_LENGTH           = 255;
+    private const MAX_EMPLOYEE_NUMBER_LENGTH = 50;
+    private const MAX_FIRST_NAME_LENGTH      = 100;
+    private const MAX_LAST_NAME_LENGTH       = 100;
+    private const MAX_PASSWORD_LENGTH        = 255;
+    private const MIN_PASSWORD_LENGTH        = 8;
+    private const MAX_COMPANY_NAME_LENGTH    = 255;
+    private const MIN_COMPANY_NAME_LENGTH    = 2;
+    private const ICO_LENGTH    					= 8;
+
     public function root(): string
     {
     		$url = '/' . Auth::tenantSlug() . (Auth::check() ? '/tasks' : '/login');
@@ -273,11 +287,16 @@ public function login(): string
 			$token    = $_POST['token'] ?? null;
 			$password = $_POST['password'] ?? null;
     		$passwordZ = $_POST['passwordZ'] ?? null;
-    		if($password === '') {
+    		if($password === '') 
+    		{
     			$this->addError('password', 'Heslo je povinné');
-    		} elseif (mb_strlen($password) < 8) {
+    		} 
+    		elseif (mb_strlen($password) < self::MIN_PASSWORD_LENGTH) 
+    		{
     			$this->addError('password', 'Heslo je příliš krátké');
-    		} elseif($password !== $passwordZ) {
+    		} 
+    		elseif($password !== $passwordZ) 
+    		{
     			$this->addError('password', 'Hesla se neshodují, věnujte zápisu více pozornosti.');
     		}
     		
@@ -316,4 +335,221 @@ public function login(): string
 				Session::forget('user.company_id');
         }
     }
+    
+	public function registerFormGet() {
+		
+		return $this->render('auth/create');
+    
+	}
+public function registerFormPost()
+{
+
+}
+
+	public function registrationStepOne()
+	{
+		$data = [];
+		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+		{
+	    	//$this->view->data = $data;
+			$data = array_map(
+			    fn($value) => is_string($value) ? trim($value) : $value,
+			    $_POST
+			);
+			
+			// --- EMAIL ---
+			if (empty($data['email'] ?? '')) 
+			{
+				$this->addError('email', 'Email je povinný.');
+			} 
+			elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) 
+			{
+				$this->addError('email', 'Email nemá platný formát.');
+			}
+			elseif (mb_strlen($data['email']) > self::MAX_EMAIL_LENGTH) 
+			{
+				$this->addError('email', 'Email je příliš dlouhý.');
+			}
+			$this->checkCsrf();
+    
+			if ($this->hasErrors()) 
+			{
+				$this->view->data = $data;
+				return $this->render('auth/registrationStepOne');
+			}
+			
+			$ip = ipToBinary(getClientIP());
+			$ua = getClientUserAgent();
+			
+		 	$requests = new RegistrationRequestModel();
+		 	$companies = new CompanyModel();
+		 	$users = new UserModel();
+			
+			$token = (new RegistrationService($requests, $companies, $users))->createRequest(
+				email: $data['email'],
+			);
+			
+			$url = Url::base() . Url::to('/register/complete?token=' . $token);
+			
+			[$subject, $htmlBody, $textBody] = ActivationMail::build($url);
+			//$ = ActivationMail::build($activationUrl);
+
+
+        $ok = (new Mailer())->send(
+  				toEmail: $data['email'],
+				toName: $data['email'],
+				subject: $subject,
+				htmlBody: $htmlBody,
+				textBody: $textBody
+        );
+
+			if($ok) 
+			{
+				Url::redirect('/register/check-email');
+			}
+			$this->addError('global', 'Litujeme, nepodařilo se zaregistrovat Váš Email. Zkuste to prosím později. Děkujeme. Bó Team');
+			
+		}
+    
+    
+    $this->view->data = $data;
+    return $this->render('auth/registrationStepOne');
+	
+	}
+	
+	public function registrationStepOneSucces()
+	{
+		return $this->render('auth/registrationStepOneSucces');
+	}
+	
+	public function registrationStepTwo()
+	{
+		$token = $_GET['token'] ?? null;
+		$data = [];
+		 $requests = new RegistrationRequestModel();
+		 $companies = new CompanyModel();
+		 $users = new UserModel();
+
+		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+		{
+			$token = $_POST['token'] ?? null;
+			if (!$token || !(new RegistrationService($requests, $companies, $users))->validateToken($token)) 
+			{
+				// přesměrujeme na registraci znovu s Flash zprávou		    	
+				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
+		    	Flash::error('Registrace trvala příliš dlouho, zkuste to prosím rychleji');
+				Url::redirect('/register');
+			}
+		    
+		    //return this->render('auth/register-step-two');
+
+			$data = array_map(
+					fn($value) => is_string($value) ? trim($value) : $value,
+					$_POST
+					);
+			$this->checkCsrf();
+    
+			//odstranění mezer mezi čísly
+			$data['ico'] = preg_replace('/\s+/', '', $data['ico']);
+
+			// --- NAME ---
+			if (empty(trim($data['name'] ?? ''))) 
+			{
+				$this->addError('name', 'Název firmy je povinný.');
+ 			} 
+			elseif (mb_strlen($data['name']) < self::MIN_COMPANY_NAME_LENGTH) 
+			{
+				$this->addError('name', 'Název firmy je příliš krátký.');
+			} 
+				elseif (mb_strlen($data['name']) > self::MAX_COMPANY_NAME_LENGTH) 
+			{
+         	$this->addError('name', 'Název firmy je příliš dlouhý.');   
+			}
+
+			// --- ICO ---
+			if (!preg_match('/^\d{8}$/', $data['ico'])) {
+				$this->addError('ico', 'Neplatné IČO.');
+			}
+
+			$data['ico'] = trim($data['ico'] ?? '');
+			if (empty($data['ico'] ?? '')) 
+			{
+				$this->addError('ico', 'IČO je povinné.');
+			} 
+			elseif (!preg_match('/^\d{8}$/', $data['ico'])) 
+			{
+				$this->addError('ico', 'IČO musí obsahovat 8 číslic.');
+			}
+			
+			if(mb_strlen($data['ico']) <> self::ICO_LENGTH) 
+			{
+				$this->addError('ico', 'IČO musí obsahovat 8 číslic.');
+			}
+
+
+			// --- FIRST NAME ---
+			if (empty(trim($data['first_name'] ?? '')))
+			{
+				$this->addError('first_name', 'Jméno je povinné.');
+			}
+    		elseif (mb_strlen($data['first_name']) > self::MAX_FIRST_NAME_LENGTH) 
+			{
+				$this->addError('first_name', 'Jméno je příliš dlouhé.');
+			}
+
+			// --- LAST NAME ---
+			if (empty(trim($data['last_name'] ?? '')))
+			{
+				$this->addError('last_name', 'Příjmení je povinné.');
+			}
+			elseif (mb_strlen($data['last_name']) > self::MAX_LAST_NAME_LENGTH) 
+			{
+				$this->addError('last_name', 'Příjmení je příliš dlouhé.');
+			}
+			
+   		if($data['password'] === '') 
+   		{
+    			$this->addError('password', 'Heslo je povinné');
+    		} 
+    		elseif (mb_strlen($data['password']) < self::MIN_PASSWORD_LENGTH) 
+    		{
+    			$this->addError('password', 'Heslo je příliš krátké');
+    		} 
+    		elseif($data['password'] !== $data['passwordZ']) 
+    		{
+    			$this->addError('password', 'Hesla se neshodují, věnujte zápisu více pozornosti.');
+    		}
+			
+			// pokud chyby, zobrazíme znovu form
+			if ($this->hasErrors()) 
+			{
+				$this->view->data = $data;
+				return $this->render('auth/registrationStepTwo');
+			}
+			$adminData['first_name'] =$data['first_name'];
+			$adminData['last_name'] = $data['last_name'];
+			$adminData['password'] = $data['password'];
+			$companyData['name'] = $data['name'];
+			$companyData['ico'] = $data['ico'];
+
+			// Pokud validace prošla:
+			// pokračujeme dál (model, transakce…)
+			$ok = (new RegistrationService($requests, $companies, $users))->complete($token, $companyData, $adminData);
+
+		}  
+		 $ok = (new RegistrationService($requests, $companies, $users))->validateToken($token);
+		if (!$token || !$ok) 
+		{
+			// přesměrujeme na registraci znovu s Flash zprávou		    	
+			// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
+	    	Flash::error('Registrace trvala příliš dlouho, zkuste to prosím rychleji');
+			return Url::redirect('/register');
+		}
+
+		$data['token'] = $token;
+		//prozatím aby se mi to protáčelo
+		$this->view->data = $data;	
+    
+		return $this->render('auth/registrationStepTwo');
+	}
 }

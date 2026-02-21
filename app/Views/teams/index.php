@@ -97,9 +97,9 @@ $mode = $view->mode ?? 'active';
                     <?php if (Access::can('teams.edit')): ?>
                         <a class="btn btn-secondary"
                            href="<?= Url::to('/{tenant}/teams/toggle/' . (int)$team['id']) ?>"
-                           title="<?= $team['active'] ? 'Deaktivovat tým' : 'Aktivovat tým' ?>"
+                           title="<?= e($team['active'] ? 'Deaktivovat tým' : 'Aktivovat tým') ?>"
                            onclick="return confirm('Opravdu chcete změnit stav týmu?')">
-                            <?= $team['active'] ? '🔒 Deaktivovat' : '🔓 Aktivovat' ?>
+                            <?= e($team['active'] ? '🔒 Deaktivovat' : '🔓 Aktivovat') ?>
                         </a>
                     <?php endif ?>
                 </div>

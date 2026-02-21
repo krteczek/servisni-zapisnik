@@ -18,6 +18,8 @@ final class Logger implements LoggerInterface
      * @var string Cesta k log souboru
      */
     private string $logFile;
+    
+    private static ?LoggerInterface $instance = null;
 
     // TODO: [PERFORMANCE] Přidat bufferování záznamů pro batch zápis
     // TODO: [SECURITY] Validovat, že logFile je v povoleném adresáři
@@ -38,6 +40,20 @@ final class Logger implements LoggerInterface
             throw new \RuntimeException("Log directory is not writable: {$dir}");
         }
     }
+
+
+
+public static function instance(): LoggerInterface
+{
+    if (self::$instance === null) {
+        $path = Config::get('app.log_file')
+            ?? __DIR__ . '/../../storage/logs/app.log';
+
+        self::$instance = new self($path);
+    }
+
+    return self::$instance;
+}
 
     /**
      * Systém je nepoužitelný.

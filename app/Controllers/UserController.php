@@ -68,7 +68,7 @@ final class UserController extends Controller
 	    $userId = $this->users->create([
 	        'email'           => strtolower(trim($data['email'])),
 	        'employee_number' => trim($data['employee_number']),
-	        'telefon' => trim($data['telefon']),
+	        'telefon' 		  => trim($data['telefon']),
 	        
 	        'first_name'      => trim($data['first_name']),
 	        'last_name'       => trim($data['last_name']),
@@ -257,7 +257,7 @@ final class UserController extends Controller
 	        );
 	
 	    } catch (\Throwable $e) {
-	var_dump($e);exit;
+	//var_dump($e);exit;
 	        // ideálně logovat $e
 	        Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .

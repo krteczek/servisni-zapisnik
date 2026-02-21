@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+
+//view/work_orders/detail.php
 $css = '';
 require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
@@ -22,20 +24,26 @@ $canCloseDone = $workOrder['canCloseDone'];
 $canCloseCanceled = $workOrder['canCloseCanceled'];
 
 $err = $view->errors; 
+var_dump($order);
 ?>
 <?= $css ?>
-
+<!--
+/**************************************************************	
+	Základní informace o zakázce
+***************************************************************/
+-->
 <div class="wo-detail">
 
     <!-- HEADER -->
     <div class="wo-detail-header">
         <div class="wo-detail-title">
-            Zakázka #<?= (int) $order['id'] ?> – <?= htmlspecialchars($order['title'] ?? '') ?>
+            Zakázka #<?= (int) $order['id'] ?> – <?= e($order['title'] ?? '') ?>
         </div>
 
         <div class="wo-detail-meta">
-            <span class="wo-status status-open" title="Status zakázky">Otevřená</span>
-            <span class="wo-priority priority-medium" title="Priorita zakázky">Střední</span>
+					<span class="badge badge-status-<?= e($order['status']) ?>"><?= te($order['status']) ?></span>
+					<span class="badge badge-priority-<?= e($order['priority']) ?>"><?= te($order['priority']) ?></span>
+
         </div>
     </div>
 
@@ -45,130 +53,97 @@ $err = $view->errors;
 
     <div class="wo-info-main">
         <strong>Popis: </strong><br>
-        <?= nl2br(htmlspecialchars($order['description'] ?: 'Nezadán')) ?>
+        <?= nl2br(e($order['description'] ?: 'Nezadán')) ?>
     </div>
 
     <div class="wo-info-grid">
         <div class="wo-info-box">
             <span class="label">Zdroj: </span>
             <span class="value">
-                <?= htmlspecialchars($workOrder['source'] ?: 'Nezadán') ?>
+                <?= te($workOrder['source'] ?: 'Nezadán') ?>
             </span>
         </div>
 
         <div class="wo-info-box">
             <span class="label">Požadavek vznesl: </span>
             <span class="value">
-                <?= htmlspecialchars($workOrder['requested_by'] ?: 'Nezadán') ?>
+                <?= e($workOrder['requested_by'] ?: 'Nezadán') ?>
             </span>
         </div>
 
         <div class="wo-info-box">
             <span class="label">Kontakt: </span>
             <span class="value">
-                <?= htmlspecialchars($workOrder['contact'] ?: 'Nezadán') ?>
+                <?= e($workOrder['contact'] ?: 'Nezadán') ?>
             </span>
         </div>
     </div>
 </div>
 
+<!-- 
+	**************************************************************	
+		Formulář pro přidání nebo úpravu tesku (úkolu) k zakázce
+	***************************************************************
+-->
 
 
 
 <div class="wo-section">
     <h3>Úkoly k zakázce</h3>
 <div class="task-form">
-
-    <div class="task-form-context">
-        Zakázka: <strong><?= htmlspecialchars($order['title']) ?></strong>
-    </div>
-
-    <h2>Nový úkol</h2>
-
-<?php
-$ch = '';
-if ($err) {
-    foreach ($err as $field => $messages) {
-        foreach ($messages as $msg) {
-            $ch .= '
-<p>' . e($msg) . '</p>
-';
-        }
-    }
-}	
-?>
-
-    <form method="post" action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create') ?>">
-    <?= Csrf::getField() ?>
-<?= e($ch) ?>
-        <div class="form-group">
-            <label>Název úkolu <span class="req">*</span></label>
-            <input type="text" name="title" value="<?= e($post['title']) ?>"  required>
-        </div>
-
-        <div class="form-group">
-            <label>Popis</label>
-            <textarea name="description"><?= e($post['description']) ?></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Tým <span class="req">*</span></label>
-            <select name="team_id" required>
-                <option value="">— vyber tým —</option>
-            <?php foreach ($teams as $team): ?>
-                <option
-                    value="<?= $team['id'] ?>"
-                    <?= (($post['team_id'] ?? null) == $team['id']) ? 'selected' : '' ?>
-                >
-                    <?= htmlspecialchars($team['name']) ?>
-                </option>
-            <?php endforeach; ?>
-            </select>
-        </div>
+<style>
+.task-add-button {
+padding: 14px;
+}
+</style>
+<div class="task-box">
+                <a class="btn btn-primary"
+							href="<?= Url::to('/{tenant}/tasks/create-to/' . $order['id'] . '/#main') ?>">
+							Přidat nový úkol k této zakázce
+					</a>
 
 
-        <div class="form-actions">
-            <button class="btn btn-success">Vytvořit úkol</button>
-        </div>
+    <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
+        ← Zpět na přehled
+    </a>
 
-    </form>
 </div>
-
-
 <?php if ($tasks === []) : ?>
     <p class="muted">Zatím nejsou přidány žádné úkoly.</p>
 <?php else : ?>
 
+
     <div class="task-list">
 
 <?php foreach ($tasks as $task) : ?>
-        <div class="task-box status-<?= htmlspecialchars($task['status']) ?>">
+        <div class="task-box status-<?= e($task['status']) ?>" id="taskId_<?= (int) $task['id'] ?>">
 
             <!-- HLAVIČKA TASKU -->
             <div class="task-header">
-                <strong>
-                    
+                <strong>                   
                     <?= htmlspecialchars($task['title'] ?? 'Bez názvu') ?>
                 </strong>
-
-                <span class="task-status">
-                    <?= htmlspecialchars($task['status']) ?>
+					<span class="badge badge-priority-<?= e($task['status']) ?>">
+                    <?= te($task['status']) ?>
                 </span>
-            </div>
-
+           </div>
+				<div class="task-meta">
+				<strong class="task-description-header">Popis úkolu:</strong>
+				<div class="task-description"><?= e($task['description']) ?></div>
+				</div>
             <!-- META -->
             <div class="task-meta">
                 Vytvořeno:
-                <?= htmlspecialchars(formatCzDate($task['created_at'])) ?>
+                <?= e(formatCzDate($task['created_at'])) ?>
             </div>
 
             <!-- STATISTIKY ASSIGNMENTŮ -->
             
 <!-- tady potřebuji ty hodiny a kilometry --> 
-<div class="task-stats">
-    <span>Záznamy: <?= $task['stats']['total'] ?></span>
-    <span>Čas: <?= formatMinutes($task['stats']['minutes'] ?? 0) ?></span>
-    <span>Km: <?= $task['stats']['kilometers'] ?? 0 ?></span>
+<div class="task-stats"><?php print_r($task); ?>
+    <span>Záznamy: <?= $task['stats']['total_assignments'] ?></span>
+    <span>Čas: <?= formatMinutes($task['stats']['total_minutes'] ?? 0) ?></span>
+    <span>Km: <?= $task['stats']['total_kilometers'] ?? 0 ?></span>
 </div>
             
 
@@ -176,13 +151,13 @@ if ($err) {
             <div class="task-actions">
 
                 <a class="btn btn-sm btn-secondary"
-							href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/' . $task['id']) ?>">
+							href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>">
 							Detail / assignmenty
 					</a>
 
 
 					<a class="btn btn-sm btn-primary"
-					   href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/' . $task['id'] . '/edit') ?>">
+					   href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>">
 					    Upravit
 					</a>
 <?php if ($task['can_cancel']) : ?>

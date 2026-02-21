@@ -19,31 +19,34 @@ final class UserActivationService
     /**
      * Aktivace účtu + nastavení hesla
      */
-    public function activate(string $rawToken, string $newPassword): void
-    {
-        $this->tokenModel->begin();
+public function activate(string $rawToken, string $newPassword): void
+{
+    $this->tokenModel->begin();
 
-        try {
-            $token = $this->tokenService->consume($rawToken, 'activate');
+    try {
+        $token = $this->tokenService->consume($rawToken, 'activate');
+        $userId = (int) $token['user_id'];
 
-            $userId = (int) $token['user_id'];
-
-            $user = $this->userModel->find($userId);
-            if (!$user) {
-                throw new RuntimeException('Uživatel neexistuje');
-            }
-
-            if ((int)$user['active'] === 1) {
-                throw new RuntimeException('Účet je již aktivní');
-            }
-
-            $this->userModel->updatePassword($userId, $newPassword);
-            $this->userModel->setActive($userId, true);
-
-            $this->tokenModel->commit();
-        } catch (Throwable $e) {
-            $this->tokenModel->rollback();
-            throw $e;
+        $user = $this->userModel->find($userId);
+        if (!$user) {
+            throw new RuntimeException('Uživatel neexistuje');
         }
+
+        if ((int)$user['active'] === 1) {
+            throw new RuntimeException('Účet je již aktivní');
+        }
+
+        $this->userModel->updatePassword($userId, $newPassword);
+        $this->userModel->setActive($userId, true);
+
+        // 🔥 NOVÉ
+        $companyModel = new CompanyModel();
+        $companyModel->activate((int)$user['company_id']);
+
+        $this->tokenModel->commit();
+
+    } catch (Throwable $e) {
+        $this->tokenModel->rollback();
+        throw $e;
     }
-}
+}}

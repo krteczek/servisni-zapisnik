@@ -103,4 +103,13 @@ final class CompanyModel extends BaseModel
              ORDER BY name"
         );
     }
+    
+    
+    public function activate(int $companyId): void
+{
+    $this->update($companyId, [
+        'active' => 1,
+        'activated_at' => date('Y-m-d H:i:s'),
+    ]);
+}
 }

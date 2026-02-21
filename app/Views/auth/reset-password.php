@@ -36,5 +36,4 @@ if ($errors) {
 
 
 
-<?php require __DIR__ . '/../layout/footer.php'; ?>        <label>Nové heslo</label>
-        <input type="password" name="password" required>
+<?php require __DIR__ . '/../layout/footer.php'; ?>

@@ -28,6 +28,10 @@ $tasks = $view->tasks ?? [];
                 <span class="badge badge-status-<?= e($task['status']) ?>">
                     <?= te($task['status']) ?>
                 </span>
+                 <span class="badge badge-priority-<?= e($task['work_order_priority']) ?>">
+                    <?= te($task['work_order_priority']) ?>
+                </span>
+               
             </div>
 
             <!-- TĚLO KARTY -->
@@ -62,15 +66,15 @@ $tasks = $view->tasks ?? [];
             <div class="card-footer">
                 <div class="actions">
 						
-                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
+                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id']) ?>" 
                        class="btn btn-secondary" 
                        title="Upravit úkol">
-                        ✏️ Upravit
+                        ✏️ Upravit úkol
                     </a>
                     <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Přidat report">
-                        📝 Report
+                        📝 Napsat Report
                     </a>
                 </div>
             </div>

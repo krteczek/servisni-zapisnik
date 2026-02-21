@@ -96,6 +96,11 @@ if ($user['password_hash'] === null) {
                    class="btn btn-secondary">
                     Upravit uživatele
                 </a>
+ 
+                <a href="<?= Url::to('/{tenant}/users/create') ?>/#main" class="btn btn-secondary">
+                    + Nový uživatel
+                </a>
+
 
                 <a href="<?= Url::to('/{tenant}/users') ?>/#main"
                    class="btn btn-secondary">
@@ -124,11 +129,6 @@ if ($user['password_hash'] === null) {
                 <strong>poslat nový aktivační email</strong>.
             </p>
 
-            <p style="margin-top:16px;">
-                <a href="<?= Url::to('/{tenant}/users/create') ?>/#main" class="btn btn-secondary" style="width:100%;">
-                    + Nový uživatel
-                </a>
-            </p>
         </div>
     </div>
 
