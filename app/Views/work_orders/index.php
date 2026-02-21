@@ -7,6 +7,7 @@ require __DIR__ . '/../layout/header.php';
 use App\Core\Url;
 
 $workOrders = $view->orders;
+//var_dump($workOrders);
 ?>
 <?= $css ?>
 
@@ -20,7 +21,7 @@ $workOrders = $view->orders;
                    title="Otevřít detail zakázky">
                     <?= e($wo['title']) ?>
                 </a></span>
-                <span class="badge badge-priority-<?= htmlspecialchars($wo['priority']) ?>">
+                <span class="badge badge-priority-<?= e($wo['priority']) ?>">
                     <?= te($wo['priority']) ?>
                 </span>
             </div>
@@ -30,12 +31,38 @@ $workOrders = $view->orders;
                 <div class="meta-list">
                     <div class="meta-item">
                         <span class="meta-label">Status</span>
-                        <span class="badge badge-status-<?= htmlspecialchars($wo['status']) ?>">
-                            <?= te($wo['status']) ?>
-                        </span>
+                        <span class="badge badge-status-<?= e($wo['status']) ?>"><?= te($wo['status']) ?></span>
                     </div>
                     <!-- Sem můžeš přidat další metadata, až budou -->
-                </div>
+                    <div class="meta-item">
+                       <span class="meta-label">Celkem úkolů: </span>
+                        <span class="meta-value"><?= e($wo['tasks_total']) ?></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Otevřených: </span>
+                        <span class="meta-value"><?= e($wo['tasks_open']) ?></span>
+                     </div>
+                    <div class="meta-item">
+                       <span class="meta-label">Uzavřených: </span>
+                        <span class="meta-value"><?= e($wo['tasks_done']) ?></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Zrušených: </span>
+                        <span class="meta-value"><?= e($wo['tasks_cancelled']) ?></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Napsáno reportů: </span>
+                        <span class="meta-value"><?= e($wo['reports_count']) ?></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Najeto: </span>
+                        <span class="meta-value"><?= e($wo['total_km']) ?></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Odpracováno: </span>
+                        <span class="meta-value"><?= e($wo['total_hours_formatted']) ?></span>
+                    </div>
+               </div>
             </div>
 
             <!-- PATIČKA KARTY -->
@@ -43,8 +70,8 @@ $workOrders = $view->orders;
                 <div class="actions">
                     <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id'] . '/detail/#main') ?>" 
                        class="btn btn-secondary" 
-                       title="Detail zakázky">
-                        🔍 Detail
+                       title="Detail zakázky, můžete přidat úkol k zakázce">
+                        🔍 Detail zakázky
                     </a>
                     <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id'] . '/edit/#main') ?>" 
                        class="btn btn-secondary" 

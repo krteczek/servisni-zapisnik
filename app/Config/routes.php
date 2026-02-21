@@ -12,6 +12,55 @@ use App\Controllers\SystemController;
 use App\Controllers\TaskController;
 return [
 
+
+/*
+|--------------------------------------------------------------------------
+| Registrace nového tenantu
+|--------------------------------------------------------------------------
+*/
+[
+    'method' => 'GET',
+    'path'   => '/register',
+    'action' => [AuthController::class, 'registrationStepOne'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/register',
+    'action' => [AuthController::class, 'registrationStepOne'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/register/check-email',
+    'action' => [AuthController::class, 'registrationStepOneSucces'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/register/complete',
+    'action' => [AuthController::class, 'registrationStepTwo'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/register/complete',
+    'action' => [AuthController::class, 'registrationStepTwoSucces'],
+    'auth'   => false,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/register/complete',
+    'action' => [AuthController::class, 'registrationStepTwo'],
+    'auth'   => false,
+],
+
+
 /*
 |--------------------------------------------------------------------------
 | ROOT + AUTH
@@ -123,7 +172,7 @@ return [
 | TASKY
 |--------------------------------------------------------------------------
 */
-
+// výpis tasků
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/tasks',
@@ -146,9 +195,11 @@ return [
 	'title'   => 'Úkoly > Přehled',
 ],
 */
+
+//přidání reportu
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/tasks/{id}/report',
+    'path'    => '/{tenant}/tasks/{taskId}/report',
     'action'  => [TaskController::class, 'addTaskReportGet'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
@@ -158,7 +209,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/{tenant}/tasks/{id}/report',
+    'path'    => '/{tenant}/tasks/{taskId}/report',
     'action'  => [TaskController::class, 'addTaskReportPost'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
@@ -166,19 +217,34 @@ return [
 	'title'   => 'Úkoly: Přidat report',
 ],
 
-
-
-
-
-
-
-
+//vytvoření samotného tasku při zakázce
 [
     'method' => 'POST',
     'path'   => '/{tenant}/tasks/create',
     'action' => [TaskController::class, 'create'],
     'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Přidat úkol',
 ],
+
+//úprava tasku:
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/tasks/{taskId}/edit',
+    'action' => [WorkOrderController::class, 'detailOrderEditTask'],
+    'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: upravit úkol',
+],
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/tasks/{taskId}/edit',
+    'action' => [WorkOrderController::class, 'detailOrderEditTask'],
+    'auth'   => true,
+    'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: upravit úkol',
+],
+
 
 [
     'method' => 'POST',
@@ -196,7 +262,7 @@ return [
 
 /*
 |--------------------------------------------------------------------------
-| ZAKÁZKY
+| ZAKÁZKY, index (výpis zakázek)
 |--------------------------------------------------------------------------
 */
 
@@ -211,6 +277,13 @@ return [
     'section' => 'workorders',
     'title'   => 'Zakázky: Přehled',
 ],
+
+
+/*
+|--------------------------------------------------------------------------
+| ZAKÁZKY, vytvoření zakázky: create
+|--------------------------------------------------------------------------
+*/
 
 [
     'method'  => 'GET',
@@ -231,16 +304,28 @@ return [
     'roles'  => ['admin', 'mistr', 'predak'],
 ],
 
+/*
+|--------------------------------------------------------------------------
+| ZAKÁZKY, Detail zakázky
+|--------------------------------------------------------------------------
+*/
+
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/work-orders/{orderId:\d+}/detail',
-    'action'  => [WorkOrderController::class, 'detail'],
+    'action'  => [WorkOrderController::class, 'detailOrder'],
     'auth'    => true,
-    'roles'   => ['admin', 'mistr', 'predak', 'monter'],
+    'roles'   => ['admin', 'mistr', 'predak'],
     'section' => 'workorders',
     'title'   => 'Zakázky: Detail',
 ],
 
+
+/*
+|--------------------------------------------------------------------------
+|  úprava zakázky
+|--------------------------------------------------------------------------
+*/ 
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/work-orders/{orderId:\d+}/edit',
@@ -258,6 +343,11 @@ return [
     'roles'   => ['admin', 'mistr', 'predak'],
 ],
 
+/*
+|--------------------------------------------------------------------------
+|  routy pro zavření Zakázky (done, canceled)
+|--------------------------------------------------------------------------
+*/
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/work-orders/{orderId:\d+}/close/canceled',
@@ -273,14 +363,12 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
 ],
-// routy pro přidání tasku k zakázce
-[
-    'method'  => 'POST',
-    'path'    => '/{tenant}/work-orders/{orderId:\d+}/tasks/create',
-    'action'  => [WorkOrderController::class, 'detail'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr', 'predak'],
-],
+
+/*
+|--------------------------------------------------------------------------
+|  routy pro zavření tasku k zakázce (done, canceled) Ještě možná budeme rušit/přesouvat
+|--------------------------------------------------------------------------
+*/
 
 [
     'method'  => 'POST',

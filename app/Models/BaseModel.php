@@ -299,8 +299,11 @@ abstract class BaseModel
         $sql = "SELECT * FROM {$this->tableName}
                 WHERE " . implode(' AND ', $parts) . "
                 LIMIT 1";
-
-        return $this->fetchOne($sql, $where);
+//var_dump($sql);
+			$ok = $this->fetchOne($sql, $where);
+//var_dump($ok);
+			
+        return $ok;
     }
 
     /* ==========================================================
@@ -450,6 +453,9 @@ abstract class BaseModel
      */
     protected function fetchAll(string $sql, array $params = []): array
     {
+	//var_dump($sql);
+	//var_dump($params);exit;
+
         $stmt = $this->db()->prepare($sql);
         $stmt->execute($params);
 
@@ -509,4 +515,17 @@ abstract class BaseModel
 
         return " AND {$col} = :" . $this->tenantColumn;
     }
+    
+    public function createWithTenant(int $tenantId, array $data): int
+{
+    if ($data === []) {
+        throw new LogicException('CreateWithTenant: empty data');
+    }
+
+    if ($this->tenantAware) {
+        $data[$this->tenantColumn] = $tenantId;
+    }
+
+    return $this->insertRaw($data);
+}
 }

@@ -7,7 +7,7 @@ use App\Core\Url;
 use App\Core\Csrf;
 
 $css = '';
-require __DIR__ . '/style.php';
+//require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
 
 $old    = $view->data ?? [];
@@ -44,6 +44,7 @@ $errors = $view->errors ?? [];
         <?php endif; ?>
 
         <div class="card-body">
+			<div class="form-container">
             <form method="post" action="">
                 <?= Csrf::getField() ?>
 
@@ -63,25 +64,23 @@ $errors = $view->errors ?? [];
                 </div>
 
                 <!-- BARVA TÝMU (speciální input) -->
-                <div class="form-group <?= isset($errors['color']) ? 'has-error' : '' ?>">
-                    <label for="color">Barva týmu</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="color"
-                               id="color"
-                               name="color"
-                               value="<?= e($old['color'] ?? '#2196F3') ?>"
-                               style="width: 60px; height: 40px; padding: 2px; border-radius: 6px; border: 1px solid #cfd6de; background: transparent; cursor: pointer;">
-                        <span style="color: #4b5563; font-size:0.9rem;">
-                            (vyber barvu pro označení týmů)
-                        </span>
-                    </div>
+					<div class="form-inline">
+					    <input type="color"
+					           id="color"
+					           name="color"
+					           value="<?= e($old['color'] ?? '#2196F3') ?>">
+					    <span class="meta-label-header">
+					        (vyber barvu pro označení týmů)
+					    </span>
+					</dniv>
+					<dinv>
                     <?php if (isset($errors['color'])): ?>
                         <span class="error-message"><?= e($errors['color']) ?></span>
                     <?php endif; ?>
                 </div>
 
                 <!-- FORMULÁŘOVÁ TLAČÍTKA -->
-                <div class="form-actions" style="margin-top: 32px;">
+                <div class="form-actions" style="margin-top: 32px;"><?= Csrf::getField() ?>
                     <button type="submit" class="btn btn-primary">
                         Vytvořit tým
                     </button>
@@ -95,8 +94,8 @@ $errors = $view->errors ?? [];
 
             </form>
         </div>
+       </div>
     </div>
-
     <!-- PRAVÝ SLOUPEC – NÁPOVĚDA -->
     <div class="card card-help" id="helpCard">
         <div class="card-body">
@@ -116,8 +115,8 @@ $errors = $view->errors ?? [];
 
             <h4>Tip</h4>
             <p>
-                Pokud týmy barevně odlišíš (např. modrá – elektro, zelená – voda,
-                červená – stavba), bude systém přehlednější.
+                Pokud týmy barevně odlišíš (např. červená – elektro, modrá – voda,
+                zelená – stavba), bude systém přehlednější.
             </p>
 
             <hr style="margin:20px 0; border:0; border-top:1px solid #e5e7eb;">
@@ -130,7 +129,8 @@ $errors = $view->errors ?? [];
                     sestoupil k nám a rozpadl se na jednotlivé úkoly.
                     Skrze splnění těchto úkolů (reporty o vykonané práci),
                     se Bůh, čili zakázka realizuje. Aby se úkoly mohly splnit,
-                    je potřeba (ještě stále) lidi – a ti pracují v týmech.
+                    je potřeba (ještě stále) lidi – a ti pracují v týmech. 
+                    Každý fotbalový tým má své barvy, buďt skromnější, stačí Vám jedna barva na tým.
                 </p>
             </details>
         </div>

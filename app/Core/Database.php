@@ -95,10 +95,21 @@ final class Database
      * @param string $dbName Název tenant databáze
      * @return void
      */
-    public static function useWorkDatabase(string $dbName): void
-    {
-        self::$currentWorkDb = $dbName;
-    }
+		public static function useWorkDatabase(string $dbName): void
+		{
+			if (!preg_match('/^[a-zA-Z0-9_]+$/', $dbName)) {
+			    throw new RuntimeException('Invalid database name.');
+			}
+		
+		
+		    if (!self::workDatabaseExists($dbName)) {
+		        throw new RuntimeException(
+		            "Tenant database '{$dbName}' does not exist."
+		        );
+		    }
+		
+		    self::$currentWorkDb = $dbName;
+		}
 
     /**
      * Legacy kompatibilita – vrátí aktuální work DB nebo admin DB.
@@ -161,10 +172,12 @@ final class Database
 
         } catch (PDOException $e) {
             // TODO: [OBSERVABILITY] Integrovat s externím monitoringem (Sentry, NewRelic)
-            Logger::error('DB connection failed', [
-                'key' => $key,
-                'exception' => $e,
-            ]);
+            Logger::instance()->error('DB connection failed', [
+					'key' => $key,
+					'exception' => $e->getMessage(),
+				]);
+
+
             throw new RuntimeException('Database connection failed.');
         }
 
@@ -189,4 +202,32 @@ final class Database
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
     }
+    
+    public static function workDatabaseExists(string $dbName): bool
+{
+    $cfg = Config::get('database.work');
+
+    $dsn = sprintf(
+        'mysql:host=%s;charset=utf8mb4',
+        $cfg['host']
+    );
+
+    try {
+        $pdo = new PDO($dsn, $cfg['user'], $cfg['password'], self::options());
+
+        $stmt = $pdo->prepare(
+            "SELECT SCHEMA_NAME
+             FROM INFORMATION_SCHEMA.SCHEMATA
+             WHERE SCHEMA_NAME = :name"
+        );
+
+        $stmt->execute(['name' => $dbName]);
+
+        return (bool) $stmt->fetch();
+
+    } catch (PDOException) {
+        return false;
+    }
+}
+
 }

@@ -156,7 +156,3 @@ details[open] summary {
     width: auto;
     margin: 0;
 }
-
-.card-body-teams {
-grid-template-columns: repeat(2, 1fr);
-}

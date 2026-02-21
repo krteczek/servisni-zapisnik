@@ -11,10 +11,27 @@ declare(strict_types=1);
  * @param string|null $text Text k escapování
  * @return string Escapovaný text (prázdný string pokud vstup je null)
  */
-function e(?string $text): string
+function e(mixed $value): string
 {
-    return htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8');
+    return match ($value) {
+        null => 'NULL',
+        false => 'FALSE',
+        true => 'TRUE',
+        default => htmlspecialchars(
+            (string)$value,
+            ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
+            'UTF-8'
+        )
+    };
 }
+
+// Přesně tohle dělá:
+e(null);        // "NULL"
+e(false);       // "FALSE"
+e(true);        // "TRUE"
+e(0);           // "0"
+e("");          // ""
+e("text");      // "text"
 
 /**
  * Formátuje hodnotu pro zobrazení v uživatelském rozhraní.
@@ -102,33 +119,86 @@ function formatCzDate(string $datetime): string
     );
 }
 
-function t(string $key): string
+function t(mixed $key): string
 {
-	
-	$statuses = [
-		'new' 			=> 'Nový',
-		'in_progress' 	=> 'Probíhá',
-		'done' 			=> 'Hotovo',
-		'canceled'		=> 'Zrušeno',
-		'open'			=> 'Otevřeno',
-		'normal'			=> 'Normální',
-		'high'			=> 'Vysoká',
-		'emergency'		=> 'Naléhavé',
-		'low'				=> 'Nízká',
-		'mistr'			=> 'Mistr',
-		'admin'			=> 'Admin',
-		'predak'			=> 'Předák',
-		'monter'			=> 'Montér',
-		'active'			=> 'Aktivní',
-		'inactive'		=> 'Neaktivní',
-		'pending'		=> 'Čeká...',
-		
-	];
-	$key = strtolower(trim($key));
-	return e($statuses[$key] ?? $key);
-}
+    if (!is_string($key)) {
+        return e((string)$key);
+    }
 
-function te(string $key): string
+    $statuses = [
+        'new'         => 'Nová',
+        'in_progress' => 'Probíhá',
+        'done'        => 'Hotovo',
+        'cancelled'   => 'Zrušeno',
+        'open'        => 'Otevřeno',
+        'normal'      => 'Normální',
+        'high'        => 'Vysoká',
+        'emergency'   => 'Naléhavé',
+        'low'         => 'Nízká',
+        'mistr'       => 'Mistr',
+        'admin'       => 'Admin',
+        'predak'      => 'Předák',
+        'monter'      => 'Montér',
+        'active'      => 'Aktivní',
+        'inactive'    => 'Neaktivní',
+        'pending'     => 'Čeká...',
+        'phone'       => 'Telefón',
+        'email'       => 'Email',
+        'personal'    => 'Osobně',
+        'system'      => 'Systém',
+    ];
+
+    $key = strtolower(trim($key));
+
+    return e($statuses[$key] ?? $key);
+}
+function te(mixed $key): string
 {
     return e(t($key));
 }
+
+/*
+	zjištění ip adresy
+	Příklad použití
+	
+	$clientIP = getClientIP();
+	echo "IP adresa klienta: " . htmlspecialchars($clientIP);
+
+*/
+
+function getClientIP(): string
+{
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+    return filter_var($ip, FILTER_VALIDATE_IP)
+        ? $ip
+        : '0.0.0.0';
+}
+
+function ipToBinary(string $ip): string
+{
+    $binary = @inet_pton($ip);
+
+    return $binary !== false ? $binary : inet_pton('0.0.0.0');
+}
+
+
+/*
+	zjištění useragenta adresy
+	Příklad použití
+$userAgent = getClientUserAgent();
+echo "User-Agent: " . $userAgent;
+
+
+*/
+function getClientUserAgent(): string
+{
+    if (!isset($_SERVER['HTTP_USER_AGENT'])) {
+        return 'Unknown';
+    }
+
+    // Omezíme délku kvůli DB a bezpečnosti
+    return mb_substr($_SERVER['HTTP_USER_AGENT'], 0, 255);
+}
+
+?>

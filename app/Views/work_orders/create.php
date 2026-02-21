@@ -55,10 +55,10 @@ $data = $view->data;
             <th><label for="source">Zdroj</label></th>
             <td>
                 <select id="source" name="source">
-                    <option value="email">Email</option>
-                    <option value="phone">Telefon</option>
-                    <option value="personal">Osobně</option>
-                    <option value="system">Systém</option>
+                    <option value="email"><?= te('email') ?></option>
+                    <option value="phone"><?= te('phone') ?></option>
+                    <option value="personal"><?= te('personal') ?></option>
+                    <option value="system"><?= te('system') ?></option>
                 </select>
             </td>
         </tr>

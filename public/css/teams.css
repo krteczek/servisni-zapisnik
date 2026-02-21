@@ -45,3 +45,45 @@
     flex-wrap: wrap;
     gap: 3px;
 }
+
+/* =====================================
+   TEAM EDIT – dual list layout
+===================================== */
+
+.team-dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+    .team-dual {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* jednotlivý řádek člena */
+.team-member-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.team-member-row .member-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.team-member-row select {
+    width: auto;
+    min-width: 110px;
+}
+
+.create-container--wide {
+  grid-template-columns: 2fr 1fr;
+}

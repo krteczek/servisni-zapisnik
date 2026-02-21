@@ -27,6 +27,7 @@
 
 .card-body {
   padding: 16px 18px;
+  flex: 1;
 }
 
 .card-footer {
@@ -52,3 +53,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.card-actions {
+  margin-top: auto; /* pojistka */
+}
+
