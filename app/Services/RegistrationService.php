@@ -60,70 +60,94 @@ final class RegistrationService
      * STEP 2 – dokončení registrace (POST)
      * ========================================================== */
 
-    public function complete(
-        string $token,
-        array $companyData,
-        array $adminData
-    ): void {
+ public function complete(
+    string $token,
+    array $companyData,
+    array $adminData
+): array {
 
-        $pdo = Database::admin();
-        $pdo->beginTransaction();
+    $pdo = Database::admin();
+    $pdo->beginTransaction();
 
-        try {
+    try {
 
-            $request = $this->validateToken($token);
-            /*
-             * 1️⃣ Vytvoření firmy (admin DB)
-             */
-            $dbName = Config::get('registrationWorkDbName');
-            
-            $slug = $this->generateSlug($companyData['name']); 
-            
-            print_r($companyData['ico']);
-            //print_r($slug);exit;
-            
-            $companyId = $this->companies->create([
-            			'slug' 			=> $slug, // musíme vygenerovat někde
-							'db_name' 		=> $dbName['registrationWorkDbName'],
-							'name' 			=> $companyData['name'],
-							'ico'  			=> $companyData['ico'],
-							'active' 		=> 1,
-							'created_at' 	=>  date('Y-m-d H:i:s'),//current_timestamp
-							'activated_at' =>  date('Y-m-d H:i:s'),
-            ]);
+        $request = $this->validateToken($token);
 
-            /*
-             * 2️⃣ Vytvoření admin uživatele
-             */
-            $this->users->createWithTenant($companyId,[
-                
-                'email'      			=> $request['email'],
-                'employee_number' 	=> 'admin',
-                'first_name' 			=> $adminData['first_name'],
-	             'last_name'  			=> $adminData['last_name'],
-                'password_hash'   			=> password_hash(
-                    								$adminData['password'],
-                    								PASSWORD_DEFAULT
-                									),
-                'global_role'       => 'admin',
-                'domain_admin'		=> 1,
-                'active'				=> 1,
-                'created_at'			=>  date('Y-m-d H:i:s'), //current_timestamp
-            ]);
-
-            /*
-             * 3️⃣ Smazání žádosti (token už nesmí existovat)
-             */
-            $this->requests->deleteById((int) $request['id']);
-
-            $pdo->commit();
-
-        } catch (\Throwable $e) {
+        if (!$request) {
             $pdo->rollBack();
-            throw $e;
+            return [
+                'ok' => false,
+                'error' => 'Neplatný nebo expirovaný token.'
+            ];
         }
+
+        /*
+         * 1️⃣ Vytvoření firmy
+         */
+        $dbName = Config::get('registrationWorkDbName');
+        $dbname = $dbName['registrationWorkDbName']['registrationWorkDbName'];
+        $slug = $this->generateSlug($companyData['name']);
+
+        $companyId = $this->companies->create([
+            'slug'          => $slug,
+            'db_name'       => $dbName['registrationWorkDbName'],
+            'name'          => $companyData['name'],
+            'ico'           => $companyData['ico'],
+            'active'        => 1,
+            'created_at'    => date('Y-m-d H:i:s'),
+            'activated_at'  => date('Y-m-d H:i:s'),
+        ]);
+
+        /*
+         * 2️⃣ Vytvoření admin uživatele
+         */
+        $userId = $this->users->createWithTenant($companyId, [
+            'email'           => $request['email'],
+            'employee_number' => 'admin',
+            'first_name'      => $adminData['first_name'],
+            'last_name'       => $adminData['last_name'],
+            'password_hash'   => password_hash(
+                $adminData['password'],
+                PASSWORD_DEFAULT
+            ),
+            'global_role'     => 'admin',
+            'domain_admin'    => 1,
+            'active'          => 1,
+            'created_at'      => date('Y-m-d H:i:s'),
+        ]);
+
+        /*
+         * 3️⃣ Smazání žádosti
+         */
+        $this->requests->deleteById((int) $request['id']);
+
+        $pdo->commit();
+			return [
+			    'ok' => true,
+			    'data' => [
+			        'user_id' => $userId,
+			        'email' => $request['email'],
+			        'company_id' => $companyId,
+			        'company_name' => $companyData['name'],
+			        'slug' => $slug,
+			        'first_name' => $adminData['first_name'],
+			        'last_name' => $adminData['last_name'],
+			        'global_role' => 'admin',
+			        'db_name' => $dbName,
+			    ]
+			];
+
+    } catch (\Throwable $e) {
+
+        $pdo->rollBack();
+
+        // Tohle je systémová chyba
+        return [
+            'ok' => false,
+            'error' => 'Registraci se nepodařilo dokončit. Zkuste to prosím znovu.'
+        ];
     }
-    
+}    
     /**
  * Pomocná metoda pro generování slugu
  */

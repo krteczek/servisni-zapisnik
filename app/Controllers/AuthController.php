@@ -84,7 +84,7 @@ public function login(): string
     if ($this->hasErrors()) {
         return $this->render('auth/login');
     }
-
+	
     /* ===== AUTH ===== */
 
     $companyModel = new \App\Models\CompanyModel();
@@ -128,7 +128,8 @@ public function login(): string
     Url::redirect($url);
 
 }
-    
+
+
 
     public function logout(): string
     {
@@ -417,12 +418,12 @@ public function registerFormPost()
 	
 	}
 	
-	public function registrationStepOneSucces()
+	public function registrationStepOneSucces(): string
 	{
 		return $this->render('auth/registrationStepOneSucces');
 	}
 	
-	public function registrationStepTwo()
+	public function registrationStepTwo(): string
 	{
 		$token = $_GET['token'] ?? null;
 		$data = [];
@@ -476,17 +477,11 @@ public function registerFormPost()
 			{
 				$this->addError('ico', 'IČO je povinné.');
 			} 
-			elseif (!preg_match('/^\d{8}$/', $data['ico'])) 
+			elseif (!preg_match('/^\d{' . self::ICO_LENGTH . '}$/', $data['ico'])) 
 			{
-				$this->addError('ico', 'IČO musí obsahovat 8 číslic.');
+				$this->addError('ico', 'IČO musí obsahovat ' . self::ICO_LENGTH . ' číslic.');
 			}
 			
-			if(mb_strlen($data['ico']) <> self::ICO_LENGTH) 
-			{
-				$this->addError('ico', 'IČO musí obsahovat 8 číslic.');
-			}
-
-
 			// --- FIRST NAME ---
 			if (empty(trim($data['first_name'] ?? '')))
 			{
@@ -534,18 +529,52 @@ public function registerFormPost()
 
 			// Pokud validace prošla:
 			// pokračujeme dál (model, transakce…)
+			/*
+                 'email'     => $request['email'],
+                'slug'      => $slug,
+                'password'  => $adminData['password'],
+        ];			
+			*/
 			$ok = (new RegistrationService($requests, $companies, $users))->complete($token, $companyData, $adminData);
-
+			if($ok['ok'] === true) 
+			{
+				//jdeme řešit přihlášení:
+				$data = $ok['data'];
+				print_r($data['db_name']['registrationWorkDbName']);exit;
+			    Auth::login([
+			        'id'           => $data['user_id'],
+			        'email'        => $data['email'],
+			        'global_role'  => 'admin',
+			        'company_id'   => $data['company_id'],
+			        'company_name' => $data['company_name'],
+			        'tenant_slug'  => $data['slug'],
+			        'first_name'   => $data['first_name'],
+			        'last_name'    => $data['last_name'],
+			        'db_name'      => $data['db_name']['registrationWorkDbName'],
+			    ]);
+			
+			    Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
+			    );
+			    $url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : '/tasks' );
+			    Url::redirect($url);
+			} 
+			else 
+			{
+				var_dump($ok);
+			}
 		}  
-		 $ok = (new RegistrationService($requests, $companies, $users))->validateToken($token);
-		if (!$token || !$ok) 
+		else 
 		{
-			// přesměrujeme na registraci znovu s Flash zprávou		    	
-			// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
-	    	Flash::error('Registrace trvala příliš dlouho, zkuste to prosím rychleji');
-			return Url::redirect('/register');
+			$ok = (new RegistrationService($requests, $companies, $users))->validateToken($token);
+			var_dump($ok);
+			if (!$token || !$ok) 
+			{
+				// přesměrujeme na registraci znovu s Flash zprávou		    	
+				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
+	    		Flash::error('Todo:Registrace trvala příliš dlouho, zkuste to prosím rychleji');
+				return Url::redirect('/register');
+			}
 		}
-
 		$data['token'] = $token;
 		//prozatím aby se mi to protáčelo
 		$this->view->data = $data;	

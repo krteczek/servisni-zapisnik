@@ -28,7 +28,7 @@ LoggerHolder::set(new Logger(__DIR__ . '/../storage/logs/app.log'));
 // Session
 // -------------------------------------------------
 Session::start();
-
+//var_dump($_SESSION);
 // -------------------------------------------------
 // ❗ PRVNÍ A NATVRDÉ PŘIPOJENÍ K DB = ADMIN
 // -------------------------------------------------
