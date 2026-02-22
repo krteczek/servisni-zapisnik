@@ -428,3 +428,40 @@
 [2026-02-21 23:12:38] error: Router exception
 [2026-02-21 23:16:47] error: Router exception
 [2026-02-21 23:16:48] error: Router exception
+[2026-02-22 00:39:52] error: Router exception
+[2026-02-22 00:39:52] critical: 
+	message: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, array given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Core/Controller.php on line 45
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Core/Database.php
+	line: 98
+[2026-02-22 00:47:16] error: Router exception
+[2026-02-22 00:47:16] critical: 
+	message: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, array given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Core/Controller.php on line 45
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Core/Database.php
+	line: 98
+[2026-02-22 00:47:17] error: Router exception
+[2026-02-22 00:47:17] critical: 
+	message: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, array given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Core/Controller.php on line 45
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Core/Database.php
+	line: 98
+[2026-02-22 01:01:40] error: Router exception
+[2026-02-22 01:01:40] critical: 
+	message: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, array given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Core/Controller.php on line 45
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Core/Database.php
+	line: 98
+[2026-02-22 01:03:24] error: Router exception
+[2026-02-22 01:03:24] critical: 
+	message: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, array given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Core/Controller.php on line 45
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Core/Database.php
+	line: 98
+[2026-02-22 01:05:36] error: Router exception
+[2026-02-22 01:05:36] critical: 
+	message: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, array given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Core/Controller.php on line 45
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Core/Database.php
+	line: 98
+[2026-02-22 01:05:38] error: Router exception
+[2026-02-22 01:05:38] critical: 
+	message: App\Core\Database::useWorkDatabase(): Argument #1 ($dbName) must be of type string, array given, called in /opt/lampp/htdocs/servisni-zapisnik/app/Core/Controller.php on line 45
+	file: /opt/lampp/htdocs/servisni-zapisnik/app/Core/Database.php
+	line: 98
+[2026-02-22 01:08:16] error: Router exception
+[2026-02-22 01:13:20] error: Router exception
