@@ -98,7 +98,7 @@ padding: 14px;
 </style>
 <div class="task-box">
                 <a class="btn btn-primary"
-							href="<?= Url::to('/{tenant}/tasks/create-to/' . $order['id'] . '/#main') ?>">
+							href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create/#main') ?>">
 							Přidat nový úkol k této zakázce
 					</a>
 

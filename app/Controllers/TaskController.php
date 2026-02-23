@@ -23,13 +23,67 @@ public function index(): string
     return $this->render('tasks/index');
 }
 
-    public function createForm(?int $orderId = null): string
+    public function createFormGet(?int $orderId = null): string
     {
-        $this->view->orderId = $orderId;
-        return $this->render('tasks/create');
+    		$order = $this->getOrderOrRedirect($orderId);
+    		
+			$taskModel = new TaskModel();
+			$tasks = $taskModel->forWorkOrderWithStats($orderId);
+	
+			$teamModel = new TeamModel();
+			$teams = $teamModel->byActive(true);
+	
+			$this->view->order = $order;
+			$this->view->tasks = $tasks;
+			$this->view->teams = $teams;
+	    
+		
+			// data formuláře (pro sticky input / chyby)
+			$this->view->taskFormData   = $this->view->taskFormData   ?? [];
+			$this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
+	
+			return $this->render('tasks/create');
+    }
+private function getOrderOrRedirect(int $orderId): array
+{
+    if ($orderId <= 0) {
+        Url::redirect('/{tenant}/work-orders');
     }
 
-    public function create(): string
+    $order = (new workOrderModel())->find($orderId);
+
+    if (!$order) {
+        Flash::error('Zakázka neexistuje');
+        Url::redirect('/{tenant}/work-orders');
+    }
+
+    return $order;
+}
+
+
+
+	private function setViewForDetail(int $orderId): void
+	{
+	    $order = $this->getOrderOrRedirect($orderId);
+	
+	    $taskModel = new TaskModel();
+	    $tasks = $taskModel->forWorkOrderWithStats($orderId);
+	
+	    $teamModel = new TeamModel();
+	    $teams = $teamModel->byActive(true);
+	
+	    $this->view->order = $order;
+	    //$this->view->tasks = $tasks;
+	    $this->view->teams = $teams;
+	    
+		
+	    // data formuláře (pro sticky input / chyby)
+	    $this->view->taskFormData   = $this->view->taskFormData   ?? [];
+	    $this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
+	
+	}
+
+    public function createFormPost(?int $orderId): string
     {/*
 $order = $workOrderModel->find($orderId);
 
@@ -43,8 +97,8 @@ if (!$workOrderModel->canAddTask($order)) {
 			
         $title 			= trim($data['title'] ?? '');
         $description 	= trim($data['description'] ?? '');
-        $team_id 			= (int) data['team_id'];
-        $work_order_id	= (int) data['work_order_id'];
+        $team_id 			= (int) $data['team_id'];
+        $work_order_id	= (int) $data['work_order_id'];
         
         
         
@@ -86,7 +140,6 @@ if (!$workOrderModel->canAddTask($order)) {
         ]);
 
         Url::redirect('/dashboard');
-        exit;
     }
 	// ověří existenci tasku, pokud existuje, vrátí jeho hodnoty, jinak redirect
 	private function getTaskOrRedirect(int $taskId): array

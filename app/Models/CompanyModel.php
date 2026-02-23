@@ -112,4 +112,14 @@ final class CompanyModel extends BaseModel
         'activated_at' => date('Y-m-d H:i:s'),
     ]);
 }
+
+public function existsByIco(string $ico): bool
+{
+    $sql = "SELECT 1 FROM companies WHERE ico = :ico LIMIT 1";
+    
+    $stmt = $this->db()->prepare($sql);
+    $stmt->execute(['ico' => $ico]);
+    
+    return (bool) $stmt->fetchColumn();
+}
 }

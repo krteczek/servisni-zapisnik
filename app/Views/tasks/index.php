@@ -11,8 +11,8 @@ $tasks = $view->tasks ?? [];
 
 <?php if (empty($tasks)): ?>
     <div class="ui-alert ui-alert-warning">
-        <strong>Žádné úkoly</strong>
-        <p>Zatím zde není žádný úkol. Nový úkol vytvoříte <a href="<?= Url::to('/{tenant}/tasks/create/#main') ?>">zde</a>.</p>
+        <strong>Nemáte žádné úkoly</strong>
+        <p>Zatím zde není žádný úkol. Nové úkoly můžete vytvořit vždy jen u <a href="<?= Url::to('/{tenant}/work-orders/#main') ?>">zakázek</a>.</p>
     </div>
 <?php else: ?>
 

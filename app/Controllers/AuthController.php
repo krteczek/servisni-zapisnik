@@ -433,7 +433,11 @@ public function registerFormPost()
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 		{
-			$token = $_POST['token'] ?? null;
+			$data = array_map(
+					fn($value) => is_string($value) ? trim($value) : $value,
+					$_POST
+					);
+			$token = $data['token'] ?? null;
 			if (!$token || !(new RegistrationService($requests, $companies, $users))->validateToken($token)) 
 			{
 				// přesměrujeme na registraci znovu s Flash zprávou		    	
@@ -444,10 +448,6 @@ public function registerFormPost()
 		    
 		    //return this->render('auth/register-step-two');
 
-			$data = array_map(
-					fn($value) => is_string($value) ? trim($value) : $value,
-					$_POST
-					);
 			$this->checkCsrf();
     
 			//odstranění mezer mezi čísly
@@ -480,6 +480,12 @@ public function registerFormPost()
 			elseif (!preg_match('/^\d{' . self::ICO_LENGTH . '}$/', $data['ico'])) 
 			{
 				$this->addError('ico', 'IČO musí obsahovat ' . self::ICO_LENGTH . ' číslic.');
+			} 
+			//ověření neexistence iča v db (unikátní číslo v databázi)
+			//vrací true když existuje
+			elseif($companies->existsByIco($data['ico']))
+			{
+				$this->addError('ico', 'Firma s tímto IČO je již registrovaná');
 			}
 			
 			// --- FIRST NAME ---
@@ -540,7 +546,7 @@ public function registerFormPost()
 			{
 				//jdeme řešit přihlášení:
 				$data = $ok['data'];
-				print_r($data['db_name']['registrationWorkDbName']);exit;
+				//print_r($data['db_name']['registrationWorkDbName']);
 			    Auth::login([
 			        'id'           => $data['user_id'],
 			        'email'        => $data['email'],
@@ -550,23 +556,24 @@ public function registerFormPost()
 			        'tenant_slug'  => $data['slug'],
 			        'first_name'   => $data['first_name'],
 			        'last_name'    => $data['last_name'],
-			        'db_name'      => $data['db_name']['registrationWorkDbName'],
+			        'db_name'      => $data['db_name'],
 			    ]);
 			
-			    Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
+			    Flash::success('Vítej v aplikaci, ' . ($data['first_name'] ?? $data['email']) . ' 👋'
 			    );
-			    $url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : '/tasks' );
+			    $url = '/' . Auth::tenantSlug() . '/tasks';
 			    Url::redirect($url);
 			} 
 			else 
 			{
 				var_dump($ok);
+				$this->addError('global', 'Litujeme, Váš účet se nepodařilo vytvořit. Zkuste to prosím za chvíli znovu.');
 			}
 		}  
 		else 
 		{
 			$ok = (new RegistrationService($requests, $companies, $users))->validateToken($token);
-			var_dump($ok);
+			//var_dump($ok);
 			if (!$token || !$ok) 
 			{
 				// přesměrujeme na registraci znovu s Flash zprávou		    	
