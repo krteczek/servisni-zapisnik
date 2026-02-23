@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Počítač: localhost
--- Vytvořeno: Pon 23. úno 2026, 02:42
+-- Vytvořeno: Pon 23. úno 2026, 22:21
 -- Verze serveru: 10.4.28-MariaDB
 -- Verze PHP: 8.2.4
 
@@ -61,7 +61,8 @@ INSERT INTO `audit_logs` (`id`, `company_id`, `user_id`, `user_email`, `action`,
 (1, 2, 3, 'admin@local.cz', 'update', 'users', 4, '{\"active\":{\"from\":0,\"to\":1}}', '127.0.0.1', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-02-20 21:06:35'),
 (2, 2, 3, 'admin@local.cz', 'update', 'users', 4, '{\"active\":{\"from\":1,\"to\":0}}', '127.0.0.1', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-02-20 21:07:04'),
 (3, 15, 46, 'novak@novak.cz', 'insert', 'companies', 16, '{\"slug\":{\"from\":null,\"to\":\"novak-sro-1\"},\"db_name\":{\"from\":null,\"to\":\"work\"},\"name\":{\"from\":null,\"to\":\"Nov\\u00e1k s.r.o.\"},\"ico\":{\"from\":null,\"to\":\"77777779\"},\"active\":{\"from\":null,\"to\":1},\"activated_at\":{\"from\":null,\"to\":\"2026-02-22 11:26:50\"}}', '127.0.0.1', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/6.8.3 Chrome/122.0.0.0 Safari/537.36', '2026-02-22 11:26:50'),
-(4, 15, 46, 'novak@novak.cz', 'insert', 'users', 47, '{\"email\":{\"from\":null,\"to\":\"jan@novak.sk\"},\"employee_number\":{\"from\":null,\"to\":\"admin\"},\"first_name\":{\"from\":null,\"to\":\"Nov\\u00e1k\"},\"last_name\":{\"from\":null,\"to\":\"Jan\"},\"global_role\":{\"from\":null,\"to\":\"admin\"},\"domain_admin\":{\"from\":null,\"to\":1},\"active\":{\"from\":null,\"to\":1},\"company_id\":{\"from\":null,\"to\":16}}', '127.0.0.1', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/6.8.3 Chrome/122.0.0.0 Safari/537.36', '2026-02-22 11:26:50');
+(4, 15, 46, 'novak@novak.cz', 'insert', 'users', 47, '{\"email\":{\"from\":null,\"to\":\"jan@novak.sk\"},\"employee_number\":{\"from\":null,\"to\":\"admin\"},\"first_name\":{\"from\":null,\"to\":\"Nov\\u00e1k\"},\"last_name\":{\"from\":null,\"to\":\"Jan\"},\"global_role\":{\"from\":null,\"to\":\"admin\"},\"domain_admin\":{\"from\":null,\"to\":1},\"active\":{\"from\":null,\"to\":1},\"company_id\":{\"from\":null,\"to\":16}}', '127.0.0.1', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/6.8.3 Chrome/122.0.0.0 Safari/537.36', '2026-02-22 11:26:50'),
+(5, 2, 3, 'admin@local.cz', 'update', 'users', 4, '{\"global_role\":{\"from\":\"mistr\",\"to\":\"predak\"},\"active\":{\"from\":0,\"to\":1}}', '127.0.0.1', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-02-23 14:14:07');
 
 -- --------------------------------------------------------
 
@@ -179,10 +180,11 @@ CREATE TABLE `team_memberships` (
 INSERT INTO `team_memberships` (`id`, `company_id`, `user_id`, `team_id`, `role_in_team`, `valid_from`, `valid_to`) VALUES
 (1, 2, 4, 3, 'member', '2026-02-18', '2026-02-20'),
 (2, 2, 3, 3, 'member', '2026-02-18', '2026-02-20'),
-(3, 2, 3, 4, 'member', '2026-02-18', NULL),
+(3, 2, 3, 4, 'member', '2026-02-18', '2026-02-23'),
 (4, 2, 4, 4, 'leader', '2026-02-18', NULL),
-(5, 2, 4, 3, 'member', '2026-02-20', NULL),
-(6, 2, 3, 3, 'member', '2026-02-20', NULL);
+(5, 2, 4, 3, 'member', '2026-02-20', '2026-02-23'),
+(6, 2, 3, 3, 'member', '2026-02-20', NULL),
+(7, 2, 3, 4, 'member', '2026-02-23', '2026-02-23');
 
 -- --------------------------------------------------------
 
@@ -213,7 +215,7 @@ INSERT INTO `users` (`id`, `company_id`, `email`, `employee_number`, `telefon`, 
 (1, 1, 'admin@local.cz', 'A001', NULL, '$2y$10$DYqd3MaL1QlWftkhnnQfLu.wHZvlCggAC6VFUWe.DJCnwfDvP1y3u', 'Petr', 'Vaněk', 'admin', 1, 1, '2026-02-18 12:41:33'),
 (2, 1, 'mistr@acme.cz', 'A002', NULL, '$2y$10$DYqd3MaL1QlWftkhnnQfLu.wHZvlCggAC6VFUWe.DJCnwfDvP1y3u', 'Petr', 'Svoboda', 'mistr', 0, 0, '2026-02-18 12:41:33'),
 (3, 2, 'admin@local.cz', 'B001', NULL, '$2y$10$DYqd3MaL1QlWftkhnnQfLu.wHZvlCggAC6VFUWe.DJCnwfDvP1y3u', 'Lucie', 'Dvořáková', 'admin', 1, 1, '2026-02-18 12:41:33'),
-(4, 2, 'mistr@beta.cz', 'B002', NULL, '$2y$10$DYqd3MaL1QlWftkhnnQfLu.wHZvlCggAC6VFUWe.DJCnwfDvP1y3u', 'Karel', 'Černý', 'mistr', 0, 0, '2026-02-18 12:41:33'),
+(4, 2, 'mistr@beta.cz', 'B002', NULL, '$2y$10$DYqd3MaL1QlWftkhnnQfLu.wHZvlCggAC6VFUWe.DJCnwfDvP1y3u', 'Karel', 'Černý', 'predak', 0, 1, '2026-02-18 12:41:33'),
 (38, 5, 'pirati@pirati.cz', 'admin', NULL, '$2y$10$Zx4TmbndMLC0aSwl9TEdy.EiGxZ/tIhK3FlqXWjn2xBp48ImiEZea', 'Petr', 'VAněk', 'admin', 1, 1, '2026-02-21 23:00:42'),
 (39, 6, 'krtek@bb.bb', 'admin', NULL, '$2y$10$ctnTgirqIPWptHxZaoGQWe7fo6nuIuv0ees9lGQXT2h.NWJkJYL82', 'yxcy', 'ycyxcyxvd', 'admin', 1, 1, '2026-02-21 23:23:29'),
 (40, 7, 'honza@primula.cz', 'admin', NULL, '$2y$10$OID/lxTqoIfWDssWft4SPeqheaEMwMRgL1cEM.LNYLBn.oFyr8apS', 'pirát', 'pirátská', 'admin', 1, 1, '2026-02-22 00:39:52'),
@@ -316,7 +318,7 @@ ALTER TABLE `access_logs`
 -- AUTO_INCREMENT pro tabulku `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT pro tabulku `auth_tokens`
@@ -346,7 +348,7 @@ ALTER TABLE `teams`
 -- AUTO_INCREMENT pro tabulku `team_memberships`
 --
 ALTER TABLE `team_memberships`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT pro tabulku `users`
