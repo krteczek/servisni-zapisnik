@@ -39,6 +39,7 @@ $errors = $view->errors ?? [];
                       data-lpignore="true">
 
                     <?= Csrf::getField() ?>
+                    
 							<input type="hidden" name="token" value="<?= e($old['token'] ?? '') ?>">
                     <h3>Firma</h3>
 

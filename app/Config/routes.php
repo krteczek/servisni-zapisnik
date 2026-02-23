@@ -199,7 +199,7 @@ return [
 //přidání reportu
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/tasks/{taskId}/report',
+    'path'    => '/{tenant}/tasks/{taskId:\d+}/report',
     'action'  => [TaskController::class, 'addTaskReportGet'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
@@ -209,7 +209,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/{tenant}/tasks/{taskId}/report',
+    'path'    => '/{tenant}/tasks/{taskId:\d+}/report',
     'action'  => [TaskController::class, 'addTaskReportPost'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
@@ -218,10 +218,20 @@ return [
 ],
 
 //vytvoření samotného tasku při zakázce
+//vytvoření samotného tasku při zakázce
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/work-orders/{orderId:\d+}/tasks/create',
+    'action' => [TaskController::class, 'createFormGet'],
+    'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Přidat úkol',
+],
+
 [
     'method' => 'POST',
-    'path'   => '/{tenant}/tasks/create',
-    'action' => [TaskController::class, 'create'],
+    'path'   => '/{tenant}/work-orders/{orderId:\d+}/tasks/create',
+    'action' => [TaskController::class, 'createFormPost'],
     'auth'   => true,
 	'roles'   => ['admin', 'mistr'],
 	'title'   => 'Úkoly: Přidat úkol',
@@ -230,7 +240,7 @@ return [
 //úprava tasku:
 [
     'method' => 'GET',
-    'path'   => '/{tenant}/tasks/{taskId}/edit',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/edit',
     'action' => [WorkOrderController::class, 'detailOrderEditTask'],
     'auth'   => true,
 	'roles'   => ['admin', 'mistr'],
@@ -238,7 +248,7 @@ return [
 ],
 [
     'method' => 'POST',
-    'path'   => '/{tenant}/tasks/{taskId}/edit',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/edit',
     'action' => [WorkOrderController::class, 'detailOrderEditTask'],
     'auth'   => true,
     'roles'   => ['admin', 'mistr'],
@@ -299,7 +309,7 @@ return [
 [
     'method' => 'POST',
     'path'   => '/{tenant}/work-orders/create',
-    'action' => [WorkOrderController::class, 'create'],
+    'action' => [WorkOrderController::class, 'createformStore'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr', 'predak'],
 ],
@@ -329,7 +339,7 @@ return [
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/work-orders/{orderId:\d+}/edit',
-    'action'  => [WorkOrderController::class, 'edit'],
+    'action'  => [WorkOrderController::class, 'editForm'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak'],
     'section' => 'workorders',
@@ -338,7 +348,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/work-orders/{orderId:\d+}/edit',
-    'action'  => [WorkOrderController::class, 'update'],
+    'action'  => [WorkOrderController::class, 'editFormUpdate'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak'],
 ],

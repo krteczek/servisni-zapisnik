@@ -84,13 +84,12 @@ final class RegistrationService
         /*
          * 1️⃣ Vytvoření firmy
          */
-        $dbName = Config::get('registrationWorkDbName');
-        $dbname = $dbName['registrationWorkDbName']['registrationWorkDbName'];
+        $dbName = Config::get('registrationWorkDbName.registrationWorkDbName');
         $slug = $this->generateSlug($companyData['name']);
 
         $companyId = $this->companies->create([
             'slug'          => $slug,
-            'db_name'       => $dbName['registrationWorkDbName'],
+            'db_name'       => $dbName,
             'name'          => $companyData['name'],
             'ico'           => $companyData['ico'],
             'active'        => 1,
@@ -144,7 +143,7 @@ final class RegistrationService
         // Tohle je systémová chyba
         return [
             'ok' => false,
-            'error' => 'Registraci se nepodařilo dokončit. Zkuste to prosím znovu.'
+            'error' => 'Registraci se nepodařilo dokončit. Zkuste to prosím znovu. ' . $e
         ];
     }
 }    
