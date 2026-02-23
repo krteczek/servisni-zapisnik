@@ -36,12 +36,7 @@ public function index(): string
 			$this->view->order = $order;
 			$this->view->tasks = $tasks;
 			$this->view->teams = $teams;
-	    
-		
-			// data formuláře (pro sticky input / chyby)
-			$this->view->taskFormData   = $this->view->taskFormData   ?? [];
-			$this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
-	
+	    	
 			return $this->render('tasks/create');
     }
 private function getOrderOrRedirect(int $orderId): array
@@ -49,15 +44,21 @@ private function getOrderOrRedirect(int $orderId): array
     if ($orderId <= 0) {
         Url::redirect('/{tenant}/work-orders');
     }
-
+		// máme tu čistý find (na basemodel), musíme ověřit, jestli je zakázka editovatelná.
     $order = (new workOrderModel())->find($orderId);
 
     if (!$order) {
         Flash::error('Zakázka neexistuje');
         Url::redirect('/{tenant}/work-orders');
     }
+	
+	if($order['status'] === 'new' || $order['status'] === 'in_progress') 
+	{
+		return $order;
+	}
+	Flash::error('Tato zakázka již byla ukončena a proto k ní nelze přidat nový úkol. Pokud je to nutné, lze zakázku přepnout do stavu ');
+	Url::redirect('/{tenant}/work-orders');
 
-    return $order;
 }
 
 
