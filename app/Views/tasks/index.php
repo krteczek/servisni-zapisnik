@@ -6,7 +6,7 @@ use App\Core\Url;
 require __DIR__ . '/../layout/header.php';
 
 $tasks = $view->tasks ?? [];
-//var_dump($tasks);
+var_dump($tasks);
 ?>
 
 <?php if (empty($tasks)): ?>
@@ -21,17 +21,14 @@ $tasks = $view->tasks ?? [];
         <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
-                <span class="card-title"><a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>"
+                <span class="card-title"><a href="<?= Url::to('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/tasks/' . (int)$task['id'] . '/edit/#main') ?>"
                    title="Upravit úkol">
                     <?= e($task['title']) ?>
                 </a></span>
                 <span class="badge badge-status-<?= e($task['status']) ?>">
                     <?= te($task['status']) ?>
                 </span>
-                 <span class="badge badge-priority-<?= e($task['work_order_priority']) ?>">
-                    <?= te($task['work_order_priority']) ?>
-                </span>
-               
+                
             </div>
 
             <!-- TĚLO KARTY -->
@@ -42,9 +39,10 @@ $tasks = $view->tasks ?? [];
                             <span class="meta-label">Zakázka</span>
                             <span class="meta-value">
                                 <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$task['work_order_id'] . '/detail/#main') ?>">
-                                    #<?= (int)$task['work_order_id'] ?>: <?= e($task['work_order_name']) ?>
+                                    #<?= (int)$task['work_order_id'] ?>: <?= e($task['work_order_title']) ?>
                                 </a>
                             </span>
+            
                         </div>
                     <?php endif; ?>
 							<div class="meta-item">

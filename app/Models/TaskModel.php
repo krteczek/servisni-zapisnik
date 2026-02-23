@@ -169,10 +169,126 @@ public function getStatsForTasks(array $taskIds): array
 }
 
 /**
- * Upravený forIndex, který používá samostatnou metodu pro statistiky
+ * Upravený forIndex,
  */
- 
-public function forIndex(): array
+ public function forIndex(?int $filterUserId = null): array
+{
+    $companyId = Auth::companyId();
+    $userId    = Auth::id();
+    $role      = Auth::role();
+
+    $params = [
+        'company_id' => $companyId,
+        'status'     => 'open',
+    ];
+		$sql = "
+		    SELECT 
+		        t.*,
+		
+		        -- zakázka
+		        w.title AS work_order_title,
+		        w.status AS work_order_status,
+		        w.priority AS work_order_priority,
+		
+		        -- tým
+		        tm.name AS team_name,
+		        tm.color AS team_color,
+		
+		        -- statistiky
+		        COALESCE(r.reports_count, 0) AS reports_count,
+		        COALESCE(r.total_minutes, 0) AS total_minutes,
+		        COALESCE(r.total_km, 0) AS total_km
+		
+		    FROM tasks t
+		
+		    LEFT JOIN work_orders w 
+		        ON w.id = t.work_order_id 
+		        AND w.company_id = :company_id_work_order
+		
+		    LEFT JOIN admin.teams tm
+		        ON tm.id = t.team_id
+		        AND tm.company_id = :company_id_team
+		
+		    LEFT JOIN (
+            SELECT
+                ta.task_id,
+                COUNT(*) AS reports_count,
+                SUM(ta.kilometers) AS total_km,
+                SUM(
+                    ta.minutes_spent +
+                    COALESCE((
+                        SELECT SUM(tap.minutes_spent)
+                        FROM task_assignment_participants tap
+                        WHERE tap.assignment_id = ta.id
+                    ), 0)
+                ) AS total_minutes
+            FROM task_assignments ta
+            WHERE ta.company_id = :company_id_reports
+            GROUP BY ta.task_id
+        ) r ON r.task_id = t.id
+
+        WHERE 
+            t.company_id = :company_id
+            AND t.status = :status
+    ";
+
+		$params['company_id_reports'] = $companyId;
+		$params['company_id_work_order'] = $companyId;
+		$params['company_id_team'] = $companyId;
+
+    /*
+     * ADMIN / MISTR
+     */
+    if (in_array($role, ['admin', 'mistr'], true)) {
+
+        if ($filterUserId !== null) {
+            $sql .= " AND t.created_by_user_id = :filter_user_id";
+            $params['filter_user_id'] = $filterUserId;
+        } else {
+            $sql .= " AND t.created_by_user_id = :current_user_id";
+            $params['current_user_id'] = $userId;
+        }
+
+        $sql .= " ORDER BY t.id DESC";
+    }
+
+    /*
+     * PŘEDÁK / MONTÉR
+     */
+    else {
+
+        $teamIds = Auth::teamIds(); // pole ID týmů
+
+        if (empty($teamIds)) {
+            return [];
+        }
+
+        $placeholders = [];
+        foreach ($teamIds as $i => $teamId) {
+            $key = "team_$i";
+            $placeholders[] = ":$key";
+            $params[$key] = $teamId;
+        }
+
+        $sql .= " AND t.team_id IN (" . implode(',', $placeholders) . ")";
+        $sql .= " ORDER BY t.id DESC";
+    }
+
+    $tasks = $this->fetchAll($sql, $params);
+
+    /*
+     * Formátování hodin
+     */
+    foreach ($tasks as &$task) {
+        $task['total_minutes'] = (int)$task['total_minutes'];
+        $task['total_hours_formatted'] =
+            floor($task['total_minutes'] / 60) . 'h ' .
+            ($task['total_minutes'] % 60) . 'm';
+    }
+
+    return $tasks;
+}
+public function forIndexOld(): array
 {
     $userId    = Auth::id();
     $role      = Auth::role();
