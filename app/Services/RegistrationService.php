@@ -17,7 +17,9 @@ final class RegistrationService
     public function __construct(
         private RegistrationRequestModel $requests,
         private CompanyModel $companies,
-        private UserModel $users
+        private UserModel $users,
+        private TaskModel $tasks,
+        private WorkOrderModel $orders
     ) {}
 
     /* ==========================================================
@@ -115,12 +117,112 @@ final class RegistrationService
             'created_at'      => date('Y-m-d H:i:s'),
         ]);
 
+
         /*
-         * 3️⃣ Smazání žádosti
+         * 3 Vytvoření první defaultní zakázky. Ta slouží jako ukázka a 
+         * zároven pro úkoly čistě firemního charakteru.
+         * company_id, title, description, source, priority, status, created_by_user_id, is_system
+         */
+         
+         
+$description1 = <<<TXT
+Interní práce jsou běžné práce pro fungování samotné firmy.
+Například čas strávený vytvořením účtu v našem systému a seznámení se s ním, 
+se dá považovat za režijní náklad firmy.
+K téhle zakázce je systémem vytvořeno několik prvních úkolů.
+<<<TXT;         
+				$WOID = $this->orders->createWithTenant($companyId, [
+
+    'title' => 'Režie firmy',
+    'description' => $description1,
+    'source' => 'system',
+    'priority' => 'normal',
+    'status' => 'in_progress',
+    'created_by_user_id' => $userId,
+    'is_system' => 1,
+]);
+
+		/*
+		 *	vytvoření prvního defaultního týmu
+		 * name, color, active
+		 */
+		$TeamID = $this->teams->createWithTenant($companyId, [
+			'name' 	=> 'Základní tým',
+			'color' 	=> TeamController::getDefaultColor(),
+			'active'	=> 1
+		]);
+		 
+		 
+        /*
+         *  Vytvoření prvních úkolů k první defaultní zakázce. 
+         * tyto už bude možno dokončit běžným způsobem
+         * company_id, team_id, work_order_id, title, description, 
+         * source, priority, status, created_by_user_id
+         */
+				$description2 = <<<TXT
+Uživatelé s rolí Admin nebo Mistr mohou vytvářet a vidět všechny zakázky a úkoly.
+Mohou je i editovat a měnit stavy.
+Aby mohli k jednotlivým úkolům psát i reporty, čili výkazy práce, musí být součástí týmu, který má úkol na starosti.
+
+Uživatelé s rolí Předák nebo Montér vidí jen úkoly přiřazené týmu, jehož jsou součástí. K nim také mohou psát své reporty.
+Vaším prvním úkolem je tedy jít do části Týmy, najít "Základní tým", a přidat sám sebe do týmu.
+
+Teprve  poté můžete vypsat první report k tomuhle úkolu.
+
+A také tento úkol označit jako "dokončen".
+
+<<<TXT;
+				$TID1 = $this->tasks->createWithTenant($companyId, [
+    'team_id' 					=> $companyId,
+    'work_order_id'			=> $WOID
+    'title' 					=> 'Přidejte svůj účet do Základního týmu',
+    'description' 			=> $description2,
+    
+    'source' 					=> 'system',
+    'priority' 				=> 'normal',
+    'status' 					=> 'in_progress',
+    'created_by_user_id' 	=> $userId,
+    'is_system' => 1,
+]);
+
+				$description3 = <<<TXT
+Uživatelé s rolí Admin nebo Mistr mohou vytvářet a vidět všechny zakázky a úkoly.
+Mohou je i editovat a měnit stavy.
+Aby mohli k jednotlivým úkolům psát i reporty, čili výkazy práce, musí být součástí týmu, který má úkol na starosti.
+
+Uživatelé s rolí Předák nebo Montér vidí jen úkoly přiřazené týmu, jehož jsou součástí. K nim také mohou psát své reporty.
+Vaším prvním úkolem je tedy jít do části Týmy, najít "Základní tým", a přidat sebe do týmu.
+
+
+
+<<<TXT;
+				$TID1 = $this->tasks->createWithTenant($companyId, [
+    'team_id' 					=> $companyId,
+    'work_order_id'			=> $WOID
+    'title' 					=> '',
+    'description' 			=> $description,
+    
+    'source' 					=> 'system',
+    'priority' 				=> 'normal',
+    'status' 					=> 'in_progress',
+    'created_by_user_id' 	=> $userId,
+
+]);
+
+
+        /*
+         *  Smazání žádosti
          */
         $this->requests->deleteById((int) $request['id']);
-
+			
+			/* 
+			 *	Dokončíme transakci
+			*/
         $pdo->commit();
+
+			/* 
+			 *	vrátíme data pro první přihlášení
+			  */
 			return [
 			    'ok' => true,
 			    'data' => [

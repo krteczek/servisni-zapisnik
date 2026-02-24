@@ -337,15 +337,6 @@ public function login(): string
         }
     }
     
-	public function registerFormGet() {
-		
-		return $this->render('auth/create');
-    
-	}
-public function registerFormPost()
-{
-
-}
 
 	public function registrationStepOne()
 	{
@@ -430,7 +421,8 @@ public function registerFormPost()
 		 $requests = new RegistrationRequestModel();
 		 $companies = new CompanyModel();
 		 $users = new UserModel();
-
+		 $tasks = new TaskModel();
+		$orders = new WorkOrderModel();
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 		{
 			$data = array_map(
@@ -438,7 +430,14 @@ public function registerFormPost()
 					$_POST
 					);
 			$token = $data['token'] ?? null;
-			if (!$token || !(new RegistrationService($requests, $companies, $users))->validateToken($token)) 
+			$RegistrationService = (new RegistrationService(
+									RegistrationRequestModel: $requests, 
+									CompanyModel: $companies, 
+									UserModel: $users, 
+									TaskModel: $tasks,
+									WorkOrderModel: $orders
+									));
+			if (!$token || !$RegistrationService->validateToken($token))
 			{
 				// přesměrujeme na registraci znovu s Flash zprávou		    	
 				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
@@ -541,7 +540,7 @@ public function registerFormPost()
                 'password'  => $adminData['password'],
         ];			
 			*/
-			$ok = (new RegistrationService($requests, $companies, $users))->complete($token, $companyData, $adminData);
+			$ok = $RegistrationService->complete($token, $companyData, $adminData);
 			if($ok['ok'] === true) 
 			{
 				//jdeme řešit přihlášení:

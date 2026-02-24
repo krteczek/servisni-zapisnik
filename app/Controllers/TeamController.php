@@ -13,6 +13,9 @@ use App\Models\UserModel;
 
 final class TeamController extends Controller
 {
+		private const DEFAULT_COLOR = '#2196F3';
+		private const MAX_LENGHT_COLOR_NAME = 100;
+
     // TODO: [SECURITY] Po implementaci ACL přidat kontrolu oprávnění pro všechny metody tohoto controlleru.
     // TODO: [PERFORMANCE] Při více než 50 týmech zvážit přidání stránkování do metod `index()` a `inactive()`.
 
@@ -100,7 +103,7 @@ final class TeamController extends Controller
         $this->checkCsrf();
 
         $name  = trim($_POST['name'] ?? '');
-        $color = trim($_POST['color'] ?? '#2196F3');
+        $color = trim($_POST['color'] ?? self::DEFAULT_COLOR);
 
         if ($name === '') {
             Flash::error('Název týmu je povinný.');
@@ -195,8 +198,28 @@ final class TeamController extends Controller
         /* ===== ÚPRAVA NÁZVU / BARVY ===== */
         if (isset($_POST['name'], $_POST['color'])) {
             $name  = trim($_POST['name']);
-            $color = trim($_POST['color']);
-
+            $color = trim($_POST['color'] ?? self::DEFAULT_COLOR);
+				
+				if($name === '')
+				{
+					$this->addError('name', 'Název týmu je povinný.');
+				}
+				elseif(mb_strlen($name)>= self::MAX_LENGHT_COLOR_NAME) 
+				{
+					$this->addError('name', 'Název týmu je příliš dlouhý.');
+				}
+				
+				if($color === '')
+				{
+					$this->addError('color', 'Barva týmu je povinná.');
+				}
+				elseif(self::isValidHexColor($color))
+				{
+					//poslali nějaký nesmysl, dáme defaultní barvu
+					$color = self::DEFAULT_COLOR;
+				}
+				
+				
             if ($name !== '' && $color !== '') {
                 $teamModel->update($id, [
                     'name'  => $name,
@@ -289,4 +312,22 @@ final class TeamController extends Controller
 
         Url::redirect('/{tenant}/teams/#main');
     }
+    
+    /* helper pro ošetření vstupu barvy */
+	private function isValidHexColor($color) 
+	{
+		// 'i' modifikátor = case-insensitive
+		if (preg_match('/^#([0-9A-F]{3}|[0-9A-F]{6})$/i', $color)) 
+		{
+			return true;
+		}
+ 		return false;
+	}
+    
+   public static function getDefaultColor()
+   {
+   	return self::DEFAULT_COLOR;
+   } 
+    
+    
 }

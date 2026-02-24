@@ -6,8 +6,7 @@ use App\Core\Roles;
 use App\Core\Csrf;
 use App\Core\UserGuard;
 
-$css = '';
-//require __DIR__ . '/style.php';
+
 require __DIR__ . '/../layout/header.php';
 
 $old    = $view->old ?? [];
@@ -17,7 +16,7 @@ $fullName = trim(
     ($old['first_name'] ?? '') . ' ' . ($old['last_name'] ?? '')
 );
 ?>
-<?= $css ?>
+
 
 <!-- ===============================
      SAME ALERT – už máš, jen nechám
@@ -81,6 +80,7 @@ $fullName = trim(
                         <div class="form-static" style="padding:10px 12px; background:#f3f4f6; border-radius:8px;">
                             <?= e($old['email'] ?? '') ?>
                             <small style="display:block; color:#6c757d;">Email u tohoto účtu nelze změnit.</small>
+                            <input type="hidden" name="email"  value="<?= e($old['email'] ?? '') ?>">
                         </div>
                     <?php endif; ?>
                 </div>
@@ -135,7 +135,7 @@ $fullName = trim(
                 <div class="form-group">
                     <?php if (!UserGuard::isProtected($old)): ?>
 
-                        <label for="global_role">Role</label>
+                        <label for="global_role">Role: </label>
                         <select name="global_role" id="global_role" class="form-control">
                             <?php foreach ($view->roles as $key => $label): ?>
                                 <option value="<?= e($key) ?>"
@@ -158,8 +158,9 @@ $fullName = trim(
                     <?php else: ?>
 
                         <div class="form-static" style="padding:10px 12px; background:#f3f4f6; border-radius:8px;">
-                            <strong>Role:</strong> <?= e($old['global_role'] ?? '') ?><br>
-                            <small style="color:#6c757d;">Tento účet nelze upravovat ani deaktivovat.</small>
+                            <strong>Role: </strong><?= te($old['global_role'] ?? '') ?><br>
+                            <small style="color:#6c757d;">Toto je Hlavní administrátorský účet vašeho pracovního 
+                            prostoru. U tohoto účtu nelze změnit Email, roli uživatele, ani ho nelze deaktivovat.</small>
                         </div>
 
                     <?php endif; ?>
