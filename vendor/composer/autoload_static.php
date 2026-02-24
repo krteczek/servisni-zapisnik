@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInit2185d2f99bcd56787481d9357a5972d3
 {
     public static $prefixLengthsPsr4 = array (
+        'T' =>
+        array (
+            'Texy\\' => 5,
+        ),
         'P' =>
         array (
             'PHPMailer\\PHPMailer\\' => 20,
@@ -14,6 +18,10 @@ class ComposerStaticInit2185d2f99bcd56787481d9357a5972d3
     );
 
     public static $prefixDirsPsr4 = array (
+        'Texy\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/texy/texy/src/Texy',
+        ),
         'PHPMailer\\PHPMailer\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
@@ -22,6 +30,41 @@ class ComposerStaticInit2185d2f99bcd56787481d9357a5972d3
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Texy' => __DIR__ . '/..' . '/texy/texy/src/Texy.php',
+        'Texy\\BlockParser' => __DIR__ . '/..' . '/texy/texy/src/Texy/BlockParser.php',
+        'Texy\\Bridges\\Latte\\TexyExtension' => __DIR__ . '/..' . '/texy/texy/src/Bridges/Latte/TexyExtension.php',
+        'Texy\\Bridges\\Latte\\TexyNode' => __DIR__ . '/..' . '/texy/texy/src/Bridges/Latte/TexyNode.php',
+        'Texy\\Configurator' => __DIR__ . '/..' . '/texy/texy/src/Texy/Configurator.php',
+        'Texy\\HandlerInvocation' => __DIR__ . '/..' . '/texy/texy/src/Texy/HandlerInvocation.php',
+        'Texy\\Helpers' => __DIR__ . '/..' . '/texy/texy/src/Texy/Helpers.php',
+        'Texy\\HtmlElement' => __DIR__ . '/..' . '/texy/texy/src/Texy/HtmlElement.php',
+        'Texy\\Image' => __DIR__ . '/..' . '/texy/texy/src/Texy/Image.php',
+        'Texy\\LineParser' => __DIR__ . '/..' . '/texy/texy/src/Texy/LineParser.php',
+        'Texy\\Link' => __DIR__ . '/..' . '/texy/texy/src/Texy/Link.php',
+        'Texy\\Modifier' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modifier.php',
+        'Texy\\Module' => __DIR__ . '/..' . '/texy/texy/src/Texy/Module.php',
+        'Texy\\Modules\\BlockModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/BlockModule.php',
+        'Texy\\Modules\\BlockQuoteModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/BlockQuoteModule.php',
+        'Texy\\Modules\\EmoticonModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/EmoticonModule.php',
+        'Texy\\Modules\\FigureModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/FigureModule.php',
+        'Texy\\Modules\\HeadingModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/HeadingModule.php',
+        'Texy\\Modules\\HorizLineModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/HorizLineModule.php',
+        'Texy\\Modules\\HtmlModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/HtmlModule.php',
+        'Texy\\Modules\\HtmlOutputModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/HtmlOutputModule.php',
+        'Texy\\Modules\\ImageModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/ImageModule.php',
+        'Texy\\Modules\\LinkModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/LinkModule.php',
+        'Texy\\Modules\\ListModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/ListModule.php',
+        'Texy\\Modules\\LongWordsModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/LongWordsModule.php',
+        'Texy\\Modules\\ParagraphModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/ParagraphModule.php',
+        'Texy\\Modules\\PhraseModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/PhraseModule.php',
+        'Texy\\Modules\\ScriptModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/ScriptModule.php',
+        'Texy\\Modules\\TableCellElement' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/TableCellElement.php',
+        'Texy\\Modules\\TableModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/TableModule.php',
+        'Texy\\Modules\\TypographyModule' => __DIR__ . '/..' . '/texy/texy/src/Texy/Modules/TypographyModule.php',
+        'Texy\\Parser' => __DIR__ . '/..' . '/texy/texy/src/Texy/Parser.php',
+        'Texy\\Patterns' => __DIR__ . '/..' . '/texy/texy/src/Texy/Patterns.php',
+        'Texy\\Regexp' => __DIR__ . '/..' . '/texy/texy/src/Texy/Regexp.php',
+        'Texy\\Texy' => __DIR__ . '/..' . '/texy/texy/src/Texy/Texy.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

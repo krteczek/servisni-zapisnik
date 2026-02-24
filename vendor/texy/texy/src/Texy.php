@@ -1,0 +1,16 @@
+<?php declare(strict_types=1);
+
+/**
+ * Texy! is human-readable text to HTML converter (https://texy.nette.org)
+ *
+ * Copyright (c) 2004, 2014 David Grudl (https://davidgrudl.com)
+ */
+
+
+if (false) {
+	class Texy extends Texy\Texy
+	{
+	}
+} elseif (!class_exists(Texy::class)) {
+	class_alias(Texy\Texy::class, Texy::class);
+}

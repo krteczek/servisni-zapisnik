@@ -181,6 +181,128 @@ public function getStatsForTasks(array $taskIds): array
         'company_id' => $companyId,
         'status'     => 'open',
     ];
+
+    $sql = "
+        SELECT 
+            t.*,
+
+            -- zakázka
+            w.title AS work_order_title,
+            w.status AS work_order_status,
+            w.priority AS work_order_priority,
+
+            -- tým
+            tm.name AS team_name,
+            tm.color AS team_color,
+
+            -- statistiky
+            COALESCE(r.reports_count, 0) AS reports_count,
+            COALESCE(r.total_minutes, 0) AS total_minutes,
+            COALESCE(r.total_km, 0) AS total_km
+
+        FROM tasks t
+
+        LEFT JOIN work_orders w 
+            ON w.id = t.work_order_id 
+            AND w.company_id = :company_id_work_order
+
+        LEFT JOIN admin.teams tm
+            ON tm.id = t.team_id
+            AND tm.company_id = :company_id_team
+
+        LEFT JOIN (
+            SELECT
+                ta.task_id,
+                COUNT(*) AS reports_count,
+                COALESCE(SUM(ta.kilometers), 0) AS total_km,
+                COALESCE(SUM(
+                    ta.minutes_spent +
+                    COALESCE((
+                        SELECT SUM(tap.minutes_spent)
+                        FROM task_assignment_participants tap
+                        WHERE tap.assignment_id = ta.id
+                          AND tap.company_id = ta.company_id
+                    ), 0)
+                ), 0) AS total_minutes
+            FROM task_assignments ta
+            WHERE ta.company_id = :company_id_reports
+            GROUP BY ta.task_id
+        ) r ON r.task_id = t.id
+
+        WHERE 
+            t.company_id = :company_id
+            AND t.status = :status
+    ";
+
+    $params['company_id_reports']      = $companyId;
+    $params['company_id_work_order']   = $companyId;
+    $params['company_id_team']         = $companyId;
+
+    /*
+     * ADMIN / MISTR
+     */
+    if (in_array($role, ['admin', 'mistr'], true)) {
+
+        if ($filterUserId !== null) {
+            $sql .= " AND t.created_by_user_id = :filter_user_id";
+            $params['filter_user_id'] = $filterUserId;
+            $sql .= " ORDER BY t.id DESC";
+        } else {
+            $sql .= "
+                ORDER BY 
+                    (t.created_by_user_id = :current_user_id) DESC,
+                    t.id DESC
+            ";
+            $params['current_user_id'] = $userId;
+        }
+    }
+
+    /*
+     * PŘEDÁK / MONTÉR
+     */
+    else {
+
+        $sql .= "
+            AND EXISTS (
+                SELECT 1
+                FROM admin.team_user tu
+                WHERE tu.team_id = t.team_id
+                  AND tu.user_id = :current_user_id
+                  AND tu.company_id = :company_id_team_membership
+            )
+        ";
+
+        $params['current_user_id'] = $userId;
+        $params['company_id_team_membership'] = $companyId;
+
+        $sql .= " ORDER BY t.id DESC";
+    }
+
+    $tasks = $this->fetchAll($sql, $params);
+
+    /*
+     * Formátování hodin
+     */
+    foreach ($tasks as &$task) {
+        $task['total_minutes'] = (int)$task['total_minutes'];
+        $task['total_hours_formatted'] =
+            floor($task['total_minutes'] / 60) . 'h ' .
+            ($task['total_minutes'] % 60) . 'm';
+    }
+
+    return $tasks;
+}
+
+ public function forIndexOld1(?int $filterUserId = null): array
+{
+    $companyId = Auth::companyId();
+    $userId    = Auth::id();
+    $role      = Auth::role();
+
+    $params = [
+        'company_id' => $companyId,
+        'status'     => 'open',
+    ];
 		$sql = "
 		    SELECT 
 		        t.*,

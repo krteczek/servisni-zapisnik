@@ -100,7 +100,7 @@ final class UserController extends Controller
 	        );
 	
 	    } catch (\Throwable $e) {
-	var_dump($e);
+	//var_dump($e);
 	        // ideálně logovat $e
 	        Flash::error(
 	            'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
@@ -151,14 +151,26 @@ final class UserController extends Controller
             return $this->render('users/edit');
         }
 
-        $update = [
-            'email'           => strtolower(trim($data['email'])),
+        $arr1 = [
+            'telefon'			=> trim(trim($data['telefon'])),
             'employee_number' => trim($data['employee_number']),
             'first_name'      => trim($data['first_name']),
             'last_name'       => trim($data['last_name']),
-            'global_role'     => $data['global_role'],
-            'active'          => isset($data['active']) ? 1 : 0,
         ];
+        $arr2 = [];
+        //pokud není uživatel doménový Superadmin, povolíme editovat:
+        // email, globas_role s active
+			if (!UserGuard::isProtected($old)) 
+			{
+				$arr2 = [
+				'email'           => strtolower(trim($data['email'])),
+				'global_role'     => $data['global_role'],
+				'active'          => isset($data['active']) ? 1 : 0,
+				];
+				
+			}
+
+			$update = array_merge($arr1, $arr2);
 
         if ($this->users->update($id, $update)) {
             Flash::success('Data byla změněna.');
@@ -180,22 +192,39 @@ final class UserController extends Controller
 		  $telefon        = trim($data['telefon'] ?? '');
         $firstname      = trim($data['first_name'] ?? '');
         $lastname       = trim($data['last_name'] ?? '');
+        $role 				= trim($data['global_role'] ?? '');
 
         if ($firstname === '') {
-            $this->addError('first_name', 'Jméno je povinné.');
+            $this->addError('firstname', 'Jméno je povinné.');
+        } 
+        elseif (mb_strlen($firstname,'utf-8') >= self::MAX_FIRST_NAME_LENGTH)
+        {
+            $this->addError('firstname', 'Jméno je příliš dlouhé.');
         }
 
         if ($lastname === '') {
             $this->addError('last_name', 'Příjmení je povinné.');
         }
+        elseif (mb_strlen($lastname,'utf-8') > self::MAX_LAST_NAME_LENGTH)
+        {
+            $this->addError('last_name', 'Příjmení je příliš dlouhé.');
+        }
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->addError('email', 'Neplatný email.');
+            $this->addError('email', 'Email neodpovídá platnému formátu.');
         }
 
         if ($employeeNumber === '') {
             $this->addError('employee_number', 'Osobní číslo je povinné.');
         }
+        elseif (mb_strlen($employeeNumber,'utf-8') > self::MAX_LAST_NAME_LENGTH)
+        {
+            $this->addError('employee_number', 'Osobní číslo je příliš dlouhé.');
+        }
+			if(!Roles::exists($role))
+			{
+				$role = Roles::default();
+			}
     }
 
     /* =============================

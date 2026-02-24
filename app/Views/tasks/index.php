@@ -6,7 +6,7 @@ use App\Core\Url;
 require __DIR__ . '/../layout/header.php';
 
 $tasks = $view->tasks ?? [];
-var_dump($tasks);
+//var_dump($tasks);
 ?>
 
 <?php if (empty($tasks)): ?>
