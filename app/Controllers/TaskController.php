@@ -196,10 +196,11 @@ if (!$workOrderModel->canAddTask($order)) {
     }
  public function addTaskReportGet(int $taskId): string
 {
-    
-    //prostě zavoláme pomocnou metodu
-    return $this->addTaskReport($taskId);
-    //return $this->render('tasks/report');
+	//ověříme právo na přidání Reportu
+	self::canUserAddReportOrRedirect($taskId);
+	//má právo, zavoláme pomocnou metodu
+	return $this->addTaskReport($taskId);
+
 }   
 
 /**
@@ -207,6 +208,10 @@ if (!$workOrderModel->canAddTask($order)) {
  */
 public function addTaskReportPost(int $taskId): string
 {
+	//ověříme právo na přidání Reportu
+	self::canUserAddReportOrRedirect($taskId);
+	
+	//má právo, může dát Report
     $this->checkCsrf();
     $data = $_POST;
     // 1. Načti úkol
@@ -269,25 +274,6 @@ public function addTaskReportPost(int $taskId): string
 // 6. Uložení reportu i s účastníky
 $assignmentModel = new AssignmentModel();
 
-// Připravíme data pro účastníky
-/*
-$participantsData = [];
-foreach ($_POST['participants'] as $userId => $participantData) {
-    if (!empty($participantData['selected'])) {
-        $participantsData[$userId] = [
-            'selected' => true,
-            'hours' => $participantData['hours'] ?? 0,
-            'minutes' => $participantData['minutes'] ?? 0
-        ];
-    }
-}
-
-$data = [
-    'report' => $report,
-    'kilometers' => $kilometers,
-    'participants' => $participantsData
-];
-*/
 $assignmentId = $assignmentModel->createReport($taskId, $task['work_order_id'] ?? 0, $data);
 //
     
@@ -334,4 +320,18 @@ public function addTaskReport(int $taskId): string
     
     return $this->render('tasks/report');
 }
+    private function canUserAddReportOrRedirect(int $taskId)
+    {
+    	//zízkáme id aktuálního přihlášeného uživatele
+    	$userId = Auth::id();
+
+    	//zjistíme, jestli má právo přidat report k tomuto úkolu
+    	if((new TaskModel())->canUserAddReport((int) $taskId, (int) $userId) === true)
+    	{
+    		return true;
+    	}
+    	Flash::error('Nemáte oprávnění. Nejste členem týmu, který má úkol plnit...');
+		Url::redirect('/{tenant}/tasks/#main');
+    }
+
 }

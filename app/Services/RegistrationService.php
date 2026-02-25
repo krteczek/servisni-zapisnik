@@ -19,7 +19,8 @@ final class RegistrationService
         private CompanyModel $companies,
         private UserModel $users,
         private TaskModel $tasks,
-        private WorkOrderModel $orders
+        private WorkOrderModel $orders,
+        private TeamModel $teams
     ) {}
 
     /* ==========================================================
@@ -119,15 +120,15 @@ final class RegistrationService
 
 
         /*
-         * 3 Vytvoření první defaultní zakázky. Ta slouží jako ukázka a 
+         * 3 Vytvoření první defaultní zakázky. Ta slouží jako ukázka a
          * zároven pro úkoly čistě firemního charakteru.
          * company_id, title, description, source, priority, status, created_by_user_id, is_system
          */
-         
-         
+
+
 $description1 = <<<TXT
-Interní práce jsou běžné práce pro fungování samotné firmy.
-Například čas strávený vytvořením účtu v našem systému a seznámení se s ním, 
+**Režijní práce** jsou běžné práce vykonávané pro fungování samotné firmy.
+Například čas strávený vytvořením účtu v našem systému a seznámení se s ním,
 se dá považovat za režijní náklad firmy.
 K téhle zakázce je systémem vytvořeno několik prvních úkolů.
 <<<TXT;         
@@ -151,62 +152,65 @@ K téhle zakázce je systémem vytvořeno několik prvních úkolů.
 			'color' 	=> TeamController::getDefaultColor(),
 			'active'	=> 1
 		]);
-		 
-		 
+
+
         /*
-         *  Vytvoření prvních úkolů k první defaultní zakázce. 
+         *  Vytvoření prvních úkolů k první defaultní zakázce.
          * tyto už bude možno dokončit běžným způsobem
-         * company_id, team_id, work_order_id, title, description, 
+         * company_id, team_id, work_order_id, title, description,
          * source, priority, status, created_by_user_id
          */
 				$description2 = <<<TXT
-Uživatelé s rolí Admin nebo Mistr mohou vytvářet a vidět všechny zakázky a úkoly.
-Mohou je i editovat a měnit stavy.
-Aby mohli k jednotlivým úkolům psát i reporty, čili výkazy práce, musí být součástí týmu, který má úkol na starosti.
+Vítejte v Bó systému servisního zápisníku.
 
-Uživatelé s rolí Předák nebo Montér vidí jen úkoly přiřazené týmu, jehož jsou součástí. K nim také mohou psát své reporty.
-Vaším prvním úkolem je tedy jít do části Týmy, najít "Základní tým", a přidat sám sebe do týmu.
+Vaším prvním úkolem bude přidat sám sebe do **Základního týmu**.
+ - Menu: Týmy > Aktivní > Karta: Základní tým > Upravit
+ - v rozhraní můžete:
+  - sám sebe přidat a odebrat z týmu,
+  - změnit barvu týmu
+  - i jeho název
+ - Až budete součástí týmu **Základní tým**, můžete napsat Report (nebo více) a úkol uzavřít.
 
-Teprve  poté můžete vypsat první report k tomuhle úkolu.
+Tip: Pokud nemůžete na Kartě úkolu najít tlačítko **Přidat Report**, nejste členem týmu, který má úkol na starosti.
 
-A také tento úkol označit jako "dokončen".
+Tip: Pokud v detailu úkolu nemůžete najít tlačítko **Uzavřít úkol**, tak k tomu úkolu nebyl napsán ani jeden Report.
+
 
 <<<TXT;
 				$TID1 = $this->tasks->createWithTenant($companyId, [
-    'team_id' 					=> $companyId,
-    'work_order_id'			=> $WOID
+    'team_id' 					=> $TeamID,
+    'work_order_id'			=> $WOID,
     'title' 					=> 'Přidejte svůj účet do Základního týmu',
     'description' 			=> $description2,
-    
+
     'source' 					=> 'system',
     'priority' 				=> 'normal',
     'status' 					=> 'in_progress',
     'created_by_user_id' 	=> $userId,
-    'is_system' => 1,
+    'is_system' 				=> 1,
 ]);
 
 				$description3 = <<<TXT
-Uživatelé s rolí Admin nebo Mistr mohou vytvářet a vidět všechny zakázky a úkoly.
-Mohou je i editovat a měnit stavy.
-Aby mohli k jednotlivým úkolům psát i reporty, čili výkazy práce, musí být součástí týmu, který má úkol na starosti.
+Máte první tým, jste jeho členem, vytvořil jste první Report o splnění úkolu a možná jste i úkol označil jako Uzavřený.
 
-Uživatelé s rolí Předák nebo Montér vidí jen úkoly přiřazené týmu, jehož jsou součástí. K nim také mohou psát své reporty.
-Vaším prvním úkolem je tedy jít do části Týmy, najít "Základní tým", a přidat sebe do týmu.
+Dalším Vaším úkolem bude přidat (pozvat) vaše spolupracovníky (pokud nějaké máte) do Bó systému:
+ - Menu: Uživatelé > Přidat uživatele
+ - Až budete hotovi, opět vypište Report a úkol ukončete.
 
-
+Systém funguje tak, že si volně můžete založit firmu v Bó systému. Spolupracovníkům potom vytváříte účty a tím je pozýváte do Bó systému.
 
 <<<TXT;
-				$TID1 = $this->tasks->createWithTenant($companyId, [
-    'team_id' 					=> $companyId,
-    'work_order_id'			=> $WOID
-    'title' 					=> '',
-    'description' 			=> $description,
-    
+				$TID2 = $this->tasks->createWithTenant($companyId, [
+    'team_id' 					=> $TeamID,
+    'work_order_id'			=> $WOID,
+    'title' 					=> 'Pozvěte spolupracovníky',
+    'description' 			=> $description3,
+
     'source' 					=> 'system',
     'priority' 				=> 'normal',
     'status' 					=> 'in_progress',
     'created_by_user_id' 	=> $userId,
-
+	 'is_system' 				=> 1,
 ]);
 
 
@@ -214,13 +218,13 @@ Vaším prvním úkolem je tedy jít do části Týmy, najít "Základní tým",
          *  Smazání žádosti
          */
         $this->requests->deleteById((int) $request['id']);
-			
-			/* 
+
+			/*
 			 *	Dokončíme transakci
 			*/
         $pdo->commit();
 
-			/* 
+			/*
 			 *	vrátíme data pro první přihlášení
 			  */
 			return [
@@ -241,11 +245,12 @@ Vaším prvním úkolem je tedy jít do části Týmy, najít "Základní tým",
     } catch (\Throwable $e) {
 
         $pdo->rollBack();
-
+			error_log((string)$e);
         // Tohle je systémová chyba
         return [
             'ok' => false,
-            'error' => 'Registraci se nepodařilo dokončit. Zkuste to prosím znovu. ' . $e
+            'error' => 'Registraci se nepodařilo dokončit. Zkuste to prosím znovu. '
+				
         ];
     }
 }    

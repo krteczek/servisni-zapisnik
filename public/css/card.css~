@@ -13,7 +13,7 @@
 }
 .card-WO-header {
 padding: 16px 18px;
-display: flex;
+
 }
 
 .card-header {
@@ -26,8 +26,23 @@ display: flex;
 .card-title a {
   font-weight: 600;
   color: #111827;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-body-title {
+	font-weight: 600;
 }
 
+.card-body-list {
+	margin: 0px;
+}
+.card-body-list li{
+	margin: 0px;
+	padding: 0px;
+}
 .card-body {
   padding: 16px 18px;
   flex: 1;
@@ -49,15 +64,12 @@ display: flex;
     border-left: 4px solid var(--task-color) !important;
 }
 
-.card-title a {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .card-actions {
   margin-top: auto; /* pojistka */
 }
 
+h4.card-header, h5.card-header {
+	margin:0px;
+	padding: 0px;
+	font-size: 0.8rem;
+}

@@ -61,7 +61,7 @@ $roles  = $view->roles ?? []; // předpokládám, že roles jsou v $view
 									placeholder="napr. jan.novak@firma.cz"
 									required>
 							<?php if (isset($errors['email'])): ?>
-								<span class="error-message"><?= e($errors['email']) ?></span>
+								<span class="error-message"><?= e($errors['email'][0]) ?></span>
 							<?php endif; ?>
 						</div>
 		
