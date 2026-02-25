@@ -63,17 +63,19 @@ $tasks = $view->tasks ?? [];
             <!-- PATIČKA KARTY -->
             <div class="card-footer">
                 <div class="actions">
-						
-                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id']) ?>" 
+
+						  <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id']) ?>" 
                        class="btn btn-secondary" 
                        title="Upravit úkol">
                         ✏️ Upravit úkol
                     </a>
+                    <?php if($task['can_add_report'] === true): ?>
                     <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Přidat report">
                         📝 Napsat Report
                     </a>
+                    <?php endif;?>
                 </div>
             </div>
         </div>

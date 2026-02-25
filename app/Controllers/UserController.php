@@ -160,14 +160,14 @@ final class UserController extends Controller
         $arr2 = [];
         //pokud není uživatel doménový Superadmin, povolíme editovat:
         // email, globas_role s active
-			if (!UserGuard::isProtected($old)) 
+			if (!UserGuard::isProtected($old))
 			{
 				$arr2 = [
 				'email'           => strtolower(trim($data['email'])),
 				'global_role'     => $data['global_role'],
 				'active'          => isset($data['active']) ? 1 : 0,
 				];
-				
+
 			}
 
 			$update = array_merge($arr1, $arr2);
@@ -196,7 +196,7 @@ final class UserController extends Controller
 
         if ($firstname === '') {
             $this->addError('firstname', 'Jméno je povinné.');
-        } 
+        }
         elseif (mb_strlen($firstname,'utf-8') >= self::MAX_FIRST_NAME_LENGTH)
         {
             $this->addError('firstname', 'Jméno je příliš dlouhé.');
@@ -286,7 +286,7 @@ final class UserController extends Controller
 	        );
 	
 	    } catch (\Throwable $e) {
-	//var_dump($e);exit;
+	var_dump($e);exit;
 	        // ideálně logovat $e
 	        Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .

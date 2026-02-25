@@ -418,11 +418,13 @@ public function login(): string
 	{
 		$token = $_GET['token'] ?? null;
 		$data = [];
-		 $requests = new RegistrationRequestModel();
-		 $companies = new CompanyModel();
-		 $users = new UserModel();
-		 $tasks = new TaskModel();
-		$orders = new WorkOrderModel();
+		$requests 	= new RegistrationRequestModel();
+		$companies 	= new CompanyModel();
+		$users 		= new UserModel();
+		$tasks 		= new TaskModel();
+		$orders 		= new WorkOrderModel();
+		$teams 		= new TeamModel();
+
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 		{
 			$data = array_map(
@@ -431,11 +433,13 @@ public function login(): string
 					);
 			$token = $data['token'] ?? null;
 			$RegistrationService = (new RegistrationService(
-									RegistrationRequestModel: $requests, 
-									CompanyModel: $companies, 
-									UserModel: $users, 
+									RegistrationRequestModel: $requests,
+									CompanyModel: $companies,
+									UserModel: $users,
 									TaskModel: $tasks,
-									WorkOrderModel: $orders
+									WorkOrderModel: $orders,
+									TeamModel: $teams
+
 									));
 			if (!$token || !$RegistrationService->validateToken($token))
 			{

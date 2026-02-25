@@ -191,41 +191,45 @@ $errors = $view->errors ?? []; // chyby validace
 	</div>
 	
 </div>
-<!-- Zobrazení chyb -->
-
-<!-- Formulář -->
-
-</div>
 <!-- Historie reportů -->
-<div class="reports-grid" id="report_list">
+<div class="entity-grid" id="report_list">
     <?php foreach ($reports as $report): ?>
         <div class="report-item card">
-            <div class="report-meta">
-                <strong><?= e($report['created_by_first_name'] . ' ' . $report['created_by_last_name']); ?></strong>
-                <small><?= e(date('d.m.Y H:i', strtotime($report['created_at']))); ?></small>
+            <div class="card-header">
+                <strong class="card-title"><?= e($report['created_by_first_name'] . ' ' . $report['created_by_last_name']); ?></strong>
+            	<small><?= e(date('d.m.Y H:i', strtotime($report['created_at']))); ?></small>
             </div>
-            <div class="report-content">
-                <?= nl2br(e($report['note'])); ?>
-            </div>
-            <?php $hours = 0; ?>
-            <?php if (!empty($report['participants'])): ?>
-                <div class="report-participants">
-                    <strong>Pracovali:</strong>
-                    <ul>
-                        <?php foreach ($report['participants'] as $p): ?>
-                            <li>
-                                <?= e($p['first_name'] . ' ' . $p['last_name']); ?>: 
-                                <?= formatMinutes($p['minutes_spent']); ?>
-<?php $hours += $p['minutes_spent']; ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-            <div class="">
-            	Tým ujel: <?= (int)($report['kilometers']); ?>km
+            <div class="card-body">
+            	<div class="meta-list">
+            		<h4 class="card-header">Report: </h4>
+            		<div class="meta-value">          
+                		<?= nl2br(e($report['note'])); ?>
+                	</div>
+                	<h4 class="card-header">Statistiky: </h4>
+            		<div class="meta-item">
+            			 
+							<?php $hours = 0; ?>
+							<h5 class="meta-label">Účastníci: </h5>
+							<?php if (!empty($report['participants'])): ?>
+                    		<?php foreach ($report['participants'] as $p): ?>
+                    			<span class="meta-value">
+                    				<?= e($p['first_name'] . ' ' . $p['last_name']); ?>:
+										<?= formatMinutes($p['minutes_spent']); ?>
+										<?php $hours += $p['minutes_spent']; ?>
+                    			</span><br>
+                    		<?php endforeach; ?>
+							<?php else: ?>
+								<span class="meta-value">Bez účasníků</span>
+                   	<?php endif; ?>
+                  </div>
 
-            	A celkem odpracoval: <?= formatMinutes($hours) ?>
+                  <div class="meta-item">
+                  	<span class="meta-label">Tým ujel: </span><span class="meta-value"><?= (int)($report['kilometers']); ?>km</span>
+                  </div>
+                  <div class="meta-item">
+							<span class="meta-label">Tým odpracoval: </span><span class="meta-value"><?= formatMinutes($hours) ?></span>
+						</div>
+					</div>
             </div>
         </div>
     <?php endforeach; ?>
@@ -265,61 +269,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- CSS pro chybové stavy -->
-<style>
-.has-error .form-control {
-    border-color: #dc3545;
-}
-.has-error .error-message {
-    color: #dc3545;
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-    display: block;
-}
-.member-row.has-error {
-    border-left: 3px solid #dc3545;
-}
-
-
-/* Omezíme šířku celého task-detail */
-.task-detail {
-    max-width: 800px;      /* stejné jako form-container */
-    margin: 0 auto 2rem auto;  /* zarovnání na střed + odsazení dole */
-}
-
-/* Nebo pokud chceš, aby nadpis byl také v card */
-.task-header-card {
-    max-width: 800px;
-    margin: 0 auto 1rem auto;
-}
-
-/* Grid pro reporty */
-.reports-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-/* Aby karty v gridu měly stejnou výšku */
-.reports-grid .report-item {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    margin-bottom: 0;  /* zrušíme původní margin */
-    padding: 15px;
-}
-
-.reports-grid .report-content {
-    flex: 1;  /* roztáhne se */
-}
-
-/* Pro mobil (menší než 768px) dáme jeden sloupec */
-@media (max-width: 768px) {
-    .reports-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

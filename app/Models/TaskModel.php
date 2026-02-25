@@ -5,6 +5,7 @@ namespace App\Models;
 
 use DateTime;
 use App\Core\Auth;
+use App\Core\Roles;
 
 final class TaskModel extends BaseModel
 {
@@ -171,44 +172,325 @@ public function getStatsForTasks(array $taskIds): array
 /**
  * Upravený forIndex,
  */
- public function forIndex(?int $filterUserId = null): array
+
+public function forIndex(?int $filterUserId = null): array
 {
-    $companyId = Auth::companyId();
-    $userId    = Auth::id();
-    $role      = Auth::role();
+    $companyId    = Auth::companyId();
+    $userId       = Auth::id();
+    $role         = Auth::role();
+    $isManagement = Roles::isManagement($role);
 
     $params = [
-        'company_id' => $companyId,
-        'status'     => 'open',
+        'company_id_t'         => $companyId,
+        'company_id_w'         => $companyId,
+        'company_id_tm'        => $companyId,
+        'company_id_ta'        => $companyId,
+        'company_id_perm'      => $companyId,
+        'current_user_id_perm' => $userId,
+        'status'               => 'open',
     ];
 
     $sql = "
-        SELECT 
+        SELECT
             t.*,
 
             -- zakázka
-            w.title AS work_order_title,
-            w.status AS work_order_status,
+            w.title    AS work_order_title,
+            w.status   AS work_order_status,
             w.priority AS work_order_priority,
 
             -- tým
-            tm.name AS team_name,
+            tm.name  AS team_name,
             tm.color AS team_color,
 
             -- statistiky
             COALESCE(r.reports_count, 0) AS reports_count,
             COALESCE(r.total_minutes, 0) AS total_minutes,
-            COALESCE(r.total_km, 0) AS total_km
+            COALESCE(r.total_km, 0)      AS total_km,
+
+            -- oprávnění na report
+            CASE
+                WHEN t.status = 'open'
+                     AND EXISTS (
+                        SELECT 1
+                        FROM admin.team_memberships tmu2
+                        WHERE tmu2.team_id = t.team_id
+                          AND tmu2.user_id = :current_user_id_perm
+                          AND tmu2.company_id = :company_id_perm
+                          AND (tmu2.valid_to IS NULL OR tmu2.valid_to >= CURDATE())
+                     )
+                THEN 1
+                ELSE 0
+            END AS can_add_report
 
         FROM tasks t
 
-        LEFT JOIN work_orders w 
-            ON w.id = t.work_order_id 
-            AND w.company_id = :company_id_work_order
+        LEFT JOIN work_orders w
+            ON w.id = t.work_order_id
+           AND w.company_id = :company_id_w
 
         LEFT JOIN admin.teams tm
             ON tm.id = t.team_id
-            AND tm.company_id = :company_id_team
+           AND tm.company_id = :company_id_tm
+
+        LEFT JOIN (
+            SELECT
+                ta.task_id,
+                COUNT(*) AS reports_count,
+                COALESCE(SUM(ta.kilometers), 0)     AS total_km,
+                COALESCE(SUM(ta.minutes_spent), 0)  AS total_minutes
+            FROM task_assignments ta
+            WHERE ta.company_id = :company_id_ta
+            GROUP BY ta.task_id
+        ) r ON r.task_id = t.id
+
+        WHERE
+            t.company_id = :company_id_t
+            AND t.status = :status
+    ";
+
+    /*
+     * MANAGEMENT filtr (jen filtruje, neuděluje oprávnění)
+     */
+    if ($isManagement) {
+
+        if ($filterUserId !== null) {
+            $sql .= " AND t.created_by_user_id = :filter_user_id";
+            $params['filter_user_id'] = $filterUserId;
+        }
+
+        $sql .= "
+            ORDER BY
+                (t.created_by_user_id = :current_user_id_sort) DESC,
+                t.id DESC
+        ";
+
+        $params['current_user_id_sort'] = $userId;
+
+    } else {
+
+        $sql .= "
+            AND EXISTS (
+                SELECT 1
+                FROM admin.team_memberships tmu
+                WHERE tmu.team_id = t.team_id
+                  AND tmu.user_id = :current_user_id_filter
+                  AND tmu.company_id = :company_id_filter
+                  AND (tmu.valid_to IS NULL OR tmu.valid_to >= CURDATE())
+            )
+            ORDER BY t.id DESC
+        ";
+
+        $params['current_user_id_filter'] = $userId;
+        $params['company_id_filter']      = $companyId;
+    }
+
+    $tasks = $this->fetchAll($sql, $params);
+
+    foreach ($tasks as &$task) {
+        $task['total_minutes'] = (int)$task['total_minutes'];
+
+        $task['total_hours_formatted'] =
+            floor($task['total_minutes'] / 60) . 'h ' .
+            ($task['total_minutes'] % 60) . 'm';
+
+        $task['can_add_report'] = (bool)$task['can_add_report'];
+    }
+
+    return $tasks;
+}
+
+public function forIndexOld2(?int $filterUserId = null): array
+{
+    $companyId    = Auth::companyId();
+    $userId       = Auth::id();
+    $role         = Auth::role();
+    $isManagement = Roles::isManagement($role);
+
+    $params = [
+        'company_id_t'            => $companyId,
+        'company_id_w'            => $companyId,
+        'company_id_tm'           => $companyId,
+        'company_id_ta'           => $companyId,
+        'company_id_tap'          => $companyId,
+        'company_id_perm'         => $companyId,
+        'current_user_id_perm'    => $userId,
+        'status'                  => 'open',
+    ];
+
+    $sql = "
+        SELECT
+            t.*,
+
+            -- zakázka
+            w.title    AS work_order_title,
+            w.status   AS work_order_status,
+            w.priority AS work_order_priority,
+
+            -- tým
+            tm.name  AS team_name,
+            tm.color AS team_color,
+
+            -- statistiky
+            COALESCE(r.reports_count, 0) AS reports_count,
+            COALESCE(r.total_minutes, 0) AS total_minutes,
+            COALESCE(r.total_km, 0)      AS total_km,
+
+            -- oprávnění na report
+            CASE
+                WHEN t.status = 'open'
+                     AND EXISTS (
+                        SELECT 1
+                        FROM admin.team_memberships tmu2
+                        WHERE tmu2.team_id = t.team_id
+                          AND tmu2.user_id = :current_user_id_perm
+                          AND tmu2.company_id = :company_id_perm
+                          AND (tmu2.valid_to IS NULL OR tmu2.valid_to >= CURDATE())
+                     )
+                THEN 1
+                ELSE 0
+            END AS can_add_report
+
+        FROM tasks t
+
+        LEFT JOIN work_orders w
+            ON w.id = t.work_order_id
+           AND w.company_id = :company_id_w
+
+        LEFT JOIN admin.teams tm
+            ON tm.id = t.team_id
+           AND tm.company_id = :company_id_tm
+
+        LEFT JOIN (
+            SELECT
+                ta.task_id,
+                COUNT(*) AS reports_count,
+                COALESCE(SUM(ta.kilometers), 0) AS total_km,
+                COALESCE(SUM(tap.minutes_spent), 0) AS total_minutes
+            FROM task_assignments ta
+            LEFT JOIN task_assignment_participants tap
+                ON tap.assignment_id = ta.id
+               AND tap.company_id = :company_id_tap
+            WHERE ta.company_id = :company_id_ta
+            GROUP BY ta.task_id
+        ) r ON r.task_id = t.id
+
+        WHERE
+            t.company_id = :company_id_t
+            AND t.status = :status
+    ";
+
+    /*
+     * MANAGEMENT filtr (jen filtruje, neuděluje oprávnění)
+     */
+    if ($isManagement) {
+
+        if ($filterUserId !== null) {
+            $sql .= " AND t.created_by_user_id = :filter_user_id";
+            $params['filter_user_id'] = $filterUserId;
+        }
+
+        $sql .= "
+            ORDER BY
+                (t.created_by_user_id = :current_user_id_sort) DESC,
+                t.id DESC
+        ";
+
+        $params['current_user_id_sort'] = $userId;
+
+    } else {
+
+        $sql .= "
+            AND EXISTS (
+                SELECT 1
+                FROM admin.team_memberships tmu
+                WHERE tmu.team_id = t.team_id
+                  AND tmu.user_id = :current_user_id_filter
+                  AND tmu.company_id = :company_id_filter
+                  AND (tmu.valid_to IS NULL OR tmu.valid_to >= CURDATE())
+            )
+            ORDER BY t.id DESC
+        ";
+
+        $params['current_user_id_filter'] = $userId;
+        $params['company_id_filter']      = $companyId;
+    }
+
+    $tasks = $this->fetchAll($sql, $params);
+
+    foreach ($tasks as &$task) {
+        $task['total_minutes'] = (int)$task['total_minutes'];
+
+        $task['total_hours_formatted'] =
+            floor($task['total_minutes'] / 60) . 'h ' .
+            ($task['total_minutes'] % 60) . 'm';
+
+        $task['can_add_report'] = (bool)$task['can_add_report'];
+    }
+
+    return $tasks;
+}
+
+ public function forIndexOld(?int $filterUserId = null): array
+{
+    $companyId    = Auth::companyId();
+    $userId       = Auth::id();
+    $role         = Auth::role();
+    $isManagement = Roles::isManagement($role);
+
+    $params = [
+        'company_id_t'   			=> $companyId,
+        'company_id_w'   			=> $companyId,
+        'company_id_tm'  			=> $companyId,
+        'company_id_ta'  			=> $companyId,
+        'company_id_tap' 			=> $companyId,
+        'company_id_perm'			=> $companyId,
+        'current_user_id_perm' 	=> $userId,
+        'status'         			=> 'open',
+    ];
+
+    $sql = "
+        SELECT
+            t.*,
+
+            -- zakázka
+            w.title    AS work_order_title,
+            w.status   AS work_order_status,
+            w.priority AS work_order_priority,
+
+            -- tým
+            tm.name  AS team_name,
+            tm.color AS team_color,
+
+            -- statistiky
+            COALESCE(r.reports_count, 0) AS reports_count,
+            COALESCE(r.total_minutes, 0) AS total_minutes,
+            COALESCE(r.total_km, 0)      AS total_km,
+
+            -- oprávnění na report
+            CASE
+                WHEN t.status = 'open'
+                     AND EXISTS (
+                        SELECT 1
+                        FROM admin.team_memberships tmu2
+                        WHERE tmu2.team_id = t.team_id
+                          AND tmu2.user_id = :current_user_id_perm
+                          AND tmu2.company_id = :company_id_perm
+                          AND (tmu2.valid_to IS NULL OR tmu2.valid_to >= CURDATE())
+                     )
+                THEN 1
+                ELSE 0
+            END AS can_add_report
+
+        FROM tasks t
+
+        LEFT JOIN work_orders w
+            ON w.id = t.work_order_id
+           AND w.company_id = :company_id_w
+
+        LEFT JOIN admin.teams tm
+            ON tm.id = t.team_id
+           AND tm.company_id = :company_id_tm
 
         LEFT JOIN (
             SELECT
@@ -217,296 +499,111 @@ public function getStatsForTasks(array $taskIds): array
                 COALESCE(SUM(ta.kilometers), 0) AS total_km,
                 COALESCE(SUM(
                     ta.minutes_spent +
-                    COALESCE((
-                        SELECT SUM(tap.minutes_spent)
-                        FROM task_assignment_participants tap
-                        WHERE tap.assignment_id = ta.id
-                          AND tap.company_id = ta.company_id
-                    ), 0)
+                    COALESCE(tap_sum.participants_minutes, 0)
                 ), 0) AS total_minutes
             FROM task_assignments ta
-            WHERE ta.company_id = :company_id_reports
+            LEFT JOIN (
+                SELECT
+                    tap.assignment_id,
+                    SUM(tap.minutes_spent) AS participants_minutes
+                FROM task_assignment_participants tap
+                WHERE tap.company_id = :company_id_tap
+                GROUP BY tap.assignment_id
+            ) tap_sum ON tap_sum.assignment_id = ta.id
+            WHERE ta.company_id = :company_id_ta
             GROUP BY ta.task_id
         ) r ON r.task_id = t.id
 
-        WHERE 
-            t.company_id = :company_id
+        WHERE
+            t.company_id = :company_id_t
             AND t.status = :status
     ";
 
-    $params['company_id_reports']      = $companyId;
-    $params['company_id_work_order']   = $companyId;
-    $params['company_id_team']         = $companyId;
-
     /*
-     * ADMIN / MISTR
+     * MANAGEMENT filtr (jen filtruje, neuděluje oprávnění)
      */
-    if (in_array($role, ['admin', 'mistr'], true)) {
+    if ($isManagement) {
 
         if ($filterUserId !== null) {
             $sql .= " AND t.created_by_user_id = :filter_user_id";
             $params['filter_user_id'] = $filterUserId;
-            $sql .= " ORDER BY t.id DESC";
-        } else {
-            $sql .= "
-                ORDER BY 
-                    (t.created_by_user_id = :current_user_id) DESC,
-                    t.id DESC
-            ";
-            $params['current_user_id'] = $userId;
         }
-    }
 
-    /*
-     * PŘEDÁK / MONTÉR
-     */
-    else {
+        $sql .= "
+            ORDER BY
+                (t.created_by_user_id = :current_user_id_sort) DESC,
+                t.id DESC
+        ";
+
+        $params['current_user_id_sort'] = $userId;
+
+    } else {
 
         $sql .= "
             AND EXISTS (
                 SELECT 1
-                FROM admin.team_user tu
-                WHERE tu.team_id = t.team_id
-                  AND tu.user_id = :current_user_id
-                  AND tu.company_id = :company_id_team_membership
+                FROM admin.team_memberships tmu
+                WHERE tmu.team_id = t.team_id
+                  AND tmu.user_id = :current_user_id_filter
+                  AND tmu.company_id = :company_id_filter
+                  AND (tmu.valid_to IS NULL OR tmu.valid_to >= CURDATE())
             )
+            ORDER BY t.id DESC
         ";
 
-        $params['current_user_id'] = $userId;
-        $params['company_id_team_membership'] = $companyId;
-
-        $sql .= " ORDER BY t.id DESC";
+        $params['current_user_id_filter'] = $userId;
+        $params['company_id_filter']      = $companyId;
     }
 
     $tasks = $this->fetchAll($sql, $params);
 
-    /*
-     * Formátování hodin
-     */
     foreach ($tasks as &$task) {
         $task['total_minutes'] = (int)$task['total_minutes'];
+
         $task['total_hours_formatted'] =
             floor($task['total_minutes'] / 60) . 'h ' .
             ($task['total_minutes'] % 60) . 'm';
+
+        $task['can_add_report'] = (bool)$task['can_add_report'];
     }
 
     return $tasks;
 }
 
- public function forIndexOld1(?int $filterUserId = null): array
+public function canUserAddReport(int $taskId, int $userId): bool
 {
     $companyId = Auth::companyId();
-    $userId    = Auth::id();
-    $role      = Auth::role();
+
+    $sql = "
+        SELECT 1
+        FROM tasks t
+        WHERE t.id = :task_id
+          AND t.company_id = :company_id
+          AND t.status = 'open'
+          AND EXISTS (
+                SELECT 1
+                FROM admin.team_memberships tmu
+                WHERE tmu.team_id = t.team_id
+                  AND tmu.user_id = :user_id
+                  AND tmu.company_id = :company_id_membership
+                  AND (tmu.valid_to IS NULL OR tmu.valid_to >= CURDATE())
+          )
+        LIMIT 1
+    ";
 
     $params = [
-        'company_id' => $companyId,
-        'status'     => 'open',
+        'task_id'               => $taskId,
+        'company_id'            => $companyId,
+        'user_id'               => $userId,
+        'company_id_membership' => $companyId,
     ];
-		$sql = "
-		    SELECT 
-		        t.*,
-		
-		        -- zakázka
-		        w.title AS work_order_title,
-		        w.status AS work_order_status,
-		        w.priority AS work_order_priority,
-		
-		        -- tým
-		        tm.name AS team_name,
-		        tm.color AS team_color,
-		
-		        -- statistiky
-		        COALESCE(r.reports_count, 0) AS reports_count,
-		        COALESCE(r.total_minutes, 0) AS total_minutes,
-		        COALESCE(r.total_km, 0) AS total_km
-		
-		    FROM tasks t
-		
-		    LEFT JOIN work_orders w 
-		        ON w.id = t.work_order_id 
-		        AND w.company_id = :company_id_work_order
-		
-		    LEFT JOIN admin.teams tm
-		        ON tm.id = t.team_id
-		        AND tm.company_id = :company_id_team
-		
-		    LEFT JOIN (
-            SELECT
-                ta.task_id,
-                COUNT(*) AS reports_count,
-                SUM(ta.kilometers) AS total_km,
-                SUM(
-                    ta.minutes_spent +
-                    COALESCE((
-                        SELECT SUM(tap.minutes_spent)
-                        FROM task_assignment_participants tap
-                        WHERE tap.assignment_id = ta.id
-                    ), 0)
-                ) AS total_minutes
-            FROM task_assignments ta
-            WHERE ta.company_id = :company_id_reports
-            GROUP BY ta.task_id
-        ) r ON r.task_id = t.id
 
-        WHERE 
-            t.company_id = :company_id
-            AND t.status = :status
-    ";
+    $result = $this->fetchAll($sql, $params);
 
-		$params['company_id_reports'] = $companyId;
-		$params['company_id_work_order'] = $companyId;
-		$params['company_id_team'] = $companyId;
-
-    /*
-     * ADMIN / MISTR
-     */
-    if (in_array($role, ['admin', 'mistr'], true)) {
-
-        if ($filterUserId !== null) {
-            $sql .= " AND t.created_by_user_id = :filter_user_id";
-            $params['filter_user_id'] = $filterUserId;
-        } else {
-            $sql .= " AND t.created_by_user_id = :current_user_id";
-            $params['current_user_id'] = $userId;
-        }
-
-        $sql .= " ORDER BY t.id DESC";
-    }
-
-    /*
-     * PŘEDÁK / MONTÉR
-     */
-    else {
-
-        $teamIds = Auth::teamIds(); // pole ID týmů
-
-        if (empty($teamIds)) {
-            return [];
-        }
-
-        $placeholders = [];
-        foreach ($teamIds as $i => $teamId) {
-            $key = "team_$i";
-            $placeholders[] = ":$key";
-            $params[$key] = $teamId;
-        }
-
-        $sql .= " AND t.team_id IN (" . implode(',', $placeholders) . ")";
-        $sql .= " ORDER BY t.id DESC";
-    }
-
-    $tasks = $this->fetchAll($sql, $params);
-
-    /*
-     * Formátování hodin
-     */
-    foreach ($tasks as &$task) {
-        $task['total_minutes'] = (int)$task['total_minutes'];
-        $task['total_hours_formatted'] =
-            floor($task['total_minutes'] / 60) . 'h ' .
-            ($task['total_minutes'] % 60) . 'm';
-    }
-
-    return $tasks;
-}
-public function forIndexOld(): array
-{
-    $userId    = Auth::id();
-    $role      = Auth::role();
-    $companyId = Auth::companyId();
-
-    // 🔹 základní dotaz pro work DB
-    $sql = "
-        SELECT *
-        FROM {$this->tableName}
-        WHERE company_id = :company_id
-    ";
-
-    $params = ['company_id' => $companyId];
-
-    // 🔹 Předák / monter – jen úkoly ve svých týmech
-    if (in_array($role, ['predak', 'monter'], true)) {
-        $teamIds = (new TeamMembership())->activeTeamIdsForUser($userId);
-
-        if (empty($teamIds)) {
-            return []; // nic nevidí
-        }
-
-        $in = [];
-        foreach ($teamIds as $i => $teamId) {
-            $key = "team_$i";
-            $in[] = ":$key";
-            $params[$key] = $teamId;
-        }
-
-        $sql .= " AND team_id IN (" . implode(',', $in) . ")";
-    }
-
-    // 🔹 Admin / mistr – vidí vše, seřazeno podle toho, kdo úkol vytvořil
-    if (in_array($role, ['admin', 'mistr'], true)) {
-        $sql .= "
-            ORDER BY 
-                (created_by_user_id = :user_id) DESC,
-                id DESC
-        ";
-        $params['user_id'] = $userId;
-    } else {
-        $sql .= " ORDER BY id DESC";
-    }
-
-    // 🔹 Načteme úkoly
-    $tasks = $this->fetchAll($sql, $params);
-
-    if (empty($tasks)) {
-        return [];
-    }
-
-    // 🔹 Separátně načíst týmy z admin DB
-    $teamIds = array_unique(array_column($tasks, 'team_id'));
-    $teams = (new TeamModel())->getColorsAndNamesByIds($teamIds); 
-
-    // 🔹 Separátně načíst zakázky z work DB
-    $workOrderIds = array_unique(array_filter(array_column($tasks, 'work_order_id')));
-    $workOrders = (new WorkOrderModel())->getNamesByIds($workOrderIds); 
-
-    // 🔹 Pro každý úkol načteme statistiky z task_assignments
-    foreach ($tasks as &$task) {
-        $tid = $task['team_id'];
-        $wid = $task['work_order_id'];
-
-        $task['team_name'] = $teams[$tid]['name'] ?? '';
-        $task['team_color'] = $teams[$tid]['color'] ?? '#999';
-        $task['work_order_name'] = $workOrders[$wid]['name'] ?? '';
-        $task['work_order_priority'] = $workOrders[$wid]['priority'] ?? '';
-        // 🔹 Statistiky z task_assignments
-        $stats = $this->fetchOne(
-            "SELECT 
-                COUNT(*) AS reports_count,
-                COALESCE(SUM(kilometers), 0) AS total_km,
-                COALESCE(SUM(minutes_spent), 0) AS total_minutes
-             FROM task_assignments 
-             WHERE task_id = :task_id 
-               AND company_id = :company_id",
-            [
-                'task_id' => $task['id'],
-                'company_id' => $companyId
-            ]
-        );
-
-        $task['reports_count'] = (int) ($stats['reports_count'] ?? 0);
-        $task['total_km'] = (int) ($stats['total_km'] ?? 0);
-        $task['total_minutes'] = (int) ($stats['total_minutes'] ?? 0);
-        $task['total_hours'] = round($task['total_minutes'] / 60, 1);
-        $task['total_hours_formatted'] = floor($task['total_minutes'] / 60) . 'h ' . ($task['total_minutes'] % 60) . 'm';
-    }
-
-    return $tasks;
+    return $result !== false;
 }
 
-   
-
-    public function forWorkOrderWithStats(int $orderId): array
+   public function forWorkOrderWithStats(int $orderId): array
     {
         $sql = "
             SELECT *
