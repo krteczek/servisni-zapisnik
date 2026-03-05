@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
+
+
 use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';

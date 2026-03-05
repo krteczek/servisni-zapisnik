@@ -3,6 +3,7 @@
 namespace App\Core;
 
 use App\Models\UserModel;
+use DomainException;
 
 /**
  * Centrální autentizační a autorizační služba.
@@ -172,9 +173,8 @@ public static function label(): ?string
     $suffix = $parts ? ' (' . implode(', ', $parts) . ')' : '';
 
     return $name
-        ? $name . $suffix
-        : ($parts ? ucfirst($parts[0]) . ($company ? ' (' . $company . ')' : '') : null);
-}
+           ? $name . $suffix
+           : ucfirst($parts[0]) . ($company ? ' (' . $company . ')' : '');}
 
     /* ========================= ROLE ========================= */
 

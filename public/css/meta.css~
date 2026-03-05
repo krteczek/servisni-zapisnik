@@ -14,6 +14,7 @@
   font-weight: 400;
   color: #111827; /* skoro černá */
   line-height: 1.4;
+border-bottom: 1px solid #e5e7eb;
 }
 .meta-item {
   display: flex;

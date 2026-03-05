@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace App\Core;
 
 use App\Core\Config;
-use App\phpmailer\phpmailer\src\PHPMailer;
-use App\phpmailer\phpmailer\src\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
 final class Mailer
 {

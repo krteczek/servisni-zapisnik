@@ -5,6 +5,7 @@ namespace App\Core;
 
 use App\Controllers\ErrorController;
 use Throwable;
+use LogicException;
 use App\Core\LoggerHolder;
 
 /**
@@ -97,7 +98,6 @@ final class Router
             // auth
             if (($route['auth'] ?? false) && !Auth::check()) {
                 Url::redirect('/login');
-                exit;
             }
 
             // roles
@@ -127,7 +127,6 @@ final class Router
                     );
 
                     Url::redirect('/' . $current . $cleanPath);
-                    exit;
                 }
             }
 
@@ -140,12 +139,6 @@ final class Router
             
             try {
                 $response = $this->call($route['action'], $params);
-
-                if ($response !== null && !is_string($response)) {
-                    throw new LogicException(
-                        'Controller must return string or null'
-                    );
-                }
 
                 if ($response !== null) {
                     // ------- tady by to mělo podle mne být ------

@@ -53,4 +53,11 @@ final class RegistrationTokenService
 
         return $row;
     }
+
+    public function validateToken(string $rawToken): bool
+	{
+	    $hash = hash('sha256', trim($rawToken));
+
+	    return (bool) $this->model->findValidByHash($hash);
+	}
 }

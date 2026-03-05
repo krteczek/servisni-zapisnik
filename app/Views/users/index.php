@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Url;
 use App\Core\Access;
 
@@ -30,15 +32,9 @@ require __DIR__ . '/../layout/header.php';
             ($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')
         );
 
-		$isActive = 'active';
-		if($user['password_hash'] === NULL && $user['active'] === 0) {
-			$isActive = 'pending';
-		} elseif((int) $user['active'] === 0) {
-			$isActive = 'inactive';
-		}
-
+		$isActive = a($user);
     ?>
-<div class="card  <?= !(int)$user['active'] ? 'is-inactive' : '' ?>">
+<div class="card  <?= $isActive ?>">
     <div class="card-header">
         <span class="card-title"><a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/detail/#main') ?>"><?= e($fullName ?: 'Bez jména') ?></a></span>
         <span class="badge badge-<?= e($isActive) ?>"><?= te($isActive) ?></span>

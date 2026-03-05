@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Url;
 use App\Core\Roles;
 use App\Core\Csrf;
@@ -159,7 +161,7 @@ $fullName = trim(
 
                         <div class="form-static" style="padding:10px 12px; background:#f3f4f6; border-radius:8px;">
                             <strong>Role: </strong><?= te($old['global_role'] ?? '') ?><br>
-                            <small style="color:#6c757d;">Toto je Hlavní administrátorský účet vašeho pracovního 
+                            <small style="color:#6c757d;">Toto je Hlavní administrátorský účet vašeho pracovního
                             prostoru. U tohoto účtu nelze změnit Email, roli uživatele, ani ho nelze deaktivovat.</small>
                         </div>
 

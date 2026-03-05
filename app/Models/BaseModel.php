@@ -528,4 +528,7 @@ abstract class BaseModel
 
     return $this->insertRaw($data);
 }
+
+
+
 }

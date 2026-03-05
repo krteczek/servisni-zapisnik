@@ -28,7 +28,15 @@ final class TeamMembership extends BaseModel
     /* ==========================================================
      * AKTUÁLNÍ ČLENOVÉ TÝMU
      * ========================================================== */
-
+	/**
+	 * @return array<int, array{
+	 *     membership_id: int,
+	 *     id: int,
+	 *     first_name: string,
+	 *     last_name: string,
+	 *     role_in_team: string
+	 * }>
+	 */
     public function currentMembers(int $teamId): array
     {
         $stmt = $this->db()->prepare(
@@ -98,8 +106,10 @@ public function add(int $userId, int $teamId, string $role): ?int
             "UPDATE {$this->tableName}
              SET valid_to = :today
              WHERE id = :id
-               AND company_id = :company_id"
-        );
+               AND company_id = :company_id
+               AND valid_to IS NULL
+
+               ");
 
         $stmt->execute([
             'today'      => date('Y-m-d'),
@@ -157,7 +167,8 @@ public function add(int $userId, int $teamId, string $role): ?int
             "UPDATE {$this->tableName}
              SET role_in_team = :role
              WHERE id = :id
-               AND company_id = :company_id"
+               AND company_id = :company_id
+               AND valid_to IS NULL"
         );
 
         $stmt->execute([

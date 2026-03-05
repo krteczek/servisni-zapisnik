@@ -1,3 +1,9 @@
+/* =========================
+   CSS/UI.CSS
+   ========================= */
+
+
+
 .ui-alert {
     padding: 14px 16px;
     border-radius: 10px;
@@ -14,7 +20,7 @@
     color: #7a5a00;           /* tmavší čitelný text */
 }
 .ui-alert-warning {
-    background: #fffdf5;
+    background: #fff8e6;
     border: 1px solid #f0e3b0;
     color: #7a5a00;
     border-left: 4px solid #e9c46a;

@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-/** @var array $logs */
-/** @var array $filters */
+/** @var \App\Core\ViewContext $view */
+
 
 use App\Core\Url;
 $filters = $view->filters;
@@ -58,7 +58,7 @@ require __DIR__ . '/../../layout/header.php';
                              <li>
     <strong><?= e($field) ?>:</strong>
 <span style="color:#a00"><?= formatValue($change['from']) ?></span>
-→  
+→
 <span style="color:#060"><span style="color:#060"><?= formatValue($change['to']) ?></span>
 
 </li>

@@ -36,12 +36,6 @@
     border-color: #f5deb3;
 }
 
-.badge-priority-emergency {
-    background: #fdeaea;
-    color: #7a0c0c;
-    border-color: #e0b4b4;
-    font-weight: 600;
-}
 
 .badge-priority-normal {
     background: #edf6ee;
@@ -66,7 +60,7 @@
     border-color: #c9dbf2;
 }
 
-.badge-status-todo {
+.badge-status-exported {
     background: #f4f4f5;
     color: #555;
     border-color: #ddd;
@@ -84,7 +78,7 @@
     border-color: #cfe3d2;
 }
 
-.badge-status-blocked {
+.badge-status-cancelled {
     background: #fbeaea;
     color: #8f1d1d;
     border-color: #e5c2c2;

@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 ob_start();
 
-define('APP_ENV', file_exists(__DIR__ . '/../.dev') ? 'dev' : 'prod');
-define('APP_DEBUG', APP_ENV === 'dev');
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 define('BASE_PATH', '/servisni-zapisnik/public');
 //echo phpversion();exit;
 require dirname(__DIR__) . '/bootstrap.php';
@@ -18,7 +17,14 @@ use App\Core\Logger;
 use App\Core\LoggerHolder;
 use App\Core\Database;
 use App\Core\Auth;
+use App\Core\Roles;
 
+$appEnv = Config::get('app.env');
+$appDebug = Config::get('app.debug');
+$appBasePath = Config::get('app.base_path');
+
+error_reporting(Config::get('app.error_reporting'));
+ini_set('display_errors', Config::get('app.display_errors') ? '1' : '0');
 // -------------------------------------------------
 // Logger
 // -------------------------------------------------
@@ -45,14 +51,20 @@ if (Auth::check() && Session::has('user.company_db_name')) {
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // odstranění base path
-if (str_starts_with($uri, BASE_PATH)) {
-    $uri = substr($uri, strlen(BASE_PATH));
+if (str_starts_with($uri, $appBasePath)) {
+    $uri = substr($uri, strlen($appBasePath));
 }
 
 $uri = $uri ?: '/';
 
 $routes = Config::get('routes');
-
+/*
+var_dump([
+    'auth_role' => Auth::role(),
+    'session_global_role' => $_SESSION['user']['global_role'] ?? null,
+    'isManagement' => Roles::isManagement(Auth::role()),
+]);
+*/
 try {
     $router = new Router($routes);
     echo $router->dispatch($uri, $_SERVER['REQUEST_METHOD']);
@@ -66,7 +78,7 @@ try {
     LoggerHolder::get()->critical($message);
 
     //http_response_code(500);
-    if(APP_ENV === 'dev') 
+    if($appEnv === 'dev') 
     {
     	echo "<h1>Framework crash</h1>
     	<pre>

@@ -80,8 +80,9 @@ class UserModel extends BaseModel
      * PASSWORD
      * ========================================================== */
 
-public function activateUser(int $id, string $hash): bool
+public function activateUser(int $id, string $password): bool
 {
+	     $hash = password_hash($password, PASSWORD_DEFAULT);
     $sql = "
         UPDATE {$this->tableName}
         SET password_hash = :hash,
@@ -116,7 +117,7 @@ public function activateUser(int $id, string $hash): bool
     }
 
 
-    /* tahle metřoda je jen pro přihlášení uživatele, proto email i tenantid */
+    /* tahle metoda je jen pro přihlášení uživatele, proto email i tenantid */
 	public function findByEmailAndCompany(
 	    string $email,
 	    int $companyId

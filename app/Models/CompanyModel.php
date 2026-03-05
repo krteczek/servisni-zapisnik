@@ -46,8 +46,14 @@ final class CompanyModel extends BaseModel
      */
     public function existsBySlug(string $slug): ?array
     {
-        return $this->findRowBy('slug', $slug);
-    }
+         return $this->fetchOne(
+            "SELECT *
+             FROM {$this->tableName}
+             WHERE slug = :slug
+             LIMIT 1",
+            ['slug' => $slug]
+        );
+  }
 
     /**
      * Ověří, zda existuje společnost s daným ID.
@@ -57,7 +63,7 @@ final class CompanyModel extends BaseModel
      */
     public function existsById(int $id): bool
     {
-        return (bool) $this->findRow($id);
+        return (bool) $this->find($id);
     }
 
     /**

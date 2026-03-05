@@ -36,12 +36,9 @@ public function activate(string $rawToken, string $newPassword): void
             throw new RuntimeException('Účet je již aktivní');
         }
 
-        $this->userModel->updatePassword($userId, $newPassword);
-        $this->userModel->setActive($userId, true);
+        $this->userModel->setPassword($userId, $newPassword);
+        $this->userModel->activateUser($userId, $newPassword);
 
-        // 🔥 NOVÉ
-        $companyModel = new CompanyModel();
-        $companyModel->activate((int)$user['company_id']);
 
         $this->tokenModel->commit();
 

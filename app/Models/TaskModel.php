@@ -18,59 +18,35 @@ final class TaskModel extends BaseModel
      */
     public function findById(int $taskId): ?array
     {
-        return $this->findRow($taskId);
+        return $this->find($taskId);
     }
-
-    /**
-     * Vrátí statistiky k úkolu potřebné pro validaci
-     */
-    public function getTaskStats(int $taskId): array
-    {
-        return [
-            'assignments_count' => (int) $this->fetchValue(
-                "SELECT COUNT(*) 
-                 FROM task_assignments 
-                 WHERE task_id = :task_id 
-                   AND company_id = :company_id",
-                [
-                    'task_id' => $taskId,
-                    'company_id' => $this->tenantId()
-                ]
-            ),
-        ];
-    }
-
     /**
      * Obecná validační metoda
      */
-    public function canBeClosed(array $task, string $newStatus): bool
-    {
-        if ($task['status'] !== 'open') {
-            return false;
-        }
-
-        $stats = $this->getTaskStats((int)$task['id']);
-
-        return match ($newStatus) {
-            'done'      => $this->canBeDone($stats),
-            'cancelled' => $this->canBeCancelled($stats),
-            default     => false,
-        };
+public function canBeClosed(array $task, string $newStatus): bool
+{
+    if ($task['status'] !== 'open') {
+        return false;
     }
 
-    private function canBeDone(array $stats): bool
-    {
-        // Příklad logiky:
-        // Úkol může být hotový jen pokud existuje alespoň jedno plnění
-        return $stats['assignments_count'] > 0;
-    }
+    $statsMap = $this->statsForTasks([(int)$task['id']]);
+    $stats = $statsMap[(int)$task['id']];
 
-    private function canBeCancelled(array $stats): bool
-    {
-        // Například: můžeš zrušit jen pokud nemá žádné plnění
-        return $stats['assignments_count'] === 0;
-    }
+    return match ($newStatus) {
+        'done'      => $this->canBeDone($stats),
+        'cancelled' => $this->canBeCancelled($stats),
+        default     => false,
+    };
+}
+private function canBeDone(array $stats): bool
+{
+    return $stats['assignments_count'] > 0;
+}
 
+private function canBeCancelled(array $stats): bool
+{
+    return $stats['assignments_count'] === 0;
+}
     /**
      * Uzavře úkol změnou statusu
      */
@@ -81,7 +57,6 @@ final class TaskModel extends BaseModel
         if (!$task) {
             return false;
         }
-
         if (!$this->canBeClosed($task, $newStatus)) {
             return false;
         }
@@ -120,54 +95,6 @@ final class TaskModel extends BaseModel
         );
     }
  
-/**
- * Vrátí statistiky pro seznam úkolů
- */
-public function getStatsForTasks(array $taskIds): array
-{
-    if (empty($taskIds)) {
-        return [];
-    }
-
-    $placeholders = [];
-    $params = ['company_id' => $this->tenantId()];
-
-    foreach ($taskIds as $i => $id) {
-        $key = "task_$i";
-        $placeholders[] = ":$key";
-        $params[$key] = (int) $id;
-    }
-
-    $sql = "
-        SELECT 
-            ta.task_id,
-            COUNT(DISTINCT ta.id) AS reports_count,
-            COALESCE(SUM(ta.kilometers), 0) AS total_km,
-            COALESCE(SUM(ta.minutes_spent), 0) AS total_minutes,
-            COUNT(DISTINCT tap.user_id) AS workers_count
-        FROM task_assignments ta
-        LEFT JOIN task_assignment_participants tap 
-            ON tap.assignment_id = ta.id 
-            AND tap.company_id = ta.company_id
-        WHERE ta.task_id IN (" . implode(',', $placeholders) . ")
-            AND ta.company_id = :company_id
-        GROUP BY ta.task_id
-    ";
-
-    $stats = $this->fetchAll($sql, $params);
-
-    $result = [];
-    foreach ($stats as $stat) {
-        $result[(int)$stat['task_id']] = [
-            'reports_count' => (int)$stat['reports_count'],
-            'total_km' => (int)$stat['total_km'],
-            'total_minutes' => (int)$stat['total_minutes'],
-            'workers_count' => (int)$stat['workers_count']
-        ];
-    }
-
-    return $result;
-}
 
 /**
  * Upravený forIndex,
@@ -300,275 +227,6 @@ public function forIndex(?int $filterUserId = null): array
     return $tasks;
 }
 
-public function forIndexOld2(?int $filterUserId = null): array
-{
-    $companyId    = Auth::companyId();
-    $userId       = Auth::id();
-    $role         = Auth::role();
-    $isManagement = Roles::isManagement($role);
-
-    $params = [
-        'company_id_t'            => $companyId,
-        'company_id_w'            => $companyId,
-        'company_id_tm'           => $companyId,
-        'company_id_ta'           => $companyId,
-        'company_id_tap'          => $companyId,
-        'company_id_perm'         => $companyId,
-        'current_user_id_perm'    => $userId,
-        'status'                  => 'open',
-    ];
-
-    $sql = "
-        SELECT
-            t.*,
-
-            -- zakázka
-            w.title    AS work_order_title,
-            w.status   AS work_order_status,
-            w.priority AS work_order_priority,
-
-            -- tým
-            tm.name  AS team_name,
-            tm.color AS team_color,
-
-            -- statistiky
-            COALESCE(r.reports_count, 0) AS reports_count,
-            COALESCE(r.total_minutes, 0) AS total_minutes,
-            COALESCE(r.total_km, 0)      AS total_km,
-
-            -- oprávnění na report
-            CASE
-                WHEN t.status = 'open'
-                     AND EXISTS (
-                        SELECT 1
-                        FROM admin.team_memberships tmu2
-                        WHERE tmu2.team_id = t.team_id
-                          AND tmu2.user_id = :current_user_id_perm
-                          AND tmu2.company_id = :company_id_perm
-                          AND (tmu2.valid_to IS NULL OR tmu2.valid_to >= CURDATE())
-                     )
-                THEN 1
-                ELSE 0
-            END AS can_add_report
-
-        FROM tasks t
-
-        LEFT JOIN work_orders w
-            ON w.id = t.work_order_id
-           AND w.company_id = :company_id_w
-
-        LEFT JOIN admin.teams tm
-            ON tm.id = t.team_id
-           AND tm.company_id = :company_id_tm
-
-        LEFT JOIN (
-            SELECT
-                ta.task_id,
-                COUNT(*) AS reports_count,
-                COALESCE(SUM(ta.kilometers), 0) AS total_km,
-                COALESCE(SUM(tap.minutes_spent), 0) AS total_minutes
-            FROM task_assignments ta
-            LEFT JOIN task_assignment_participants tap
-                ON tap.assignment_id = ta.id
-               AND tap.company_id = :company_id_tap
-            WHERE ta.company_id = :company_id_ta
-            GROUP BY ta.task_id
-        ) r ON r.task_id = t.id
-
-        WHERE
-            t.company_id = :company_id_t
-            AND t.status = :status
-    ";
-
-    /*
-     * MANAGEMENT filtr (jen filtruje, neuděluje oprávnění)
-     */
-    if ($isManagement) {
-
-        if ($filterUserId !== null) {
-            $sql .= " AND t.created_by_user_id = :filter_user_id";
-            $params['filter_user_id'] = $filterUserId;
-        }
-
-        $sql .= "
-            ORDER BY
-                (t.created_by_user_id = :current_user_id_sort) DESC,
-                t.id DESC
-        ";
-
-        $params['current_user_id_sort'] = $userId;
-
-    } else {
-
-        $sql .= "
-            AND EXISTS (
-                SELECT 1
-                FROM admin.team_memberships tmu
-                WHERE tmu.team_id = t.team_id
-                  AND tmu.user_id = :current_user_id_filter
-                  AND tmu.company_id = :company_id_filter
-                  AND (tmu.valid_to IS NULL OR tmu.valid_to >= CURDATE())
-            )
-            ORDER BY t.id DESC
-        ";
-
-        $params['current_user_id_filter'] = $userId;
-        $params['company_id_filter']      = $companyId;
-    }
-
-    $tasks = $this->fetchAll($sql, $params);
-
-    foreach ($tasks as &$task) {
-        $task['total_minutes'] = (int)$task['total_minutes'];
-
-        $task['total_hours_formatted'] =
-            floor($task['total_minutes'] / 60) . 'h ' .
-            ($task['total_minutes'] % 60) . 'm';
-
-        $task['can_add_report'] = (bool)$task['can_add_report'];
-    }
-
-    return $tasks;
-}
-
- public function forIndexOld(?int $filterUserId = null): array
-{
-    $companyId    = Auth::companyId();
-    $userId       = Auth::id();
-    $role         = Auth::role();
-    $isManagement = Roles::isManagement($role);
-
-    $params = [
-        'company_id_t'   			=> $companyId,
-        'company_id_w'   			=> $companyId,
-        'company_id_tm'  			=> $companyId,
-        'company_id_ta'  			=> $companyId,
-        'company_id_tap' 			=> $companyId,
-        'company_id_perm'			=> $companyId,
-        'current_user_id_perm' 	=> $userId,
-        'status'         			=> 'open',
-    ];
-
-    $sql = "
-        SELECT
-            t.*,
-
-            -- zakázka
-            w.title    AS work_order_title,
-            w.status   AS work_order_status,
-            w.priority AS work_order_priority,
-
-            -- tým
-            tm.name  AS team_name,
-            tm.color AS team_color,
-
-            -- statistiky
-            COALESCE(r.reports_count, 0) AS reports_count,
-            COALESCE(r.total_minutes, 0) AS total_minutes,
-            COALESCE(r.total_km, 0)      AS total_km,
-
-            -- oprávnění na report
-            CASE
-                WHEN t.status = 'open'
-                     AND EXISTS (
-                        SELECT 1
-                        FROM admin.team_memberships tmu2
-                        WHERE tmu2.team_id = t.team_id
-                          AND tmu2.user_id = :current_user_id_perm
-                          AND tmu2.company_id = :company_id_perm
-                          AND (tmu2.valid_to IS NULL OR tmu2.valid_to >= CURDATE())
-                     )
-                THEN 1
-                ELSE 0
-            END AS can_add_report
-
-        FROM tasks t
-
-        LEFT JOIN work_orders w
-            ON w.id = t.work_order_id
-           AND w.company_id = :company_id_w
-
-        LEFT JOIN admin.teams tm
-            ON tm.id = t.team_id
-           AND tm.company_id = :company_id_tm
-
-        LEFT JOIN (
-            SELECT
-                ta.task_id,
-                COUNT(*) AS reports_count,
-                COALESCE(SUM(ta.kilometers), 0) AS total_km,
-                COALESCE(SUM(
-                    ta.minutes_spent +
-                    COALESCE(tap_sum.participants_minutes, 0)
-                ), 0) AS total_minutes
-            FROM task_assignments ta
-            LEFT JOIN (
-                SELECT
-                    tap.assignment_id,
-                    SUM(tap.minutes_spent) AS participants_minutes
-                FROM task_assignment_participants tap
-                WHERE tap.company_id = :company_id_tap
-                GROUP BY tap.assignment_id
-            ) tap_sum ON tap_sum.assignment_id = ta.id
-            WHERE ta.company_id = :company_id_ta
-            GROUP BY ta.task_id
-        ) r ON r.task_id = t.id
-
-        WHERE
-            t.company_id = :company_id_t
-            AND t.status = :status
-    ";
-
-    /*
-     * MANAGEMENT filtr (jen filtruje, neuděluje oprávnění)
-     */
-    if ($isManagement) {
-
-        if ($filterUserId !== null) {
-            $sql .= " AND t.created_by_user_id = :filter_user_id";
-            $params['filter_user_id'] = $filterUserId;
-        }
-
-        $sql .= "
-            ORDER BY
-                (t.created_by_user_id = :current_user_id_sort) DESC,
-                t.id DESC
-        ";
-
-        $params['current_user_id_sort'] = $userId;
-
-    } else {
-
-        $sql .= "
-            AND EXISTS (
-                SELECT 1
-                FROM admin.team_memberships tmu
-                WHERE tmu.team_id = t.team_id
-                  AND tmu.user_id = :current_user_id_filter
-                  AND tmu.company_id = :company_id_filter
-                  AND (tmu.valid_to IS NULL OR tmu.valid_to >= CURDATE())
-            )
-            ORDER BY t.id DESC
-        ";
-
-        $params['current_user_id_filter'] = $userId;
-        $params['company_id_filter']      = $companyId;
-    }
-
-    $tasks = $this->fetchAll($sql, $params);
-
-    foreach ($tasks as &$task) {
-        $task['total_minutes'] = (int)$task['total_minutes'];
-
-        $task['total_hours_formatted'] =
-            floor($task['total_minutes'] / 60) . 'h ' .
-            ($task['total_minutes'] % 60) . 'm';
-
-        $task['can_add_report'] = (bool)$task['can_add_report'];
-    }
-
-    return $tasks;
-}
 
 public function canUserAddReport(int $taskId, int $userId): bool
 {
@@ -598,9 +256,9 @@ public function canUserAddReport(int $taskId, int $userId): bool
         'company_id_membership' => $companyId,
     ];
 
-    $result = $this->fetchAll($sql, $params);
+    $result = $this->fetchOne($sql, $params);
 
-    return $result !== false;
+    return $result !== null;
 }
 
    public function forWorkOrderWithStats(int $orderId): array
@@ -626,19 +284,19 @@ public function canUserAddReport(int $taskId, int $userId): bool
 
         $taskIds = array_column($tasks, 'id');
 
-        $assignmentModel = new AssignmentModel();
-        $statsMap = $assignmentModel->statsForTasks($taskIds);
-
+        //$assignmentModel = new AssignmentModel();
+        //$statsMap = $assignmentModel->statsForTasks($taskIds);
+			$statsMap = $this->statsForTasks($taskIds);
         foreach ($tasks as $i => $task) {
-            $stats = $statsMap[$task['id']] ?? [
-    'total'      => 0,
-    'kilometers' => 0,
-    'minutes'    => 0,
-];
-
+						$stats = $statsMap[$task['id']] ?? [
+						    'assignments_count' => 0,
+						    'total_minutes'     => 0,
+						    'total_km'          => 0,
+						    'workers_count'     => 0,
+						];
             $tasks[$i]['stats'] = $stats;
-            $tasks[$i]['can_cancel'] = $this->canBeCancelled($task, $stats);
-            $tasks[$i]['can_close']  = $this->canBeDone($task, $stats);
+            $tasks[$i]['can_cancel'] = $this->canBeCancelled($stats);
+				$tasks[$i]['can_close']  = $this->canBeDone($stats);
         }
 
         return $tasks;
@@ -671,5 +329,60 @@ public function statsForWorkOrder(int $orderId): array
         'cancelled' => (int) ($row['cancelled'] ?? 0),
     ];
 }
-    
+
+public function statsForTasks(array $taskIds): array
+{
+    if (empty($taskIds)) {
+        return [];
+    }
+
+    $placeholders = [];
+    $params = ['company_id' => $this->tenantId()];
+
+    foreach ($taskIds as $i => $id) {
+        $key = "task_$i";
+        $placeholders[] = ":$key";
+        $params[$key] = (int) $id;
+    }
+
+    $sql = "
+        SELECT
+            ta.task_id,
+            COUNT(DISTINCT ta.id)              AS assignments_count,
+            COALESCE(SUM(ta.kilometers), 0)    AS total_km,
+            COALESCE(SUM(ta.minutes_spent), 0) AS total_minutes,
+            COUNT(DISTINCT tap.user_id)        AS workers_count
+        FROM task_assignments ta
+        LEFT JOIN task_assignment_participants tap
+            ON tap.assignment_id = ta.id
+           AND tap.company_id = ta.company_id
+        WHERE ta.task_id IN (" . implode(',', $placeholders) . ")
+          AND ta.company_id = :company_id
+        GROUP BY ta.task_id
+    ";
+
+    $rows = $this->fetchAll($sql, $params);
+
+    $result = [];
+
+    foreach ($taskIds as $taskId) {
+        $result[$taskId] = [
+            'assignments_count' => 0,
+            'total_minutes'     => 0,
+            'total_km'          => 0,
+            'workers_count'     => 0,
+        ];
+    }
+
+    foreach ($rows as $row) {
+        $result[(int)$row['task_id']] = [
+            'assignments_count' => (int)$row['assignments_count'],
+            'total_minutes'     => (int)$row['total_minutes'],
+            'total_km'          => (int)$row['total_km'],
+            'workers_count'     => (int)$row['workers_count'],
+        ];
+    }
+
+    return $result;
+}    
 }

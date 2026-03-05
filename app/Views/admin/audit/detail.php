@@ -1,16 +1,18 @@
 <?php
 declare(strict_types=1);
-use \app\Core\Url;
-/** @var array $log */
+
+/** @var \App\Core\ViewContext $view */
+
+
+use App\Core\Url;
+
 
 require __DIR__ . '/../../layout/header.php';
-$log = $view->log;
+$log = $view->data;
 $diff = $log['diff']
     ? json_decode($log['diff'], true)
     : null;
 ?>
-
-<h2></h2>
 
 <table border="1" cellpadding="6" cellspacing="0">
     <tr>
@@ -51,7 +53,7 @@ $diff = $log['diff']
 
 <h3>Změny</h3>
 
-<?php if (!$diff || $diff === []): ?>
+<?php if (empty($diff)): ?>
     <p><em>Žádné změny</em></p>
 <?php else: ?>
     <table border="1" cellpadding="6" cellspacing="0" style="max-width:1100px">

@@ -16,8 +16,11 @@ final class AuthTokenService
     /** délka tokenu v bytech (hex = *2 znaků) */
     private const TOKEN_BYTES = 32;
 
-    /** default expirace (dny) */
-    private const DEFAULT_EXPIRATION_DAYS = 3;
+    /** ativace uživatele default  expirace (dny) */
+    private const DEFAULT_ACTIVATE_EXPIRATION_DAYS = 3;
+
+    /** reset hesla default   expirace (dny) */
+    private const DEFAULT_RESET_EXPIRATION_MINUTES = 15;
 
     private AuthTokenModel $model;
 
@@ -43,8 +46,8 @@ public function create(
     $hash     = hash('sha256', $rawToken);
 
     $expiresAt = match ($type) {
-        self::TYPE_RESET_PASSWORD => (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:s'),
-        self::TYPE_ACTIVATE       => (new DateTimeImmutable())->modify('+7 days')->format('Y-m-d H:i:s'),
+        self::TYPE_RESET_PASSWORD => (new DateTimeImmutable())->modify('+' . self::DEFAULT_RESET_EXPIRATION_MINUTES . ' minutes')->format('Y-m-d H:i:s'),
+        self::TYPE_ACTIVATE       => (new DateTimeImmutable())->modify('+' . self::DEFAULT_ACTIVATE_EXPIRATION_DAYS . ' days')->format('Y-m-d H:i:s'),
         default => throw new RuntimeException('Neznámý typ tokenu'),
     };
 
@@ -71,9 +74,10 @@ public function create(
         $row = $this->model->findValidByHash($hash, $type);
 
         if (!$row) {
-            throw new RuntimeException('Odkaz je neplatný nebo expirovaný.');
+            return ['ok' => false];
+            //throw new RuntimeException('Odkaz je neplatný nebo expirovaný.');
         }
-
+        $row['ok'] = true;
         return $row;
     }
 
@@ -81,22 +85,35 @@ public function create(
      * CONSUME (atomic)
      * ========================================================== */
 
-    public function consume(string $rawToken, string $type): array
-    {
-        $this->model->begin();
+public function consume(string $rawToken, string $type): array
+{
+    $this->model->begin();
 
-        try {
-            $row = $this->validate($rawToken, $type);
-            $this->model->markUsed((int) $row['id']);
+    try {
+        $hash = hash('sha256', trim($rawToken));
 
-            $this->model->commit();
-            return $row;
+        $row = $this->model->findValidByHashForUpdate($hash, $type);
 
-        } catch (Throwable $e) {
-            $this->model->rollback();
-            throw $e;
+        if (!$row) {
+            throw new RuntimeException('Token je neplatný nebo expirovaný.');
         }
+
+        $updated = $this->model->markUsed((int)$row['id']);
+
+        if (!$updated) {
+            throw new RuntimeException('Token již byl použit.');
+        }
+
+        $this->model->commit();
+
+        return $row;
+
+    } catch (Throwable $e) {
+        $this->model->rollback();
+        throw $e;
     }
+}
+
 
     /* ==========================================================
      * HOUSEKEEPING

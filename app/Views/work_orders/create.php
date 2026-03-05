@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
-$css = '';
-require __DIR__ . '/style.php';
+
+/** @var \App\Core\ViewContext $view */
 
 require __DIR__ . '/../layout/header.php';
 
@@ -10,9 +10,7 @@ use App\Core\Csrf;
 use App\Core\Access;
 $data = $view->data; 
 ?>
-<style>
-<?= $css ?>
-</style>
+
 <form method="post" action="">
     <?= Csrf::getField() ?>
 

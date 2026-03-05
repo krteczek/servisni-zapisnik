@@ -129,7 +129,7 @@ class Csrf
     {
         return sprintf(
             '<input type="hidden" name="_token" value="%s">',
-            htmlspecialchars(self::token(), ENT_QUOTES)
+            e(self::token())
         );
     }
 }

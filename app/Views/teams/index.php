@@ -3,18 +3,20 @@ declare(strict_types=1);
 
 // views/teams/index.php – přehled týmů
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Url;
 use App\Core\Access;
 
-$css = '';
-//require __DIR__ . '/style.php';
+
 require __DIR__ . '/../layout/header.php';
 
-/** @var string $view->mode 'active' | 'inactive' */
-$mode = $view->mode ?? 'active';
+
+$mode = $view->mode;
+$isActive = '';
 ?>
 
-<?= $css ?>
+
 
 <?php if (empty($view->teams)): ?>
 
@@ -38,7 +40,8 @@ $mode = $view->mode ?? 'active';
 
 <div class="entity-grid">
     <?php foreach ($view->teams as $team): ?>
-        <div class="card team-card <?= $team['active'] ? '' : 'is-inactive' ?>" 
+    <? $isActive = active($team); ?>
+        <div class="card team-card <?= e($isActive) ?>" 
              style="--team-color: <?= e($team['color']) ?>;">
 
             <!-- HLAVIČKA KARTY -->

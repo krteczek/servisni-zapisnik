@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
+
+use App\Core\Config;
 use Throwable;
 
 final class ErrorController extends Controller
@@ -28,7 +30,7 @@ final class ErrorController extends Controller
         $this->view->title = '500 – Interní chyba serveru';
 
         if (defined('APP_DEBUG') && APP_DEBUG) {
-            $this->view->exception = $e;
+            $this->view->exception = $e->getTraceAsString();
         }
 
         return $this->render('errors/500');
@@ -38,7 +40,7 @@ final class ErrorController extends Controller
     {
         http_response_code($code);
 
-        $this->view->errorCode = $code;
+        //$this->view->errorCode = $code;
 
         switch ($code) {
             case 403:
@@ -51,8 +53,16 @@ final class ErrorController extends Controller
 
             default:
                 $this->view->title = '500 – Chyba aplikace';
-                if (APP_ENV === 'dev' && $e) {
-                    $this->view->exception = $e;
+                if (Config::get('app.env') === 'dev' && $e) {
+                	  $txt = '
+ code: ' . $code . '
+ message: ' . $e->getMessage() . '
+ file: ' . $e->getFile() . '
+ line: ' . $e->getLine(). '
+ path: ' . $e->getTraceAsString();
+
+                     $this->view->exception = $txt;
+
                 }
                 return $this->render('errors/500');
         }

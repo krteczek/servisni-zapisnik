@@ -45,7 +45,14 @@ return [
     'action' => [AuthController::class, 'registrationStepTwo'],
     'auth'   => false,
 ],
+[
+    'method' => 'POST',
+    'path'   => '/register/complete',
+    'action' => [AuthController::class, 'registrationStepTwo'],
+    '[auth'   => false,
+],
 
+/*
 [
     'method' => 'GET',
     'path'   => '/register/complete',
@@ -53,13 +60,7 @@ return [
     'auth'   => false,
 ],
 
-[
-    'method' => 'POST',
-    'path'   => '/register/complete',
-    'action' => [AuthController::class, 'registrationStepTwo'],
-    'auth'   => false,
-],
-
+*/
 
 /*
 |--------------------------------------------------------------------------
@@ -241,7 +242,7 @@ return [
 [
     'method' => 'GET',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/edit',
-    'action' => [WorkOrderController::class, 'detailOrderEditTask'],
+    'action' => [TaskController::class, 'editTask'],
     'auth'   => true,
 	'roles'   => ['admin', 'mistr'],
 	'title'   => 'Úkoly: upravit úkol',
@@ -507,7 +508,7 @@ return [
     'section' => 'users',
     'title'   => 'Uživatelé: Detail',
 ],
-
+/* zrušeno, původně měl emaily  pro reset hesla odesílat mistr
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/users/{id:\d+}/send-reset-password',
@@ -515,7 +516,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
 ],
-
+*/
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/users/{id:\d+}/resend-activation',

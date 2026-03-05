@@ -11,17 +11,19 @@ use App\Core\UserGuard;
 use App\Core\Mailer;
 use App\Models\UserModel;
 use App\Services\AuthTokenService;
+use App\Services\ActivationMailService;
 use App\Core\Auth;
 
 final class UserController extends Controller
 {
     private UserModel $users;
 
-    private const MAX_EMAIL_LENGTH           = 255;
+    //private const MAX_EMAIL_LENGTH           = 255;
     private const MAX_EMPLOYEE_NUMBER_LENGTH = 50;
     private const MAX_FIRST_NAME_LENGTH      = 100;
     private const MAX_LAST_NAME_LENGTH       = 100;
-    private const MAX_PASSWORD_LENGTH        = 255;
+    //private const MAX_PASSWORD_LENGTH        = 255;
+    //private const MIN_PASSWORD_LENGTH        = 8;
 
     public function __construct($view)
     {
@@ -78,21 +80,32 @@ final class UserController extends Controller
 	    ]);
 	
 	    if (!$userId || (int)$userId <= 0) {
-	        $this->addError('Litujeme, uživatele se nepodařilo vytvořit');
+	        $this->addError('','Litujeme, uživatele se nepodařilo vytvořit');
 	        return $this->render('users/create');
 	    }
 	
 	    try {
+
+	    	//vytvoříme token
 				$token = (new AuthTokenService())->create(
 				    userId: $userId,
 				    type: AuthTokenService::TYPE_ACTIVATE
 				);
+
+				$url = Url::base() . Url::to('/activate/complete?token=' . $token);
+				
+			//vytvoříme emailovou zprávu
+			[$subject, $htmlBody, $textBody] = ActivationMailService::buildInvitation($url, Auth::company());
+
+			//pošleme email
+        $ok = (new Mailer())->send(
+  				toEmail: $data['email'],
+				toName: $data['email'],
+				subject: $subject,
+				htmlBody: $htmlBody,
+				textBody: $textBody
+        );
 	
-	        Mailer::sendActivationEmail(
-	            $data['email'],
-	            $token,
-	            Auth::company()
-	        );
 	
 	        Flash::success(
 	            'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
@@ -217,7 +230,7 @@ final class UserController extends Controller
         if ($employeeNumber === '') {
             $this->addError('employee_number', 'Osobní číslo je povinné.');
         }
-        elseif (mb_strlen($employeeNumber,'utf-8') > self::MAX_LAST_NAME_LENGTH)
+        elseif (mb_strlen($employeeNumber,'utf-8') > self::MAX_EMPLOYEE_NUMBER_LENGTH)
         {
             $this->addError('employee_number', 'Osobní číslo je příliš dlouhé.');
         }
@@ -239,13 +252,15 @@ final class UserController extends Controller
             Url::redirect('/{tenant}/users');
         }
 
-        $this->view->user = $user;
 
-        $this->view->accountState = match (true) {
+        $user['accountState'] = match (true) {
             $user['password_hash'] === null => 'pending_activation',
             (int)$user['active'] === 0      => 'inactive',
             default                         => 'active',
         };
+
+        $this->view->user = $user;
+
 
         return $this->render('users/detail');
     }
@@ -274,19 +289,29 @@ final class UserController extends Controller
 				    type: AuthTokenService::TYPE_ACTIVATE
 				);
 //var_dump($token);exit;
-	        Mailer::sendActivationEmail(
-	            $user['email'],
-	            $token,
-	            Auth::company()
-	        );
-	
-	        Flash::success(
+			$url = Url::base() . Url::to('/register/complete?token=' . $token);
+			
+			[$subject, $htmlBody, $textBody] = ActivationMailService::buildInvitation($url, Auth::company());
+			
+			//$ = ActivationMail::build($activationUrl);
+        $ok = (new Mailer())->send(
+  				toEmail: $user['email'],
+				toName: $user['email'],
+				subject: $subject,
+				htmlBody: $htmlBody,
+				textBody: $textBody
+        );
+
+	       if($ok)
+	       {
+	       		Flash::success(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
 	            ' byl aktivační e-mail úspěšně odeslán.'
-	        );
+	            );
+	       }
 	
 	    } catch (\Throwable $e) {
-	var_dump($e);exit;
+			//var_dump($e);exit;
 	        // ideálně logovat $e
 	        Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
@@ -298,36 +323,4 @@ final class UserController extends Controller
     }
 
 
-    /* =============================
-     * RESET PASSWORD
-     * ============================= */
-
-    public function sendResetPassword(int $id): string
-    {
-        $user = $this->users->find($id);
-        if (!$user) {
-            Flash::error('Uživatel neexistuje.');
-            Url::redirect('/{tenant}/users');
-        }
-
-        if (!Auth::hasRole(['admin', 'mistr'])) {
-            Flash::error('Na tuto akci nemáte oprávnění.');
-            Url::redirect('/{tenant}/users/' . $id . '/detail');
-        }
-	        $token = (new AuthTokenService())->create(
-	            userId: (int)$user['id'],
-	            companyId: Auth::company(),
-	            type: AuthTokenService::TYPE_ACTIVATE
-	        );
-
-        Mailer::sendResetPassword($user['email'], $token, Auth::company());
-
-        Flash::success('E-mail pro změnu hesla byl odeslán.');
-        Url::redirect('/{tenant}/users/' . $id . '/detail');
-    }
-
-    public function sendResetPasswordOld(int $id): string
-    {
-        return '';
-    }
-}
+ }

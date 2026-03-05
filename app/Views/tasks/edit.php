@@ -2,6 +2,8 @@
 declare(strict_types=1);
 // app/views/tasks/report.php
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Csrf;
 use App\Core\Url;
 
@@ -14,7 +16,7 @@ $oldData = $view->oldData ?? []; // stará data z POST při chybě
 $errors = $view->errors ?? []; // chyby validace
 
 //var_dump($task);
-print_r($errors);
+//print_r($errors);
 ?>
 
 <div class="task-detail">
