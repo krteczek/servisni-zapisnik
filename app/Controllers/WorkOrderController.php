@@ -49,7 +49,7 @@ public function index(): string
         $orderId = $this->model->create($data);
         $this->model->recomputeStatus($orderId);
 			if(!$orderId) {
-				$this->addErrors('global', 'Zakázku se nepodařilo vytvořit.');
+				$this->addError('global', 'Zakázku se nepodařilo vytvořit.');
             return $this->render('work_orders/create');
 			
 			}
@@ -80,7 +80,7 @@ public function index(): string
 			$ok = $this->model->update($orderId, $data);
 			$add = $ok ? 'success' : 'error';
 			if(!$ok){
-				$this->addErrors('global','Zakázku se nepodařilo změnit.');
+				$this->addError('global','Zakázku se nepodařilo změnit.');
 				$this->view->data = $data;
 				return $this->render('work_orders/create');
 			}
@@ -88,8 +88,9 @@ public function index(): string
         Flash::success('Zakázka byla úspěšně změněna.');
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
     }
-	private function setViewForDetail(int $orderId): void
-	{
+    
+public function detailOrder(int $orderId): string
+{
 	    $order = $this->getOrderOrRedirect($orderId);
 	
 	    $taskModel = new TaskModel();
@@ -101,38 +102,10 @@ public function index(): string
 	    $this->view->order = $order;
 	    $this->view->tasks = $tasks;
 	    $this->view->teams = $teams;
-	    
-		
-	    // data formuláře (pro sticky input / chyby)
-	    $this->view->taskFormData   = $this->view->taskFormData   ?? [];
-	    $this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
-	
-	}
+
     
-public function detailOrder(int $orderId): string
-{
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-        $result = $this->validateTask(
-            ['work_order_id' => $orderId],
-            'CREATE'
-        );
-
-        if ($result['ok']) {
-            Flash::success('Úkol byl úspěšně vytvořen.');
-            Url::redirect(
-                '/{tenant}/work-orders/' 
-                . $orderId 
-                . '/detail/#taskId_' 
-                . $result['task_id']
-            );
-        }
-
-        $this->view->taskFormData = $result['data'];
-    }
-
-    $this->setViewForDetail($orderId);
     return $this->render('work_orders/detail');
+    
 }
 		
 		
@@ -241,10 +214,36 @@ public function closeOrderDone(int $orderId)
     Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
 }
 
+/* nepoužívaná metoda dle phpstan
 private function recomputeOrder(int $orderId): void
 {
     $this->model->recomputeStatus($orderId);
 }
+*/
+	public function closeTaskDone(int $taskId): void
+	{
+		if ($taskId <= 0)
+		{
+			Flash::error('Úkol neexistuje');
+			Url::redirect('/{tenant}/tasks/#main');
+		}
 
+		$model = (new TaskModel());
+		$task = $model->find($taskId);
+		if(!$task)
+		{
+			Flash::error('Úkol neexistuje');
+			Url::redirect('/{tenant}/tasks/#main');
+		}
+		$ok = $model->closeTask($taskId, 'done');
+		
+		if ($ok === false)
+		{
+			Flash::error('Úkol neexistuje');
+			Url::redirect('/{tenant}/tasks/#main');
+		}
+		Flash::error('Úkol byl úspěšně uzavřen.');
+		Url::redirect('/{tenant}/work-order/' . (int) $task['work_order_id'] . '/detail/#taskId_' . $taskId );
+	}
 
 }

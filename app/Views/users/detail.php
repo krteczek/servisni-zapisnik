@@ -1,30 +1,25 @@
 <?php
 declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Url;
 use App\Core\Csrf;
-$css = '';
-require __DIR__ . '/style.php';
+
+
 require __DIR__ . '/../layout/header.php';
 
 $user = $view->user ?? [];
-?>
-<?= $css ?>
-<?php if (!empty($user)): ?>
+
+print_r($user);
+
+
+if (!empty($user)): ?>
 
 <?php
 $fullName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
 
-if ($user['password_hash'] === null) {
-    $stateLabel = 'Čeká na aktivaci';
-    $stateClass = 'badge-pending';  // přizpůsobíme našemu badge systému
-} elseif ((int)$user['active'] === 1) {
-    $stateLabel = 'Aktivní';
-    $stateClass = 'badge-active';          // existuje v badge.css
-} else {
-    $stateLabel = 'Deaktivovaný';
-    $stateClass = 'badge-inactive';        // existuje v badge.css
-}
+$active = active($user);
 ?>
 
 <!-- HLAVNÍ KONTEJNER (grid, ale může být i jeden sloupec) -->
@@ -37,8 +32,8 @@ if ($user['password_hash'] === null) {
             <!-- HLAVIČKA S NÁZVEM A BADGEM -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <h2 style="margin:0;"><?= e($fullName ?: '—') ?></h2>
-                <span class="badge <?= $stateClass ?>">
-                    <?= $stateLabel ?>
+                <span class="badge badge-<?= e($active) ?>">
+                    <?= te($active) ?>
                 </span>
             </div>
 

@@ -12,17 +12,25 @@ use App\Core\Mailer;
 use App\Models\UserModel;
 use App\Models\CompanyModel;
 use App\Models\RegistrationRequestModel;
+use App\Models\TaskModel;
+use App\Models\WorkOrderModel;
+use App\Models\TeamModel;
 
+
+use App\Services\ServiceFactory;
 use App\Services\AuthTokenService;
 use App\Services\RegistrationTokenService;
 use App\Services\RegistrationService;
-use App\Services\ActivationMail;
+use App\Services\ActivationMailService;
+use App\Services\PasswordResetRequestService;
+use App\Services\PasswordResetService;
+
 use App\Core\Flash;
 
 class AuthController extends Controller
 {
     private const MAX_EMAIL_LENGTH           = 255;
-    private const MAX_EMPLOYEE_NUMBER_LENGTH = 50;
+    //private const MAX_EMPLOYEE_NUMBER_LENGTH = 50;
     private const MAX_FIRST_NAME_LENGTH      = 100;
     private const MAX_LAST_NAME_LENGTH       = 100;
     private const MAX_PASSWORD_LENGTH        = 255;
@@ -191,63 +199,37 @@ public function login(): string
 	{
 		return $this->render('auth/forgot-password');
 	}
+public function forgotPasswordPost(): string
+{
+    $this->checkCsrf();
 
-	public function forgotPasswordPost(): string
-	{
-			$this->checkCsrf();
-			//email, tenant
-			$tenant   = trim($_POST['tenant'] ?? '');
-			$email    = trim($_POST['email'] ?? '');
+    $tenant = trim($_POST['tenant'] ?? '');
+    $email  = trim($_POST['email'] ?? '');
 
-			if ($tenant === '') {
-				$this->addError('tenant', 'Firma je povinná');
-			}
-			
-			if ($email === '') {
-				$this->addError('email', 'Email je povinný');
-			}
+    if ($tenant === '') {
+        $this->addError('tenant', 'Firma je povinná');
+    }
 
-			if ($this->hasErrors()) {
-				return $this->render('auth/forgot-password');
-			}
-			$user = null;
-			$company = null;
-			
-			/* jdeme se zeptat db, zda něco takového (komninace emailu a tenantu) existuje */
-			
-		$company = (new CompanyModel())->findBySlug($tenant);
+    if ($email === '') {
+        $this->addError('email', 'Email je povinný');
+    }
 
-		if ($company) {
-		    $user = (new UserModel())->findByEmailAndCompany(
-		        $email,
-		        (int) $company['id']
-		    );
-		
-		    if ($user) {
-		        try {
-		            $token = (new AuthTokenService())->create(
-		                userId: $user['id'],
-		                type: AuthTokenService::TYPE_RESET_PASSWORD
-		            );
-		
-		            Mailer::sendResetPassword(
-		                $email,
-		                $token,
-		                $company['name']
-		            );
-		
-		        } catch (\Throwable $e) {
-		            error_log($e->getMessage());
-		        }
-		    }
-		}
-		
-		Flash::success(
-		    'Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.'
-		);
-		
-		Url::redirect('/login');
-	}
+    if ($this->hasErrors()) {
+        return $this->render('auth/forgot-password');
+    }
+    ServiceFactory::passwordResetRequest()->request(
+        $tenant,
+        $email,
+        $_SERVER['REMOTE_ADDR'] ?? '',
+        $_SERVER['HTTP_USER_AGENT'] ?? ''
+    );
+
+    Flash::success(
+        'Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.'
+    );
+
+    Url::redirect('/login');
+}
 
     /* =========================
      *  PRIVATE HELPERS
@@ -266,8 +248,7 @@ public function login(): string
         		
             $user = (new AuthTokenService())->validate($token, $type);
 
-            $this->view->token = $token;
-				$this->view->csrf  = $this->csrfField();
+            $this->view->data['token'] = $token;
 
 				return $this->render('auth/reset-password');
 
@@ -295,42 +276,36 @@ public function login(): string
     		elseif (mb_strlen($password) < self::MIN_PASSWORD_LENGTH) 
     		{
     			$this->addError('password', 'Heslo je příliš krátké');
-    		} 
+    		}
+    		elseif (mb_strlen($password) > self::MAX_PASSWORD_LENGTH)
+    		{
+    			$this->addError('password', 'Heslo je příliš dlouhé.');
+    		}
     		elseif($password !== $passwordZ) 
     		{
     			$this->addError('password', 'Hesla se neshodují, věnujte zápisu více pozornosti.');
     		}
     		
     		if ($this->hasErrors()) {
-    			$this->view->token = $token;
+    			$this->view->data['token'] = $token;
             return $this->render('auth/reset-password');
         }	
 
         try {
-            $service = new AuthTokenService();
-            $row = $service->consume($token, $type);
-            
-				$userModel = new UserModel();
+    $service = new PasswordResetService(
+        new AuthTokenService(),
+        new UserModel()
+    );
 
-				/* načteme usera bez tenant omezení */
-				$user = $userModel->findRawById((int)$row['user_id']);
+    $service->resetByToken($token, $password);
 
-				if (!$user) {
-					throw new \LogicException('User not found');
-				}
-
-				/* bootstrap tenant do session */
-				Session::set('user.company_id', (int)$user['company_id']);
-				
-            $userAction((int) $row['user_id'], $password);
-
-            Flash::success($successMessage);
-            Url::redirect('/login');
+    Flash::success('Heslo bylo změněno.');
+    Url::redirect('/login');
 
         } catch (\Throwable $e) {
         		$mess = '[handleTokenPost] ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString();
             error_log($mess);
-            Flash::error('Operace se nezdařila. ' . $mess);
+            Flash::error('Operace se nezdařila. ');
             Url::redirect('/login');
         } finally {
 				Session::forget('user.company_id');
@@ -338,7 +313,7 @@ public function login(): string
     }
     
 
-	public function registrationStepOne()
+	public function registrationStepOne():  string
 	{
 		$data = [];
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
@@ -369,21 +344,14 @@ public function login(): string
 				$this->view->data = $data;
 				return $this->render('auth/registrationStepOne');
 			}
-			
-			$ip = ipToBinary(getClientIP());
-			$ua = getClientUserAgent();
-			
-		 	$requests = new RegistrationRequestModel();
-		 	$companies = new CompanyModel();
-		 	$users = new UserModel();
-			
-			$token = (new RegistrationService($requests, $companies, $users))->createRequest(
+
+			$token = ServiceFactory::registrationService()->createRequest(
 				email: $data['email'],
 			);
 			
 			$url = Url::base() . Url::to('/register/complete?token=' . $token);
 			
-			[$subject, $htmlBody, $textBody] = ActivationMail::build($url);
+			[$subject, $htmlBody, $textBody] = ActivationMailService::buildRegistration($url);
 			//$ = ActivationMail::build($activationUrl);
 
 
@@ -418,12 +386,7 @@ public function login(): string
 	{
 		$token = $_GET['token'] ?? null;
 		$data = [];
-		$requests 	= new RegistrationRequestModel();
 		$companies 	= new CompanyModel();
-		$users 		= new UserModel();
-		$tasks 		= new TaskModel();
-		$orders 		= new WorkOrderModel();
-		$teams 		= new TeamModel();
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 		{
@@ -432,24 +395,14 @@ public function login(): string
 					$_POST
 					);
 			$token = $data['token'] ?? null;
-			$RegistrationService = (new RegistrationService(
-									RegistrationRequestModel: $requests,
-									CompanyModel: $companies,
-									UserModel: $users,
-									TaskModel: $tasks,
-									WorkOrderModel: $orders,
-									TeamModel: $teams
-
-									));
-			if (!$token || !$RegistrationService->validateToken($token))
+			if (!$token || !(new RegistrationTokenService())->validateToken($token))
 			{
 				// přesměrujeme na registraci znovu s Flash zprávou		    	
 				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
-		    	Flash::error('Registrace trvala příliš dlouho, zkuste to prosím rychleji');
+		    	Flash::error('Registrace trvala příliš dlouho, zkuste to prosím znovu a rychleji');
 				Url::redirect('/register');
 			}
 		    
-		    //return this->render('auth/register-step-two');
 
 			$this->checkCsrf();
     
@@ -471,12 +424,9 @@ public function login(): string
 			}
 
 			// --- ICO ---
-			if (!preg_match('/^\d{8}$/', $data['ico'])) {
-				$this->addError('ico', 'Neplatné IČO.');
-			}
 
 			$data['ico'] = trim($data['ico'] ?? '');
-			if (empty($data['ico'] ?? '')) 
+			if (empty($data['ico'])) 
 			{
 				$this->addError('ico', 'IČO je povinné.');
 			} 
@@ -536,15 +486,8 @@ public function login(): string
 			$companyData['name'] = $data['name'];
 			$companyData['ico'] = $data['ico'];
 
-			// Pokud validace prošla:
-			// pokračujeme dál (model, transakce…)
-			/*
-                 'email'     => $request['email'],
-                'slug'      => $slug,
-                'password'  => $adminData['password'],
-        ];			
-			*/
-			$ok = $RegistrationService->complete($token, $companyData, $adminData);
+			$ok = ServiceFactory::registrationService()->complete($token, $companyData, $adminData);
+			
 			if($ok['ok'] === true) 
 			{
 				//jdeme řešit přihlášení:
@@ -569,20 +512,20 @@ public function login(): string
 			} 
 			else 
 			{
-				var_dump($ok);
+				//var_dump($ok);
 				$this->addError('global', 'Litujeme, Váš účet se nepodařilo vytvořit. Zkuste to prosím za chvíli znovu.');
 			}
 		}  
 		else 
 		{
-			$ok = (new RegistrationService($requests, $companies, $users))->validateToken($token);
+			$ok = (new RegistrationTokenService())->validateToken($token);
 			//var_dump($ok);
 			if (!$token || !$ok) 
 			{
 				// přesměrujeme na registraci znovu s Flash zprávou		    	
 				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
 	    		Flash::error('Todo:Registrace trvala příliš dlouho, zkuste to prosím rychleji');
-				return Url::redirect('/register');
+				Url::redirect('/register');
 			}
 		}
 		$data['token'] = $token;

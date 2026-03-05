@@ -1,22 +1,17 @@
 <?php
 declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Url;
 use App\Core\Csrf;
 
-$css = '';
 $team        = $view->team;
 $rolesInTeam = $view->rolesInTeam;
 
-require __DIR__ . '/style.php';
 require __DIR__ . '/../layout/header.php';
+
 ?>
-<?= $css ?>
-<?php if (!empty($view->error)): ?>
-    <div class="ui-alert ui-alert-danger alert-top">
-        <?= htmlspecialchars($view->errors) ?>
-    </div>
-<?php endif; ?>
 
 <div class="create-container">
 
@@ -28,7 +23,7 @@ require __DIR__ . '/../layout/header.php';
             <div class="ui-alert ui-alert-info alert-spacing">
                 <strong>Nastavení týmu</strong> – uprav název, barvu a spravuj členy.
             </div>
-
+<?php require __DIR__ . '/../layout/formsErrors.php'; ?>
             <!-- ===================== -->
             <!-- ÚPRAVA TÝMU -->
             <!-- ===================== -->

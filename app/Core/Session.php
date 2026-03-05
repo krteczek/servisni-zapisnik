@@ -43,7 +43,8 @@ public static function start(): void
 
     if (session_status() !== PHP_SESSION_ACTIVE) {
 
-        $secure = APP_ENV === 'prod';
+        $appEnv = Config::get('app.env');
+        $secure = $appEnv === 'prod';
 
         session_set_cookie_params([
             'lifetime' => 0,

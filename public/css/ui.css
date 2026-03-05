@@ -15,12 +15,7 @@
 }
 
 .ui-alert-warning {
-    background: #fff8e6;      /* velmi jemná žlutá */
-    border-color: #f0d9a7;
-    color: #7a5a00;           /* tmavší čitelný text */
-}
-.ui-alert-warning {
-    background: #fffdf5;
+    background: #fff8e6;
     border: 1px solid #f0e3b0;
     color: #7a5a00;
     border-left: 4px solid #e9c46a;

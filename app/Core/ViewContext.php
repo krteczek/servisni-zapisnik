@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use \Throwable;
+
 /**
  * Kontejner pro data předávaná z controllerů do view šablon.
  * Poskytuje strukturovaný způsob předávání dat s výchozími hodnotami.
@@ -153,6 +155,16 @@ class ViewContext
      */
     public ?bool $canCloseOrder = false;
 
+    public ?array $tasks = [];
+    public ?array $task = [];
+    public ?array $teamMembers = [];
+    public ?array $reports = [];
+    public ?array $oldData = [];
+
+
+    public string $mode = '';
+
+    public ?string $exception = '';
     // TODO: [MAINTENANCE] Přidat __construct() pro nastavení výchozích hodnot
     // TODO: [TYPING] Zvážit použití typed properties s nullable pro všechny proměnné
 }

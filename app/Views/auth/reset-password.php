@@ -1,8 +1,13 @@
 <?php
+declare(strict_types=1);
+
+/** @var \App\Core\ViewContext $view */
+
+
 use App\Core\Url;
 use App\Core\Csrf;
 require __DIR__ . '/../layout/header.php';
-$token = $view->token ?? '';
+$token = $view->data['token'] ?? '';
 $errors = $view->errors ?? [];
 
 $ch = '';
@@ -15,12 +20,12 @@ if ($errors) {
 }	
 ?>
 
-<?= htmlspecialchars($ch) ?>
+<?= e($ch) ?>
 
 <form method="post" action="">
     <?= Csrf::getField() ?>
 
-    <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
+    <input type="hidden" name="token" value="<?= e($token) ?>">
 
     <div>
         <label>Nové heslo</label>

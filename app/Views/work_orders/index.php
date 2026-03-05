@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1); 
-$css = '';
-//require __DIR__ . '/style.php';
+
+/** @var \App\Core\ViewContext $view */
+
 require __DIR__ . '/../layout/header.php';
 
 use App\Core\Url;
@@ -9,7 +10,7 @@ use App\Core\Url;
 $workOrders = $view->orders;
 //var_dump($workOrders);
 ?>
-<?= $css ?>
+
 
 <div class="entity-grid">
     <?php foreach ($workOrders as $wo): ?>

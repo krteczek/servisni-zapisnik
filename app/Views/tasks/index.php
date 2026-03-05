@@ -1,11 +1,13 @@
 <?php
 declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Url;
 
 require __DIR__ . '/../layout/header.php';
 
-$tasks = $view->tasks ?? [];
+$tasks = $view->data ?? [];
 //var_dump($tasks);
 ?>
 
@@ -21,8 +23,9 @@ $tasks = $view->tasks ?? [];
         <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
-                <span class="card-title"><a href="<?= Url::to('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/tasks/' . (int)$task['id'] . '/edit/#main') ?>"
-                   title="Upravit úkol">
+                <span class="card-title">
+                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>"
+                       title="Přidat report k tomuto úkolu">
                     <?= e($task['title']) ?>
                 </a></span>
                 <span class="badge badge-status-<?= e($task['status']) ?>">
@@ -72,7 +75,7 @@ $tasks = $view->tasks ?? [];
                     <?php if($task['can_add_report'] === true): ?>
                     <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>" 
                        class="btn btn-secondary" 
-                       title="Přidat report">
+                       title="Přidat report k tomuto úkolu">
                         📝 Napsat Report
                     </a>
                     <?php endif;?>

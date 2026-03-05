@@ -98,7 +98,7 @@ interface LoggerInterface
      * @param string $message Text zprávy
      * @param array $context Kontextová data
      * @return void
-     * @throws \Psr\Log\InvalidArgumentException Pokud úroveň není platná
+     * @throws \InvalidArgumentException
      */
     public function log(string $level, string $message, array $context = []): void;
 }

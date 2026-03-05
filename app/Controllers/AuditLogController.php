@@ -24,22 +24,22 @@ class AuditLogController extends Controller
 
         $logs = (new AuditLogModel())->findByFilters($filters);
 
-        $this->view->logs    = $logs ?? [];
-        $this->view->filters = $filters ?? [];
+        $this->view->data    = $logs;
+        $this->view->filters = $filters;
 //var_dump($logs);
         return $this->render('admin/audit/index');
     }
 
 public function detail(int $id): string
 {
-    $log = (new AuditLogModel())->findById($id);
+    $log = (new AuditLogModel())->find($id);
 
     if (!$log) {
         Flash::error('Audit záznam nebyl nalezen');
         Url::redirect('/admin/audit');
     }
 
-    $this->view->log = $log;
+    $this->view->logs = $log;
 
     return $this->render('admin/audit/detail');
 }

@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 // views/teams/create.php – vytvoření týmu
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Url;
 use App\Core\Csrf;
 
-$css = '';
-//require __DIR__ . '/style.php';
+
 require __DIR__ . '/../layout/header.php';
 
 $old    = $view->data ?? [];
@@ -26,22 +27,7 @@ $errors = $view->errors ?? [];
             Každý tým může mít přiřazené úkoly a zakázky.
         </div>
 
-        <!-- Zobrazení chyb -->
-        <?php if (!empty($errors)): ?>
-            <div class="ui-alert ui-alert-danger">
-                <ul style="margin:0;">
-                    <?php foreach ($errors as $field => $error): ?>
-                        <?php if (is_array($error)): ?>
-                            <?php foreach ($error as $message): ?>
-                                <li><?= e($message) ?></li>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <li><?= e($error) ?></li>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
+<?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 
         <div class="card-body">
 			<div class="form-container">

@@ -6,15 +6,23 @@ namespace App\Services;
 use App\Models\RegistrationRequestModel;
 use App\Models\CompanyModel;
 use App\Models\UserModel;
+use App\Models\TaskModel;
+use App\Models\WorkOrderModel;
+use App\Models\TeamModel;
+
+use App\Controllers\TeamController;
 use App\Core\Database;
 use App\Core\Config;
 use RuntimeException;
 
+/*
+	Registrace do Bo systému
+*/
 final class RegistrationService
 {
-    private int $tokenLifetimeMinutes = 60;
 
     public function __construct(
+        private RegistrationTokenService $registrationTokenService,
         private RegistrationRequestModel $requests,
         private CompanyModel $companies,
         private UserModel $users,
@@ -29,36 +37,16 @@ final class RegistrationService
 
     public function createRequest(string $email): string
     {
-        $token = bin2hex(random_bytes(32));
-
-        $this->requests->upsert([
-            'email'       => $email,
-            'token_hash'  => hash('sha256', $token),
-            'expires_at'  => date('Y-m-d H:i:s', strtotime("+{$this->tokenLifetimeMinutes} minutes")),
-            'ip_address'  => inet_pton($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1'),
-            'user_agent'  => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
-        ]);
+        $token = (new RegistrationTokenService())->create(
+                    email:  $email,
+                    ip:     inet_pton($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1'),
+                    ua:     substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)
+                    );
 
         return $token;
     }
 
-    /* ==========================================================
-     * STEP 2 – validace tokenu (GET)
-     * ========================================================== */
-
-    public function validateToken(string $token): ?array
-    {
-        $hash = hash('sha256', $token);
-
-        $request = $this->requests->findValidByHash($hash);
-/*
-        if (!$request) {
-            throw new RuntimeException('Neplatný nebo expirovaný token.');
-        }
-*/
-        return $request;
-    }
-
+ 
     /* ==========================================================
      * STEP 2 – dokončení registrace (POST)
      * ========================================================== */
@@ -74,7 +62,8 @@ final class RegistrationService
 
     try {
 
-        $request = $this->validateToken($token);
+
+        $request = $this->registrationTokenService->consume($token);
 
         if (!$request) {
             $pdo->rollBack();
@@ -125,24 +114,6 @@ final class RegistrationService
          * company_id, title, description, source, priority, status, created_by_user_id, is_system
          */
 
-
-$description1 = <<<TXT
-**Režijní práce** jsou běžné práce vykonávané pro fungování samotné firmy.
-Například čas strávený vytvořením účtu v našem systému a seznámení se s ním,
-se dá považovat za režijní náklad firmy.
-K téhle zakázce je systémem vytvořeno několik prvních úkolů.
-<<<TXT;         
-				$WOID = $this->orders->createWithTenant($companyId, [
-
-    'title' => 'Režie firmy',
-    'description' => $description1,
-    'source' => 'system',
-    'priority' => 'normal',
-    'status' => 'in_progress',
-    'created_by_user_id' => $userId,
-    'is_system' => 1,
-]);
-
 		/*
 		 *	vytvoření prvního defaultního týmu
 		 * name, color, active
@@ -154,13 +125,34 @@ K téhle zakázce je systémem vytvořeno několik prvních úkolů.
 		]);
 
 
+
+
+$description1 = <<<TXT
+**Režijní práce** jsou běžné práce vykonávané pro fungování samotné firmy.
+Například čas strávený vytvořením účtu v našem systému a seznámení se s ním,
+se dá považovat za režijní náklad firmy.
+K téhle zakázce je systémem vytvořeno několik prvních úkolů.
+
+TXT;
+
+            Database::useWorkDatabase($dbName);
+				$WOID = $this->orders->createWithTenant($companyId, [
+
+    'title' => 'Režie firmy',
+    'description' => $description1,
+    'priority' => 'normal',
+    'status' => 'in_progress',
+    'created_by_user_id' => $userId,
+
+]);
+
         /*
          *  Vytvoření prvních úkolů k první defaultní zakázce.
          * tyto už bude možno dokončit běžným způsobem
          * company_id, team_id, work_order_id, title, description,
          * source, priority, status, created_by_user_id
          */
-				$description2 = <<<TXT
+$description2 = <<<TXT
 Vítejte v Bó systému servisního zápisníku.
 
 Vaším prvním úkolem bude přidat sám sebe do **Základního týmu**.
@@ -176,21 +168,18 @@ Tip: Pokud nemůžete na Kartě úkolu najít tlačítko **Přidat Report**, nej
 Tip: Pokud v detailu úkolu nemůžete najít tlačítko **Uzavřít úkol**, tak k tomu úkolu nebyl napsán ani jeden Report.
 
 
-<<<TXT;
+TXT;
 				$TID1 = $this->tasks->createWithTenant($companyId, [
     'team_id' 					=> $TeamID,
     'work_order_id'			=> $WOID,
-    'title' 					=> 'Přidejte svůj účet do Základního týmu',
+    'title' 					=> '#1: Přidejte svůj účet do Základního týmu',
     'description' 			=> $description2,
-
-    'source' 					=> 'system',
-    'priority' 				=> 'normal',
-    'status' 					=> 'in_progress',
+    'status' 					=> 'open',
     'created_by_user_id' 	=> $userId,
-    'is_system' 				=> 1,
+
 ]);
 
-				$description3 = <<<TXT
+$description3 = <<<TXT
 Máte první tým, jste jeho členem, vytvořil jste první Report o splnění úkolu a možná jste i úkol označil jako Uzavřený.
 
 Dalším Vaším úkolem bude přidat (pozvat) vaše spolupracovníky (pokud nějaké máte) do Bó systému:
@@ -199,21 +188,19 @@ Dalším Vaším úkolem bude přidat (pozvat) vaše spolupracovníky (pokud ně
 
 Systém funguje tak, že si volně můžete založit firmu v Bó systému. Spolupracovníkům potom vytváříte účty a tím je pozýváte do Bó systému.
 
-<<<TXT;
+TXT;
+
 				$TID2 = $this->tasks->createWithTenant($companyId, [
     'team_id' 					=> $TeamID,
     'work_order_id'			=> $WOID,
-    'title' 					=> 'Pozvěte spolupracovníky',
+    'title' 					=> '#2: Pozvěte spolupracovníky',
     'description' 			=> $description3,
-
-    'source' 					=> 'system',
-    'priority' 				=> 'normal',
-    'status' 					=> 'in_progress',
+    'status' 					=> 'open',
     'created_by_user_id' 	=> $userId,
-	 'is_system' 				=> 1,
+
 ]);
 
-
+         Database::admin();
         /*
          *  Smazání žádosti
          */

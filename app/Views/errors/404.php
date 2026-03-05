@@ -1,6 +1,9 @@
+<?php
+declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
 
-<?php require __DIR__ . '/../layout/header.php'; ?>
+ require __DIR__ . '/../layout/header.php'; ?>
 
 <p>Požadovaná stránka neexistuje.</p>
 

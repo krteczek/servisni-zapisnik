@@ -1,4 +1,9 @@
 <?php
+declare(strict_types=1);
+
+/** @var \App\Core\ViewContext $view */
+
+
 use App\Core\Csrf;
 use App\Core\Url;
 
@@ -6,17 +11,12 @@ require __DIR__ . '/../layout/header.php';
 
 $errors = $view->errors ?? [];
 ?>
-<?php if (!empty($view->error)): ?>
-    <p style="color:#c62828; max-width:900px; margin:1rem auto;">
-        <?= htmlspecialchars($view->errors) ?>
-    </p>
-<?php endif; ?>
 
 <p>
 Abychom Vám mohli zaslat informace pro resetování Vašeho přístupového hesla,
 potřebujeme znát Váš email a jméno Vašeho pracovního prostoru.
 </p>
-
+<?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 <form method="post" action="">
     <?= Csrf::getField() ?>
 

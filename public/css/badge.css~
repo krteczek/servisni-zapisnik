@@ -29,28 +29,13 @@
     font-weight: 600;
     box-shadow: 0 0 0 1px rgba(122, 12, 12, 0.08);
 }
-.badge-priority-high {
-    background: #fbeaea;
-    color: #8f1d1d;
-    border-color: #e5c2c2;
-}
-.badge-priority-high {
-    background: #fff4db;
-    color: #8a5a00;
-    border-color: #f1d7a3;
-}
+
 .badge-priority-high {
     background: #fff7e6;
     color: #9a6700;
     border-color: #f5deb3;
 }
 
-.badge-priority-emergency {
-    background: #fdeaea;
-    color: #7a0c0c;
-    border-color: #e0b4b4;
-    font-weight: 600;
-}
 
 .badge-priority-normal {
     background: #edf6ee;
@@ -75,7 +60,7 @@
     border-color: #c9dbf2;
 }
 
-.badge-status-todo {
+.badge-status-exported {
     background: #f4f4f5;
     color: #555;
     border-color: #ddd;

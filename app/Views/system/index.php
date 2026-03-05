@@ -1,4 +1,9 @@
 <?php
+declare(strict_types=1);
+
+/** @var \App\Core\ViewContext $view */
+
+
 require __DIR__ . '/../layout/header.php';
 $companies = $view->companies;
 ?>
@@ -18,10 +23,10 @@ $companies = $view->companies;
         <tbody>
             <?php foreach ($companies as $company): ?>
                 <tr>
-                    <td><?= $company['id'] ?></td>
-                    <td><?= htmlspecialchars($company['name']) ?></td>
-                    <td><?= htmlspecialchars($company['slug']) ?></td>
-                    <td><?= $company['created_at'] ?></td>
+                    <td><?= (int) $company['id'] ?></td>
+                    <td><?= e($company['name']) ?></td>
+                    <td><?= e($company['slug']) ?></td>
+                    <td><?= formatMinutes($company['created_at']) ?></td>
                 </tr>
             <?php endforeach ?>
         </tbody>

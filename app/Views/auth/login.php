@@ -1,4 +1,9 @@
 <?php
+declare(strict_types=1);
+
+/** @var \App\Core\ViewContext $view */
+
+
 use App\Core\Url;
 use App\Core\Csrf;
 
@@ -14,25 +19,25 @@ require __DIR__ . '/../layout/header.php';
     <?= Csrf::getField() ?>
 
     <?php if (!empty($view->errors['_csrf'])): ?>
-        <div class="error"><?= htmlspecialchars($view->errors['_csrf'][0]) ?></div>
+        <div class="error"><?= e($view->errors['_csrf'][0]) ?></div>
     <?php endif; ?>
 
     <?php if (!empty($view->errors['global'])): ?>
-        <div class="error"><?= htmlspecialchars($view->errors['global'][0]) ?></div>
+        <div class="error"><?= e($view->errors['global'][0]) ?></div>
     <?php endif; ?>
 <table>
 <tr>
 	<td>
     Pracovní prostor
      <?php if (!empty($view->errors['tenant'])): ?>
-        <div class="error"><?= htmlspecialchars($view->errors['tenant'][0]) ?></div>
+        <div class="error"><?= e($view->errors['tenant'][0]) ?></div>
     <?php endif; ?>
 
 	</td>
 	<td><input
     name="tenant"
     placeholder="např. servis-novak"
-    value="<?= htmlspecialchars($view->data['tenant'] ?? '') ?>" title="Název, který jste zvolili při vytvoření pracovního prostoru." 
+    value="<?= e($view->data['tenant'] ?? '') ?>" title="Název, který jste zvolili při vytvoření pracovního prostoru." 
 >
 
 	</td>
@@ -42,12 +47,12 @@ require __DIR__ . '/../layout/header.php';
 	<td>
     Email
         <?php if (!empty($view->errors['email'])): ?>
-            <div class="error"><?= htmlspecialchars($view->errors['email'][0]) ?></div>
+            <div class="error"><?= e($view->errors['email'][0]) ?></div>
         <?php endif; ?>
 
 	</td>
 	<td>
-		<input name="email" value="<?= htmlspecialchars($view->data['email'] ?? '') ?>">
+		<input name="email" value="<?= e($view->data['email'] ?? '') ?>">
 	</td>
 </tr>
 
@@ -55,7 +60,7 @@ require __DIR__ . '/../layout/header.php';
 	<td>
     Heslo
         <?php if (!empty($view->errors['password'])): ?>
-            <div class="error"><?= htmlspecialchars($view->errors['password'][0]) ?></div>
+            <div class="error"><?= e($view->errors['password'][0]) ?></div>
         <?php endif; ?>
 	</td>
 	<td>

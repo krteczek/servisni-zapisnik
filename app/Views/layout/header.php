@@ -1,5 +1,8 @@
 <?php
+declare(strict_types=1);
+
 /** @var App\Core\ViewContext $view */
+
 use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Auth;
@@ -11,7 +14,7 @@ use App\Core\Session;
 <html lang="cs">
 <head>
     <meta charset="utf-8">
-    <title>Bó - <?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></title>
+    <title>Bó - <?= e($view->title ?: 'Servisní zápisník') ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="<?= Url::to('/favicon_io/favicon.ico') ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
@@ -58,22 +61,22 @@ require __DIR__ . '/../../../public/css/form.css';
     <?php if (Auth::check()): ?>
 <div class="identity">
     <div class="identity-company">
-        <?= htmlspecialchars(Auth::company()) ?>
+        <?= e(Auth::company()) ?>
     </div>
 
     <div class="identity-user">
-        <?= htmlspecialchars(Auth::name() ?? 'Uživatel') ?>
+        <?= e(Auth::name() ?? 'Uživatel') ?>
     </div>
 
     <div class="identity-role">
-        <?= htmlspecialchars(Auth::effectiveRole()) ?>
+        <?= e(Auth::effectiveRole()) ?>
     </div>
 </div>    <?php endif; ?>
 
     <?php if (Auth::hasGlobalRole(['admin'])): ?>
         <div class="role-switcher">
             <small class="role-switcher-label">
-                Pohled jako: <strong><?= Auth::effectiveRole() ?></strong>
+                Pohled jako: <strong><?= e(Auth::effectiveRole()) ?></strong>
             </small>
 
             <div class="role-switch">
@@ -82,7 +85,7 @@ require __DIR__ . '/../../../public/css/form.css';
                         href="<?= Url::to('/' . Auth::tenantSlug() . '/admin/switch-role/' . $key) ?>"
                         class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"
                     >
-                        <?= htmlspecialchars($label) ?>
+                        <?= e($label) ?>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -111,12 +114,12 @@ require __DIR__ . '/../../../public/css/form.css';
                               onsubmit="return confirm('Opravdu se chcete odhlásit?');">
                             <?= Csrf::getField() ?>
                             <button type="submit">
-                                <?= htmlspecialchars($section['label']) ?>
+                                <?= e($section['label']) ?>
                             </button>
                         </form>
                     <?php else: ?>
                         <a href="<?= $section['path'] ?>/#main">
-                            <?= htmlspecialchars($section['label']) ?>
+                            <?= e($section['label']) ?>
                         </a>
                     <?php endif; ?>
 
@@ -125,7 +128,7 @@ require __DIR__ . '/../../../public/css/form.css';
                             <?php foreach ($section['items'] as $item): ?>
                                 <li class="submenu-item <?= $item['active'] ? 'active' : '' ?>">
                                     <a href="<?= $item['path'] ?>/#main">
-                                        <?= htmlspecialchars($item['label']) ?>
+                                        <?= e($item['label']) ?>
                                     </a>
                                 </li>
                             <?php endforeach; ?>
@@ -140,20 +143,20 @@ require __DIR__ . '/../../../public/css/form.css';
 
     <!-- ================= MAIN ================= -->
     <main id="main" class="main">
-        <h1>Bó - <?= htmlspecialchars($view->title ?: 'Servisní zápisník') ?></h1>
+        <h1>Bó - <?= e($view->title ?: 'Servisní zápisník') ?></h1>
 
-<?php if (!empty($_SESSION['flash'] ?? [])): ?>
+
     <div class="flash-wrapper">
         <?php foreach (['success','error','info'] as $type): ?>
             <?php if (Session::hasFlash($type)): ?>
                 <div class="flash flash-<?= $type ?>">
                     <span class="flash-message">
-                        <?= Session::getFlash($type) ?>
+                        <?= e(Session::getFlash($type)) ?>
                     </span>
                     <button class="flash-close" onclick="this.parentElement.remove()">×</button>
                 </div>
             <?php endif; ?>
         <?php endforeach; ?>
     </div>
-<?php endif; ?>
+
 

@@ -12,16 +12,18 @@ use App\Models\AssignmentModel;
 use App\Core\Url;
 use App\Core\Flash;
 use App\Core\Auth;
+use App\Core\Roles;
+
 
 class TaskController extends Controller
 {
-public function index(): string
-{
-    $tasks = (new TaskModel())->forIndex();
-
-    $this->view->tasks = $tasks;
-    return $this->render('tasks/index');
-}
+	public function index(): string
+	{
+	    $tasks = (new TaskModel())->forIndex();
+	//var_dump($tasks);
+	    $this->view->data = $tasks;
+	    return $this->render('tasks/index');
+	}
 
     public function createFormGet(?int $orderId = null): string
     {
@@ -61,8 +63,7 @@ private function getOrderOrRedirect(int $orderId): array
 
 }
 
-
-
+/*
 	private function setViewForDetail(int $orderId): void
 	{
 	    $order = $this->getOrderOrRedirect($orderId);
@@ -79,19 +80,14 @@ private function getOrderOrRedirect(int $orderId): array
 	    
 		
 	    // data formuláře (pro sticky input / chyby)
-	    $this->view->taskFormData   = $this->view->taskFormData   ?? [];
-	    $this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
+	    //$this->view->taskFormData   = $this->view->taskFormData   ?? [];
+	    //$this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
 	
 	}
-
+*/
     public function createFormPost(?int $orderId): string
-    {/*
-$order = $workOrderModel->find($orderId);
-
-if (!$workOrderModel->canAddTask($order)) {
-    $this->flashError('K uzavřené zakázce nelze přidat nový úkol.');
-    return $this->redirect("/work-orders/{$orderId}#main");
-}*/
+    {
+    	
         $this->checkCsrf();
 			
 			$data = $_POST;
@@ -129,7 +125,7 @@ if (!$workOrderModel->canAddTask($order)) {
 			}
 			
         if ($this->hasErrors()) {
-            return $this->createForm();
+            return $this->createFormGet();
         }
 			
         (new TaskModel())->create([
@@ -177,7 +173,7 @@ if (!$workOrderModel->canAddTask($order)) {
 	{
 		$task = $this->getTaskOrRedirect($taskId);
 		
-		$this->view->tasks = $tasks;
+		$this->view->tasks = $task;
 		return $this->render('tasks/edit');
 	}
 
@@ -185,20 +181,18 @@ if (!$workOrderModel->canAddTask($order)) {
 
     public function done(int $taskId): void
     {
-        (new TaskModel())->markDone($taskId);
+        (new TaskModel())->closeTask($taskId, 'done');
         Url::back();
     }
 
     public function cancel(int $taskId): void
     {
-        (new TaskModel())->cancel($taskId);
+        (new TaskModel())->closeTask($taskId, 'cancelled');
         Url::back();
     }
  public function addTaskReportGet(int $taskId): string
 {
 	//ověříme právo na přidání Reportu
-	self::canUserAddReportOrRedirect($taskId);
-	//má právo, zavoláme pomocnou metodu
 	return $this->addTaskReport($taskId);
 
 }   
@@ -209,15 +203,25 @@ if (!$workOrderModel->canAddTask($order)) {
 public function addTaskReportPost(int $taskId): string
 {
 	//ověříme právo na přidání Reportu
-	self::canUserAddReportOrRedirect($taskId);
+
 	
 	//má právo, může dát Report
     $this->checkCsrf();
     $data = $_POST;
+    
+	$canUserAddReport = self::canUserAddReport($taskId);
+	if(
+	    !$canUserAddReport
+    && !Roles::isManagement(Auth::role())
+    ){
+		//není manager, nemá ani vidět:
+    	Flash::error('Nemáte oprávnění. Nejste členem týmu, který má úkol plnit...');
+		Url::redirect('/{tenant}/tasks/#main');
+	}
+    $data['canUserAddReport'] = $canUserAddReport;
     // 1. Načti úkol
     $taskModel = new TaskModel();
     $task = $taskModel->find($taskId);
-    
     if (!$task) {
         Flash::error('Úkol neexistuje');
         Url::redirect('/{tenant}/tasks');
@@ -225,7 +229,8 @@ public function addTaskReportPost(int $taskId): string
     
     // 2. Validace reportu (povinné)
 		$report 				= trim($data['report'] ?? '');
-		$kilometers 		= (int) $data['kilometers'] ?? 0;
+		//$kilometers 		= (int) $data['kilometers'] ?? 0;
+		$kilometers 		= (int) ($data['kilometers'] ?? 0);
 		$participants		= $data['participants'] ?? [];
 		$hours				= 0;
 		$minutes				= 0;
@@ -300,7 +305,18 @@ public function addTaskReport(int $taskId): string
         Flash::error('Úkol neexistuje');
         Url::redirect('/{tenant}/tasks');
     }
+	$task['canUserAddReport'] = self::canUserAddReport($taskId);
+	if(
+	    !$task['canUserAddReport']
+    && !Roles::isManagement(Auth::role())
+    ){
+		//není manager, nemá ani vidět:
+    	Flash::error('Nemáte oprávnění. Nejste členem týmu, který má úkol plnit...');
+		Url::redirect('/{tenant}/tasks/#main');
+	}
+
     
+
     // Načti členy týmu
     $teamModel = new TeamModel();
     $teamMembers = $teamModel->getActiveMembers($task['team_id']);
@@ -320,6 +336,8 @@ public function addTaskReport(int $taskId): string
     
     return $this->render('tasks/report');
 }
+
+/**
     private function canUserAddReportOrRedirect(int $taskId)
     {
     	//zízkáme id aktuálního přihlášeného uživatele
@@ -331,7 +349,20 @@ public function addTaskReport(int $taskId): string
     		return true;
     	}
     	Flash::error('Nemáte oprávnění. Nejste členem týmu, který má úkol plnit...');
-		Url::redirect('/{tenant}/tasks/#main');
+		Url::redirect('/{tenant}/tasks');
+    }
+**/
+    private function canUserAddReport(int $taskId)
+    {
+    	//zízkáme id aktuálního přihlášeného uživatele
+    	$userId = Auth::id();
+
+    	//zjistíme, jestli má právo přidat report k tomuto úkolu
+    	if((new TaskModel())->canUserAddReport((int) $taskId, (int) $userId) === true)
+    	{
+    		return true;
+    	}
+       return false;
     }
 
 }

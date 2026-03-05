@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
+
+
 // views/teams/index.php – přehled týmů
 
 use App\Core\Url;

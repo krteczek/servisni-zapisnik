@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 /**
  * Bezpečně escapuje text pro výstup do HTML.
  * Zabrání XSS útoku při zobrazování uživatelského vstupu.
@@ -8,30 +9,21 @@ declare(strict_types=1);
  * TODO: [SECURITY] Zvážit použití HTML Purifier pro povolené HTML tagy
  * TODO: [PERFORMANCE] Přidat caching pro často escapované identické texty
  *
- * @param string|null $text Text k escapování
+ * @param string|null $value Text k escapování
  * @return string Escapovaný text (prázdný string pokud vstup je null)
  */
 function e(mixed $value): string
 {
-    return match ($value) {
-        null => 'NULL',
-        false => 'FALSE',
-        true => 'TRUE',
-        default => htmlspecialchars(
-            (string)$value,
-            ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
-            'UTF-8'
-        )
-    };
-}
+    if ($value === null) {
+        return '';
+    }
 
-// Přesně tohle dělá:
-e(null);        // "NULL"
-e(false);       // "FALSE"
-e(true);        // "TRUE"
-e(0);           // "0"
-e("");          // ""
-e("text");      // "text"
+    return htmlspecialchars(
+        (string) $value,
+        ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
+        'UTF-8'
+    );
+}
 
 /**
  * Formátuje hodnotu pro zobrazení v uživatelském rozhraní.
@@ -141,12 +133,12 @@ function t(mixed $key): string
         'monter'      => 'Montér',
         'active'      => 'Aktivní',
         'inactive'    => 'Neaktivní',
-        'pending'     => 'Čeká...',
+        'pending'     => 'Čeká na aktivaci',
         'phone'       => 'Telefón',
         'email'       => 'Email',
         'personal'    => 'Osobně',
-        'system'      => 'Systém',
-    ];
+        'exported'    => 'Exportováno',
+            ];
 
     $key = strtolower(trim($key));
 
@@ -201,4 +193,40 @@ function getClientUserAgent(): string
     return mb_substr($_SERVER['HTTP_USER_AGENT'], 0, 255);
 }
 
+//používá se při výpisu uživatelů, týmů,
+function active(array$user) : string
+{
+		$isActive = 'active';
+		if($user['password_hash'] === NULL && $user['active'] === 0) {
+			$isActive = 'pending';
+		} elseif((int) $user['active'] === 0) {
+			$isActive = 'inactive';
+		}
+		return $isActive;
+}
+
+function a(array $user) : string
+{
+   return active($user);
+}
+
+
+
+
+
+function tx(?string $text): string
+{
+    static $texy = null;
+
+    if ($texy === null) {
+        $texy = new \Texy();
+        Texy\Configurator::safeMode($texy);
+    }
+
+    if (!$text) {
+        return '';
+    }
+
+    return $texy->process($text);
+}
 ?>

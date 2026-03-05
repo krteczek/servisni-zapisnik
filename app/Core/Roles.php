@@ -15,7 +15,8 @@ final class Roles
     private const ROLE_ROOT  = 'root';
     private const ROLE_ADMIN = 'admin';
     private const ROLE_MISTR = 'mistr';
-    private const ROLE_USER  = 'user';
+    //private const ROLE_PREDAK  = 'predak';
+    //private const ROLE_MONTER  = 'monter';
 
     private static ?array $roles = null;
 

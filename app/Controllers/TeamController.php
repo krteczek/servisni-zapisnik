@@ -47,6 +47,7 @@ final class TeamController extends Controller
 
         $this->view->teams = $teams;
 
+        $this->view->mode = $active === true ? 'active' : 'inactive';
         return $this->render('teams/index');
     }
 
@@ -192,33 +193,33 @@ final class TeamController extends Controller
             Url::redirect('/{tenant}/teams/#main');
         }
 
-        $roles     = Config::get('roles_in_team')['roles'];
-        $default   = Config::get('roles_in_team')['default'];
+        $roles     = Config::get('roles_in_team.roles');
+        $default   = Config::get('roles_in_team.default');
 
         /* ===== ÚPRAVA NÁZVU / BARVY ===== */
         if (isset($_POST['name'], $_POST['color'])) {
             $name  = trim($_POST['name']);
-            $color = trim($_POST['color'] ?? self::DEFAULT_COLOR);
-				
+            $color = trim($_POST['color']);
+
 				if($name === '')
 				{
 					$this->addError('name', 'Název týmu je povinný.');
 				}
-				elseif(mb_strlen($name)>= self::MAX_LENGHT_COLOR_NAME) 
+				elseif(mb_strlen($name)>= self::MAX_LENGHT_COLOR_NAME)
 				{
 					$this->addError('name', 'Název týmu je příliš dlouhý.');
 				}
-				
+
 				if($color === '')
 				{
 					$this->addError('color', 'Barva týmu je povinná.');
 				}
-				elseif(self::isValidHexColor($color))
+				elseif(!self::isValidHexColor($color))
 				{
 					//poslali nějaký nesmysl, dáme defaultní barvu
 					$color = self::DEFAULT_COLOR;
 				}
-				
+
 				
             if ($name !== '' && $color !== '') {
                 $teamModel->update($id, [
@@ -227,7 +228,7 @@ final class TeamController extends Controller
                 ]);
                 Flash::success('Data týmu byla změněna.');
             } else {
-                Flash::success('Data týmu se nepodařilo změnit');
+                Flash::error('Data týmu se nepodařilo změnit');
             }
 
             Url::redirect('/{tenant}/teams/' . $id . '/edit/#main');
@@ -246,17 +247,40 @@ final class TeamController extends Controller
 
             // root NIKDY
             if (!$user || $user['global_role'] === 'root') {
+            	Flash::error('Uživatele typu root nelze přidávat do týmů');
                 Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
             }
 
-            $membershipModel->add($userId, $id, $role);
-            Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
-        }
+            $ok = $membershipModel->add($userId, $id, $role);
+            if((int) $ok > 0)
+            {
+               Flash::success('Uživatel byl přidán do týmu');
+               Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
+            }
+         }
 
         /* ===== ZMĚNA ROLE ===== */
+        //tyto role jsou jen přiznáním funkce členu skupiny, na aplikaci nemají vliv
         if (isset($_POST['change_user_role'], $_POST['role_in_team'])) {
             $membershipId = (int) $_POST['change_user_role'];
             $role         = $_POST['role_in_team'];
+            /*
+            roles_in_team: array [
+    'default' => 'member',
+
+    'roles' => [
+        'leader' => 'Vedoucí',
+        'member' => 'Člen',
+        'guest'  => 'Host',
+    ],
+];
+*/          // ošetřeni proti podvržení
+            $roles = Config::get('roles_in_team.roles');
+            if (!array_key_exists($role, $roles))
+            {
+                $role = Config::get('roles_in_team.default');
+            }
+
 
             if (isset($roles[$role])) {
                 $membershipModel->changeRole($membershipId, $role);
@@ -268,6 +292,8 @@ final class TeamController extends Controller
         /* ===== ODEBRÁNÍ ČLENA ===== */
         if (isset($_POST['remove_membership_id'])) {
             $membershipModel->end((int) $_POST['remove_membership_id']);
+
+            Flash::success('Uživatel byl odebrán z týmu');
             Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
         }
 
@@ -312,22 +338,22 @@ final class TeamController extends Controller
 
         Url::redirect('/{tenant}/teams/#main');
     }
-    
+
     /* helper pro ošetření vstupu barvy */
-	private function isValidHexColor($color) 
+	private function isValidHexColor(string $color): bool
 	{
 		// 'i' modifikátor = case-insensitive
-		if (preg_match('/^#([0-9A-F]{3}|[0-9A-F]{6})$/i', $color)) 
+		if (preg_match('/^#([0-9A-F]{3}|[0-9A-F]{6})$/i', $color))
 		{
 			return true;
 		}
  		return false;
 	}
-    
+
    public static function getDefaultColor()
    {
    	return self::DEFAULT_COLOR;
-   } 
-    
+   }
+
     
 }

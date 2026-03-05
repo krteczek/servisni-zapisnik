@@ -124,6 +124,27 @@ final class AuthTokenModel extends BaseModel
         return $out;
     }
 
+
+public function findValidByHashForUpdate(string $hash, string $type): ?array
+{
+    $sql = "
+        SELECT *
+        FROM {$this->tableName}
+        WHERE token_hash = :hash
+          AND type = :type
+          AND used_at IS NULL
+          AND expires_at > NOW()
+        LIMIT 1
+        FOR UPDATE
+    ";
+
+    return $this->fetchOne($sql, [
+        'hash' => $hash,
+        'type' => $type,
+    ]);
+}
+
+
     /* ==========================================================
      * INVALIDATE OLD TOKENS
      * ========================================================== */
@@ -182,11 +203,21 @@ final class AuthTokenModel extends BaseModel
      */
     public function markUsed(int $id): bool
     {
-        return $this->update($id, [
-            'used_at' => date('Y-m-d H:i:s'),
-        ]);
-    }
 
+    		$sql = "UPDATE auth_tokens
+SET used_at = NOW()
+WHERE id = :id
+  AND used_at IS NULL
+  ";
+        $stmt = $this->db()->prepare($sql);
+
+        $stmt->execute([
+            'id' => $id
+        ]);
+
+        return $stmt->rowCount() === 1;
+    }
+    
     /* ==========================================================
      * HOUSEKEEPING
      * ========================================================== */

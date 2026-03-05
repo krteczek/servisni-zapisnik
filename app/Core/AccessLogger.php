@@ -87,8 +87,7 @@ final class AccessLogger
         $count = $model->countRecent($type, $ip, 10);
 
         if ($count >= 5 && $userId !== null) {
-            Flash::add(
-                'warning',
+            Flash::error(
                 'Bylo zaznamenáno opakované neplatné chování. '
                 . 'Pokračování může vést k omezení účtu.'
             );

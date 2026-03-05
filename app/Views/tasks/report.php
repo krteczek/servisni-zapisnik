@@ -2,6 +2,8 @@
 declare(strict_types=1);
 // app/views/tasks/report.php
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Csrf;
 use App\Core\Url;
 
@@ -13,7 +15,8 @@ $reports = $view->reports ?? [];
 $oldData = $view->oldData ?? []; // stará data z POST při chybě
 $errors = $view->errors ?? []; // chyby validace
 
-//var_dump($task);
+//var_dump($task, $teamMembers, $reports, $oldData);
+var_dump($teamMembers);
 //print_r($errors);
 ?>
 <div class="create-container">
@@ -25,9 +28,10 @@ $errors = $view->errors ?? []; // chyby validace
 				<div class="task-detail">
 				    <?php if (!empty($task['title'])): ?>
 				        <div class="task-description card">
-								<h3><?= e($task['title'] ?: 'Nespecifikováno') ?></h3>
+								<h3><?= e($task['title']) ?></h3>
 				            <div class="card-body">
-				                <?= nl2br(e($task['description'] ?: 'Nespecifikováno')); ?>
+				                <?= tx($task['description'] ?? '') ?: 'Nespecifikováno'; ?>
+				                
 				            </div>
 				        </div>
 				    <?php endif; ?>
@@ -52,7 +56,7 @@ $errors = $view->errors ?? []; // chyby validace
 				<?php endif; ?>
 				<!-- END: výpis chyb způsobených při vyplnování formuláře -->
 
-
+<?php if($task['canUserAddReport'] === true): ?>
 				<!-- START: Formulář pro zadávání reportů k úkolům -->
 				<div class="form-container">
 					    <form method="POST" class="form">
@@ -152,7 +156,12 @@ $errors = $view->errors ?? []; // chyby validace
 					    </form>
 				</div>
 				<!-- END: Formulář pro zadávání reportů k úkolům -->
-
+<?php else: ?>
+<div class="ui-alert ui-alert-warning">
+<p>Máte právo nahlížet do tohoto úkolu, ale nemáte právo přidávat k němu reporty.
+Pokud chcete přidat report, musíte se nejprve stát členem týmu, který má tento úkol na starosti...</p>
+</div>
+<?php endif; ?>
 			</div>
 			<!-- END: Tělo karty formuláře -->
 

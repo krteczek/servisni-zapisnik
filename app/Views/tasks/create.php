@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
+/** @var \App\Core\ViewContext $view */
+
 use App\Core\Url;
 //use App\Core\Roles;
 use App\Core\Csrf;
 
-$css = '';
-//require __DIR__ . '/style.php';
 
 require __DIR__ . '/../layout/header.php';
 
@@ -143,5 +143,6 @@ $errors = $view->errors;
 </div>
 
 
-<?php require __DIR__ . '/../layout/footer.php'; ?>
+<?php require __DIR__ . '/../layout/footer.php';
+
 
