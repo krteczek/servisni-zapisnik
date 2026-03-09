@@ -8,6 +8,7 @@ use App\Core\Url;
 use App\Core\Csrf;
 require __DIR__ . '/../layout/header.php';
 $token = $view->data['token'] ?? '';
+$title = $view->data['button'] ?? '';
 $errors = $view->errors ?? [];
 
 $ch = '';
@@ -36,7 +37,7 @@ if ($errors) {
         <input type="password" name="passwordZ" required>
     </div>
 
-    <button type="submit">Změnit heslo</button>
+    <button type="submit"><?= $title ?></button>
 </form>
 
 

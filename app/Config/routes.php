@@ -99,7 +99,7 @@ return [
 
 [
     'method' => 'GET',
-    'path'   => '/activate',
+    'path'   => '/activate/complete',
     'action' => [AuthController::class, 'activate'],
     'auth'   => false,
     'title'  => 'Bó: Aktivace uživatele',
@@ -107,7 +107,7 @@ return [
 
 [
     'method' => 'POST',
-    'path'   => '/activate',
+    'path'   => '/activate/complete',
     'action' => [AuthController::class, 'activatePost'],
     'auth'   => false,
     'title'  => 'Bó: Aktivace uživatele',

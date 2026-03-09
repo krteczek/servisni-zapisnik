@@ -10,8 +10,9 @@ use App\Core\Flash;
 use App\Core\UserGuard;
 use App\Core\Mailer;
 use App\Models\UserModel;
-use App\Services\AuthTokenService;
-use App\Services\ActivationMailService;
+use App\Services\Tokens\TokenService;
+use App\Services\Tokens\TokenType;
+use App\Services\Users\ActivationMailService;
 use App\Core\Auth;
 
 final class UserController extends Controller
@@ -87,9 +88,10 @@ final class UserController extends Controller
 	    try {
 
 	    	//vytvoříme token
-				$token = (new AuthTokenService())->create(
-				    userId: $userId,
-				    type: AuthTokenService::TYPE_ACTIVATE
+				$token = (new TokenService())->create(
+				    type: TokenType::INVITATION,
+				    email: $user['email'],
+				    userId: $id
 				);
 
 				$url = Url::base() . Url::to('/activate/complete?token=' . $token);
@@ -284,12 +286,13 @@ final class UserController extends Controller
         }
         
 	    try {
-				$token = (new AuthTokenService())->create(
-				    userId: $id,
-				    type: AuthTokenService::TYPE_ACTIVATE
+				$token = (new TokenService())->create(
+				    type: TokenType::INVITATION,
+				    email: $user['email'],
+				    userId: $id
 				);
 //var_dump($token);exit;
-			$url = Url::base() . Url::to('/register/complete?token=' . $token);
+			$url = Url::base() . Url::to('/activate/complete?token=' . $token);
 			
 			[$subject, $htmlBody, $textBody] = ActivationMailService::buildInvitation($url, Auth::company());
 			
@@ -309,9 +312,17 @@ final class UserController extends Controller
 	            ' byl aktivační e-mail úspěšně odeslán.'
 	            );
 	       }
+	       else
+	       {
+	       		Flash::error(
+	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
+	            ' se nepodařilo aktivační e-mail odeslat.'
+	            );
+
+	       }
 	
 	    } catch (\Throwable $e) {
-			//var_dump($e);exit;
+			var_dump($e);exit;
 	        // ideálně logovat $e
 	        Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .

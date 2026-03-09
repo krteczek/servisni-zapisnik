@@ -17,13 +17,16 @@ use App\Models\WorkOrderModel;
 use App\Models\TeamModel;
 
 
-use App\Services\ServiceFactory;
-use App\Services\AuthTokenService;
-use App\Services\RegistrationTokenService;
-use App\Services\RegistrationService;
-use App\Services\ActivationMailService;
-use App\Services\PasswordResetRequestService;
-use App\Services\PasswordResetService;
+//use App\Services\ServiceFactory;
+use App\Services\Tokens\TokenService;
+use App\Services\Tokens\TokenType;
+//use App\Services\RegistrationTokenService;
+//use App\Services\RegistrationService;
+//use App\Services\ActivationMailService;
+use App\Services\Users\UserActivationService;
+use App\Services\Tokens\AuthTokenService;
+//use App\Services\PasswordResetService;
+//use App\Services\Users\UserActivationService;
 
 use App\Core\Flash;
 
@@ -155,13 +158,14 @@ public function login(): string
 
     public function activate(): string
     {
-        return $this->handleTokenGet('activate');
+    	
+        return $this->handleTokenGet(TokenType::INVITATION);
     }
 
     public function activatePost(): string
     {
         return $this->handleTokenPost(
-            'activate',
+            TokenType::INVITATION,
             function (int $userId, string $password): void {
                 (new UserModel())->activateUser(
                     $userId,
@@ -174,7 +178,7 @@ public function login(): string
 
     public function resetPassword(): string
     {
-        return $this->handleTokenGet('reset_password');
+        return $this->handleTokenGet(TokenType::PASSWORD_RESET);
     }
 
 
@@ -183,7 +187,7 @@ public function login(): string
         
         
         return $this->handleTokenPost(
-            'reset_password',
+            TokenType::PASSWORD_RESET,
             function (int $userId, string $password): void {
                 (new UserModel())->setPassword(
                     $userId,
@@ -245,9 +249,9 @@ public function forgotPasswordPost(): string
         }
 
         try {
-        		
-            $user = (new AuthTokenService())->validate($token, $type);
-
+        		//public function validate(string $rawToken, string $type): array
+            $this->view->data = (new TokenService())->validate($token, $type);
+				$this->view->data['button'] = 'Nastavit heslo';
             $this->view->data['token'] = $token;
 
 				return $this->render('auth/reset-password');
@@ -266,9 +270,9 @@ public function forgotPasswordPost(): string
     ): string {
     	
 			$this->checkCsrf();
-			$token    = $_POST['token'] ?? null;
-			$password = $_POST['password'] ?? null;
-    		$passwordZ = $_POST['passwordZ'] ?? null;
+			$token    = trim($_POST['token']) ?? null;
+			$password = trim($_POST['password']) ?? null;
+    		$passwordZ = trim($_POST['passwordZ']) ?? null;
     		if($password === '') 
     		{
     			$this->addError('password', 'Heslo je povinné');
@@ -287,20 +291,18 @@ public function forgotPasswordPost(): string
     		}
     		
     		if ($this->hasErrors()) {
-    			$this->view->data['token'] = $token;
+        		//public function validate(string $rawToken, string $type): array
+            $this->view->data = (new TokenService())->validate($token, $type);
+				$this->view->data['button'] = 'Nastavit heslo';
+            $this->view->data['token'] = $token;
             return $this->render('auth/reset-password');
         }	
 
         try {
-    $service = new PasswordResetService(
-        new AuthTokenService(),
-        new UserModel()
-    );
+            (new UserActivationService())->consumeAndProcess($token, $type, $password);
 
-    $service->resetByToken($token, $password);
-
-    Flash::success('Heslo bylo změněno.');
-    Url::redirect('/login');
+            Flash::success('Heslo bylo úspěšně nastaveno.');
+            Url::redirect('/login');
 
         } catch (\Throwable $e) {
         		$mess = '[handleTokenPost] ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString();

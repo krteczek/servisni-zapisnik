@@ -37,6 +37,7 @@ final class EmailRateLimitModel extends BaseModel
         string $ip,
         int $windowMinutes
     ): int {
+    	  $minutes = (int)$windowMinutes;
         $sql = "
             SELECT COUNT(*)
             FROM {$this->table}
@@ -44,7 +45,7 @@ final class EmailRateLimitModel extends BaseModel
               AND tenant_slug = :tenant
               AND email = :email
               AND ip = :ip
-              AND created_at >= (NOW() - INTERVAL :window MINUTE)
+              AND created_at >= (NOW() - INTERVAL $minutes MINUTE)
         ";
 
         $stmt = $this->db()->prepare($sql);
