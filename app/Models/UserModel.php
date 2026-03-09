@@ -80,9 +80,9 @@ class UserModel extends BaseModel
      * PASSWORD
      * ========================================================== */
 
-public function activateUser(int $id, string $password): bool
+public function activateUser(int $id, string $hash): bool
 {
-	     $hash = password_hash($password, PASSWORD_DEFAULT);
+	     
     $sql = "
         UPDATE {$this->tableName}
         SET password_hash = :hash,

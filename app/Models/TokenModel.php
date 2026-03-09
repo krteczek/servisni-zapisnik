@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use PDO;
+use RuntimeException;
 
 /**
  * Model pro správu autentizačních tokenů (aktivace účtu, reset hesla).
@@ -15,14 +16,14 @@ use PDO;
  * - Zneplatnění všech tokenů uživatele (např. při novém požadavku)
  * - Čištění expirovaných tokenů
  */
-final class AuthTokenModel extends BaseModel
+final class TokenModel extends BaseModel
 {
     /**
      * Název tabulky bez prefixu.
      *
      * @var string
      */
-    protected string $table = 'auth_tokens';
+    protected string $table = 'tokens';
 
     /**
      * Připojení k admin databázi (centrální token store pro všechny tenanty).
@@ -91,7 +92,7 @@ final class AuthTokenModel extends BaseModel
      * - Odpovídá zadanému typu (activation, password_reset)
      * - Není označen jako použitý (used_at IS NULL)
      * - Nevypršela jeho platnost (expires_at > NOW())
-     * - Patří do aktuálního tenantu
+     * 
      *
      * TODO: [SECURITY] Přidat logování pokusů o neplatný token (prevence brute force)
      * TODO: [PERFORMANCE] Index na (token_hash, type, used_at, expires_at, company_id)
@@ -102,16 +103,16 @@ final class AuthTokenModel extends BaseModel
      */
     public function findValidByHash(string $hash, string $type): ?array
     {
-    	//$this->tenantAware = false;
-    	 
+    	
         $sql = "
-            SELECT *
+            SELECT id, user_id, email
             FROM {$this->tableName}
             WHERE token_hash = :hash
               AND type = :type
               
               AND used_at IS NULL
               AND expires_at > NOW()
+              AND invalidated_at IS NULL
               
             LIMIT 1
         ";
@@ -127,13 +128,17 @@ final class AuthTokenModel extends BaseModel
 
 public function findValidByHashForUpdate(string $hash, string $type): ?array
 {
+	 if (!$this->db()->inTransaction()) {
+    throw new RuntimeException('Token consume requires transaction');
+	}
     $sql = "
-        SELECT *
+        SELECT id, user_id, email
         FROM {$this->tableName}
         WHERE token_hash = :hash
           AND type = :type
           AND used_at IS NULL
           AND expires_at > NOW()
+          AND invalidated_at IS NULL
         LIMIT 1
         FOR UPDATE
     ";
@@ -166,27 +171,28 @@ public function findValidByHashForUpdate(string $hash, string $type): ?array
      * @param string $type Typ tokenu
      * @return int Počet zneplatněných tokenů
      */
-    public function invalidateForUser(
-        int $userId,
-        string $type
-    ): int {
-        $sql = "
-            UPDATE {$this->tableName}
-            SET used_at = NOW()
-            WHERE user_id = :user_id
-              AND type = :type
-              AND used_at IS NULL
-        ";
 
-        $stmt = $this->db()->prepare($sql);
+     public function invalidateActive(string $email, string $type): int
+{
+    $sql = "
+        UPDATE {$this->tableName}
+        SET invalidated_at = NOW()
+        WHERE email = :email
+          AND type = :type
+          AND used_at IS NULL
+          AND expires_at > NOW()
+          AND invalidated_at IS NULL
+    ";
 
-        $stmt->execute([
-            'user_id' => $userId,
-            'type'    => $type,
-        ]);
+    $stmt = $this->db()->prepare($sql);
 
-        return $stmt->rowCount();
-    }
+    $stmt->execute([
+        'email' => $email,
+        'type'  => $type,
+    ]);
+
+    return $stmt->rowCount();
+}
 
     /* ==========================================================
      * MARK AS USED
@@ -204,10 +210,12 @@ public function findValidByHashForUpdate(string $hash, string $type): ?array
     public function markUsed(int $id): bool
     {
 
-    		$sql = "UPDATE auth_tokens
+    		$sql = "UPDATE {$this->tableName}
 SET used_at = NOW()
 WHERE id = :id
   AND used_at IS NULL
+  AND invalidated_at IS NULL
+  LIMIT 1
   ";
         $stmt = $this->db()->prepare($sql);
 
@@ -217,7 +225,9 @@ WHERE id = :id
 
         return $stmt->rowCount() === 1;
     }
-    
+
+
+   
     /* ==========================================================
      * HOUSEKEEPING
      * ========================================================== */
@@ -239,10 +249,12 @@ WHERE id = :id
     public function deleteExpired(): int
     {
         $sql = "
-            DELETE FROM {$this->tableName}
-            WHERE expires_at < NOW()
-              AND used_at IS NOT NULL
-              
+DELETE FROM {$this->tableName}
+WHERE expires_at < NOW() - INTERVAL 30 DAY
+AND (
+    used_at IS NOT NULL
+    OR invalidated_at IS NOT NULL
+)              
         ";
 
         $stmt = $this->db()->prepare($sql);
