@@ -23,6 +23,8 @@ final class ExceptionHandler
     public static function register(): void
     {
         set_exception_handler([self::class, 'handle']);
+        set_error_handler([self::class, 'handleError']);
+        register_shutdown_function([self::class, 'handleShutdown']);
     }
 
     /**
@@ -43,13 +45,15 @@ final class ExceptionHandler
     public static function handle(Throwable $e): void
     {
         // TODO: [MAINTENANCE] Přidat ignorování určitých typů výjimek (např. UserException)
+        $errorId = bin2hex(random_bytes(4));
         LoggerHolder::get()->error(
-            $e->getMessage(),
+            "[{$errorId}] " . $e->getMessage(),
             [
                 'exception' => get_class($e),
                 'file'      => $e->getFile(),
                 'line'      => $e->getLine(),
-                'trace'     => $e->getTraceAsString(),
+                'trace' => substr($e->getTraceAsString(), 0, 5000),
+                'url' => $_SERVER['REQUEST_URI'] ?? null,
             ]
         );
 
@@ -61,7 +65,7 @@ final class ExceptionHandler
         if (self::isDev()) {
             self::renderDev($e);
         } else {
-            self::renderProd();
+            self::renderProd($errorId);
         }
 
         exit;
@@ -90,10 +94,13 @@ final class ExceptionHandler
      *
      * @return void
      */
-    private static function renderProd(): void
+    private static function renderProd(string $errorId): void
     {
         // TODO: [UX] Použít profesionální HTML šablonu s logem a navigací
-        echo 'Došlo k chybě aplikace. Omlouváme se.';
+        echo 'Došlo k chybě aplikace.
+ID chyby: <strong>' . htmlspecialchars($errorId) . '</strong>.
+Omlouváme se.';
+
     }
 
     /**
@@ -116,4 +123,31 @@ final class ExceptionHandler
         echo $e->getTraceAsString();
         echo '</pre>';
     }
+
+public static function handleShutdown(): void
+{
+    $error = error_get_last();
+
+    if ($error !== null) {
+        LoggerHolder::get()->error(
+            'Fatal error',
+            $error
+        );
+    }
+}
+
+public static function handleError(
+    int $severity,
+    string $message,
+    string $file,
+    int $line
+): bool {
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+
+    throw new \ErrorException($message, 0, $severity, $file, $line);
+}
+
+
 }

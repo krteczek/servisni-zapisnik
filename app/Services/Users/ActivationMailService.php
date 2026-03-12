@@ -129,4 +129,15 @@ Pokud jste o vytvoření účtu nevěděli, kontaktujte prosím administrátora 
         return [$subject, $html, $text];
     }
 
+
+    
+    public static function buildPasswordRecowery(string $activationUrl, string $companyName, array $user ): array
+    {
+        $subject = 'Pozvánka do systému Bó';
+
+        $html = 'Tohle musíme dodělat';
+        $text = '';
+
+        return [$subject, $html, $text];
+    }
 }

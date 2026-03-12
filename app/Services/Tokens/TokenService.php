@@ -32,13 +32,18 @@ final class TokenService
         string $type,
         string $email,
         ?int $userId = null,
-        string $expires = '+15 minutes',
+        string $expires = '+115 minutes',
     ): string {
 
         //$ip = inet_pton($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
         $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 		  $ip = $ip ? inet_pton($ip) : null;
         $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
+
+        if (!in_array($type, TokenType::all()))
+        {
+        	  throw new RuntimeException('Požadavek na neznámý typ tokenu: ' . $type);
+        }
 
         $this->invalidate($email, $type);
 
@@ -86,34 +91,33 @@ final class TokenService
 
     public function consume(string $rawToken, string $type): array
     {
-        //$this->model->begin();
-
-        //try {
 
             $hash = self::hash($rawToken);
 
             $row = $this->model->findValidByHashForUpdate($hash, $type);
 
             if (!$row) {
-                throw new RuntimeException('Token je neplatný nebo expirovaný.');
+                return [
+                'ok' => false,
+                'result' => TokenResult::EXPIRED
+                ];
             }
 
             $updated = $this->model->markUsed((int)$row['id']);
 
             if (!$updated) {
-                throw new RuntimeException('Token již byl použit.');
+                return [
+                'ok' => false,
+                'result' => TokenResult::USED
+                ];
+
             }
 
-            //$this->model->commit();
-
+				$row['ok'] = true;
+				$row['result'] = TokenResult::VALID;
             return $row;
 
-        //} catch (Throwable $e) {
-
-         //   $this->model->rollback();
-         //   throw $e;
-        //}
-    }
+     }
 
     /* ==========================================================
      * INVALIDATE

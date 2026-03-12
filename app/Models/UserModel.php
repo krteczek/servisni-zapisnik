@@ -80,7 +80,7 @@ class UserModel extends BaseModel
      * PASSWORD
      * ========================================================== */
 
-public function activateUser(int $id, string $hash): bool
+public function activateUser(int $id, string $hash): array
 {
 	     
     $sql = "
@@ -101,17 +101,17 @@ public function activateUser(int $id, string $hash): bool
 		error_log('Table: ' . $this->tableName);
 		
 		if (!$ok) {
-			return false;
+			return ['ok' => false, 'result' => 'Uživatele se nepodařilo aktivovat'];
 		}
 
-		return $stmt->rowCount() === 1;
+		return ['ok' => $stmt->rowCount() === 1, 'result' => 'Uživatel byl aktivován.'];
 		//return $ok;
 
 }
 
     public function setPassword(int $id, string $hash): bool
     {
-        return $this->update($id, [
+       return $this->update($id, [
             'password_hash' => $hash,
         ]);
     }

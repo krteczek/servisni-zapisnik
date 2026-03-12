@@ -100,97 +100,95 @@ $err = $view->errors;
             </ul>
         </div>
     </div>
-
+</div>
 <?php if ($tasks === []) : ?>
     <p class="muted">Zatím nejsou přidány žádné úkoly.</p>
 <?php else : ?>
 
 
-    <div class="task-list">
+    <div class="task-grid" id="task-list">
 
 <?php foreach ($tasks as $task) : ?>
 <?php
 $canCloseDone = $task['can_close'];
 $canCloseCanceled = $task['can_cancel'];
 ?>
-       <div class="task-box status-<?= e($task['status']) ?>" id="taskId_<?= (int) $task['id'] ?>">
+<div class="task-card card status-<?= e($task['status']) ?>" id="taskId_<?= (int)$task['id'] ?>">
 
-            <!-- HLAVIČKA TASKU -->
-            <div class="task-header">
-                <strong>                   
-                    <?= e($task['title'] ?? 'Bez názvu') ?>
-                </strong>
-					<span class="badge badge-status-<?= e($task['status']) ?>">
-                    <?= te($task['status']) ?>
-                </span>
-           </div>
-				<div class="task-meta">
-				<strong class="task-description-header">Popis úkolu:</strong>
-				<div class="task-description"><?= tx($task['description']) ?></div>
-				</div>
-            <!-- META -->
-            <div class="task-meta">
-                Vytvořeno:
-                <?= e(formatCzDate($task['created_at'])) ?>
-            </div>
+    <div class="card-header">
+        <strong><?= e($task['title'] ?? 'Bez názvu') ?></strong>
 
-            <!-- STATISTIKY ASSIGNMENTŮ -->
-            
-<!-- tady potřebuji ty hodiny a kilometry --> 
-<div class="task-stats">
-    <span>Záznamy: <?= $task['stats']['assignments_count'] ?></span>
-    <span>Čas: <?= formatMinutes($task['stats']['total_minutes'] ?? 0) ?></span>
-    <span>Km: <?= $task['stats']['total_kilometers'] ?? 0 ?></span>
-</div>
-            
+        <span class="badge badge-status-<?= e($task['status']) ?>">
+            <?= te($task['status']) ?>
+        </span>
+    </div>
 
-            <!-- AKCE NAD TASKEM -->
-            <div class="task-actions">
+    <div class="card-body">
 
-                <a class="btn btn-sm btn-secondary"
-							href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>">
-							Detail + reporty
-					</a>
-
-
-					<a class="btn btn-sm btn-primary"
-					   href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>">
-					    Upravit
-					</a>
-<?php if ($task['can_cancel']) : ?>
-                <form method="post"
-								action="<?= Url::to(
-								'/{tenant}/tasks/' . $task['id'] . '/cancel'
-								) ?>"
-								onsubmit="return confirm('Opravdu chcete úkol stornovat?');"
-								style="display:inline">
-
-                    <?= Csrf::getField() ?>
-                    <button class="btn btn-sm btn-danger">
-                        Stornovat
-                    </button>
-                </form>
-<?php endif; ?>
-
-<?php if ($task['can_close'] && $task['status'] !== 'done') : ?>
-                <form method="post"
-								action="<?= Url::to(
-								'/{tenant}/tasks/' . $task['id'] . '/done'
-								) ?>"
-								onsubmit="return confirm('Opravdu chcete úkol uzavřít jako hotový?');"
-								style="display:inline">
-
-                    <?= Csrf::getField() ?>
-                    <button class="btn btn-sm btn-success">
-                        Uzavřít
-                    </button>
-                </form>
-<?php endif; ?>
-
-            </div>
-
+        <div class="meta-item">
+            <span class="meta-label">Popis:</span>
+            <span class="meta-value"><?= tx($task['description']) ?: 'Bez popisu' ?></span>
         </div>
-<?php endforeach; ?>
+
+        <div class="meta-item">
+            <span class="meta-label">Vytvořeno:</span>
+            <span class="meta-value"><?= e(formatCzDate($task['created_at'])) ?></span>
+        </div>
+
+        <div class="meta-item">
+            <span class="meta-label">Záznamy:</span>
+            <span class="meta-value"><?= $task['stats']['assignments_count'] ?></span>
+        </div>
+
+        <div class="meta-item">
+            <span class="meta-label">Čas:</span>
+            <span class="meta-value"><?= formatMinutes($task['stats']['total_minutes'] ?? 0) ?></span>
+        </div>
+
+        <div class="meta-item">
+            <span class="meta-label">Km:</span>
+            <span class="meta-value"><?= $task['stats']['total_kilometers'] ?? 0 ?></span>
+        </div>
+
+    </div>
+
+    <div class="card-footer">
+
+        <a class="btn btn-sm btn-secondary"
+           href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>">
+           Detail + reporty
+        </a>
+
+        <a class="btn btn-sm btn-primary"
+           href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>">
+           Upravit
+        </a>
+
+        <?php if ($task['can_cancel']) : ?>
+        <form method="post"
+              action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
+              onsubmit="return confirm('Opravdu chcete úkol stornovat?');">
+
+            <?= Csrf::getField() ?>
+            <button class="btn btn-sm btn-danger">Stornovat</button>
+
+        </form>
+        <?php endif; ?>
+
+        <?php if ($task['can_close'] && $task['status'] !== 'done') : ?>
+        <form method="post"
+              action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/done') ?>"
+              onsubmit="return confirm('Opravdu chcete úkol uzavřít?');">
+
+            <?= Csrf::getField() ?>
+            <button class="btn btn-sm btn-success">Uzavřít</button>
+
+        </form>
+        <?php endif; ?>
+
+    </div>
+
+</div><?php endforeach; ?>
 
     </div>
 

@@ -116,12 +116,12 @@ final class TokenModel extends BaseModel
               
             LIMIT 1
         ";
-
+			//var_dump($sql, $type, $hash);
          $out = $this->fetchOne($sql, [
             'hash'   => $hash,
             'type'   => $type,
         ]);
-        
+        //var_dump($out);exit;
         return $out;
     }
 
@@ -143,10 +143,12 @@ public function findValidByHashForUpdate(string $hash, string $type): ?array
         FOR UPDATE
     ";
 
-    return $this->fetchOne($sql, [
+     $out = $this->fetchOne($sql, [
         'hash' => $hash,
         'type' => $type,
     ]);
+    //var_dump($out);exit;
+    return $out;
 }
 
 
@@ -167,7 +169,7 @@ public function findValidByHashForUpdate(string $hash, string $type): ?array
      *
      * TODO: [AUDIT] Logovat hromadné zneplatnění tokenů
      *
-     * @param int $userId ID uživatele
+     * @param string $email ID uživatele
      * @param string $type Typ tokenu
      * @return int Počet zneplatněných tokenů
      */
@@ -222,8 +224,9 @@ WHERE id = :id
         $stmt->execute([
             'id' => $id
         ]);
-
-        return $stmt->rowCount() === 1;
+        $out = $stmt->rowCount() === 1;
+			//var_dump($out);exit;
+        return $out;
     }
 
 
@@ -278,4 +281,14 @@ AND (
     {
         return $this->create($data);
     }
+
+    public function deleteById(int $id): void
+    {
+        $stmt = $this->db()->prepare(
+            "DELETE FROM {$this->tableName} WHERE id = :id"
+        );
+
+        $stmt->execute(['id' => $id]);
+    }
+    
 }

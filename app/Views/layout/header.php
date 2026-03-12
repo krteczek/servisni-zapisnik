@@ -7,6 +7,7 @@ use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Auth;
 use App\Core\Roles;
+use App\Core\Flash;
 use App\Core\Session;
 
 ?>
@@ -28,7 +29,9 @@ use App\Core\Session;
     <link rel="stylesheet" href="<?= Url::to('/css/ui.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/buttons.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/teams.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/meta.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/form.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/flash.css') ?>">
 
     -->
  <style>
@@ -44,6 +47,7 @@ require __DIR__ . '/../../../public/css/buttons.css';
 require __DIR__ . '/../../../public/css/teams.css';
 require __DIR__ . '/../../../public/css/meta.css';
 require __DIR__ . '/../../../public/css/form.css';
+require __DIR__ . '/../../../public/css/flash.css';
 
 
 ?>
@@ -146,17 +150,6 @@ require __DIR__ . '/../../../public/css/form.css';
         <h1>Bó - <?= e($view->title ?: 'Servisní zápisník') ?></h1>
 
 
-    <div class="flash-wrapper">
-        <?php foreach (['success','error','info'] as $type): ?>
-            <?php if (Session::hasFlash($type)): ?>
-                <div class="flash flash-<?= $type ?>">
-                    <span class="flash-message">
-                        <?= e(Session::getFlash($type)) ?>
-                    </span>
-                    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
-                </div>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    </div>
-
+    <?= Flash::display() ?>
+<?php
 

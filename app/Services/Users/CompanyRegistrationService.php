@@ -1,15 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Services\Users;
 
-use App\Models\RegistrationRequestModel;
+use App\Models\TokenModel;
+
 use App\Models\CompanyModel;
 use App\Models\UserModel;
 use App\Models\TaskModel;
 use App\Models\WorkOrderModel;
 use App\Models\TeamModel;
-
+use App\Services\Tokens\TokenService;
+use App\Services\Tokens\TokenType;
 use App\Controllers\TeamController;
 use App\Core\Database;
 use App\Core\Config;
@@ -18,17 +20,18 @@ use RuntimeException;
 /*
 	Registrace do Bo systému
 */
-final class RegistrationService
+
+final class CompanyRegistrationService
 {
 
     public function __construct(
-        private RegistrationTokenService $registrationTokenService,
-        private RegistrationRequestModel $requests,
-        private CompanyModel $companies,
-        private UserModel $users,
-        private TaskModel $tasks,
-        private WorkOrderModel $orders,
-        private TeamModel $teams
+        private TokenService $tokenService = new TokenService(),
+        private TokenModel $tokenModel     = new TokenModel(),
+        private CompanyModel $companies    = new CompanyModel,
+        private UserModel $users           = new UserModel(),
+        private TaskModel $tasks           = new TaskModel(),
+        private WorkOrderModel $orders     = new WorkOrderModel,
+        private TeamModel $teams           = new TeamModel()
     ) {}
 
     /* ==========================================================
@@ -37,11 +40,10 @@ final class RegistrationService
 
     public function createRequest(string $email): string
     {
-        $token = (new RegistrationTokenService())->create(
+        $token = $this->tokenService->create(
+                    TokenType::COMPANY_CREATE,
                     email:  $email,
-                    ip:     inet_pton($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1'),
-                    ua:     substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)
-                    );
+                     );
 
         return $token;
     }
@@ -52,26 +54,26 @@ final class RegistrationService
      * ========================================================== */
 
  public function complete(
-    string $token,
-    array $companyData,
-    array $adminData
+     array $companyData
 ): array {
 
+	//var_dump($companyData);
+//echo "joogggo<br>";
     $pdo = Database::admin();
-    $pdo->beginTransaction();
+    //$pdo->beginTransaction();
 
     try {
 
 
-        $request = $this->registrationTokenService->consume($token);
-
-        if (!$request) {
-            $pdo->rollBack();
-            return [
-                'ok' => false,
-                'error' => 'Neplatný nebo expirovaný token.'
-            ];
+        /* $request = $this->tokenService->consume($companyData['token'], TokenType::COMPANY_CREATE);
+var_dump($request);
+echo "joogggo<br>";
+        if ($request['ok'] === false) {
+            //$pdo->rollBack();
+            $request['error'] = 'Neplatný nebo expirovaný token.';
+            return $request;
         }
+        */
 
         /*
          * 1️⃣ Vytvoření firmy
@@ -88,25 +90,49 @@ final class RegistrationService
             'created_at'    => date('Y-m-d H:i:s'),
             'activated_at'  => date('Y-m-d H:i:s'),
         ]);
+//echo "joogggo 91 " . $companyId . "<br>";
+        if(!$companyId)
+        {
+            //$pdo->rollBack();
+            $companyId = [];
+            $companyId['ok'] = false;
+            $companyId['error'] = 'Nepodařilo se vytvořit Vaši firmu v Bó systému. Zkuste to prosím později.';
+            return $companyId;
 
+        }
+//echo "joogggo 100 '" . $companyData['password'] . "'<br>";
+//$passw = password_hash($companyData['password'],PASSWORD_DEFAULT);
+//echo "hash '" . $passw . "'<br>";
         /*
          * 2️⃣ Vytvoření admin uživatele
          */
-        $userId = $this->users->createWithTenant($companyId, [
-            'email'           => $request['email'],
+         $data = [
+            'email'           => $companyData['email'],
             'employee_number' => 'admin',
-            'first_name'      => $adminData['first_name'],
-            'last_name'       => $adminData['last_name'],
+            'first_name'      => $companyData['first_name'],
+            'last_name'       => $companyData['last_name'],
             'password_hash'   => password_hash(
-                $adminData['password'],
+                $companyData['password'],
                 PASSWORD_DEFAULT
             ),
             'global_role'     => 'admin',
             'domain_admin'    => 1,
             'active'          => 1,
             'created_at'      => date('Y-m-d H:i:s'),
-        ]);
 
+         ];
+         //var_dump($companyId, $data);
+        $userId = $this->users->createWithTenant($companyId, $data);
+//echo "joogggo 118 " . $userId . "<br>";
+        if(!$userId)
+        {
+            //$pdo->rollBack();
+            $userId = [];
+            $userId['ok'] = false;
+            $userId['error'] = 'Nepodařilo se vytvořit Vašeho Admina v Bó systému. Zkuste to prosím později.';
+            return $userId;
+
+        }
 
         /*
          * 3 Vytvoření první defaultní zakázky. Ta slouží jako ukázka a
@@ -123,6 +149,15 @@ final class RegistrationService
 			'color' 	=> TeamController::getDefaultColor(),
 			'active'	=> 1
 		]);
+        if(!$TeamID)
+        {
+            //$pdo->rollBack();
+            $TeamID = [];
+            $TeamID['ok'] = false;
+            $TeamID['error'] = 'Nepodařilo se vytvořit Váš první tým v Bó systému. Zkuste to prosím později.';
+            return $TeamID;
+
+        }
 
 
 
@@ -145,6 +180,16 @@ TXT;
     'created_by_user_id' => $userId,
 
 ]);
+        if(!$WOID)
+        {
+            //$pdo->rollBack();
+            $WOID = [];
+            $WOID['ok'] = false;
+            $WOID['error'] = 'Nepodařilo se vytvořit Váši první zakázku v Bó systému. Zkuste to prosím později.';
+            return $WOID;
+
+        }
+
 
         /*
          *  Vytvoření prvních úkolů k první defaultní zakázce.
@@ -178,6 +223,15 @@ TXT;
     'created_by_user_id' 	=> $userId,
 
 ]);
+        if(!$TID1)
+        {
+            //$pdo->rollBack();
+            $TID1 = [];
+            $TID1['ok'] = false;
+            $TID1['error'] = 'Nepodařilo se vytvořit Váš první úkol v Bó systému. Zkuste to prosím později.';
+            return $TID1;
+
+        }
 
 $description3 = <<<TXT
 Máte první tým, jste jeho členem, vytvořil jste první Report o splnění úkolu a možná jste i úkol označil jako Uzavřený.
@@ -199,17 +253,26 @@ TXT;
     'created_by_user_id' 	=> $userId,
 
 ]);
+        if(!$TID2)
+        {
+            //$pdo->rollBack();
+            $TID2 = [];
+            $TID2['ok'] = false;
+            $TID2['error'] = 'Nepodařilo se vytvořit Váš druhý úkol zakázku v Bó systému. Zkuste to prosím později.';
+            return $TID2;
+
+        }
 
          Database::admin();
         /*
          *  Smazání žádosti
          */
-        $this->requests->deleteById((int) $request['id']);
+        $this->tokenModel->deleteById((int) $companyData['tokenId']);
 
 			/*
 			 *	Dokončíme transakci
 			*/
-        $pdo->commit();
+        //$pdo->commit();
 
 			/*
 			 *	vrátíme data pro první přihlášení
@@ -218,20 +281,20 @@ TXT;
 			    'ok' => true,
 			    'data' => [
 			        'user_id' => $userId,
-			        'email' => $request['email'],
+			        'email' => $companyData['email'],
 			        'company_id' => $companyId,
 			        'company_name' => $companyData['name'],
 			        'slug' => $slug,
-			        'first_name' => $adminData['first_name'],
-			        'last_name' => $adminData['last_name'],
+			        'first_name' => $companyData['first_name'],
+			        'last_name' => $companyData['last_name'],
 			        'global_role' => 'admin',
 			        'db_name' => $dbName,
 			    ]
 			];
-
+		
     } catch (\Throwable $e) {
 
-        $pdo->rollBack();
+        //$pdo->rollBack();
 			error_log((string)$e);
         // Tohle je systémová chyba
         return [

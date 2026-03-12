@@ -118,7 +118,7 @@ $errors = $view->errors ?? [];
                         </div>
                         <div>
      <div class="form-group <?= isset($errors['password']) ? 'has-error' : '' ?>">
-        <label>Nové heslo <span class="req">*</span></label>
+        <label>Nové heslo (min. 8 znaků)<span class="req">*</span></label>
         <input type="password" name="password" class="form-control" id="password" required>
     </div>
     <div class="form-group">
@@ -140,6 +140,34 @@ $errors = $view->errors ?? [];
             </div>
         </div>
     </div>
+	<div class="card card-help" id="helpCard">
+
+		<div class="card-body">
+			<h3>Filozofie projektu</h3>
+			<details>
+			<p>
+				Když jsem přemýšlel nad vytvořením tohoto systému, měl jsem jasnou vizi: 
+				<span>Zakázka je Bůh. 
+				Aby se Bůh mohl realizovat, zažít, naplnit, sestoupil k nám a rozpadl se na jednotlivé úkoly.
+				Skrze splnění těchto úkolů (reporty o vykonané práci), se Bůh, čili zakázka realizuje. 
+				</span>
+			</p>
+			<p>
+				Abyste mohli využívat náš systém, je nutno do něj zaregistrovat Vaši firmu. 
+			</p>
+			
+			</details>
+			<h3>Nápověda:</h3>
+			<ul>
+				<li><strong>Název firmy: </strong>Obchodní jméno Vaší firmy</li>
+				<li><strong>Ičo: </strong>Identifikační číslo Vaší firmy</li>
+				<li><strong>Jméno a příjmení: </strong>Jméno člověka, který za Vaši firmu bude spravovat Váš prostor v Bó systému.</li>
+				<li><strong>Heslo: </strong>Zvolte si své bezpečné heslo pro přihlášení do Bó systému.
+				Minimální požadovaná délka hesla je 8 znaků.</li>
+			</ul>
+			<p>Po úspěšném vytvoření prostoru pro Vaši firmu budete automaticky přihlášení.</p>
+			<p>V systému je vytvořena první zakázka a několik úkolů pro Vaše snažší seznámení s Bó systémem.</p>
+	</div> 
 </div>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

@@ -49,7 +49,7 @@ class MailService
         string $subject,
         string $html,
         string $text
-    ): void {
+    ): bool {
 
         $config = $this->config;
 
@@ -64,6 +64,6 @@ class MailService
         $this->mailer->AltBody = $text;
         $this->mailer->isHTML(true);
 
-        $this->mailer->send();
+        return $this->mailer->send();
     }
 }

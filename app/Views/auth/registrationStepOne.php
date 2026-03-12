@@ -81,7 +81,8 @@ $errors = $view->errors ?? [];
 								<h3>Nápověda:</h3>
 								<p>
 						Pro registraci uživatele je nutné zadat platnou emailovou adresu,
-						na kterou bude odeslán aktivační email pro nastavení hesla.
+						na kterou bude odeslán aktivační email pro založení firemního účtu
+						 a dalších základních informací, včetně nastavení hesla pro tento účet.
 						</p>						
 
 		</div>

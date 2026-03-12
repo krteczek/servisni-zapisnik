@@ -5,7 +5,7 @@ namespace App\Models;
 
 
 
-final class EmailRateLimitModel extends BaseModel
+final class RateLimitModel extends BaseModel
 {
     protected string $table = 'email_rate_limits';
 
@@ -13,12 +13,13 @@ final class EmailRateLimitModel extends BaseModel
         string $action,
         string $tenant,
         string $email,
-        string $ip
+        string $ip,
+        string $ua
     ): void {
         $sql = "
             INSERT INTO {$this->table}
-            (action, tenant_slug, email, ip)
-            VALUES (:action, :tenant, :email, :ip)
+            (action, tenant_slug, email, ip, ua)
+            VALUES (:action, :tenant, :email, :ip, : ua)
         ";
 
         $stmt = $this->db()->prepare($sql);
@@ -27,6 +28,7 @@ final class EmailRateLimitModel extends BaseModel
             'tenant' => $tenant,
             'email'  => $email,
             'ip'     => $ip,
+            'ua'     => $ua,
         ]);
     }
 
@@ -35,6 +37,7 @@ final class EmailRateLimitModel extends BaseModel
         string $tenant,
         string $email,
         string $ip,
+        string $ua,
         int $windowMinutes
     ): int {
     	  $minutes = (int)$windowMinutes;
@@ -45,6 +48,7 @@ final class EmailRateLimitModel extends BaseModel
               AND tenant_slug = :tenant
               AND email = :email
               AND ip = :ip
+              AND ua = :ua
               AND created_at >= (NOW() - INTERVAL $minutes MINUTE)
         ";
 
@@ -54,6 +58,7 @@ final class EmailRateLimitModel extends BaseModel
             'tenant' => $tenant,
             'email'  => $email,
             'ip'     => $ip,
+            'ua'     => $ua,
             'window' => $windowMinutes,
         ]);
 

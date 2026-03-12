@@ -9,7 +9,7 @@ use App\Core\Url;
 
 require __DIR__ . '/../layout/header.php';
 
-$errors = $view->errors ?? [];
+$err = $view->errors ?? [];
 ?>
 
 <p>
@@ -23,6 +23,7 @@ potřebujeme znát Váš email a jméno Vašeho pracovního prostoru.
     <div>
         <label>Email:</label>
         <input type="email" name="email" required>
+        <p><?= e($err['email']) ?></p>
     </div>
 
     <div>
@@ -34,6 +35,7 @@ potřebujeme znát Váš email a jméno Vašeho pracovního prostoru.
             title="Název, který jste zvolili při vytvoření pracovního prostoru."
             required
         >
+        <p><?= e($err['tenant']) ?></p>
     </div>
 
     <button type="submit">
