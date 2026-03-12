@@ -8,5 +8,5 @@ return [
     'base_path' => '/servisni-zapisnik/public',
 
     'error_reporting' => E_ALL,
-    'display_errors' => true,
+    'display_errors' => false,
 ];

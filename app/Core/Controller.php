@@ -125,7 +125,10 @@ abstract class Controller
     {
         return !empty($this->view->errors);
     }
-
+    public function getError($key): bool
+    {
+        return $this->view->errors[$key] ?? '';
+    }
     /* =========================
        COMMON PAGES
        ========================= */

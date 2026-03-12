@@ -16,17 +16,13 @@ use App\Models\TaskModel;
 use App\Models\WorkOrderModel;
 use App\Models\TeamModel;
 
-
-//use App\Services\ServiceFactory;
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
-//use App\Services\RegistrationTokenService;
-//use App\Services\RegistrationService;
-//use App\Services\ActivationMailService;
+use App\Services\Users\CompanyRegistrationService;
+use App\Services\Mail\MailService;
 use App\Services\Users\UserActivationService;
 use App\Services\Tokens\AuthTokenService;
-//use App\Services\PasswordResetService;
-//use App\Services\Users\UserActivationService;
+use App\Services\Users\ActivationMailService;
 
 use App\Core\Flash;
 
@@ -203,6 +199,7 @@ public function login(): string
 	{
 		return $this->render('auth/forgot-password');
 	}
+	
 public function forgotPasswordPost(): string
 {
     $this->checkCsrf();
@@ -221,12 +218,51 @@ public function forgotPasswordPost(): string
     if ($this->hasErrors()) {
         return $this->render('auth/forgot-password');
     }
-    ServiceFactory::passwordResetRequest()->request(
-        $tenant,
-        $email,
-        $_SERVER['REMOTE_ADDR'] ?? '',
-        $_SERVER['HTTP_USER_AGENT'] ?? ''
+
+    //nutno ověřit existenci uživatele na základě tenantu a emailu, teprve potom poslat email!!
+    /* userPasswordReset Service to umí a lépe:
+    $company = (new CompanyModel())->existsBySlug($tenant);
+    $error = 0;
+    if(!$company)
+    {
+    	$error = 1;
+    }
+    $user = (new UserModel())->findByEmailAndCompany($email, $company['id']);
+    if(!$user)
+    {
+    	$error = 1;
+    }
+
+    if($error === 1)
+    {
+    	 Flash::success('Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.');
+    	 /** TODO: přidat logování neúspěšných pokusů * /
+    	 Url::redirect('/login');
+    }
+*/
+    /*************************************************************************
+     *   uživatel existuje v tenantu, můžeme přistoupit k posílání emailu:   *
+     *************************************************************************/
+     $ok = (new UserPasswordResetService())->request(
+        tenantSlug:   $tenant,
+             email:   $email
     );
+
+    [$subject, $htmlBody, $textBody] = ActivationMailService::buildPasswordRecowery($url, Auth::company());
+
+	 //pošleme email
+    $ok = (new MailService())->send(
+  				toEmail: $email,
+				toName: $user['first_name'] . ' ' . $user['last_name'],
+				subject: $subject,
+				html: $htmlBody,
+				text: $textBody
+   );
+    if(!$ok)
+    {
+    	$this->addError('global', 'Email se nepodařilo odeslat.');
+      return $this->render('auth/forgot-password');
+    }
 
     Flash::success(
         'Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.'
@@ -270,9 +306,9 @@ public function forgotPasswordPost(): string
     ): string {
     	
 			$this->checkCsrf();
-			$token    = trim($_POST['token']) ?? null;
-			$password = trim($_POST['password']) ?? null;
-    		$passwordZ = trim($_POST['passwordZ']) ?? null;
+			$token    = trim($_POST['token']);
+			$password = trim($_POST['password']);
+    		$passwordZ = trim($_POST['passwordZ']);
     		if($password === '') 
     		{
     			$this->addError('password', 'Heslo je povinné');
@@ -347,9 +383,8 @@ public function forgotPasswordPost(): string
 				return $this->render('auth/registrationStepOne');
 			}
 
-			$token = ServiceFactory::registrationService()->createRequest(
-				email: $data['email'],
-			);
+			$token = (new CompanyRegistrationService())->createRequest($data['email']);
+
 			
 			$url = Url::base() . Url::to('/register/complete?token=' . $token);
 			
@@ -357,12 +392,12 @@ public function forgotPasswordPost(): string
 			//$ = ActivationMail::build($activationUrl);
 
 
-        $ok = (new Mailer())->send(
+        $ok = (new MailService())->send(
   				toEmail: $data['email'],
 				toName: $data['email'],
 				subject: $subject,
-				htmlBody: $htmlBody,
-				textBody: $textBody
+				html: $htmlBody,
+				text: $textBody
         );
 
 			if($ok) 
@@ -390,6 +425,9 @@ public function forgotPasswordPost(): string
 		$data = [];
 		$companies 	= new CompanyModel();
 
+		$ok = (new TokenService())->validate($token,TokenType::COMPANY_CREATE);
+
+
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 		{
 			$data = array_map(
@@ -397,11 +435,12 @@ public function forgotPasswordPost(): string
 					$_POST
 					);
 			$token = $data['token'] ?? null;
-			if (!$token || !(new RegistrationTokenService())->validateToken($token))
+
+			if (!$token || !$ok)
 			{
 				// přesměrujeme na registraci znovu s Flash zprávou		    	
 				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
-		    	Flash::error('Registrace trvala příliš dlouho, zkuste to prosím znovu a rychleji');
+		    	Flash::error('Neplatný odkaz, od vygenerování emailu k použití odkazu v něm uplynulo příliš mnoho času...');
 				Url::redirect('/register');
 			}
 		    
@@ -475,20 +514,20 @@ public function forgotPasswordPost(): string
     		{
     			$this->addError('password', 'Hesla se neshodují, věnujte zápisu více pozornosti.');
     		}
-			
+		 
 			// pokud chyby, zobrazíme znovu form
 			if ($this->hasErrors()) 
 			{
 				$this->view->data = $data;
 				return $this->render('auth/registrationStepTwo');
 			}
-			$adminData['first_name'] =$data['first_name'];
-			$adminData['last_name'] = $data['last_name'];
-			$adminData['password'] = $data['password'];
-			$companyData['name'] = $data['name'];
-			$companyData['ico'] = $data['ico'];
+			$adminData['first_name'] = $data['first_name'];
+			$adminData['last_name']  = $data['last_name'];
+			$adminData['password']   = $data['password'];
+			$companyData['name']     = $data['name'];
+			$companyData['ico']      = $data['ico'];
 
-			$ok = ServiceFactory::registrationService()->complete($token, $companyData, $adminData);
+			$ok = (new UserActivationService())->consumeAndProcess($token, TokenType::COMPANY_CREATE, $data['password'], $data);
 			
 			if($ok['ok'] === true) 
 			{
@@ -520,13 +559,13 @@ public function forgotPasswordPost(): string
 		}  
 		else 
 		{
-			$ok = (new RegistrationTokenService())->validateToken($token);
-			//var_dump($ok);
+			
+			//var_dump($ok);exit;
 			if (!$token || !$ok) 
 			{
 				// přesměrujeme na registraci znovu s Flash zprávou		    	
 				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
-	    		Flash::error('Todo:Registrace trvala příliš dlouho, zkuste to prosím rychleji');
+	    		Flash::error('Neplatný odkaz, od vygenerování emailu k použití odkazu v něm uplynulo příliš mnoho času...');
 				Url::redirect('/register');
 			}
 		}

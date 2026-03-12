@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-//use Psr\Log\LogLevel;
+use \DateTime;
+
 
 /**
  * Jednoduchá implementace PSR-3 loggeru, který zapisuje do souboru.
@@ -169,13 +170,17 @@ public static function instance(): LoggerInterface
      */
     public function log(string $level, string $message, array $context = []): void
     {
-        $date = date('Y-m-d H:i:s');
+        $date = (new DateTime())->format('Y-m-d H:i:s.u');
         $msg  = $this->interpolate($message, $context);
-
-        $line = "[{$date}] {$level}: {$msg}\n";
-
+        
+        $line = sprintf(
+                   "[%s] %-7s %s\n",
+                   $date,
+                   strtoupper($level) . ':',
+                   $msg
+               );
         // TODO: [SECURITY] Omezit velikost log souboru a implementovat rotaci
-        file_put_contents($this->logFile, $line, FILE_APPEND);
+        file_put_contents($this->logFile, $line, FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -189,14 +194,28 @@ public static function instance(): LoggerInterface
      * @param array $context Kontextová data
      * @return string Interpolovaná zpráva
      */
-    private function interpolate(string $message, array $context): string
-    {
-        foreach ($context as $key => $value) {
-            if (is_scalar($value)) {
-                $message = str_replace('{' . $key . '}', (string) $value, $message);
-            }
+private function interpolate(string $message, array $context): string
+{
+    foreach ($context as $key => $value) {
+
+        if (is_scalar($value) || $value === null) {
+            $replace = (string) $value;
+
+        } elseif (is_object($value) && method_exists($value, '__toString')) {
+            $replace = (string) $value;
+
+        } elseif ($value instanceof \Throwable) {
+           $replace = $value->getMessage();
+
+        } else {
+            $replace = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
         }
 
-        return $message;
+        $message = str_replace('{' . $key . '}', $replace, $message);
     }
+
+    return $message;
+}
+
 }

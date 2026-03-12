@@ -47,7 +47,7 @@ private function getOrderOrRedirect(int $orderId): array
         Url::redirect('/{tenant}/work-orders');
     }
 		// máme tu čistý find (na basemodel), musíme ověřit, jestli je zakázka editovatelná.
-    $order = (new workOrderModel())->find($orderId);
+    $order = (new WorkOrderModel())->find($orderId);
 
     if (!$order) {
         Flash::error('Zakázka neexistuje');
@@ -118,14 +118,14 @@ private function getOrderOrRedirect(int $orderId): array
 				$this->addError('team_id', 'Vybraný tým neexistuje');
 			}
 
-			$team = (new WorkOrderModel())->find($work_order_id);
-			if(!$team) {
+			$order = (new WorkOrderModel())->find($work_order_id);
+			if(!$order) {
 				flash::error('Vybraná zakázka neexistuje');
 				URL::redirect("/{tenant}/work-orders/#main");
 			}
 			
         if ($this->hasErrors()) {
-            return $this->createFormGet();
+            return $this->createFormGet($work_order_id);
         }
 			
         (new TaskModel())->create([
@@ -133,10 +133,10 @@ private function getOrderOrRedirect(int $orderId): array
             'description'        => $description,
             'team_id'            => (int) $team_id,
             'work_order_id'      => (int) $work_order_id,
-            'created_by_user_id' => $this->view->user['id'],
+            'created_by_user_id' => Auth::id(),
         ]);
 
-        Url::redirect('/dashboard');
+        Url::redirect('/{tenant}/tasks/#main');
     }
 	// ověří existenci tasku, pokud existuje, vrátí jeho hodnoty, jinak redirect
 	private function getTaskOrRedirect(int $taskId): array
@@ -229,7 +229,7 @@ public function addTaskReportPost(int $taskId): string
     
     // 2. Validace reportu (povinné)
 		$report 				= trim($data['report'] ?? '');
-		//$kilometers 		= (int) $data['kilometers'] ?? 0;
+
 		$kilometers 		= (int) ($data['kilometers'] ?? 0);
 		$participants		= $data['participants'] ?? [];
 		$hours				= 0;
@@ -240,8 +240,8 @@ public function addTaskReportPost(int $taskId): string
     }
     
     // 3. Validace kilometrů (nepovinné, ale pokud jsou, musí být číslo)
-	if ((int) $kilometers < 0 || $kilometers > 9999) {
-		$this->addError('kilometers', 'Kilometry musí být v rozmezí 0-9999');
+	if ((int) $kilometers < -9999 || $kilometers > 9999) {
+		$this->addError('kilometers', 'Kilometry musí být v rozmezí -9999 až 9999');
 	}
     
     // 4. Validace účastníků (nepovinné, ale pokud jsou zaškrtnutí, musí mít čas)
@@ -256,12 +256,12 @@ public function addTaskReportPost(int $taskId): string
                 $this->addError("participants[$userId]", 'Vyplň čas nebo odškrtni pracovníka');
             } else {
                 // Validace hodin
-                if ($hours !== '' && (!is_numeric($hours) || $hours < 0 || $hours > 24)) {
-                    $this->addError("participants[$userId][hours]", 'Hodiny musí být 0-24');
+                if ($hours !== '' && (!is_numeric($hours) || $hours < -24 || $hours > 24)) {
+                    $this->addError("participants[$userId][hours]", 'Hodiny musí být v rozmezí -24 až 24');
                 }
                 // Validace minut
-                if ($minutes !== '' && (!is_numeric($minutes) || $minutes < 0 || $minutes > 59)) {
-                    $this->addError("participants[$userId][minutes]", 'Minuty musí být 0-59');
+                if ($minutes !== '' && (!is_numeric($minutes) || $minutes < -59 || $minutes > 59)) {
+                    $this->addError("participants[$userId][minutes]", 'Minuty musí být v rozmezí -59 až 59');
                 }
             }
         }

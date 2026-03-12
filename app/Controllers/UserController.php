@@ -8,12 +8,15 @@ use App\Core\Url;
 use App\Core\Roles;
 use App\Core\Flash;
 use App\Core\UserGuard;
-use App\Core\Mailer;
+use App\Core\Auth;
+
 use App\Models\UserModel;
+
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
+use App\Services\Mail\MailService;
 use App\Services\Users\ActivationMailService;
-use App\Core\Auth;
+
 
 final class UserController extends Controller
 {
@@ -90,8 +93,8 @@ final class UserController extends Controller
 	    	//vytvoříme token
 				$token = (new TokenService())->create(
 				    type: TokenType::INVITATION,
-				    email: $user['email'],
-				    userId: $id
+				    email: $data['email'],
+				    userId: $userId
 				);
 
 				$url = Url::base() . Url::to('/activate/complete?token=' . $token);
@@ -100,12 +103,12 @@ final class UserController extends Controller
 			[$subject, $htmlBody, $textBody] = ActivationMailService::buildInvitation($url, Auth::company());
 
 			//pošleme email
-        $ok = (new Mailer())->send(
+        $ok = (new MailService())->send(
   				toEmail: $data['email'],
 				toName: $data['email'],
 				subject: $subject,
-				htmlBody: $htmlBody,
-				textBody: $textBody
+				html: $htmlBody,
+				text: $textBody
         );
 	
 	
@@ -297,12 +300,12 @@ final class UserController extends Controller
 			[$subject, $htmlBody, $textBody] = ActivationMailService::buildInvitation($url, Auth::company());
 			
 			//$ = ActivationMail::build($activationUrl);
-        $ok = (new Mailer())->send(
+        $ok = (new MailService())->send(
   				toEmail: $user['email'],
 				toName: $user['email'],
 				subject: $subject,
-				htmlBody: $htmlBody,
-				textBody: $textBody
+				html: $htmlBody,
+				text: $textBody
         );
 
 	       if($ok)
@@ -322,7 +325,7 @@ final class UserController extends Controller
 	       }
 	
 	    } catch (\Throwable $e) {
-			var_dump($e);exit;
+			//var_dump($e);exit;
 	        // ideálně logovat $e
 	        Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .

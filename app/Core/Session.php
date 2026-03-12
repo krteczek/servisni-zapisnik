@@ -317,4 +317,41 @@ public static function destroy(): void
 
         return $value;
     }
+/**
+ * Vygeneruje HTML pro všechny flash zprávy.
+ * Zprávy se při čtení automaticky odstraní (read-once).
+ */
+public static function renderFlash(): string
+{
+    if (!self::has('_flash')) {
+        return '';
+    }
+
+    $html = '';
+    $flashes = self::get('_flash', []);
+
+    foreach ($flashes as $key => $value) {
+
+        $message = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+
+        $class = match ($key) {
+            'success' => 'flash-success',
+            'error'   => 'flash-error',
+            'warning' => 'flash-warning',
+            'info'    => 'flash-info',
+            default   => 'flash-info',
+        };
+
+        $html .= "
+<div class=\"flash-container\">
+   <div class=\"flash {$class}\">{$message}</div>
+</div>
+
+";
+    }
+
+    self::forget('_flash');
+
+    return $html;
+}
 }

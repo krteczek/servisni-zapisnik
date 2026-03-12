@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 ob_start();
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 define('BASE_PATH', '/servisni-zapisnik/public');
 //echo phpversion();exit;
 require dirname(__DIR__) . '/bootstrap.php';
@@ -18,13 +16,19 @@ use App\Core\LoggerHolder;
 use App\Core\Database;
 use App\Core\Auth;
 use App\Core\Roles;
+use App\Services\Guards\BanService;
 
 $appEnv = Config::get('app.env');
 $appDebug = Config::get('app.debug');
 $appBasePath = Config::get('app.base_path');
 
-error_reporting(Config::get('app.error_reporting'));
-ini_set('display_errors', Config::get('app.display_errors') ? '1' : '0');
+if(BanService::isBanned() === true)
+{
+	echo "Příliš mnoho neplatných pokusů. Přístup je Vám dočasně odepřen. ";
+	exit;
+}
+//error_reporting(Config::get('app.error_reporting'));
+ini_set('display_errors', Config::get('app.display_errors') ? '0' : '0');
 // -------------------------------------------------
 // Logger
 // -------------------------------------------------

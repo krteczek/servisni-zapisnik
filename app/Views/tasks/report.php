@@ -16,7 +16,7 @@ $oldData = $view->oldData ?? []; // stará data z POST při chybě
 $errors = $view->errors ?? []; // chyby validace
 
 //var_dump($task, $teamMembers, $reports, $oldData);
-var_dump($teamMembers);
+//var_dump($teamMembers);
 //print_r($errors);
 ?>
 <div class="create-container">
@@ -63,7 +63,7 @@ var_dump($teamMembers);
 					        <?= Csrf::getField() ?>
 					        
 					        <div class="form-group <?= isset($errors['report']) ? 'has-error' : '' ?>">
-					            <label for="report">Report:</label>
+					            <label for="report">Report: (*)</label>
 					            <textarea 
 					                name="report" 
 					                id="report" 
@@ -82,8 +82,9 @@ var_dump($teamMembers);
 					                name="kilometers" 
 					                id="kilometers" 
 					                class="form-control" 
-					                min="0" 
-					                max="9999" 
+					                min="-9999" 
+					                max="9999"
+					                step="1"
 					                value="<?= $oldData['kilometers'] ?? 0 ?>"
 					            >
 					            <?php if (isset($errors['kilometers'])): ?>
@@ -123,7 +124,7 @@ var_dump($teamMembers);
 					                                       name="participants[<?= $userId ?>][hours]" 
 					                                       class="time-input" 
 					                                       placeholder="h" 
-					                                       min="0"
+					                                       min="-24"
 					                                       max="24"
 					                                       value="<?= e($hours) ?>">
 					                                <span class="time-separator">h</span>
@@ -131,7 +132,7 @@ var_dump($teamMembers);
 					                                       name="participants[<?= $userId ?>][minutes]" 
 					                                       class="time-input" 
 					                                       placeholder="m" 
-					                                       min="0" 
+					                                       min="-59" 
 					                                       max="59"
 					                                       value="<?= e($minutes) ?>">
 					                                <span class="time-separator">m</span>
@@ -188,13 +189,16 @@ Pokud chcete přidat report, musíte se nejprve stát členem týmu, který má 
 			
 			<ul>
 				<li><strong>Report: </strong>Jakákoli textová informace popisující vykonanou práci. Je to pro Vašeho šéfa. Je to i pro vás v budoucnu, 
-					až budete vzpomínat, co jste tam dělali. Tady to najdete.</li>
+					až budete vzpomínat, co jste tam dělali. Tady to najdete. A také: je to jediná povinná položka tohoto rozhraní.</li>
 				<li><strong>Kilometry: </strong>Zapisujte ujeté kilometry. Abyste si mohli nakonci zakázky spočítat, kolik jste 
 					celkem na této zakázce najezdili kilometrů.</li>
 				<li><strong>Kdo pracoval: </strong>V týmu bývá více lidí, někdy jsou všichni v práci, jindy ne, někdy někdo 
 					začne později nebo skončí dříve. Takový je život. Proto je zde možnost vybrat, kdo na tomto 
 					úkole pracoval a jak dlouho.</li>
-				<li>Telefonní číslo není povinné.</li>
+				<li>Systém funguje tak, že žádný odeslaný report nelze opravit ani odstranit. Můžete však napsat další report a
+					v něm provést opravu. Čas i najeté kilometry je možno zadávat i v záporných hodnotách, takže když se někde spletete,
+					můžete to v dalším reportu snadno opravit.</li>
+				
 			</ul>
 		</div>
 	</div>

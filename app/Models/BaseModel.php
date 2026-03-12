@@ -221,36 +221,43 @@ abstract class BaseModel
      * @param array $after Nová data
      * @return array Pole změn ve formátu [field => ['from' => old, 'to' => new]]
      */
-    protected function diff(array $before, array $after): array
-    {
-        $diff = [];
+protected function diff(array $before, array $after): array
+{
+    $diff = [];
 
-        $ignore = [
-            'id',
-            'created_at',
-            'updated_at',
-            'password',
-            'password_hash',
-        ];
+    $ignore = [
+        'id' => true,
+        'created_at' => true,
+        'updated_at' => true,
+        'password' => true,
+        'password_hash' => true,
+    ];
 
-        foreach ($after as $key => $newValue) {
-            if (in_array($key, $ignore, true)) {
+    foreach ($after as $key => $newValue) {
+
+        if (isset($ignore[$key])) {
+            continue;
+        }
+
+        $oldValue = $before[$key] ?? null;
+
+        // pole / JSON
+        if (is_array($oldValue) || is_array($newValue)) {
+            if (json_encode($oldValue) === json_encode($newValue)) {
                 continue;
-            }
-
-            $oldValue = $before[$key] ?? null;
-
-            if ($oldValue !== $newValue) {
-                $diff[$key] = [
-                    'from' => $oldValue,
-                    'to'   => $newValue,
-                ];
             }
         }
 
-        return $diff;
+        if ($oldValue !== $newValue) {
+            $diff[$key] = [
+                'from' => $oldValue,
+                'to'   => $newValue,
+            ];
+        }
     }
 
+    return $diff;
+}
     /* ==========================================================
      * SELECT
      * ========================================================== */
@@ -523,6 +530,7 @@ abstract class BaseModel
     }
 
     if ($this->tenantAware) {
+    	//echo "kikol";
         $data[$this->tenantColumn] = $tenantId;
     }
 
