@@ -108,8 +108,7 @@ final class TokenModel extends BaseModel
             SELECT id, user_id, email
             FROM {$this->tableName}
             WHERE token_hash = :hash
-              AND type = :type
-              
+              AND type = :type              
               AND used_at IS NULL
               AND expires_at > NOW()
               AND invalidated_at IS NULL
@@ -124,7 +123,6 @@ final class TokenModel extends BaseModel
         //var_dump($out);exit;
         return $out;
     }
-
 
 public function findValidByHashForUpdate(string $hash, string $type): ?array
 {

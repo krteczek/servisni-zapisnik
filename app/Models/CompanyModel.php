@@ -80,17 +80,20 @@ final class CompanyModel extends BaseModel
      * @param string $slug Slug společnosti z URL
      * @return array|null Data společnosti nebo null
      */
-    public function findBySlug(string $slug): ?array
-    {
-        return $this->fetchOne(
-            "SELECT *
-             FROM {$this->tableName}
-             WHERE slug = :slug
-               AND active = 1
-             LIMIT 1",
-            ['slug' => $slug]
-        );
-    }
+		public function findBySlug(string $slug): ?array
+		{
+		    return $this->fetchOne(
+		        "SELECT *
+		         FROM {$this->tableName}
+		         WHERE (slug = :slug OR ico = :ico)
+		           AND active = 1
+		         LIMIT 1",
+		        [
+		            'slug' => $slug,
+		            'ico'  => $slug,
+		        ]
+		    );
+		}
 
     /**
      * Vrátí seznam všech společností se základními informacemi.

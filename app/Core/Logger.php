@@ -44,17 +44,17 @@ final class Logger implements LoggerInterface
 
 
 
-public static function instance(): LoggerInterface
-{
-    if (self::$instance === null) {
-        $path = Config::get('app.log_file')
-            ?? __DIR__ . '/../../storage/logs/app.log';
-
-        self::$instance = new self($path);
-    }
-
-    return self::$instance;
-}
+	public static function instance(): LoggerInterface
+	{
+	    if (self::$instance === null) {
+	        $path = Config::get('app.log_file')
+	            ?? __DIR__ . '/../../storage/logs/app.log';
+	
+	        self::$instance = new self($path);
+	    }
+	
+	    return self::$instance;
+	}
 
     /**
      * Systém je nepoužitelný.

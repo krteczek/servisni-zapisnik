@@ -13,11 +13,13 @@ use App\Services\Mail\MailService;
 use App\Models\UserModel;
 use App\Models\CompanyModel;
 use App\Core\Config;
+use App\Core\Url;
 
 final class UserPasswordResetService
 {
 	private string $message = 'Pokud email a firma existují, byl Vám odeslán email s pokyny pro změnu hesla.';
-	private const PASSWORD_RESET = 'PASSWORD_RESET';
+
+
     public function __construct(
         private RateLimiterService $rateLimiter = new RateLimiterService(),
         private TokenService $tokenService = new TokenService(),
@@ -27,18 +29,18 @@ final class UserPasswordResetService
     ) {}
 
     public function request(
-        string $tenantSlug,
+        ?string $tenantSlug,
         string $email
     ): array {
-
+//var_dump(self::PASSWORD_RESET);exit;
         // 1️⃣ Rate limit (fake success pokud překročeno)
 			$row = $this->rateLimiter->tooManyAttempts(
-			    action:        self::PASSWORD_RESET,
+			    action:        TokenType::PASSWORD_RESET,
              tenant:        $tenantSlug,
-             email:         $email,
-             maxAttempts:   3,
-             windowMinutes: 15
+             email:         $email
 			);
+
+			//var_dump($row);
 			if($row === true)
 			{
 				// příliš mnoho požadavků v krátkém čase,
@@ -54,7 +56,7 @@ final class UserPasswordResetService
         if (!$company) {
 				$ok = [
 					"ok" => false,
-					'result' => self::message,
+					'result' => $this->message,
 					];
 			    return $ok;
         }
@@ -68,31 +70,62 @@ final class UserPasswordResetService
         if (!$user || (int)$user['active'] !== 1) {
 				$ok = [
 					"ok" => false,
-					'result' => self::message,
+					'result' => $this->message,
 					];
 			    return $ok;
         }
 
         // 4️⃣ Vytvořit token
         $token = $this->tokenService->create(
-            userId: (int)$user['id'],
-            type: AuthTokenService::TYPE_RESET_PASSWORD,
-            ip: $ip,
-            userAgent: $userAgent
-        );
+                  type:       TokenType::PASSWORD_RESET,
+                  email:      $email,
+                  userId:     (int)$user['id']
+        );//var_dump($token);
+        if (!$token)
+        {
+				$ok = [
+					"ok" => false,
+					'result' => $this->message,
+					];
+			    return $ok;
+
+        }
+
+
 
         // 5️⃣ Sestavit URL
-        $resetUrl = Config::get('app.url')
-            . '/reset-password?token=' . urlencode($token);
+        $resetUrl = Url::base() . Url::to('/reset-password?token=' . urlencode($token));
 
         // 6️⃣ Poslat email
         //musíme rozšířit informace kde a co
-        $this->mailService->send(
-            $email,
-            $company['name'],
-            'Reset hesla',
-            "<a href='{$resetUrl}'>Reset hesla</a>",
-            "Reset hesla: {$resetUrl}"
+        [$subject, $html, $text] = BuildMailService::buildPasswordRecovery($resetUrl, $company, $user);
+        $mail = $this->mailService->send(
+        toEmail:  $email,
+        toName:   $company['name'],
+        subject:  $subject,
+        html:     $html,
+        text:     $text
         );
+        if (!$mail)
+        {
+				$ok = [
+					"ok" => false,
+					'result' => $this->message,
+					];
+			    return $ok;
+
+        }
+
+        else
+        {
+        	   $ok = $user;
+				$ok["ok"] = true;
+				$ok['result'] = $this->message;
+
+			    return $ok;
+
+        }
+
     }
+
 }

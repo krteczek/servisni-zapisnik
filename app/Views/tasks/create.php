@@ -14,7 +14,7 @@ require __DIR__ . '/../layout/header.php';
 
 $workOrder = $view->order;
 $teams = $view->teams;
-$post = $view->data;
+$post = $view->post;
 $errors = $view->errors; 
 //var_dump($workOrder);
 
@@ -23,14 +23,17 @@ $errors = $view->errors;
 
 <div class="create-container">
 	<div class="card">
-		<div class="card-WO-header">
-		<p>Nový úkol pro zakázku: <strong><?= e($workOrder['title']) ?></strong><span class="badge badge-status-<?= e($workOrder['status']) ?>"><?= te($workOrder['status']) ?></span></p>
-		<div><?= e($workOrder['description']) ?></div>
-		</div>
-		<!-- INFO ALERT (stejný styl jako v report šabloně) -->
-		<div class="ui-alert ui-alert-info">
-			<strong>Informace:</strong>
-			Úkol je nějaká část zakázky, kterou má vykonat určitá osoba nebo tým. 
+		<div class="card-section card-section--wo">
+		    <div class="section-label">Zakázka</div>
+
+		    <p>
+		        <strong><?= e($workOrder['title']) ?></strong>
+		        <span class="badge badge-status-<?= e($workOrder['status']) ?>">
+		            <?= te($workOrder['status']) ?>
+		        </span>
+		    </p>
+
+		    <div><?= tx($workOrder['description']) ?></div>
 		</div>
 		<!-- FORMULÁŘ -->
 		<!-- Zobrazení chyb (stejné jako v report šabloně) -->
@@ -67,7 +70,7 @@ $errors = $view->errors;
 
         <div class="form-group">
             <label>Popis</label>
-            <textarea name="description"><?= e($post['description'] ?? '') ?></textarea>
+            <textarea name="description" rows="10"><?= e($post['description'] ?? '') ?></textarea>
         </div>
 
         <div class="form-group">
@@ -128,6 +131,9 @@ $errors = $view->errors;
 								</details>
 								<h3>Nápověda:</h3>
 								<p>
+			        <p><strong>Informace:</strong>
+			           Úkol je nějaká část zakázky, kterou má vykonat určitá osoba nebo tým. 
+		           </p>
 						<p>Náš systém je navržen tak, že úkoly mohou vznikat jen tehdy, patří-li nějaké zakázce. 
 						Úkol bez zakázky, ke které by patřil, nám nedává smysl. </p>
 						<p>Zde úkol vytvoříte a přiřadíte ho některému z vašich aktivních týmů. 

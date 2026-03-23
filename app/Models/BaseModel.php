@@ -7,6 +7,8 @@ use App\Core\Database;
 use App\Core\AuditLogCore;
 use App\Core\Config;
 use App\Core\Auth;
+use App\Core\TenantContext;
+
 use PDO;
 use LogicException;
 use Throwable;
@@ -161,7 +163,7 @@ abstract class BaseModel
             throw new LogicException('Tenant context missing');
         }
 
-        return $companyId;
+        return TenantContext::get() ?? $companyId;
     }
 
     /**

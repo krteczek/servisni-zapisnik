@@ -30,6 +30,19 @@ a:hover {
   text-decoration: underline;
 }
 
+a.link {
+  color: #4A6FA5;
+  font-weight: 500;
+}
+
+a.link:hover {
+  text-decoration: underline;
+}
+
+.create-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
 
 /* =========================
    APP GRID

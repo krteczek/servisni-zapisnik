@@ -87,3 +87,64 @@
 .create-container--wide {
   grid-template-columns: 2fr 1fr;
 }
+
+.member-row {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb; /* jemná linka */
+}
+
+.member-checkbox {
+    display: flex;
+    justify-content: center;
+}
+
+.member-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.member-time {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 600px) {
+    .member-row {
+        grid-template-columns: 24px 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    .member-time {
+        grid-column: 2;
+    }
+}
+
+.member-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.member-form {
+    margin: 0;
+}
+
+.member-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* KLÍČOVÉ */
+.member-form select {
+    max-width: 120px;
+}
+
+

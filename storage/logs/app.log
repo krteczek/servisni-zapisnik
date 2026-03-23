@@ -141,3 +141,55 @@
 [2026-03-11 13:18:24.332583] ERROR:  Router exception
 [2026-03-11 14:15:54.810683] ERROR:  Router exception
 [2026-03-11 14:16:24.692592] ERROR:  Router exception
+[2026-03-12 13:33:15.152030] ERROR:  Router exception
+[2026-03-12 13:34:26.540689] ERROR:  Router exception
+[2026-03-12 13:35:29.985174] ERROR:  Router exception
+[2026-03-12 13:36:18.010877] ERROR:  Router exception
+[2026-03-12 13:40:12.496812] ERROR:  Router exception
+[2026-03-12 13:42:47.441762] ERROR:  Router exception
+[2026-03-12 14:03:03.200209] ERROR:  Router exception
+[2026-03-12 14:05:21.613978] ERROR:  Router exception
+[2026-03-12 14:05:49.874923] ERROR:  Router exception
+[2026-03-12 14:06:31.498169] ERROR:  Router exception
+[2026-03-12 14:07:24.029551] ERROR:  Router exception
+[2026-03-12 14:08:23.821582] ERROR:  Router exception
+[2026-03-12 14:09:21.872810] ERROR:  Router exception
+[2026-03-12 14:10:01.170833] ERROR:  Router exception
+[2026-03-12 14:11:36.245197] ERROR:  Router exception
+[2026-03-12 14:15:56.810280] ERROR:  Router exception
+[2026-03-12 14:19:20.269645] ERROR:  Router exception
+[2026-03-12 14:21:34.693293] ERROR:  Router exception
+[2026-03-12 14:21:54.186313] ERROR:  Router exception
+[2026-03-14 01:10:16.791372] ERROR:  Router exception
+[2026-03-16 22:06:03.959659] ERROR:  Router exception
+[2026-03-16 22:08:11.009019] ERROR:  Router exception
+[2026-03-16 23:38:49.364679] CRITICAL: 
+	message: App\Core\AccessLogger::log(): Argument #1 ($type) must be of type string, int given, called in C:\xampp\htdocs\servisni-zapisnik\app\Core\Router.php on line 159
+	file: C:\xampp\htdocs\servisni-zapisnik\app\Core\AccessLogger.php
+	line: 39
+[2026-03-17 01:21:29.650571] ERROR:  Router exception
+[2026-03-17 01:23:02.037736] ERROR:  Router exception
+[2026-03-17 01:23:36.038100] ERROR:  Router exception
+[2026-03-17 01:28:00.203806] ERROR:  Router exception
+[2026-03-17 23:35:55.980332] ERROR:  Router exception
+[2026-03-17 23:45:01.741790] ERROR:  Router exception
+[2026-03-18 00:21:36.440346] ERROR:  Router exception
+[2026-03-19 22:52:26.912457] ERROR:  Router exception
+[2026-03-19 23:10:18.190681] ERROR:  Router exception
+[2026-03-19 23:47:28.232943] ERROR:  Router exception
+[2026-03-19 23:57:39.734684] ERROR:  Router exception
+[2026-03-20 00:01:21.252347] ERROR:  Router exception
+[2026-03-20 00:03:00.672140] ERROR:  Router exception
+[2026-03-20 00:12:23.095706] ERROR:  Router exception
+[2026-03-20 00:13:26.641746] ERROR:  Router exception
+[2026-03-20 00:19:28.548653] ERROR:  Router exception
+[2026-03-20 00:36:03.016283] ERROR:  Router exception
+[2026-03-20 00:36:43.088735] ERROR:  Router exception
+[2026-03-20 00:47:57.281621] ERROR:  Router exception
+[2026-03-20 22:48:03.018409] ERROR:  Router exception
+[2026-03-21 16:47:25.275383] ERROR:  Router exception
+[2026-03-21 16:48:05.772108] ERROR:  Router exception
+[2026-03-22 02:27:05.311979] CRITICAL: 
+	message: Class "App\Models\TenantContext" not found
+	file: C:\xampp\htdocs\servisni-zapisnik\app\Models\BaseModel.php
+	line: 164

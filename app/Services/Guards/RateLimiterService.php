@@ -6,13 +6,13 @@ namespace App\Services\Guards;
 use App\Models\RateLimitModel;
 use App\Core\Request;
 use App\Core\Config;
-use App\Services\Guards\RataLimitService;
+
 
 class RateLimiterService
 {
-	private static $config = [];
+
     public function __construct(
-        private rateLimitModel $rateLimitModel
+        private RateLimitModel $rateLimitModel = new RateLimitModel()
     ) {
 
     }
@@ -22,18 +22,16 @@ public function tooManyAttempts(
     string $tenant,
     string $email
 ): bool {
-    $config = Config::get('ratelimit.' . mb_strtoupper($action, 'UTF-8'));
+	//var_dump($action);
+    $config = Config::get('rateLimits.' . $action);
+    //var_dump($config);exit;
     $ip = Request::ip();
     $ua = Request::ua();
-    $hash = BanService::fingerprint($ip, $ua);
+    $fingerprint = BanService::fingerprint();
 
     $attempts = $this->rateLimitModel->countRecentAttempts(
         action:          $action,
-        tenant:          $tenant,
-        email:           $email,
-        ip:              $ip,
-        ua:              $ua,
-        hash:            $hash,
+       fingerprint:     $fingerprint,
         windowMinutes:   $config['time']
     );
 
@@ -41,14 +39,11 @@ public function tooManyAttempts(
     	// přidáme ban
     	BanService::ban(
     		type:    $action,
-    		ip:      $ip,
-    		ua:      $ua,
-    		minutes: $config['ban']
     		);
         return true;
     }
 
-    $this->rateLimitModel->logAttempt($action, $tenant, $email, $ip, $ua);
+    $this->rateLimitModel->logAttempt($action, $tenant, $email, $ip, $ua, $fingerprint);
 
     return false;
 }

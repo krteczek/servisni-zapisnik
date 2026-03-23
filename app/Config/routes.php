@@ -100,7 +100,7 @@ return [
 [
     'method' => 'GET',
     'path'   => '/activate/complete',
-    'action' => [AuthController::class, 'activate'],
+    'action' => [AuthController::class, 'activateGet'],
     'auth'   => false,
     'title'  => 'Bó: Aktivace uživatele',
 ],
@@ -117,7 +117,7 @@ return [
 [
     'method' => 'GET',
     'path'   => '/reset-password',
-    'action' => [AuthController::class, 'resetPassword'],
+    'action' => [AuthController::class, 'resetPasswordGet'],
     'auth'   => false,
     'title'  => 'Bó: Reset hesla uživatele',
 
@@ -242,7 +242,7 @@ return [
 [
     'method' => 'GET',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/edit',
-    'action' => [TaskController::class, 'editTask'],
+    'action' => [TaskController::class, 'editTaskGet'],
     'auth'   => true,
 	'roles'   => ['admin', 'mistr'],
 	'title'   => 'Úkoly: upravit úkol',
@@ -250,10 +250,27 @@ return [
 [
     'method' => 'POST',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/edit',
-    'action' => [WorkOrderController::class, 'detailOrderEditTask'],
+    'action' => [TaskController::class, 'editTaskPost'],
     'auth'   => true,
     'roles'   => ['admin', 'mistr'],
 	'title'   => 'Úkoly: upravit úkol',
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/clone',
+    'action' => [TaskController::class, 'cloneTaskGet'],
+    'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Vytvořit klon úkolu',
+],
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/clone',
+    'action' => [TaskController::class, 'cloneTaskPost'],
+    'auth'   => true,
+    'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Vytvořit klon úkolu',
 ],
 
 
@@ -508,15 +525,7 @@ return [
     'section' => 'users',
     'title'   => 'Uživatelé: Detail',
 ],
-/* zrušeno, původně měl emaily  pro reset hesla odesílat mistr
-[
-    'method'  => 'POST',
-    'path'    => '/{tenant}/users/{id:\d+}/send-reset-password',
-    'action'  => [UserController::class, 'sendResetPassword'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-],
-*/
+
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/users/{id:\d+}/resend-activation',

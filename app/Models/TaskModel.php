@@ -284,6 +284,7 @@ public function canUserAddReport(int $taskId, int $userId): bool
 
         $taskIds = array_column($tasks, 'id');
 
+        
         //$assignmentModel = new AssignmentModel();
         //$statsMap = $assignmentModel->statsForTasks($taskIds);
 			$statsMap = $this->statsForTasks($taskIds);
@@ -297,6 +298,7 @@ public function canUserAddReport(int $taskId, int $userId): bool
             $tasks[$i]['stats'] = $stats;
             $tasks[$i]['can_cancel'] = $this->canBeCancelled($stats);
 				$tasks[$i]['can_close']  = $this->canBeDone($stats);
+				
         }
 
         return $tasks;

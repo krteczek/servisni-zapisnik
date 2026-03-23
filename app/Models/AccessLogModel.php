@@ -36,7 +36,7 @@ final class AccessLogModel extends BaseModel
     public function log(array $data): void
     {
         $this->create([
-            'user_id'    => $data['user_id'],
+            'user_id'    => $data['user_id'] ?? null,
             'ip_address' => $data['ip_address'],
             'type'       => $data['type'],
             'path'       => $data['path'],
@@ -58,21 +58,21 @@ final class AccessLogModel extends BaseModel
      * TODO: [PERFORMANCE] Přidat index na (type, ip_address, created_at)
      * TODO: [FEATURE] Přidat variantu pro counting podle user_id
      *
-     * @param string $type Typ události ('403', '404', 'login', atd.)
-     * @param string $ip IP adresa klienta
+     * @param int $type Typ události ('403', '404', 'login', atd.)
+     * @param int $userId  id uživatele
      * @param int $minutes Časový interval v minutách
      * @return int Počet záznamů
      */
     public function countRecent(
-        string $type,
-        string $ip,
+        int $type,
+        int $userId,
         int $minutes
     ): int {
         $sql = "
             SELECT COUNT(*)
             FROM {$this->tableName}
             WHERE type = :type
-              AND ip_address = :ip
+              AND user_id = :userId
               AND created_at >= DATE_SUB(NOW(), INTERVAL :min MINUTE)
               AND {$this->tenantColumn} = :tenant
         ";
@@ -80,7 +80,7 @@ final class AccessLogModel extends BaseModel
         $stmt = $this->db()->prepare($sql);
 
         $stmt->bindValue(':type', $type);
-        $stmt->bindValue(':ip', $ip);
+        $stmt->bindValue(':userId', $userId);
         $stmt->bindValue(':min', $minutes, PDO::PARAM_INT);
         $stmt->bindValue(':tenant', $this->tenantId(), PDO::PARAM_INT);
 
