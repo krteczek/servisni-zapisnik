@@ -21,8 +21,9 @@ use App\Services\Tokens\TokenType;
 use App\Services\Users\CompanyRegistrationService;
 use App\Services\Mail\MailService;
 use App\Services\Users\UserActivationService;
-use App\Services\Tokens\AuthTokenService;
-use App\Services\Users\ActivationMailService;
+use App\Services\Users\UserPasswordResetService;
+use App\Services\Guards\RateLimiterService;
+use App\Services\Users\BuildMailService;
 
 use App\Core\Flash;
 
@@ -37,6 +38,7 @@ class AuthController extends Controller
     private const MAX_COMPANY_NAME_LENGTH    = 255;
     private const MIN_COMPANY_NAME_LENGTH    = 2;
     private const ICO_LENGTH    					= 8;
+    private const BAD_LOGIN                  = 'BAD_LOGIN';
 
     public function root(): string
     {
@@ -64,7 +66,6 @@ public function login(): string
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    $this->view->csrf = $this->csrfField();
     $this->view->data = [
         'tenant' => $tenant,
         'email'  => $email,
@@ -112,6 +113,18 @@ public function login(): string
         !$user ||
         !password_verify($password, $user['password_hash'])
     ) {
+        // 1️⃣ Rate limit
+			$row = (new RateLimiterService())->tooManyAttempts(
+			    action:        self::BAD_LOGIN,
+             tenant:        $tenant,
+             email:         $email,
+			);
+			if($row === true)
+			{
+				// příliš mnoho požadavků v krátkém čase,
+				//tady nebudeme řešit, to už si vyřeší banservice
+			}
+    	  
         $this->addError('global', 'Neplatné přihlašovací údaje. Pokud problém přetrvává, kontaktujte správce vašeho prostoru.');
         return $this->render('auth/login');
     }
@@ -152,47 +165,80 @@ public function login(): string
      *  PUBLIC ROUTES
      * ========================= */
 
-    public function activate(): string
+    public function activateGet(): string
     {
     	
         return $this->handleTokenGet(TokenType::INVITATION);
     }
 
-    public function activatePost(): string
-    {
-        return $this->handleTokenPost(
-            TokenType::INVITATION,
-            function (int $userId, string $password): void {
-                (new UserModel())->activateUser(
-                    $userId,
-                    password_hash($password, PASSWORD_DEFAULT)
-                );
-            },
-            'Účet byl aktivován. Můžeš se přihlásit.'
-        );
-    }
-
-    public function resetPassword(): string
+    public function resetPasswordGet(): string
     {
         return $this->handleTokenGet(TokenType::PASSWORD_RESET);
     }
 
+public function activatePost(): string
+{
+    return $this->processToken(TokenType::INVITATION, 'Účet byl aktivován.');
+}
 
-    public function resetPasswordPost(): string
-    {		
-        
-        
-        return $this->handleTokenPost(
-            TokenType::PASSWORD_RESET,
-            function (int $userId, string $password): void {
-                (new UserModel())->setPassword(
-                    $userId,
-                    password_hash($password, PASSWORD_DEFAULT)
-                );
-            },
-            'Heslo bylo změněno.'
-        );
+
+public function resetPasswordPost(): string
+{
+    return $this->processToken(TokenType::PASSWORD_RESET, 'Heslo bylo změněno.');
+}
+
+private function processToken(string $type, string $successMessage): string
+{
+    $this->checkCsrf();
+
+    $token    = trim($_POST['token'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    $passwordZ = trim($_POST['passwordZ'] ?? '');
+
+    // ===== VALIDACE =====
+
+    if ($password === '') {
+        $this->addError('password', 'Heslo je povinné');
+    } elseif (mb_strlen($password) < self::MIN_PASSWORD_LENGTH) {
+        $this->addError('password', 'Heslo je příliš krátké');
+    } elseif (mb_strlen($password) > self::MAX_PASSWORD_LENGTH) {
+        $this->addError('password', 'Heslo je příliš dlouhé.');
+    } elseif ($password !== $passwordZ) {
+        $this->addError('password', 'Hesla se neshodují.');
     }
+/*
+    $tv = (new TokenService())->validate($token, $type);
+    if($tv['ok'] === false) {
+    	  $this->addError('token', 'Platnost odkazu z emailu již vypršela... Požádejte si o nový.');
+    }
+*/
+    if ($this->hasErrors()) {
+        $this->view->data['token'] = $token;
+        return $this->render('auth/reset-password');
+    }
+
+    // ===== PROCESS =====
+
+    //try {
+        $ok = (new UserActivationService())->consumeAndProcess(
+            $token,
+            $type,
+            $password
+        );
+        if ($ok['ok'] === true) {
+        	 Flash::success($successMessage);
+        	 Url::redirect('/login');
+        }
+        else {
+        	  error_log('[processToken] ' . $ok['result']);
+           Flash::error('Operace se nezdařila.' . $ok['result']);
+           Url::redirect('/login');
+        }
+    }
+
+
+
+
 
 	/* Zapomenuté heslo */
 	public function forgotPassword(): string
@@ -219,50 +265,14 @@ public function forgotPasswordPost(): string
         return $this->render('auth/forgot-password');
     }
 
-    //nutno ověřit existenci uživatele na základě tenantu a emailu, teprve potom poslat email!!
-    /* userPasswordReset Service to umí a lépe:
-    $company = (new CompanyModel())->existsBySlug($tenant);
-    $error = 0;
-    if(!$company)
-    {
-    	$error = 1;
-    }
-    $user = (new UserModel())->findByEmailAndCompany($email, $company['id']);
-    if(!$user)
-    {
-    	$error = 1;
-    }
-
-    if($error === 1)
-    {
-    	 Flash::success('Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.');
-    	 /** TODO: přidat logování neúspěšných pokusů * /
-    	 Url::redirect('/login');
-    }
-*/
-    /*************************************************************************
-     *   uživatel existuje v tenantu, můžeme přistoupit k posílání emailu:   *
+     /*************************************************************************
+     *    můžeme přistoupit k posílání emailu:   *
      *************************************************************************/
-     $ok = (new UserPasswordResetService())->request(
+     $row = (new UserPasswordResetService())->request(
         tenantSlug:   $tenant,
              email:   $email
     );
 
-    [$subject, $htmlBody, $textBody] = ActivationMailService::buildPasswordRecowery($url, Auth::company());
-
-	 //pošleme email
-    $ok = (new MailService())->send(
-  				toEmail: $email,
-				toName: $user['first_name'] . ' ' . $user['last_name'],
-				subject: $subject,
-				html: $htmlBody,
-				text: $textBody
-   );
-    if(!$ok)
-    {
-    	$this->addError('global', 'Email se nepodařilo odeslat.');
-      return $this->render('auth/forgot-password');
-    }
 
     Flash::success(
         'Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.'
@@ -278,77 +288,34 @@ public function forgotPasswordPost(): string
     private function handleTokenGet(string $type): string
     {
         $token = $_GET['token'] ?? null;
+        $errMsg = 'Odkaz je neplatný nebo expirovaný. Můžete si požádat o nový.';
 
         if (!$token) {
-            Flash::error('Chybí token.');
+            Flash::error($errMsg);
             Url::redirect('/login');
         }
+        $row = (new TokenService())->validate($token, $type);
+        if ($row['ok'] === false) {
+            Flash::error($errMsg);
+            Url::redirect('/login');
 
+        }
+       
         try {
         		//public function validate(string $rawToken, string $type): array
-            $this->view->data = (new TokenService())->validate($token, $type);
-				$this->view->data['button'] = 'Nastavit heslo';
+            $this->view->data = $row;
+				//$this->view->data['button'] = 'Nastavit heslo';
             $this->view->data['token'] = $token;
 
 				return $this->render('auth/reset-password');
 
         } catch (\Throwable $e) {
         	//var_dump($e);exit;
-            Flash::error('Odkaz je neplatný nebo expirovaný.');
+            Flash::error($errMsg);
             Url::redirect('/login');
         }
     }
 
-    private function handleTokenPost(
-        string $type,
-        callable $userAction,
-        string $successMessage
-    ): string {
-    	
-			$this->checkCsrf();
-			$token    = trim($_POST['token']);
-			$password = trim($_POST['password']);
-    		$passwordZ = trim($_POST['passwordZ']);
-    		if($password === '') 
-    		{
-    			$this->addError('password', 'Heslo je povinné');
-    		} 
-    		elseif (mb_strlen($password) < self::MIN_PASSWORD_LENGTH) 
-    		{
-    			$this->addError('password', 'Heslo je příliš krátké');
-    		}
-    		elseif (mb_strlen($password) > self::MAX_PASSWORD_LENGTH)
-    		{
-    			$this->addError('password', 'Heslo je příliš dlouhé.');
-    		}
-    		elseif($password !== $passwordZ) 
-    		{
-    			$this->addError('password', 'Hesla se neshodují, věnujte zápisu více pozornosti.');
-    		}
-    		
-    		if ($this->hasErrors()) {
-        		//public function validate(string $rawToken, string $type): array
-            $this->view->data = (new TokenService())->validate($token, $type);
-				$this->view->data['button'] = 'Nastavit heslo';
-            $this->view->data['token'] = $token;
-            return $this->render('auth/reset-password');
-        }	
-
-        try {
-            (new UserActivationService())->consumeAndProcess($token, $type, $password);
-
-            Flash::success('Heslo bylo úspěšně nastaveno.');
-            Url::redirect('/login');
-
-        } catch (\Throwable $e) {
-        		$mess = '[handleTokenPost] ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString();
-            error_log($mess);
-            Flash::error('Operace se nezdařila. ');
-            Url::redirect('/login');
-        } finally {
-				Session::forget('user.company_id');
-        }
-    }
     
 
 	public function registrationStepOne():  string
@@ -388,8 +355,8 @@ public function forgotPasswordPost(): string
 			
 			$url = Url::base() . Url::to('/register/complete?token=' . $token);
 			
-			[$subject, $htmlBody, $textBody] = ActivationMailService::buildRegistration($url);
-			//$ = ActivationMail::build($activationUrl);
+			[$subject, $htmlBody, $textBody] = BuildMailService::buildRegistration($url);
+			
 
 
         $ok = (new MailService())->send(
@@ -531,6 +498,7 @@ public function forgotPasswordPost(): string
 			
 			if($ok['ok'] === true) 
 			{
+				
 				//jdeme řešit přihlášení:
 				$data = $ok['data'];
 				//print_r($data['db_name']['registrationWorkDbName']);

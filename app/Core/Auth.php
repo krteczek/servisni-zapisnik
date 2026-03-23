@@ -212,6 +212,7 @@ public static function label(): ?string
         Session::start();
         Session::regenerate();
         Session::set(self::USER_KEY, $userData);
+        AccessLogger::log(AccessLogger::TYPE_LOGIN);
         self::$cachedUser = null;
     }
 
@@ -231,6 +232,7 @@ public static function label(): ?string
     public static function logout(): void
     {
         Session::start();
+        AccessLogger::log(AccessLogger::TYPE_LOGOUT);
         Session::forget(self::USER_KEY);
         Session::regenerate();
         self::$cachedUser = null;

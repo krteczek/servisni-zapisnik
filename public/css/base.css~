@@ -30,7 +30,14 @@ a:hover {
   text-decoration: underline;
 }
 
+a.link {
+  color: #4A6FA5;
+  font-weight: 500;
+}
 
+a.link:hover {
+  text-decoration: underline;
+}
 /* =========================
    APP GRID
    ========================= */
@@ -119,8 +126,6 @@ h1 {
   font-weight: 600;
   margin: 0 0 20px 0;
   color: #111827;
-}
-h1 {
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 12px;
 }

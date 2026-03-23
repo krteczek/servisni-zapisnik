@@ -37,7 +37,7 @@ if ($errors) {
         <input type="password" name="passwordZ" required>
     </div>
 
-    <button type="submit"><?= $title ?></button>
+    <button type="submit">Nastavit heslo</button>
 </form>
 
 

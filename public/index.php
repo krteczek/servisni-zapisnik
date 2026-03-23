@@ -24,7 +24,7 @@ $appBasePath = Config::get('app.base_path');
 
 if(BanService::isBanned() === true)
 {
-	echo "Příliš mnoho neplatných pokusů. Přístup je Vám dočasně odepřen. ";
+	echo "Bylo zaznamenáno vícenásobné nevhodné chování. Přístup je Vám dočasně odepřen. ";
 	exit;
 }
 //error_reporting(Config::get('app.error_reporting'));

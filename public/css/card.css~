@@ -73,3 +73,17 @@ h4.card-header, h5.card-header {
 	padding: 0px;
 	font-size: 0.8rem;
 }
+
+.team-box-card {
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--team-color, #ccc);
+    border-left: 4px solid var(--team-color, #ccc);
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.team-note {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-top: 6px;
+}

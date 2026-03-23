@@ -102,6 +102,7 @@ final class Router
 
             // roles
             if (!empty($route['roles']) && !Auth::hasGlobalRole($route['roles'])) {
+            	 AccessLogger::log(AccessLogger::TYPE_404);
                 return (new ErrorController($this->view))->forbidden();
             }
 
@@ -155,7 +156,7 @@ final class Router
                 return $this->handleError(500, $e);
             }
         }
-
+        AccessLogger::log(AccessLogger::TYPE_404);
         return (new ErrorController($this->view))->notFound();
     }
 

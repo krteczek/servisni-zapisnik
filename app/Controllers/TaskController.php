@@ -41,9 +41,9 @@ class TaskController extends Controller
 	    	
 			return $this->render('tasks/create');
     }
-private function getOrderOrRedirect(int $orderId): array
+private function getOrderOrRedirect(?int $orderId): array
 {
-    if ($orderId <= 0) {
+    if (!$orderId || $orderId <= 0) {
         Url::redirect('/{tenant}/work-orders');
     }
 		// máme tu čistý find (na basemodel), musíme ověřit, jestli je zakázka editovatelná.
@@ -63,81 +63,53 @@ private function getOrderOrRedirect(int $orderId): array
 
 }
 
-/*
-	private function setViewForDetail(int $orderId): void
-	{
-	    $order = $this->getOrderOrRedirect($orderId);
-	
-	    $taskModel = new TaskModel();
-	    $tasks = $taskModel->forWorkOrderWithStats($orderId);
-	
-	    $teamModel = new TeamModel();
-	    $teams = $teamModel->byActive(true);
-	
-	    $this->view->order = $order;
-	    //$this->view->tasks = $tasks;
-	    $this->view->teams = $teams;
-	    
-		
-	    // data formuláře (pro sticky input / chyby)
-	    //$this->view->taskFormData   = $this->view->taskFormData   ?? [];
-	    //$this->view->taskFormErrors = $this->view->taskFormErrors ?? [];
-	
+private function saveTask(array $data, int $workOrderId): string
+{
+	$this->checkCsrf();
+    $order = $this->getOrderOrRedirect($workOrderId);
+
+    $post = $this->validateTask($data);
+
+    $team_id = (int) ($data['team_id'] ?? 0);
+
+    //$teams = (new TeamModel())->find($team_id);
+    $teams = (new TeamModel())->byActive(true);
+	$team = (new TeamModel())->find($team_id);
+	if (!$team) {
+	    $this->addError('team_id', 'Vybraný tým neexistuje');
 	}
-*/
+  	$this->view->post = $data;
+  	$this->view->teams = $teams;
+  	$this->view->order = $order;
+
+
+    if ($this->hasErrors()) {
+
+       return $this->render('tasks/create');
+    }
+
+    $row = (new TaskModel())->create([
+        'title'              => $post['title'],
+        'description'        => $post['description'],
+        'team_id'            => $team_id,
+        'work_order_id'      => $workOrderId,
+        'created_by_user_id' => Auth::id(),
+    ]);
+
+        if(!$row)
+        {
+           $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
+           return $this->render('tasks/create');
+        }
+        Url::redirect('/{tenant}/work-orders/' . $workOrderId . '/#taskId_' . $row);
+
+}
     public function createFormPost(?int $orderId): string
     {
-    	
-        $this->checkCsrf();
-			
-			$data = $_POST;
-			
-        $title 			= trim($data['title'] ?? '');
-        $description 	= trim($data['description'] ?? '');
-        $team_id 			= (int) $data['team_id'];
-        $work_order_id	= (int) $data['work_order_id'];
-        
-        
-        
-        
-        if ($title === '') {
-            $this->addError('title', 'Název úkolu je povinný');
-        }
-			if(mb_strlen($title) > 250) {
-            $this->addError('title', 'Název úkolu je příliš dlouhý');
-        }
-        
-        
-			if(mb_strlen($description) > 10000)
-			{
-				$this->addError('description', 'Popis úkolu je příliš dlouhý');
-			}
-			
-			$team = (new TeamModel())->find($team_id);
-			if(!$team) {
-				$this->addError('team_id', 'Vybraný tým neexistuje');
-			}
+    	 return $this->saveTask($_POST, $orderId);
 
-			$order = (new WorkOrderModel())->find($work_order_id);
-			if(!$order) {
-				flash::error('Vybraná zakázka neexistuje');
-				URL::redirect("/{tenant}/work-orders/#main");
-			}
-			
-        if ($this->hasErrors()) {
-            return $this->createFormGet($work_order_id);
-        }
-			
-        (new TaskModel())->create([
-            'title'              => $title,
-            'description'        => $description,
-            'team_id'            => (int) $team_id,
-            'work_order_id'      => (int) $work_order_id,
-            'created_by_user_id' => Auth::id(),
-        ]);
-
-        Url::redirect('/{tenant}/tasks/#main');
     }
+    
 	// ověří existenci tasku, pokud existuje, vrátí jeho hodnoty, jinak redirect
 	private function getTaskOrRedirect(int $taskId): array
 	{
@@ -151,31 +123,103 @@ private function getOrderOrRedirect(int $orderId): array
 		return $task;	
 	}
 
-	public function editGet(int $taskId): string 
+	public function editTaskGet(int $taskId): string 
 	{
+		//ověříme že úkol existuje
 		$task = $this->getTaskOrRedirect($taskId);
 		
 		//potřebujeme vytáhnoutzakázku (podle work_order_id)
 		$order = (new WorkOrderModel())->find($task['work_order_id']);
-		//print_r($order);
+		//print_r($task);
 		
-		//zjistíme jméno
+		//zjistíme jméno a barvu týmu
 		$team = (new TeamModel())->find($task['team_id']);
 
-
+		//print_r($team);
 		$this->view->team = $team;
 		$this->view->order = $order;
-		$this->view->tasks = $task;
+		$this->view->task = $task;
+		$this->view->post = $task;
 		return $this->render('tasks/edit');
 	}
 	
-	public function editPost(int $taskId): string 
+	public function editTaskPost(int $taskId): string 
 	{
 		$task = $this->getTaskOrRedirect($taskId);
-		
-		$this->view->tasks = $task;
-		return $this->render('tasks/edit');
-	}
+		//$row = $this->saveTask($_POST, $task['work_order_id']);
+		$post = $this->validateTask($_POST);
+      $title 			= trim($post['title'] ?? '');
+      $description 	= trim($post['description'] ?? '');
+
+		$this->checkCsrf();
+
+	  if ($this->hasErrors())
+	  {
+	     return $this->render('tasks/edit');
+	  }
+
+       $row = (new TaskModel())->update($taskId, [
+            'title'              => $title,
+            'description'        => $description,
+        ]);
+        
+        if(!$row)
+        {
+           $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
+           return $this->render('tasks/edit');
+        }
+
+	    Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#taskId_' . $taskId);
+  }
+
+public function cloneTaskGet(int $taskId): string
+{
+    $task = $this->getTaskOrRedirect($taskId);
+
+    $order = (new WorkOrderModel())->find($task['work_order_id']);
+    $teams = (new TeamModel())->byActive(true);
+
+    // předvyplníme formulář
+    $this->view->order = $order;
+    $this->view->teams = $teams;
+    $this->view->post = [
+        'title' => $task['title'] . ' (kopie)',
+        'description' => $task['description'],
+        'team_id' => $task['team_id'],
+    ];
+
+    return $this->render('tasks/create');
+}
+
+public function cloneTaskPost(int $taskId): string
+{
+	$task = $this->getTaskOrRedirect($taskId);
+	return $this->saveTask($_POST, (int) $task['work_order_id']);
+ }
+
+
+private function validateTask(array $data): array
+{
+    $title = trim($data['title'] ?? '');
+    $description = trim($data['description'] ?? '');
+
+    if ($title === '') {
+        $this->addError('title', 'Název úkolu je povinný');
+    }
+
+    if (mb_strlen($title) > 250) {
+        $this->addError('title', 'Název úkolu je příliš dlouhý');
+    }
+
+    if (mb_strlen($description) > 10000) {
+        $this->addError('description', 'Popis úkolu je příliš dlouhý');
+    }
+
+    return [
+        'title' => $title,
+        'description' => $description,
+    ];
+}
 
 
 
@@ -337,21 +381,6 @@ public function addTaskReport(int $taskId): string
     return $this->render('tasks/report');
 }
 
-/**
-    private function canUserAddReportOrRedirect(int $taskId)
-    {
-    	//zízkáme id aktuálního přihlášeného uživatele
-    	$userId = Auth::id();
-
-    	//zjistíme, jestli má právo přidat report k tomuto úkolu
-    	if((new TaskModel())->canUserAddReport((int) $taskId, (int) $userId) === true)
-    	{
-    		return true;
-    	}
-    	Flash::error('Nemáte oprávnění. Nejste členem týmu, který má úkol plnit...');
-		Url::redirect('/{tenant}/tasks');
-    }
-**/
     private function canUserAddReport(int $taskId)
     {
     	//zízkáme id aktuálního přihlášeného uživatele

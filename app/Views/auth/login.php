@@ -3,77 +3,118 @@ declare(strict_types=1);
 
 /** @var \App\Core\ViewContext $view */
 
-
 use App\Core\Url;
 use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 ?>
-<p>Zadejte údaje pro přístup do Vašeho pracovního prostoru.</p>
-<p>
-  Nemáte ještě účet?
-  <a href="<?= Url::to('/register') ?>">Vytvořte si účet a pracovní prostor</a>
-</p>
 
-<form method="post" action="<?= Url::current() ?>">
-    <?= Csrf::getField() ?>
+<h1>Přihlášení</h1>
 
-    <?php if (!empty($view->errors['_csrf'])): ?>
-        <div class="error"><?= e($view->errors['_csrf'][0]) ?></div>
-    <?php endif; ?>
+<div class="create-container">
 
-    <?php if (!empty($view->errors['global'])): ?>
-        <div class="error"><?= e($view->errors['global'][0]) ?></div>
-    <?php endif; ?>
-<table>
-<tr>
-	<td>
-    Pracovní prostor
-     <?php if (!empty($view->errors['tenant'])): ?>
-        <div class="error"><?= e($view->errors['tenant'][0]) ?></div>
-    <?php endif; ?>
+    <!-- 🔹 LEVÁ STRANA – FORM -->
+    <div class="card">
+        <div class="card-body">
 
-	</td>
-	<td><input
-    name="tenant"
-    placeholder="např. servis-novak"
-    value="<?= e($view->data['tenant'] ?? '') ?>" title="Název, který jste zvolili při vytvoření pracovního prostoru." 
->
+            <p>Zadejte údaje pro přístup do Vašeho pracovního prostoru.</p>
 
-	</td>
-</tr>
-    
-<tr>
-	<td>
-    Email
-        <?php if (!empty($view->errors['email'])): ?>
-            <div class="error"><?= e($view->errors['email'][0]) ?></div>
-        <?php endif; ?>
+            <form method="post" action="<?= Url::current() ?>">
+                <?= Csrf::getField() ?>
 
-	</td>
-	<td>
-		<input name="email" value="<?= e($view->data['email'] ?? '') ?>">
-	</td>
-</tr>
+                <?php if (!empty($view->errors['_csrf'])): ?>
+                    <div class="flash flash-error"><?= e($view->errors['_csrf'][0]) ?></div>
+                <?php endif; ?>
 
-<tr>
-	<td>
-    Heslo
-        <?php if (!empty($view->errors['password'])): ?>
-            <div class="error"><?= e($view->errors['password'][0]) ?></div>
-        <?php endif; ?>
-	</td>
-	<td>
-		<input type="password" name="password">
-	</td>
-</tr>
-<tr>
-<td colspan="2"><button>Přihlásit</button></td>
-</tr>
-</table>
-    
-</form>
-<p>Nemůžete se přihlásit? <a href="<?= Url::to('/forgot-password') ?>">Zapomněli jste heslo?</a></p>
+                <?php if (!empty($view->errors['global'])): ?>
+                    <div class="flash flash-error"><?= e($view->errors['global'][0]) ?></div>
+                <?php endif; ?>
 
+                <!-- TENANT -->
+                <div class="form-group <?= !empty($view->errors['tenant']) ? 'has-error' : '' ?>">
+                    <label>IČO / název prostoru</label>
+                    <input
+                        class="form-control"
+                        name="tenant"
+                        placeholder="např. servis-novak"
+                        value="<?= e($view->data['tenant'] ?? '') ?>"
+                    >
+
+                    <?php if (!empty($view->errors['tenant'])): ?>
+                        <div class="error-message"><?= e($view->errors['tenant'][0]) ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- EMAIL -->
+                <div class="form-group <?= !empty($view->errors['email']) ? 'has-error' : '' ?>">
+                    <label>Email</label>
+                    <input
+                        class="form-control"
+                        name="email"
+                        value="<?= e($view->data['email'] ?? '') ?>"
+                    >
+
+                    <?php if (!empty($view->errors['email'])): ?>
+                        <div class="error-message"><?= e($view->errors['email'][0]) ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="form-group <?= !empty($view->errors['password']) ? 'has-error' : '' ?>">
+                    <label>Heslo</label>
+                    <input
+                        type="password"
+                        class="form-control"
+                        name="password"
+                    >
+
+                    <?php if (!empty($view->errors['password'])): ?>
+                        <div class="error-message"><?= e($view->errors['password'][0]) ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary">Přihlásit</button>
+                </div>
+
+            </form>
+
+            <p style="margin-top:16px;">
+                <a href="<?= Url::to('/forgot-password') ?>" class="link">
+                    Zapomněli jste heslo?
+                </a>
+            </p>
+
+        </div>
+    </div>
+
+
+    <!-- 🔹 PRAVÁ STRANA – HELP -->
+    <div class="card card-help">
+        <div class="card-body">
+
+            <h3>Nemáte účet?</h3>
+            <p>
+                Vytvořte si pracovní prostor a začněte evidovat zakázky.
+            </p>
+
+            <p>
+                <a href="<?= Url::to('/register') ?>" class="link">
+                    ➜ Vytvořit účet
+                </a>
+            </p>
+
+            <hr>
+
+            <h4>Co zadat jako název prostoru?</h4>
+            <p>
+                Použijte název, který jste zvolili při registraci
+                (např. <strong>servis-novak</strong>) nebo IČO Vaší firmy.
+            </p>
+
+        </div>
+    </div>
+
+</div>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

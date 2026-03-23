@@ -15,7 +15,7 @@ use App\Models\UserModel;
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
 use App\Services\Mail\MailService;
-use App\Services\Users\ActivationMailService;
+use App\Services\Users\BuildMailService;
 
 
 final class UserController extends Controller
@@ -84,7 +84,7 @@ final class UserController extends Controller
 	    ]);
 	
 	    if (!$userId || (int)$userId <= 0) {
-	        $this->addError('','Litujeme, uživatele se nepodařilo vytvořit');
+	        $this->addError('global', 'Litujeme, uživatele se nepodařilo vytvořit');
 	        return $this->render('users/create');
 	    }
 	
@@ -100,7 +100,7 @@ final class UserController extends Controller
 				$url = Url::base() . Url::to('/activate/complete?token=' . $token);
 				
 			//vytvoříme emailovou zprávu
-			[$subject, $htmlBody, $textBody] = ActivationMailService::buildInvitation($url, Auth::company());
+			[$subject, $htmlBody, $textBody] = BuildMailService::buildInvitation($url, Auth::company());
 
 			//pošleme email
         $ok = (new MailService())->send(
@@ -296,9 +296,10 @@ final class UserController extends Controller
 				);
 //var_dump($token);exit;
 			$url = Url::base() . Url::to('/activate/complete?token=' . $token);
-			
-			[$subject, $htmlBody, $textBody] = ActivationMailService::buildInvitation($url, Auth::company());
-			
+//var_dump($url);exit;			
+			[$subject, $htmlBody, $textBody] = BuildMailService::buildInvitation($url, Auth::company());
+var_dump($subject, $htmlBody, $textBody);
+//exit;			
 			//$ = ActivationMail::build($activationUrl);
         $ok = (new MailService())->send(
   				toEmail: $user['email'],
@@ -319,7 +320,7 @@ final class UserController extends Controller
 	       {
 	       		Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
-	            ' se nepodařilo aktivační e-mail odeslat.'
+	            ' se nepodařilo aktivační e-mail odeslat. 1'
 	            );
 
 	       }
@@ -329,7 +330,7 @@ final class UserController extends Controller
 	        // ideálně logovat $e
 	        Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
-	            ' se aktivační e-mail nepodařilo odeslat.'
+	            ' se aktivační e-mail nepodařilo odeslat.2'
 	        );
 	    }
 	

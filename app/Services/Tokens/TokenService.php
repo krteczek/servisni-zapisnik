@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace App\Services\Tokens;
 
 use App\Models\TokenModel;
+use App\Core\Config;
+use App\Core\Request;
+
 use DateTimeImmutable;
 use RuntimeException;
 use Throwable;
@@ -22,50 +25,48 @@ final class TokenService
 
     public static function hash(string $rawToken): string
     {
-    	return hash('sha256', trim($rawToken));
+    	return hash('sha256', $rawToken);
     }
     /* ==========================================================
      * CREATE
      * ========================================================== */
 
-    public function create(
-        string $type,
-        string $email,
-        ?int $userId = null,
-        string $expires = '+115 minutes',
-    ): string {
+public function create(
+    string $type,
+    string $email,
+    ?int $userId = null,
+): string {
 
-        //$ip = inet_pton($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
-        $ip = $_SERVER['REMOTE_ADDR'] ?? null;
-		  $ip = $ip ? inet_pton($ip) : null;
-        $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
-
-        if (!in_array($type, TokenType::all()))
-        {
-        	  throw new RuntimeException('Požadavek na neznámý typ tokenu: ' . $type);
-        }
-
-        $this->invalidate($email, $type);
-
-        $rawToken = bin2hex(random_bytes(self::TOKEN_BYTES));
-        $hash     = self::hash($rawToken);
-
-        $expiresAt = (new DateTimeImmutable())
-            ->modify($expires)
-            ->format('Y-m-d H:i:s');
-
-        $this->model->create([
-            'type'        => $type,
-            'email'       => $email,
-            'user_id'     => $userId,
-            'token_hash'  => $hash,
-            'expires_at'  => $expiresAt,
-            'ip_address'  => $ip,
-            'user_agent'  => $ua,
-        ]);
-
-        return $rawToken;
+    if (!in_array($type, TokenType::all())) {
+        throw new RuntimeException('Požadavek na neznámý typ tokenu: ' . $type);
     }
+
+    $expiresMinutes = (int) Config::get('tokenExpires.' . $type);
+
+    $ip = Request::ip();
+    $ua = Request::ua();
+
+    $this->invalidate($email, $type);
+
+    $rawToken = bin2hex(random_bytes(self::TOKEN_BYTES));
+    $hash     = self::hash($rawToken);
+
+    $expiresAt = (new DateTimeImmutable())
+        ->modify("+{$expiresMinutes} minutes")
+        ->format('Y-m-d H:i:s');
+
+    $this->model->create([
+        'type'        => $type,
+        'email'       => $email,
+        'user_id'     => $userId,
+        'token_hash'  => $hash,
+        'expires_at'  => $expiresAt,
+        'ip_address'  => $ip,
+        'user_agent'  => $ua,
+    ]);
+
+    return $rawToken;
+}
 
     /* ==========================================================
      * VALIDATE

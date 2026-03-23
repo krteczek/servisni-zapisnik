@@ -21,7 +21,7 @@ $teams = $view->teams;
 
 
 $err = $view->errors; 
-//var_dump($order, $tasks,$teams);
+//var_dump($tasks,$teams);
 ?>
 
 
@@ -73,6 +73,42 @@ $err = $view->errors;
 				</div>
 			</div>
 		</div>
+
+        <div class="meta-item">
+            <span class="meta-label">Úkoly (všechny):</span>
+            <span class="meta-value"><?= e($order['total_tasks_count']) ?></span>
+        </div>
+
+        <div class="meta-item">
+            <span class="meta-label">Úkoly (otevřené):</span>
+            <span class="meta-value"><?= e($order['open_tasks_count']) ?></span>
+         </div>
+
+        <div class="meta-item">
+           <span class="meta-label">Úkoly (hotové):</span>
+            <span class="meta-value"><?= e($order['done_tasks_count']) ?></span>
+        </div>
+
+        <div class="meta-item">
+            <span class="meta-label">Úkoly (zrušené):</span>
+            <span class="meta-value"><?= e($order['cancelled_tasks_count']) ?></span>
+        </div>
+
+        <div class="meta-item">
+            <span class="meta-label">Reporty:</span>
+            <span class="meta-value"><?= e($order['report_count']) ?></span>
+        </div>
+
+        <div class="meta-item">
+            <span class="meta-label">Čas:</span>
+            <span class="meta-value"><?= e($order['total_time']) ?></span>
+        </div>
+
+        <div class="meta-item">
+            <span class="meta-label">Km:</span>
+            <span class="meta-value"><?= e($order['total_km']) ?></span>
+        </div>
+
 <div class="card-footer">
                 <a class="btn btn-primary"
 							href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create/#main') ?>">
@@ -113,7 +149,7 @@ $err = $view->errors;
 $canCloseDone = $task['can_close'];
 $canCloseCanceled = $task['can_cancel'];
 ?>
-<div class="task-card card status-<?= e($task['status']) ?>" id="taskId_<?= (int)$task['id'] ?>">
+<div class="task-card card status-<?= e($task['status']) ?>" id="taskId_<?= (int)$task['id'] ?>" style="--task-color: <?= e($task['team_color']) ?>">
 
     <div class="card-header">
         <strong><?= e($task['title'] ?? 'Bez názvu') ?></strong>
@@ -126,6 +162,10 @@ $canCloseCanceled = $task['can_cancel'];
     <div class="card-body">
 
         <div class="meta-item">
+            <span class="meta-label">Úkol řeší tým:</span>
+            <span class="meta-value"><?= tx($task['team_name']) ?: 'Bez popisu' ?></span>
+        </div>
+        <div class="meta-item">
             <span class="meta-label">Popis:</span>
             <span class="meta-value"><?= tx($task['description']) ?: 'Bez popisu' ?></span>
         </div>
@@ -136,7 +176,7 @@ $canCloseCanceled = $task['can_cancel'];
         </div>
 
         <div class="meta-item">
-            <span class="meta-label">Záznamy:</span>
+            <span class="meta-label">Reporty:</span>
             <span class="meta-value"><?= $task['stats']['assignments_count'] ?></span>
         </div>
 
@@ -147,7 +187,7 @@ $canCloseCanceled = $task['can_cancel'];
 
         <div class="meta-item">
             <span class="meta-label">Km:</span>
-            <span class="meta-value"><?= $task['stats']['total_kilometers'] ?? 0 ?></span>
+            <span class="meta-value"><?= $task['stats']['total_km'] ?? 0 ?></span>
         </div>
 
     </div>

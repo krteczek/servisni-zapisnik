@@ -4,7 +4,10 @@ declare(strict_types=1);
 namespace App\Services\Guards;
 
 use App\Models\BanModel;
+use App\Core\Config;
+use App\Core\Auth;
 use App\Core\Request;
+
 class BanService
 {
     public static function isBanned(): bool
@@ -14,9 +17,16 @@ class BanService
 
     public static function ban(string $type): void
     {
-        $config = Config::get('ratelimit.' . mb_strtoupper($type, 'UTF-8'));
+        $config = Config::get('rateLimits.' . mb_strtoupper($type, 'UTF-8'));
+        $userId = null;
+        if(Auth::check())
+        {
+        	   $userId = Auth::id();
+        }
+
         (new BanModel())->createBan([
             'type' => $type,
+            'user_id' => $userId,
             'fingerprint' => self::fingerprint(),
             'banned_until' => date('Y-m-d H:i:s', time() + $config['ban'] * 60),
             'created_at' => date('Y-m-d H:i:s'),

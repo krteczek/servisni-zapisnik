@@ -216,7 +216,7 @@ Pokud chcete přidat report, musíte se nejprve stát členem týmu, který má 
             	<div class="meta-list">
             		<h4 class="card-header">Report: </h4>
             		<div class="meta-value">          
-                		<?= nl2br(e($report['note'])); ?>
+                		<?= tx($report['note']); ?>
                 	</div>
                 	<h4 class="card-header">Statistiky: </h4>
             		<div class="meta-item">

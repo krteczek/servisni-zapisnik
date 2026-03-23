@@ -67,7 +67,7 @@ $tasks = $view->data ?? [];
             <div class="card-footer">
                 <div class="actions">
 
-						  <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id']) ?>" 
+						  <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Upravit úkol">
                         ✏️ Upravit úkol

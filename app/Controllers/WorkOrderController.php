@@ -89,7 +89,7 @@ public function index(): string
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
     }
     
-public function detailOrder(int $orderId): string
+public function detailOrderOLD(int $orderId): string
 {
 	    $order = $this->getOrderOrRedirect($orderId);
 	
@@ -98,7 +98,40 @@ public function detailOrder(int $orderId): string
 	
 	    $teamModel = new TeamModel();
 	    $teams = $teamModel->byActive(true);
-	
+
+			// 1. Vytvoř lookup mapu týmů (id => [name, color])
+			$teamMap = [];
+			foreach ($teams as $team) {
+			    $teamMap[$team['id']] = [
+			        'team_name'  => $team['name'],
+			        'team_color' => $team['color'],
+			    ];
+			}
+
+			// 2. Pro každý úkol přidej team_name a team_color a poskládej kompletní statistiku
+			$totalMinutes = 0;
+			$totalKm      = 0;
+			$reportCount  = 0;
+
+			foreach ($tasks as &$task) {
+			    $teamId = $task['team_id'] ?? null;
+			    $totalMinutes += $task['stats']['total_minutes'] ?? 0;
+			    $totalKm      += $task['stats']['total_km'] ?? 0;
+			    $reportCount  += $task['stats']['assignments_count'] ?? 0; // nebo počet reportů
+
+
+			    if ($teamId !== null && isset($teamMap[$teamId])) {
+			        $task['team_name']  = $teamMap[$teamId]['team_name'];
+			        $task['team_color'] = $teamMap[$teamId]['team_color'];
+			    } else {
+			        // pokud tým neexistuje (např. smazaný) – fallback
+			        $task['team_name']  = '—';
+			        $task['team_color'] = '#cccccc'; // šedá nebo nějaká default
+			    }
+			}
+			$hours = floor($totalMinutes / 60);
+			$mins  = $totalMinutes % 60;
+			$order['hours'] = $hours . 'h ' . $mins . ' min';
 	    $this->view->order = $order;
 	    $this->view->tasks = $tasks;
 	    $this->view->teams = $teams;
@@ -107,7 +140,85 @@ public function detailOrder(int $orderId): string
     return $this->render('work_orders/detail');
     
 }
-		
+public function detailOrder(int $orderId): string
+{
+    $order = $this->getOrderOrRedirect($orderId);
+
+    $taskModel = new TaskModel();
+    $tasks = $taskModel->forWorkOrderWithStats($orderId);
+
+    $teamModel = new TeamModel();
+    $teams = $teamModel->byActive(true);
+
+    // 1. Vytvoř lookup mapu týmů (id => [name, color])
+    $teamMap = [];
+    foreach ($teams as $team) {
+        $teamMap[$team['id']] = [
+            'team_name'  => $team['name']   ?? '—',
+            'team_color' => $team['color']  ?? '#cccccc',
+        ];
+    }
+
+    // 2. Inicializace součtů zakázky
+    $totalMinutes       = 0;
+    $totalKm            = 0;
+    $reportCount        = 0;
+    $openTaskCount      = 0;
+    $doneTaskCount      = 0;
+    $cancelledTaskCount = 0;
+
+    // 3. Rozšíření úkolů o tým + výpočet součtů
+    foreach ($tasks as &$task) {
+        $teamId = $task['team_id'] ?? null;
+
+        // Přidání týmu (s fallbackem)
+        if ($teamId !== null && isset($teamMap[$teamId])) {
+            $task['team_name']  = $teamMap[$teamId]['team_name'];
+            $task['team_color'] = $teamMap[$teamId]['team_color'];
+        } else {
+            $task['team_name']  = '—';
+            $task['team_color'] = '#cccccc'; // šedá default
+        }
+
+        // Bezpečné sčítání statistik (ochrana před chybějícími klíči)
+        $stats = $task['stats'] ?? [];
+        $totalMinutes += (int) ($stats['total_minutes'] ?? 0);
+        $totalKm      += (int) ($stats['total_km']      ?? 0);
+        $reportCount  += (int) ($stats['assignments_count'] ?? 0);
+        if ($task['status'] === 'open')
+        {
+            $openTaskCount++;
+        }
+        elseif ($task['status'] === 'done')
+        {
+            $doneTaskCount++;
+        }
+        elseif ($task['status'] === 'cancelled')
+        {
+            $cancelledTaskCount++;
+        }
+    }
+    unset($task); // dobrý zvyk po použití reference
+
+    // 4. Formátování celkového času (vždycky hezky "X h Y min")
+    $hours = floor($totalMinutes / 60);
+    $mins  = $totalMinutes % 60;
+    $order['total_time']            = $hours . ' h ' . $mins . ' min'; // lepší název než jen 'hours'
+    $order['total_km']              = $totalKm;
+    $order['report_count']          = $reportCount;
+    $order['total_tasks_count']     = count($tasks);
+    $order['open_tasks_count']      = $openTaskCount;
+    $order['done_tasks_count']      = $doneTaskCount;
+    $order['cancelled_tasks_count'] = $cancelledTaskCount;
+
+
+    // 5. Předání do view
+    $this->view->order = $order;
+    $this->view->tasks = $tasks;
+    // $this->view->teams = $teams;  // nepotřebuješ, pokud ho nepoužíváš ve view
+
+    return $this->render('work_orders/detail');
+}		
 		
 
 

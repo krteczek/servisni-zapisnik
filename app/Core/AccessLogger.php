@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 use App\Models\AccessLogModel;
+use App\Services\Guards\BanService;
 
 /**
  * Statická služba pro logování přístupů k aplikaci a detekci potenciálního zneužití.
@@ -16,6 +17,22 @@ use App\Models\AccessLogModel;
  */
 final class AccessLogger
 {
+	 public const TYPE_403 = 403;
+    public const TYPE_404 = 404;
+	 public const TYPE_LOGIN = 100; //login
+    public const TYPE_LOGOUT = 999;//logout
+
+
+    public static function all(): array
+    {
+    	return [
+    		 self::TYPE_403,
+    		 self::TYPE_404,
+    		 self::TYPE_LOGIN,
+    		 self::TYPE_LOGOUT
+];
+    }
+
     /**
      * Zapíše záznam o přístupu do logu a provede kontrolu na zneužití.
      * Metoda je navržena jako fail-safe – žádná výjimka nesmí způsobit pád aplikace.
@@ -29,27 +46,37 @@ final class AccessLogger
      * TODO: [PERFORMANCE] Při vysokém vytížení zvážit batchování logů nebo použití asynchronního zápisu
      * TODO: [FEATURE] Přidat možnost konfigurovat logované typy událostí (config)
      *
-     * @param string $type Typ logované události ('403', '404', 'login', 'logout', atd.)
+     * @param int $type Typ logované události (403, 404, 100 (login), 999 (logout), atd.)
      * @return void
      */
-    public static function log(string $type): void
+
+    public static function log(int $type): void
     {
         try {
-            $model = new AccessLogModel();
-
+            $model  = new AccessLogModel();
             $userId = Auth::check() ? Auth::id() : null;
-            $ip     = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-
+		      $ip     = Request::ip();
+		      //$us     = UserAgent::parse(Request::ua());
+		      $us     = Request::ua();
             $model->log([
                 'user_id'    => $userId,
                 'ip_address' => $ip,
                 'type'       => $type,
                 'path'       => $_SERVER['REQUEST_URI'] ?? '',
                 'method'     => $_SERVER['REQUEST_METHOD'] ?? '',
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                'user_agent' => $us,
             ]);
 
-            self::detectAbuse($model, $type, $ip, $userId);
+            if($type === self::TYPE_403 or $type === self::TYPE_404)
+            {
+
+               self::detectAbuse(
+                           model:   $model,
+                           type:    $type,
+                           ip:      $ip,
+                           userId:  $userId
+                           );
+            }
 
         } catch (\Throwable) {
             // TODO: [OBSERVABILITY] Přidat fallback logování do souboru/syslog když DB selže
@@ -69,28 +96,45 @@ final class AccessLogger
      * TODO: [CONFIG] Přenést limity (5 pokusů/10 minut) do konfigurace
      *
      * @param AccessLogModel $model Instance modelu pro dotazy na logy
-     * @param string $type Typ události
+     * @param int $type Typ události
      * @param string $ip IP adresa klienta
      * @param int|null $userId ID přihlášeného uživatele nebo null
      * @return void
      */
     private static function detectAbuse(
         AccessLogModel $model,
-        string $type,
+        int $type,
         string $ip,
         ?int $userId
     ): void {
-        if (!in_array($type, ['403', '404'], true)) {
-            return;
-        }
 
-        $count = $model->countRecent($type, $ip, 10);
+        $conf = Config::get('rateLimits');
+        
+        $count = $model->countRecent(
+                     type:    $type,
+                     userId:  $userId,
+                     minutes: $conf['SCANNING_WARNING']['time']
+               );
 
-        if ($count >= 5 && $userId !== null) {
+        if ($count >= $conf['SCANNING_WARNING']['rate']) {
             Flash::error(
                 'Bylo zaznamenáno opakované neplatné chování. '
                 . 'Pokračování může vést k omezení účtu.'
             );
         }
-    }
+        $count = $model->countRecent(
+                     type:    $type,
+                     userId:  $userId,
+                     minutes: $conf['SCANNING_BAN']['time']
+               );
+			
+        if ($count >= $conf['SCANNING_BAN']['rate']) {
+
+         	BanService::ban('SCANNING_BAN');
+            Flash::error(
+                'Bylo zaznamenáno opakované neplatné chování. '
+                . 'Váš účet je dočasně zablokován.'
+            );
+        }
+   }
 }
