@@ -6,6 +6,9 @@ ob_start();
 define('BASE_PATH', '/servisni-zapisnik/public');
 //echo phpversion();exit;
 require dirname(__DIR__) . '/bootstrap.php';
+
+App\Core\ExceptionHandler::register();
+
 require dirname(__DIR__) . '/app/Core/helpers.php';
 
 use App\Core\Router;
