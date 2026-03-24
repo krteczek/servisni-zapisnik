@@ -1,0 +1,24 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Controllers;
+use App\Core\Controller;
+/** @var \App\Core\ViewContext $view */
+
+final class PageController extends Controller
+{
+	public function terms(): string
+	{
+	    return $this->render('pages/terms');
+	}
+
+	public function privacy(): string
+	{
+	    return $this->render('pages/privacy');
+	}
+
+	public function cookies(): string
+	{
+	    return $this->render('pages/cookies');
+	}
+}
