@@ -24,7 +24,7 @@ return [
     'path'   => '/pages/terms',
     'action' => [PageController::class, 'terms'],
     'auth'   => false,
-    'title'  => 'Podmínky použití',
+    'title'  => 'Obchodní podmínky',
 ],
 [
     'method' => 'GET',

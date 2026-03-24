@@ -1,4 +1,15 @@
-<h1>Obchodní podmínky</h1>
+<?php
+declare(strict_types=1);
+
+/** @var \App\Core\ViewContext $view */
+
+use App\Core\Url;
+use App\Core\Csrf;
+
+require __DIR__ . '/../layout/header.php';
+?>
+
+
 
 <p>
 Tyto podmínky upravují používání aplikace Bó – servisní zápisník.
@@ -61,3 +72,4 @@ v případě porušení těchto podmínek.
 <p>
 Provozovatel si vyhrazuje právo tyto podmínky kdykoliv změnit.
 </p>
+<?php require __DIR__ . '/../layout/footer.php'; ?>

@@ -1,3 +1,13 @@
+<?php
+declare(strict_types=1);
+
+/** @var \App\Core\ViewContext $view */
+
+use App\Core\Url;
+use App\Core\Csrf;
+
+require __DIR__ . '/../layout/header.php';
+?>
 
 
 <p>
@@ -73,3 +83,5 @@ Osobní údaje jsou chráněny přiměřenými technickými a organizačními op
 </p>
 
 <p>Data mohou být technicky uložena na serverech poskytovatele hostingu.</p>
+
+<?php require __DIR__ . '/../layout/footer.php'; ?>
