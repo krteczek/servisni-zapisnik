@@ -1,3 +1,14 @@
+<?php
+declare(strict_types=1);
+
+/** @var \App\Core\ViewContext $view */
+
+use App\Core\Url;
+use App\Core\Csrf;
+
+require __DIR__ . '/../layout/header.php';
+?>
+
 
 
 <p>
@@ -28,3 +39,5 @@ Cookies jsou nezbytné pro:
 Tyto cookies nevyžadují souhlas uživatele dle platné legislativy,
 protože jsou nezbytné pro provoz služby.
 </p>
+
+<?php require __DIR__ . '/../layout/footer.php'; ?>

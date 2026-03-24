@@ -17,9 +17,9 @@ use \App\Core\Config;
 
         <!-- CENTER -->
         <div class="footer-center">
-            <a href="<?= Url::to('/pages/terms') ?>">Podmínky použití</a>
+            <a href="<?= Url::to('/pages/terms') ?>" class="link">Podmínky použití</a>
 
-            <a href="<?= Url::to('/pages/privacy') ?>">Ochrana osobních údajů</a>
+            <a href="<?= Url::to('/pages/privacy') ?>" class="link">Ochrana osobních údajů</a>
 
             <a href="<?= Url::to('/pages/cookies') ?>" class="link">Cookies</a>
         </div>
