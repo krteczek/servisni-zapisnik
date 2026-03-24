@@ -1,3 +1,9 @@
+<?php
+
+use \App\Core\Auth;
+use \App\Core\Url;
+use \App\Core\Config;
+?>
 </main>
 
 <footer class="footer">
@@ -11,20 +17,22 @@
 
         <!-- CENTER -->
         <div class="footer-center">
-            <a href="<?= \App\Core\Url::to('/terms') ?>">Podmínky</a>
-            ·
-            <a href="<?= \App\Core\Url::to('/privacy') ?>">Ochrana údajů</a>
+            <a href="<?= Url::to('/pages/terms') ?>">Podmínky použití</a>
+
+            <a href="<?= Url::to('/pages/privacy') ?>">Ochrana osobních údajů</a>
+
+            <a href="<?= Url::to('/pages/cookies') ?>" class="link">Cookies</a>
         </div>
 
         <!-- RIGHT -->
         <div class="footer-right">
-            <?php if (\App\Core\Auth::check()): ?>
+            <?php if (Auth::check()): ?>
                 <small>
-                    <?= e(\App\Core\Auth::company() ?? '') ?>
+                    <?= e(Auth::company() ?? '') ?>
                 </small><br>
-                <small>verze: <?= e(\App\Core\Config::get('app.version') ?? 'dev') ?></small>
+                <small>verze: <?= e(Config::get('app.version') ?? 'dev') ?></small>
             <?php else: ?>
-                <a href="<?= \App\Core\Url::to('/login') ?>">Přihlášení</a>
+                <a href="<?= Url::to('/login') ?>">Přihlášení</a>
             <?php endif; ?>
         </div>
 

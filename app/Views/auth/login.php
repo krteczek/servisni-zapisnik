@@ -83,7 +83,10 @@ require __DIR__ . '/../layout/header.php';
                     Zapomněli jste heslo?
                 </a>
             </p>
-
+				<p style="margin-top:20px; font-size: 13px; color: #666;">
+				    Tento web používá pouze nezbytné cookies pro přihlášení a bezpečný provoz aplikace.
+				    <a href="<?= Url::to('/cookies') ?>" class="link">Více informací</a>
+				</p>
         </div>
     </div>
 

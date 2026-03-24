@@ -10,7 +10,36 @@ use App\Controllers\WorkOrderController;
 use App\Controllers\AuditLogController;
 use App\Controllers\SystemController;
 use App\Controllers\TaskController;
+use App\Controllers\PageController;
 return [
+
+/*
+|--------------------------------------------------------------------------
+| Veřejné stránky (cookies, podmínky použití...
+|--------------------------------------------------------------------------
+*/
+
+[
+    'method' => 'GET',
+    'path'   => '/pages/terms',
+    'action' => [PageController::class, 'terms'],
+    'auth'   => false,
+    'title'  => 'Podmínky použití',
+],
+[
+    'method' => 'GET',
+    'path'   => '/pages/privacy',
+    'action' => [PageController::class, 'privacy'],
+    'auth'   => false,
+    'title'  => 'Ochrana osobních údajů',
+],
+[
+    'method' => 'GET',
+    'path'   => '/pages/cookies',
+    'action' => [PageController::class, 'cookies'],
+    'auth'   => false,
+    'title'  => 'Zásady používání cookies',
+],
 
 
 /*
