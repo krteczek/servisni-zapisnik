@@ -29,19 +29,25 @@ final class UserActivationService
 	    try {
 	
 	        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
-	        $this->userModel->activateUser($userId, $hash);
+	        $userModel = new UserModel(); // 🔥 NOVĚ
+	        $userModel->activateUser($userId, $hash);
 	
 	
 	        $this->tokenModel->commit();
 	
 	    } catch (Throwable $e) {
 	        $this->tokenModel->rollback();
-	        LoggerHolder::get()->error('UserActivation failed', [
-	           'exception' => $e,
-	           'userId' => $userId,
-	           'type' => null,
-	      ]);
-	    }
+   
+				LoggerHolder::get()->error('UserActivation failed', [
+				    'message'   => $e->getMessage(),
+				    'file'      => $e->getFile(),
+				    'line'      => $e->getLine(),
+				    'trace'     => $e->getTraceAsString(),
+
+				    'userId'    => $userId,
+
+				]);
+       }
 	}
 
 
@@ -116,11 +122,18 @@ final class UserActivationService
 	   } catch (Throwable $e) {
 
 	      $this->tokenModel->rollback();
+
 	      LoggerHolder::get()->error('UserActivation failed', [
-	         'exception' => $e,
-	         'userId' => $userId ?? null,
-	         'type' => null,
-	      ]);
+				    'message'   => $e->getMessage(),
+				    'file'      => $e->getFile(),
+				    'line'      => $e->getLine(),
+				    'trace'     => $e->getTraceAsString(),
+
+				    'userId'    => $userId ?? null,
+
+				    'token'     => substr($rawToken, 0, 20) . '...',
+				]);
+
 
 	   } finally {
 	      TenantContext::clear();
@@ -134,8 +147,8 @@ final class UserActivationService
 	    if (!$password) {
 	        return ["ok" => false, "result" => "Chybí nové heslo"];
 	    }
-
-	    $user = $this->userModel->findRawById($userId);
+	    $userModel = new UserModel(); // 🔥 NOVĚ
+	    $user = $userModel->findRawById($userId);
 
 	    if (!$user) {
 	        return ["ok" => false, "result" => "Uživatel neexistuje"];
@@ -148,7 +161,8 @@ final class UserActivationService
 
 	    $ok = [];
 	    $hash = password_hash($password, PASSWORD_DEFAULT);
-	    $row = $this->userModel->activateUser($userId, $hash);
+
+	    $row = $userModel->activateUser($userId, $hash);
 	    if($row['ok'] === false)
 	    {
 	    	$ok["ok"] = false;
@@ -178,7 +192,8 @@ final class UserActivationService
 
 
 	    $hash = password_hash($password, PASSWORD_DEFAULT);
-	    $row = $this->userModel->setPassword($userId, $hash);//vrací to, co vrací db
+	    $userModel = new UserModel(); // 🔥 NOVĚ
+	    $row = $userModel->setPassword($userId, $hash);//vrací to, co vrací db
 	    if(!$row)
 	    {
 	    	$ok["ok"] = false;

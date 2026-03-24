@@ -97,8 +97,6 @@ public function activateUser(int $id, string $hash): array
         'hash' => $hash,
         'id'   => $id,
     ]);
-    	error_log('DB name: ' . $this->db()->query('select database()')->fetchColumn());
-		error_log('Table: ' . $this->tableName);
 		
 		if (!$ok) {
 			return ['ok' => false, 'result' => 'Uživatele se nepodařilo aktivovat'];

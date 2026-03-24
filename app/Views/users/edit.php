@@ -43,19 +43,7 @@ $fullName = trim(
                 </span>
             </h2>
 
-            <?php if ($errors): ?>
-                <div class="ui-alert ui-alert-error">
-                    <strong>Formulář obsahuje chyby:</strong>
-                    <ul>
-                        <?php foreach ($errors as $messages): ?>
-                            <?php foreach ((array)$messages as $message): ?>
-                                <li><?= e($message) ?></li>
-                            <?php endforeach ?>
-                        <?php endforeach ?>
-                    </ul>
-                </div>
-            <?php endif ?>
-
+            <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
             <form method="post"
                   class="user-form"
                   autocomplete="off"

@@ -151,21 +151,20 @@ abstract class BaseModel
      * @return int
      * @throws LogicException Pokud model není tenant-aware nebo chybí kontext
      */
-    protected function tenantId(): int
-    {
-        if (!$this->tenantAware) {
-            throw new LogicException('Model is not tenant-aware');
-        }
-
-        $companyId = Auth::companyId();
-
-        if (!$companyId) {
-            throw new LogicException('Tenant context missing');
-        }
-
-        return TenantContext::get() ?? $companyId;
+protected function tenantId(): int
+{
+    if (!$this->tenantAware) {
+        throw new LogicException('Model is not tenant-aware');
     }
 
+    $companyId = TenantContext::get() ?? Auth::companyId();
+
+    if (!$companyId) {
+        throw new LogicException('Tenant context missing');
+    }
+
+    return $companyId;
+}
     /**
      * Aplikuje tenant podmínku na WHERE pole.
      * Pokud je model tenant-aware, přidá company_id = aktuální tenant.
@@ -205,12 +204,17 @@ abstract class BaseModel
         }
 
         $config = Config::get('audit');
-
+        error_log('AUDIT CHECK: ' . $this->table);
+        error_log('AUDITABLES: ' . json_encode($config['auditables'] ?? []));
         if (in_array($this->table, $config['ignores'] ?? [], true)) {
+        	error_log('AUDIT SKIP IGNORE');
             return false;
         }
+        $result = in_array($this->table, $config['auditables'] ?? [], true);
 
-        return in_array($this->table, $config['auditables'] ?? [], true);
+        error_log('AUDIT RESULT: ' . ($result ? 'YES' : 'NO'));
+
+        return $result;
     }
 
     /**
@@ -365,6 +369,7 @@ protected function diff(array $before, array $after): array
         $lastId = (int) $this->db()->lastInsertId();
 
         if ($this->shouldAudit()) {
+        	error_log('AUDIT CALL: ' . $this->table);
             try {
                 AuditLogCore::log(
                     entity: $this->table,

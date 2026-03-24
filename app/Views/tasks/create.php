@@ -37,22 +37,7 @@ $errors = $view->errors;
 		</div>
 		<!-- FORMULÁŘ -->
 		<!-- Zobrazení chyb (stejné jako v report šabloně) -->
-		<?php if (!empty($errors)): ?>
-			<div class="ui-alert ui-alert-danger">
-					<ul>
-						<?php foreach ($errors as $field => $error): ?>
-							<?php if (is_array($error)): ?>
-									<?php foreach ($error as $message): ?>
-										<li><?= e($message) ?></li>
-									<?php endforeach; ?>
-							<?php else: ?>
-									<li><?= e($error) ?></li>
-							<?php endif; ?>
-						<?php endforeach; ?>
-					</ul>
-			</div>
-		<?php endif; ?>
-		<div class="card-body">
+      <?php require __DIR__ . '/../layout/formsErrors.php'; ?>		<div class="card-body">
 
 			<!-- HLAVNÍ FORMULÁŘ -->
 			<div class="form-container">

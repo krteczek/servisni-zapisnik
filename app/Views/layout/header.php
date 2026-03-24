@@ -32,6 +32,7 @@ use App\Core\Session;
     <link rel="stylesheet" href="<?= Url::to('/css/meta.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/form.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/flash.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/footer.css') ?>">
 
     -->
  <style>
@@ -48,7 +49,7 @@ require __DIR__ . '/../../../public/css/teams.css';
 require __DIR__ . '/../../../public/css/meta.css';
 require __DIR__ . '/../../../public/css/form.css';
 require __DIR__ . '/../../../public/css/flash.css';
-
+require __DIR__ . '/../../../public/css/footer.css';
 
 ?>
  </style>
@@ -60,9 +61,10 @@ require __DIR__ . '/../../../public/css/flash.css';
     <!-- ================= HEADER ================= -->
     
 <header class="header">
-    <a href="<?= Url::to('/{tenant}/tasks') ?>"  class="logo">博</a>
+    
 
     <?php if (Auth::check()): ?>
+        <a href="<?= Url::to('/{tenant}/tasks') ?>"  class="logo" title="Jít na výpis úkolů pro Vás">博</a>
 <div class="identity">
     <div class="identity-company">
         <?= e(Auth::company()) ?>
@@ -75,7 +77,10 @@ require __DIR__ . '/../../../public/css/flash.css';
     <div class="identity-role">
         <?= e(Auth::effectiveRole()) ?>
     </div>
-</div>    <?php endif; ?>
+</div>
+    <?php else: ?>
+      <a href="<?= Url::to('/login') ?>"  class="logo" title="Jít na přihlašovací formulář">博</a>
+    <?php endif; ?>
 
     <?php if (Auth::hasGlobalRole(['admin'])): ?>
         <div class="role-switcher">
