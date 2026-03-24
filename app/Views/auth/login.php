@@ -9,8 +9,6 @@ use App\Core\Csrf;
 require __DIR__ . '/../layout/header.php';
 ?>
 
-<h1>Přihlášení</h1>
-
 <div class="create-container">
 
     <!-- 🔹 LEVÁ STRANA – FORM -->
@@ -18,6 +16,7 @@ require __DIR__ . '/../layout/header.php';
         <div class="card-body">
 
             <p>Zadejte údaje pro přístup do Vašeho pracovního prostoru.</p>
+            <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 
             <form method="post" action="<?= Url::current() ?>">
                 <?= Csrf::getField() ?>
@@ -36,7 +35,7 @@ require __DIR__ . '/../layout/header.php';
                     <input
                         class="form-control"
                         name="tenant"
-                        placeholder="např. servis-novak"
+                        placeholder="IČO nebo název prostoru"
                         value="<?= e($view->data['tenant'] ?? '') ?>"
                     >
 
@@ -110,6 +109,15 @@ require __DIR__ . '/../layout/header.php';
             <p>
                 Použijte název, který jste zvolili při registraci
                 (např. <strong>servis-novak</strong>) nebo IČO Vaší firmy.
+            </p>
+            <hr>
+
+            <h4>Zapomněli jste heslo?</h4>
+            <p>
+                Máte již zde účet, ale zapomněli jste přístupové heslo?
+                Žádný problém! Na této stránce můžete <a href="<?= Url::to('/forgot-password') ?>"
+                title="Požádat o nové heslo do Bó systému"><strong>požádat o nové heslo</strong></a> do Bó systému.
+
             </p>
 
         </div>

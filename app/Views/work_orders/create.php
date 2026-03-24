@@ -11,101 +11,118 @@ use App\Core\Access;
 $data = $view->data; 
 ?>
 
-<form method="post" action="">
-    <?= Csrf::getField() ?>
+<h1>Nový požadavek</h1>
 
-    <table class="form-table">
-        <tr>
-            <th><label for="external_number">Externí číslo</label></th>
-            <td>
-                <input
-                    id="external_number"
-                    name="external_number"
-                    value="<?= e($data['external_number'] ?? '') ?>"
-                >
-            </td>
-        </tr>
+<div class="create-container">
 
-        <tr>
-            <th><label for="title">Název <span class="req">*</span></label></th>
-            <td>
-                <input
-                    id="title"
-                    name="title"
-                    required
-                    value="<?= e($data['title'] ?? '') ?>"
-                >
-            </td>
-        </tr>
+    <!-- 🔹 FORM -->
+    <div class="card">
+        <div class="card-body">
 
-        <tr>
-            <th><label for="description">Popis</label></th>
-            <td>
-                <textarea
-                    id="description"
-                    name="description"
-                    rows="4"
-                ><?= e($data['description'] ?? '') ?></textarea>
-            </td>
-        </tr>
+            <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 
-        <tr>
-            <th><label for="source">Zdroj</label></th>
-            <td>
-                <select id="source" name="source">
-                    <option value="email"><?= te('email') ?></option>
-                    <option value="phone"><?= te('phone') ?></option>
-                    <option value="personal"><?= te('personal') ?></option>
-                    <option value="system"><?= te('system') ?></option>
-                </select>
-            </td>
-        </tr>
+            <form method="post">
+                <?= Csrf::getField() ?>
 
-        <tr>
-            <th><label for="requested_by">Požadoval</label></th>
-            <td>
-                <input
-                    id="requested_by"
-                    name="requested_by"
-                    value="<?= e($data['requested_by'] ?? '') ?>"
-                >
-            </td>
-        </tr>
+                <!-- Externí číslo -->
+                <div class="form-group">
+                    <label>Externí číslo</label>
+                    <input
+                        class="form-control"
+                        name="external_number"
+                        value="<?= e($data['external_number'] ?? '') ?>"
+                    >
+                </div>
+                <div class="form-group">
+                    <label>Interní číslo</label>
+                <?= 'WO-' . str_pad($data['internal_number'], 5, '0', STR_PAD_LEFT) ?>
+                </div>
+                <!-- Název -->
+                <div class="form-group">
+                    <label>Název <span class="req">*</span></label>
+                    <input
+                        class="form-control"
+                        name="title"
+                        required
+                        value="<?= e($data['title'] ?? '') ?>"
+                    >
+                </div>
 
-        <tr>
-            <th><label for="contact">Kontaktní osoba</label></th>
-            <td>
-                <input
-                    id="contact"
-                    name="contact"
-                    value="<?= e($data['contact'] ?? '') ?>"
-                >
-            </td>
-        </tr>
+                <!-- Popis -->
+                <div class="form-group">
+                    <label>Popis</label>
+                    <textarea
+                        class="form-control"
+                        name="description"
+                        rows="4"
+                    ><?= e($data['description'] ?? '') ?></textarea>
+                </div>
 
+                <!-- Zdroj -->
+                <div class="form-group">
+                    <label>Zdroj</label>
+                    <select class="form-control" name="source">
+                        <option value="email"><?= te('email') ?></option>
+                        <option value="phone"><?= te('phone') ?></option>
+                        <option value="personal"><?= te('personal') ?></option>
+                        <option value="system"><?= te('system') ?></option>
+                    </select>
+                </div>
 
-        <tr>
-            <th><label for="priority">Priorita</label></th>
-            <td>
-                <select id="priority" name="priority">
-                    <option value="low">Nízká</option>
-                    <option value="normal" selected>Normální</option>
-                    <option value="high">Vysoká</option>
-                    <option value="emergency">Havárie</option>
-                </select>
-            </td>
-        </tr>
+                <!-- Požadoval -->
+                <div class="form-group">
+                    <label>Požadoval</label>
+                    <input
+                        class="form-control"
+                        name="requested_by"
+                        value="<?= e($data['requested_by'] ?? '') ?>"
+                    >
+                </div>
 
-        <tr>
-            <th></th>
-            <td class="form-actions">
-                <button type="submit" class="btn btn-primary">Uložit</button>
-                <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
-                    Zpět na přehled
-                </a>
-            </td>
-        </tr>
-    </table>
-</form>
+                <!-- Kontakt -->
+                <div class="form-group">
+                    <label>Kontaktní osoba</label>
+                    <input
+                        class="form-control"
+                        name="contact"
+                        value="<?= e($data['contact'] ?? '') ?>"
+                    >
+                </div>
+
+                <!-- Priorita -->
+                <div class="form-group">
+                    <label>Priorita</label>
+                    <select class="form-control" name="priority">
+                        <option value="low">Nízká</option>
+                        <option value="normal" selected>Normální</option>
+                        <option value="high">Vysoká</option>
+                        <option value="emergency">Havárie</option>
+                    </select>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="form-actions">
+                    <button class="btn btn-primary">Uložit</button>
+                    <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
+                        Zpět na přehled
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- 🔹 HELP (klidně později) -->
+    <div class="card card-help">
+        <div class="card-body">
+            <h3>Tip</h3>
+            <p>
+                Vyplňte co nejvíce informací – usnadní to zpracování požadavku.
+            </p>
+        </div>
+    </div>
+
+</div>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

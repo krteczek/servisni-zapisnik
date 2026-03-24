@@ -11,6 +11,7 @@ return [
         'permissions',
         'work_orders',
         'tasks',
+        'teams',
     ],
 
     'ignores' => [

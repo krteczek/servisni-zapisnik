@@ -23,14 +23,23 @@ padding: 16px 18px;
   align-items: center;
   border-bottom: 1px solid #cfd6de;
 }
+.card-header > * {
+  min-width: 0;
+}
+.card-title {
+    min-width: 0; /* 🔥 důležité pro flex */
+    overflow: hidden;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+
+    overflow-wrap: anywhere;
+}
 .card-title a {
   font-weight: 600;
   color: #111827;
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-decoration: none;
 }
 .card-body-title {
 	font-weight: 600;

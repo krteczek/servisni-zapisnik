@@ -38,6 +38,12 @@ a.link {
 a.link:hover {
   text-decoration: underline;
 }
+
+.create-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 /* =========================
    APP GRID
    ========================= */
@@ -76,7 +82,7 @@ a.link:hover {
   padding: 20px;
 }
 
-/* patička */
+/* patička * /
 .footer {
   background: #f0f0f0;
   padding: 10px 16px;
@@ -84,7 +90,7 @@ a.link:hover {
   opacity: .7;
   border-top: 1px solid #ccc;
 }
-
+*/
 @media (max-width: 768px) {
 
   .app {

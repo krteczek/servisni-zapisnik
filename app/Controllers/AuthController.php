@@ -230,8 +230,8 @@ private function processToken(string $type, string $successMessage): string
         	 Url::redirect('/login');
         }
         else {
-        	  error_log('[processToken] ' . $ok['result']);
-           Flash::error('Operace se nezdařila.' . $ok['result']);
+        	  error_log('[processToken] ' . json_encode($ok['result']));
+           Flash::error('Operace se nezdařila.');
            Url::redirect('/login');
         }
     }

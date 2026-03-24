@@ -6,8 +6,9 @@ declare(strict_types=1);
 
 use App\Core\Url;
 $filters = $view->filters;
-$logs = $view->logs;
+$logs = $view->data;
 require __DIR__ . '/../../layout/header.php';
+
 ?>
 
 <?php require __DIR__ . '/_filter.php'; ?>
@@ -28,7 +29,9 @@ require __DIR__ . '/../../layout/header.php';
 
     <tbody>
     
-    <?php if(is_array($logs)):
+    <?php
+    if (!empty($logs)):
+    
     	foreach ($logs as $log): ?>
         <?php
             //$diff = json_decode($log['diff'] ?? '', true);
@@ -44,7 +47,10 @@ require __DIR__ . '/../../layout/header.php';
             </td>
             <td><?= e($log['action']) ?></td>
             <td><?= e($log['entity']) ?></td>
-            <td><?= (int) $log['entity_id'] ?></td>
+            <td><a href="<?= Url::to('/{tenant}/' . $log['entity'] . '/' . (int)$log['entity_id']) ?>">
+                 <?= (int) $log['entity_id'] ?>
+                </a>
+            </td>
 
             <td>
                 <?php if (!$diff): ?>
@@ -59,7 +65,7 @@ require __DIR__ . '/../../layout/header.php';
     <strong><?= e($field) ?>:</strong>
 <span style="color:#a00"><?= formatValue($change['from']) ?></span>
 →
-<span style="color:#060"><span style="color:#060"><?= formatValue($change['to']) ?></span>
+<span style="color:#060"><?= formatValue($change['to']) ?></span>
 
 </li>
                             <?php endif; ?>
@@ -76,9 +82,16 @@ require __DIR__ . '/../../layout/header.php';
                 </a>
             </td>
         </tr>
-    <?php endforeach; 
-		endif;    
-    ?>
+    <?php endforeach;?>
+    <?php else: ?>
+<tr>
+    <td colspan="8" style="text-align:center; padding:20px;">
+        Žádné záznamy nenalezeny
+    </td>
+</tr>
+<?php endif; ?>
+		
+
     </tbody>
 </table>
 <?php require __DIR__ . '/../../layout/footer.php'; ?>

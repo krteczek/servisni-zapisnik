@@ -7,8 +7,8 @@ declare(strict_types=1);
 // views/teams/index.php – přehled týmů
 
 use App\Core\Url;
-$filters = $view->filters;
-$logs = $view->logs;
+//$filters = $view->filters;
+//$logs = $view->logs;
 ?>
 
 <form method="get" class="audit-filter">
@@ -38,8 +38,8 @@ $logs = $view->logs;
     <tr>
         <td><label for="table">Entita</label></td>
         <td>
-            <input type="text" id="table" name="table"
-                   value="<?= e($filters['table'] ?? '') ?>">
+            <input type="text" id="entity" name="entity"
+                   value="<?= e($filters['entity'] ?? '') ?>">
         </td>
     </tr>
 
@@ -65,7 +65,7 @@ $logs = $view->logs;
         <td></td>
         <td>
             <button>Filtrovat</button>
-            <a href="<?= Url::to('/admin/audit') ?>">Zrušit filtry</a>
+            <a href="<?= Url::to('/{tenant}/admin/audit') ?>">Zrušit filtry</a>
         </td>
     </tr>
 </table>

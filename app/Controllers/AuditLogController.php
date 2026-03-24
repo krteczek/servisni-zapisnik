@@ -15,7 +15,7 @@ class AuditLogController extends Controller
         $filters = [
             'user_id'    => $_GET['user_id']    ?? null,
             'action'     => $_GET['action']     ?? null,
-            'table'      => $_GET['table']      ?? null,
+            'entity'      => $_GET['entity']      ?? null,
             'from'       => $_GET['from']       ?? null,
             'to'         => $_GET['to']         ?? null,
             'ip'         => $_GET['ip']         ?? null,

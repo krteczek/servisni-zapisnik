@@ -11,8 +11,6 @@ require __DIR__ . '/../layout/header.php';
 $err = $view->errors ?? [];
 ?>
 
-<h1>Obnova hesla</h1>
-
 <div class="create-container">
 
     <!-- 🔹 FORM -->

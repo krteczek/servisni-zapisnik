@@ -22,6 +22,7 @@ $errors = $view->errors ?? [];
             Po odeslání formuláře vám zašleme e-mail s odkazem pro dokončení registrace
             a nastavení hesla hlavního administrátora.
         </div>
+        <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
      		<div class="form-container">
    			<form method="post" 
 						class="form user-form" 

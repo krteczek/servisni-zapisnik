@@ -101,7 +101,7 @@ private function saveTask(array $data, int $workOrderId): string
            $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
            return $this->render('tasks/create');
         }
-        Url::redirect('/{tenant}/work-orders/' . $workOrderId . '/#taskId_' . $row);
+        Url::redirect('/{tenant}/work-orders/' . $workOrderId . '/detail/#taskId_' . $row);
 
 }
     public function createFormPost(?int $orderId): string

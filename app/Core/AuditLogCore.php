@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 use Throwable;
+use \App\Models\AuditLogModel;
 
 /**
  * Základní služba pro auditování změn v aplikaci.
@@ -46,16 +47,24 @@ final class AuditLogCore
         if (!self::isEnabled()) {
             return;
         }
+        $diffJson = null;
 
+        if ($diff) {
+           try {
+                   $diffJson = json_encode($diff, JSON_THROW_ON_ERROR);
+           } catch (Throwable) {
+                   $diffJson = null;
+           }
+}
         try {
-            self::logInsert([
+            (new AuditLogModel())->insertLog([
                 'company_id'  => Auth::companyId(),
                 'user_id'     => Auth::id(),
                 'user_email'  => Auth::email(),
                 'action'      => $action,
                 'entity'      => $entity,
                 'entity_id'   => $entityId,
-                'diff'        => $diff ? json_encode($diff, JSON_THROW_ON_ERROR) : null,
+                'diff'        => $diffJson,
                 'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? null,
                 'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
             ]);
@@ -63,37 +72,26 @@ final class AuditLogCore
             // TODO: [OBSERVABILITY] Přidat logování do souboru/syslog při selhání DB zápisu
             // audit je BEST-EFFORT – NESMÍ nikdy shodit aplikaci
             // ticho je zde záměrné
+            error_log('AUDIT CORE FAIL: ' . $e->getMessage());
+				LoggerHolder::get()->error('AuditLogCore failed', [
+				    'message'   => $e->getMessage(),
+				    'file'      => $e->getFile(),
+				    'line'      => $e->getLine(),
+				    'trace'     => $e->getTraceAsString(),
+
+		          'company_id'  => Auth::companyId() ?? TenantContext::get(),
+                'user_id'     => Auth::id(),
+                'user_email'  => Auth::email(),
+                'action'      => $action,
+                'entity'      => $entity,
+                'entity_id'   => $entityId,
+                'diff'        => $diffJson,
+                'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? null,
+				]);
         }
     }
 
-    /**
-     * Provede INSERT záznamu do databázové tabulky audit_logs.
-     * Používá admin databázové připojení pro centralizované ukládání logů.
-     *
-     * Očekává:
-     * - Existující tabulku `audit_logs` s odpovídajícím schématem
-     * - Dostupné Database::admin() připojení
-     *
-     * TODO: [MAINTENANCE] Po migraci na novou verzi DB přidat ukázku schématu tabulky jako komentář
-     * TODO: [PERFORMANCE] Zvážit použití UPSERT pro aktualizaci existujících záznamů
-     *
-     * @param array $row Asociativní pole hodnot pro INSERT
-     * @return void
-     */
-    private static function logInsert(array $row): void
-    {
-        $db = Database::admin();
-
-        $sql = '
-            INSERT INTO audit_logs
-            (company_id, user_id, user_email, action, entity, entity_id, diff, ip_address, user_agent)
-            VALUES
-            (:company_id, :user_id, :user_email, :action, :entity, :entity_id, :diff, :ip_address, :user_agent)
-        ';
-
-        $stmt = $db->prepare($sql);
-        $stmt->execute($row);
-    }
 
     /**
      * Zjistí, zda je audit logování povoleno v konfiguraci.

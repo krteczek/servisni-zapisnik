@@ -79,7 +79,10 @@ public function create(
         $row = $this->model->findValidByHash($hash, $type);
 
         if (!$row) {
-            return ['ok' => false];
+            return [
+            'ok' => false,
+            'result' => TokenResult::EXPIRED->value
+            ];
         }
 
         $row['ok'] = true;

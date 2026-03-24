@@ -23,6 +23,7 @@ return [
     'path'   => '/register',
     'action' => [AuthController::class, 'registrationStepOne'],
     'auth'   => false,
+    'title'  => 'Registrace firmy',
 ],
 
 [
@@ -30,6 +31,8 @@ return [
     'path'   => '/register',
     'action' => [AuthController::class, 'registrationStepOne'],
     'auth'   => false,
+    'title'  => 'Registrace firmy',
+
 ],
 
 [
@@ -37,6 +40,7 @@ return [
     'path'   => '/register/check-email',
     'action' => [AuthController::class, 'registrationStepOneSucces'],
     'auth'   => false,
+    'title'  => 'Registrace firmy',
 ],
 
 [
@@ -44,23 +48,16 @@ return [
     'path'   => '/register/complete',
     'action' => [AuthController::class, 'registrationStepTwo'],
     'auth'   => false,
+    'title'  => 'Dokončení registrace firmy',
 ],
 [
     'method' => 'POST',
     'path'   => '/register/complete',
     'action' => [AuthController::class, 'registrationStepTwo'],
     '[auth'   => false,
+    'title'  => 'Dokončení registrace firmy',
 ],
 
-/*
-[
-    'method' => 'GET',
-    'path'   => '/register/complete',
-    'action' => [AuthController::class, 'registrationStepTwoSucces'],
-    'auth'   => false,
-],
-
-*/
 
 /*
 |--------------------------------------------------------------------------
@@ -80,14 +77,14 @@ return [
     'path'   => '/login',
     'action' => [AuthController::class, 'loginForm'],
     'auth'   => false,
-    'title'  => 'Bó: Přihlášení',
+    'title'  => 'Přihlášení',
 ],
 [
     'method' => 'POST',
     'path'   => '/login',
     'action' => [AuthController::class, 'login'],
     'auth'   => false,
-    'title'  => 'Bó: Přihlášení',
+    'title'  => 'Přihlášení',
 ],
 
 
@@ -102,7 +99,7 @@ return [
     'path'   => '/activate/complete',
     'action' => [AuthController::class, 'activateGet'],
     'auth'   => false,
-    'title'  => 'Bó: Aktivace uživatele',
+    'title'  => 'Aktivace uživatele',
 ],
 
 [
@@ -110,7 +107,7 @@ return [
     'path'   => '/activate/complete',
     'action' => [AuthController::class, 'activatePost'],
     'auth'   => false,
-    'title'  => 'Bó: Aktivace uživatele',
+    'title'  => 'Aktivace uživatele',
 
 ],
 
@@ -119,7 +116,7 @@ return [
     'path'   => '/reset-password',
     'action' => [AuthController::class, 'resetPasswordGet'],
     'auth'   => false,
-    'title'  => 'Bó: Reset hesla uživatele',
+    'title'  => 'Reset hesla uživatele',
 
 ],
 
@@ -128,7 +125,7 @@ return [
     'path'   => '/reset-password',
     'action' => [AuthController::class, 'resetPasswordPost'],
     'auth'   => false,
-    'title'  => 'Bó: Reset hesla uživatele',
+    'title'  => 'Reset hesla uživatele',
 
 ],
 
@@ -137,7 +134,7 @@ return [
     'path'   => '/forgot-password',
     'action' => [AuthController::class, 'forgotPassword'],
     'auth'   => false,
-    'title'  => 'Bó - Zapomenuté heslo',
+    'title'  => 'Zapomenuté heslo',
 
 ],
 
@@ -146,7 +143,7 @@ return [
     'path'   => '/forgot-password',
     'action' => [AuthController::class, 'forgotPasswordPost'],
     'auth'   => false,
-    'title'  => 'Bó: Zapomenuté heslo',
+    'title'  => 'Zapomenuté heslo',
 
 ],
 

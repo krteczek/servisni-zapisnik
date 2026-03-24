@@ -11,7 +11,7 @@ require __DIR__ . '/../layout/header.php';
 
 $user = $view->user ?? [];
 
-print_r($user);
+//print_r($user);
 
 
 if (!empty($user)): ?>

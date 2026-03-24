@@ -9,7 +9,7 @@ return [
 
     TokenType::PASSWORD_RESET => [
         'time' => 15,     // minut
-        'rate' => 5,      // pokusů
+        'rate' => 15,      // pokusů
         'ban'  => 60      // minut blokace
     ],
 
@@ -21,7 +21,7 @@ return [
 
     TokenType::INVITATION => [
         'time' => 60,
-        'rate' => 3,
+        'rate' => 10,
         'ban'  => 180
     ],
 

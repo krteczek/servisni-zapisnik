@@ -39,23 +39,7 @@ $errors = $view->errors ?? []; // chyby validace
 				<!-- END zadaný úkol ke kterému jdeme přidávat reporty -->
 
 				<!-- START: výpis chyb způsobených při vyplnování formuláře -->
-				<?php if (!empty($errors)): ?>
-				    <div class="ui-alert ui-alert-danger">
-				        <ul>
-								<?php foreach ($errors as $field => $error): ?>
-									<?php if (is_array($error)): ?>
-											<?php foreach ($error as $message): ?>
-												<li><?= e($message) ?></li>
-											<?php endforeach; ?>
-									<?php else: ?>
-											<li><?= e($error) ?></li>
-									<?php endif; ?>
-								<?php endforeach; ?>
-				        </ul>
-				    </div>
-				<?php endif; ?>
-				<!-- END: výpis chyb způsobených při vyplnování formuláře -->
-
+            <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 <?php if($task['canUserAddReport'] === true): ?>
 				<!-- START: Formulář pro zadávání reportů k úkolům -->
 				<div class="form-container">
