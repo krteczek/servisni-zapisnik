@@ -24,6 +24,7 @@ ExceptionHandler::register();
 // -------------------------------------------------
 // Ostatní Use statement
 // -------------------------------------------------
+use App\Services\Recurrings\RecurringRunner;
 use App\Core\Router;
 use App\Core\Session;
 use App\Core\Config;
@@ -38,10 +39,18 @@ $appEnv = Config::get('app.env');
 $appDebug = Config::get('app.debug');
 $appBasePath = Config::get('app.base_path');
 
+
+// -------------------------------------------------
+// RecurringRunner: spouští cronování reccuring tasků
+// -------------------------------------------------
+RecurringRunner::run();
+
+
 // -------------------------------------------------
 // BanService: pokud se uživatel ošklivě chová,
 // nedostane propustku
 // -------------------------------------------------
+
 
 if(BanService::isBanned() === true)
 {

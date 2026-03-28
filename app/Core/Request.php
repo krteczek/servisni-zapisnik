@@ -26,5 +26,8 @@ class Request
 
     }
 
-
+public static function post(string $key, $default = null)
+{
+    return $_POST[$key] ?? $default;
+}
 }
