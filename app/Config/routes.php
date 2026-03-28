@@ -11,6 +11,8 @@ use App\Controllers\AuditLogController;
 use App\Controllers\SystemController;
 use App\Controllers\TaskController;
 use App\Controllers\PageController;
+use App\Controllers\TaskRecurringController;
+use App\Controllers\BillingExportController;
 return [
 
 /*
@@ -297,6 +299,46 @@ return [
     'auth'   => true,
     'roles'   => ['admin', 'mistr'],
 	'title'   => 'Úkoly: Vytvořit klon úkolu',
+],
+
+/*
+|--------------------------------------------------------------------------
+| RECURRING Tasks create a edit
+|--------------------------------------------------------------------------
+*/
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/recurring',
+    'action' => [TaskController::class, 'recurringGet'],
+    'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Vytvořit šablonu opakujícího se úkolu',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/recurring',
+    'action' => [TaskController::class, 'recurringPost'],
+    'auth'   => true,
+    'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Vytvořit šablonu opakujícího se úkolu',
+],
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/recurringEdit',
+    'action' => [TaskController::class, 'recurringGet'],
+    'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Vytvořit šablonu opakujícího se úkolu',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/recurringEdit',
+    'action' => [TaskController::class, 'recurringPost'],
+    'auth'   => true,
+    'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Vytvořit šablonu opakujícího se úkolu',
 ],
 
 
@@ -596,6 +638,71 @@ return [
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
 ],
+
+
+
+
+/*-------------------------------------
+   Exporty, nejprve fakturace
+-------------------------------------**/
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/exports/billing/index',
+    'action'  => [BillingExportController::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'exports',
+    'menu'   => 'Exporty',
+    'submenu'=> 'Výpis exportů',
+    'title'   => 'Exporty: Výpis exportů',
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/exports/billing/create',
+    'action'  => [BillingExportController::class, 'create'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'exports',
+    'menu'   => 'Exporty',
+    'submenu'=> 'Výpis fakturačních exportů',
+    'title'   => 'Exporty: Vytvořit fakturační export',
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/exports/billing/create',
+    'action'  => [BillingExportController::class, 'store'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'exports',
+    'menu'   => 'Exporty',
+    'submenu'=> 'Výpis fakturačních exportů',
+    'title'   => 'Exporty: Vytvořit fakturační export',
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/exports/billing/{id}/detail',
+    'action'  => [BillingExportController::class, 'detail'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'exports',
+    'menu'    => 'Exporty',
+    'title'   => 'Exporty: Detail fakturačního exportu',
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/exports/billing/{id}/pdf',
+    'action'  => [BillingExportController::class, 'pdf'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'menu'    => 'Exporty',
+    'section' => 'exports',
+    'title'   => 'Exporty: Export do PDF',
+],
+
 /*-------------------------------------
 Přepínaní rolí u admina
 -------------------------------------**/

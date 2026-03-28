@@ -25,7 +25,7 @@ $errors = $view->errors;
 	<div class="card">
 
 		<div class="card-section card-section--wo">
-		    <div class="section-label">Zakázka</div>
+		    <div class="section-label">Úkol: </div>
 
 		    <p>
 		        <strong><?= e($workOrder['title']) ?></strong>
@@ -79,6 +79,25 @@ $errors = $view->errors;
 </a>
 
 </div>
+
+        <div class="form-group">
+<?php if ((int)($post['is_recurring'] ?? 0) !== 1): ?>
+          <label>Z normálního úkolu nelze dodatečně udělat opakovaný úkol.</label>
+<?php else: ?>      
+          <label>
+				Tento úkol je opakovací. Kliknutím na tlačítko <strong>Nastavit opakování úkolu</strong>
+				se dostanete na stránku, kde můžete nastavit frekvenci opakování úkolu.
+			 </label>
+							<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/recurringEdit') ?>" 
+								class="btn btn-secondary">
+								<span class="btn-icon">←</span>
+								Nastavit opakování úkolu
+							</a>
+              
+
+<?php endif; ?>
+        </div>
+
         </div>
 		
 						<!-- FORMULÁŘOVÉ TLAČÍTKA -->

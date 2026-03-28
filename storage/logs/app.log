@@ -223,3 +223,111 @@
 [2026-03-24 09:05:54.268851] ERROR:  Router exception
 [2026-03-24 09:06:45.204338] ERROR:  Fatal error
 [2026-03-24 09:07:21.926601] ERROR:  Router exception
+[2026-03-24 22:27:00.408531] ERROR:  [fd0432ed] Class "App\Services\Recurring\RecurringRunner" not found
+[2026-03-24 23:07:48.160566] ERROR:  [0d2c8d77] Class "App\Services\Recurring\RecurringRunner" not found
+[2026-03-24 23:09:46.228440] ERROR:  [b6be85f1] Class "App\Services\Recurrings\RecurringRunner" not found
+[2026-03-24 23:11:42.636860] ERROR:  [430aad88] Class "App\Services\Recurring\RecurringRunner" not found
+[2026-03-24 23:12:09.814283] ERROR:  [519d3e9c] Class "App\Services\Recurrings\RecurringRunner" not found
+[2026-03-24 23:13:41.361795] ERROR:  [b8037665] Class "App\Services\Recurrings\RecurringRunner" not found
+[2026-03-24 23:13:43.861557] ERROR:  [bd17b864] Class "App\Services\Recurrings\RecurringRunner" not found
+[2026-03-24 23:13:47.059756] ERROR:  [e613b33c] Class "App\Services\Recurrings\RecurringRunner" not found
+[2026-03-25 00:00:50.230741] ERROR:  Router exception
+[2026-03-25 00:06:24.362801] ERROR:  Router exception
+[2026-03-25 00:06:30.767529] ERROR:  Router exception
+[2026-03-25 00:09:00.373702] ERROR:  Router exception
+[2026-03-25 00:09:43.647349] ERROR:  Router exception
+[2026-03-25 00:09:50.108503] ERROR:  Router exception
+[2026-03-25 00:09:53.135640] ERROR:  Router exception
+[2026-03-25 00:12:23.199227] ERROR:  Router exception
+[2026-03-25 00:12:26.920883] ERROR:  Router exception
+[2026-03-25 00:12:31.153018] ERROR:  Router exception
+[2026-03-25 00:13:18.830984] ERROR:  Router exception
+[2026-03-25 00:22:10.432656] ERROR:  Router exception
+[2026-03-25 00:24:49.858138] ERROR:  Router exception
+[2026-03-25 00:25:29.986707] ERROR:  Router exception
+[2026-03-25 00:26:23.818820] ERROR:  Router exception
+[2026-03-25 00:48:29.391895] ERROR:  Router exception
+[2026-03-25 00:50:31.176788] ERROR:  Router exception
+[2026-03-25 00:51:52.603043] ERROR:  [8e21e321] syntax error, unexpected token "return", expecting "," or ";"
+[2026-03-25 00:54:08.111512] ERROR:  [573f050b] syntax error, unexpected token "return", expecting "," or ";"
+[2026-03-25 00:55:29.219645] ERROR:  Router exception
+[2026-03-25 01:03:04.972233] ERROR:  Router exception
+[2026-03-25 01:03:42.969911] ERROR:  Router exception
+[2026-03-25 01:03:46.989238] ERROR:  Router exception
+[2026-03-25 01:04:28.043159] ERROR:  Router exception
+[2026-03-25 01:16:27.294186] ERROR:  Router exception
+[2026-03-25 10:14:13.598487] ERROR:  Router exception
+[2026-03-25 10:15:39.976554] ERROR:  Router exception
+[2026-03-25 10:16:39.295285] ERROR:  Router exception
+[2026-03-25 10:17:48.781280] ERROR:  Fatal error
+[2026-03-25 10:18:51.395417] ERROR:  Router exception
+[2026-03-25 10:35:11.981399] ERROR:  Router exception
+[2026-03-25 10:50:26.345678] ERROR:  Router exception
+[2026-03-25 10:53:41.587791] ERROR:  Router exception
+[2026-03-25 10:59:10.155798] ERROR:  Router exception
+[2026-03-25 10:59:26.305974] ERROR:  Fatal error
+[2026-03-25 11:00:40.414076] ERROR:  Fatal error
+[2026-03-25 11:00:50.562135] ERROR:  Fatal error
+[2026-03-25 11:03:46.791874] ERROR:  Fatal error
+[2026-03-25 11:04:00.465200] ERROR:  Fatal error
+[2026-03-25 11:05:45.315780] ERROR:  Fatal error
+[2026-03-25 11:06:39.154266] ERROR:  Fatal error
+[2026-03-25 11:06:54.443012] ERROR:  Fatal error
+[2026-03-25 11:08:41.328160] ERROR:  Fatal error
+[2026-03-25 11:08:53.619119] ERROR:  Fatal error
+[2026-03-25 11:48:45.801375] ERROR:  Fatal error
+[2026-03-25 12:33:51.861353] ERROR:  Router exception
+[2026-03-25 12:33:51.868168] ERROR:  Fatal error
+[2026-03-25 12:34:27.213889] ERROR:  Router exception
+[2026-03-25 12:34:27.221623] ERROR:  Fatal error
+[2026-03-25 12:34:54.145841] ERROR:  Fatal error
+[2026-03-25 12:54:25.311089] ERROR:  Fatal error
+[2026-03-25 12:55:28.051727] ERROR:  Fatal error
+[2026-03-25 12:55:55.533247] ERROR:  Fatal error
+[2026-03-25 12:57:35.968445] ERROR:  Fatal error
+[2026-03-25 12:58:47.269957] ERROR:  Fatal error
+[2026-03-25 13:01:36.450264] ERROR:  Fatal error
+[2026-03-25 13:08:06.849436] ERROR:  Router exception
+[2026-03-25 13:08:06.875890] ERROR:  Fatal error
+[2026-03-25 13:09:01.341909] ERROR:  Fatal error
+[2026-03-25 13:15:31.765639] ERROR:  Fatal error
+[2026-03-25 13:21:50.089274] ERROR:  Fatal error
+[2026-03-25 13:22:02.278132] ERROR:  Fatal error
+[2026-03-25 13:22:03.459919] ERROR:  Fatal error
+[2026-03-26 11:20:05.328291] ERROR:  Router exception
+[2026-03-26 11:32:58.878024] ERROR:  Fatal error
+[2026-03-26 12:29:48.405454] ERROR:  Router exception
+[2026-03-26 12:38:15.255411] ERROR:  UserActivation failed
+[2026-03-26 12:38:23.289475] ERROR:  UserActivation failed
+[2026-03-26 12:48:28.271537] ERROR:  Router exception
+[2026-03-26 12:50:13.637421] ERROR:  Router exception
+[2026-03-26 12:50:39.897584] ERROR:  Router exception
+[2026-03-27 12:46:25.123211] ERROR:  Router exception
+[2026-03-27 12:47:17.074061] ERROR:  Router exception
+[2026-03-27 12:48:39.092185] ERROR:  Router exception
+[2026-03-27 12:49:53.596574] ERROR:  Router exception
+[2026-03-27 12:50:47.162247] ERROR:  Router exception
+[2026-03-27 12:59:01.590869] ERROR:  Router exception
+[2026-03-27 12:59:55.316329] ERROR:  Router exception
+[2026-03-27 13:13:18.221761] ERROR:  Router exception
+[2026-03-27 13:14:03.201106] ERROR:  Router exception
+[2026-03-27 13:14:49.088924] ERROR:  Router exception
+[2026-03-27 13:16:35.070718] ERROR:  Router exception
+[2026-03-27 13:18:54.683917] ERROR:  Router exception
+[2026-03-27 13:21:33.315337] ERROR:  Router exception
+[2026-03-27 13:24:05.928462] ERROR:  Router exception
+[2026-03-27 13:25:23.731662] ERROR:  Router exception
+[2026-03-27 13:26:07.182434] ERROR:  Router exception
+[2026-03-27 13:26:08.148070] ERROR:  Router exception
+[2026-03-27 13:27:40.200283] ERROR:  Fatal error
+[2026-03-27 13:28:32.047249] ERROR:  Fatal error
+[2026-03-27 13:28:35.884139] ERROR:  Fatal error
+[2026-03-27 13:29:06.611282] ERROR:  Router exception
+[2026-03-28 11:42:33.622855] ERROR:  Router exception
+[2026-03-28 11:44:45.148897] ERROR:  Router exception
+[2026-03-28 11:44:59.004548] ERROR:  Router exception
+[2026-03-28 11:49:19.040156] ERROR:  Router exception
+[2026-03-28 11:49:23.020968] ERROR:  Router exception
+[2026-03-28 11:57:08.228399] ERROR:  Router exception
+[2026-03-28 11:57:37.328713] ERROR:  Router exception
+[2026-03-28 12:03:36.443889] ERROR:  Router exception

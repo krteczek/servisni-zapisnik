@@ -14,9 +14,9 @@ require __DIR__ . '/../layout/header.php';
 
 $workOrder = $view->order;
 $teams = $view->teams;
-$post = $view->post;
+$post = $view->tasks;
 $errors = $view->errors; 
-//var_dump($workOrder);
+var_dump($post);
 
 
 ?>
@@ -72,6 +72,16 @@ $errors = $view->errors;
             <?php endforeach; ?>
             </select>
         </div>
+        <div class="form-group">
+          <label class="checkbox" style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox"
+                     name="is_recurring"
+                     value="1"
+                     <?= !empty($post['is_recurring']) ? 'checked' : '' ?>
+                     style="width:auto;">
+              <span>Opakující se úkol</span>
+          </label>
+     </div>
 		
 						<!-- FORMULÁŘOVÉ TLAČÍTKA -->
 						<div class="form-actions">
