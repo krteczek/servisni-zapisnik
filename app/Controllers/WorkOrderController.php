@@ -12,7 +12,7 @@ use App\Core\Logger;
 use App\Models\WorkOrderModel;
 use App\Models\TaskModel;
 use App\Models\TeamModel;
-
+use App\Models\ContactsModel;
 class WorkOrderController extends Controller
 {
     private WorkOrderModel $model;
@@ -31,8 +31,10 @@ public function index(): string
 
     public function createForm(): string
     {
-        $this->view->data   = [];
-        $this->view->errors = [];
+    	  //$contactsModel = new ContactsModel();
+    	  //$this->view->contacts = $contactsModel->all();
+        $this->view->data     = [];
+        $this->view->errors   = [];
 
         return $this->render('work_orders/create');
     }
@@ -40,11 +42,27 @@ public function index(): string
     public function createformStore(): string
     {
         $data = $this->validate($_POST);
+        $contactsModel = new ContactsModel();
 
         if ($this->hasErrors()) {
             $this->view->data = $data;
+            $this->view->contacts = $contactsModel->all();
+
             return $this->render('work_orders/create');
         }
+        $data = [
+            'contact_id'         => (int)($post['contact_id'] ?? 0),
+            'price_per_hour'     => (int)$post['price_per_hour'],
+            'price_per_km'       => (int)$post['price_per_km'],
+            'external_number' 	=> trim($post['external_number'] ?? '') ?: null,
+            'title'           	=> trim($post['title'] ?? ''),
+            'description'     	=> trim($post['description'] ?? ''),
+            'source'          	=> $post['source'] ?? 'personal',
+            'requested_by'    	=> trim($post['requested_by'] ?? ''),
+            'contact_person'         	=> trim($post['contact_person'] ?? ''),
+            'priority'        	=> $post['priority'] ?? 'normal',
+            'created_by_user_id' => Auth::id(),
+        ];
 
         $orderId = $this->model->create($data);
         $this->model->recomputeStatus($orderId);
@@ -89,57 +107,7 @@ public function index(): string
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
     }
     
-public function detailOrderOLD(int $orderId): string
-{
-	    $order = $this->getOrderOrRedirect($orderId);
-	
-	    $taskModel = new TaskModel();
-	    $tasks = $taskModel->forWorkOrderWithStats($orderId);
-	
-	    $teamModel = new TeamModel();
-	    $teams = $teamModel->byActive(true);
 
-			// 1. Vytvoř lookup mapu týmů (id => [name, color])
-			$teamMap = [];
-			foreach ($teams as $team) {
-			    $teamMap[$team['id']] = [
-			        'team_name'  => $team['name'],
-			        'team_color' => $team['color'],
-			    ];
-			}
-
-			// 2. Pro každý úkol přidej team_name a team_color a poskládej kompletní statistiku
-			$totalMinutes = 0;
-			$totalKm      = 0;
-			$reportCount  = 0;
-
-			foreach ($tasks as &$task) {
-			    $teamId = $task['team_id'] ?? null;
-			    $totalMinutes += $task['stats']['total_minutes'] ?? 0;
-			    $totalKm      += $task['stats']['total_km'] ?? 0;
-			    $reportCount  += $task['stats']['assignments_count'] ?? 0; // nebo počet reportů
-
-
-			    if ($teamId !== null && isset($teamMap[$teamId])) {
-			        $task['team_name']  = $teamMap[$teamId]['team_name'];
-			        $task['team_color'] = $teamMap[$teamId]['team_color'];
-			    } else {
-			        // pokud tým neexistuje (např. smazaný) – fallback
-			        $task['team_name']  = '—';
-			        $task['team_color'] = '#cccccc'; // šedá nebo nějaká default
-			    }
-			}
-			$hours = floor($totalMinutes / 60);
-			$mins  = $totalMinutes % 60;
-			$order['hours'] = $hours . 'h ' . $mins . ' min';
-	    $this->view->order = $order;
-	    $this->view->tasks = $tasks;
-	    $this->view->teams = $teams;
-
-    
-    return $this->render('work_orders/detail');
-    
-}
 public function detailOrder(int $orderId): string
 {
     $order = $this->getOrderOrRedirect($orderId);
@@ -246,14 +214,16 @@ private function getOrderOrRedirect(int $orderId): array
     private function validate(array $post): array
     {
         $this->checkCsrf();
-
         $data = [
+            'contact_id'         => (int)($post['contact_id'] ?? 0),
+            'price_per_hour'     => (int)$post['price_per_hour'],
+            'price_per_km'       => (int)$post['price_per_km'],
             'external_number' 	=> trim($post['external_number'] ?? '') ?: null,
             'title'           	=> trim($post['title'] ?? ''),
             'description'     	=> trim($post['description'] ?? ''),
             'source'          	=> $post['source'] ?? 'personal',
             'requested_by'    	=> trim($post['requested_by'] ?? ''),
-            'contact'         	=> trim($post['contact'] ?? ''),
+            'contact_person'         	=> trim($post['contact_person'] ?? ''),
             'priority'        	=> $post['priority'] ?? 'normal',
             'created_by_user_id' => Auth::id(),
         ];
@@ -286,6 +256,17 @@ private function getOrderOrRedirect(int $orderId): array
 				$data['priority'] = 'normal';
 			}
 
+			if($data['price_per_hour'] < 0)
+			{
+				$this->addError('price_per_hour', 'Hodinová sazba nemůže být záporná.');
+			}
+			if($data['price_per_km'] < 0)
+			{
+				$this->addError('price_per_km', 'Kilometrová sazba nemůže být záporná.');
+			}
+			if ($data['contact_id'] <= 0) {
+			    $this->addError('contact_id', 'Vyberte odběratele');
+			}
         return $data;
     }
     
