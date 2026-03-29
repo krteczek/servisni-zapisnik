@@ -10,9 +10,6 @@ use App\Core\Csrf;
 use App\Core\Access;
 $data = $view->data; 
 ?>
-
-<h1>Nový požadavek</h1>
-
 <div class="create-container">
 
     <!-- 🔹 FORM -->
@@ -35,7 +32,7 @@ $data = $view->data;
                 </div>
                 <div class="form-group">
                     <label>Interní číslo</label>
-                <?= 'WO-' . str_pad($data['internal_number'], 5, '0', STR_PAD_LEFT) ?>
+                <?= 'WO-' . str_pad(($data['internal_number'] ?? '0'), 5, '0', STR_PAD_LEFT) ?>
                 </div>
                 <!-- Název -->
                 <div class="form-group">
@@ -80,15 +77,15 @@ $data = $view->data;
                 </div>
 
                 <!-- Kontakt -->
-                <div class="form-group">
-                    <label>Kontaktní osoba</label>
-                    <input
-                        class="form-control"
-                        name="contact"
-                        value="<?= e($data['contact'] ?? '') ?>"
-                    >
-                </div>
-
+<!-- Kontaktní osoba -->
+<div class="form-group">
+    <label>Kontaktní osoba</label>
+    <input
+        class="form-control"
+        name="contact_person"
+        value="<?= e($data['contact_person'] ?? '') ?>"
+    >
+</div>
                 <!-- Priorita -->
                 <div class="form-group">
                     <label>Priorita</label>
@@ -99,6 +96,38 @@ $data = $view->data;
                         <option value="emergency">Havárie</option>
                     </select>
                 </div>
+
+<!-- Fakturace -->
+    <div class="section-label">Fakturace</div>
+
+    <div class="form-group">
+        <label>Odběratel <span class="req">*</span></label>
+
+        <select name="contact_id" required>
+            <option value="">— vyber odběratele —</option>
+
+            <?php foreach ($view->contacts ?? [] as $c): ?>
+                <option value="<?= $c['id'] ?>"
+                    <?= (($data['contact_id'] ?? null) == $c['id']) ? 'selected' : '' ?>
+                >
+                    <?= e($c['company_name']) ?>
+                </option>
+            <?php endforeach; ?>
+
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Cena za hodinu (Kč)</label>
+        <input type="number" step="1" name="price_per_hour"
+               value="<?= e($data['price_per_hour'] ?? '') ?>">
+    </div>
+
+    <div class="form-group">
+        <label>Cena za km (Kč)</label>
+        <input type="number" step="1" name="price_per_km"
+               value="<?= e($data['price_per_km'] ?? '') ?>">
+    </div>
 
                 <!-- ACTIONS -->
                 <div class="form-actions">
