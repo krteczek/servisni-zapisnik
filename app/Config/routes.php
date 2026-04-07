@@ -13,6 +13,7 @@ use App\Controllers\TaskController;
 use App\Controllers\PageController;
 use App\Controllers\TaskRecurringController;
 use App\Controllers\BillingExportController;
+use App\Controllers\ContactsController;
 return [
 
 /*
@@ -395,7 +396,7 @@ return [
 [
     'method' => 'POST',
     'path'   => '/{tenant}/work-orders/create',
-    'action' => [WorkOrderController::class, 'createformStore'],
+    'action' => [WorkOrderController::class, 'createFormStore'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr', 'predak'],
 ],
@@ -639,6 +640,45 @@ return [
     'roles'  => ['admin', 'mistr'],
 ],
 
+
+/* ----------------------------------------
+   Zákazníci
+-------------------------------------------*/
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/contacts/index',
+    'action'  => [ContactsController::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'contacts',
+    'menu'    => 'Zákazníci',
+    'submenu' => 'Výpis zákazníků',
+    'title'   => 'Zákazníci: Výpis zákazníků',
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/contacts/create',
+    'action' => [ContactsController::class, 'createContact'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr'],
+    'section'=> 'contacts',
+    'menu'   => 'Zákazníci',
+    'submenu'=> 'Vytvořit zákazníka',
+    'title'  => 'Zákazníci: Vytvořit zákazníka',
+
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/contacts/create',
+    'action' => [ContactsController::class, 'storeContact'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr'],
+    'section'=> 'contacts',
+    'title'  => 'Zákazníci: Vytvořit zákazníka',
+
+],
 
 
 

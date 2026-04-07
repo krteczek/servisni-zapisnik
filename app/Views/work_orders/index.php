@@ -63,6 +63,14 @@ $workOrders = $view->orders;
                         <span class="meta-label">Odpracováno: </span>
                         <span class="meta-value"><?= e($wo['total_hours_formatted']) ?></span>
                     </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Zákazník: </span>
+                        <span class="meta-value"><?= e($wo['customer_name'] ?: 'nezadán') ?></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Adresa: </span>
+                        <span class="meta-value"><?= e($wo['customer_address'] ?: 'nezadána') ?></span>
+                    </div>
                </div>
             </div>
 

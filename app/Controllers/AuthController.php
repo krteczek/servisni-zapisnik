@@ -95,7 +95,7 @@ public function login(): string
 	
     /* ===== AUTH ===== */
 
-    $companyModel = new \App\Models\CompanyModel();
+    $companyModel = new CompanyModel();
     $company = $companyModel->findBySlug($tenant);
 
     $user = null;
