@@ -311,8 +311,22 @@ public static function label(): ?string
 
         return Session::get(self::USER_KEY . '.email');
     }
-    
+
     /**
+     * Vrátí název work databáze pro tenant právě přihlášeného uživatele  
+     *
+     * @return string|null db_name tenantu uživatele
+     */
+    
+    public static function dbName(): ?string
+    {
+        if (!self::check()) {
+            return null;
+        }
+
+        return Session::get(self::USER_KEY . '.db_name');
+    }
+   /**
      * Vrátí slug tenanta z session.
      * Používá se pro multi-tenant routing a izolaci dat.
      *

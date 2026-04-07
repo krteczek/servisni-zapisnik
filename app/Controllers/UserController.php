@@ -298,7 +298,7 @@ final class UserController extends Controller
 			$url = Url::base() . Url::to('/activate/complete?token=' . $token);
 //var_dump($url);exit;			
 			[$subject, $htmlBody, $textBody] = BuildMailService::buildInvitation($url, Auth::company());
-var_dump($subject, $htmlBody, $textBody);
+//var_dump($subject, $htmlBody, $textBody);
 //exit;			
 			//$ = ActivationMail::build($activationUrl);
         $ok = (new MailService())->send(

@@ -161,6 +161,8 @@ class ViewContext
     public ?array $reports = [];
     public ?array $oldData = [];
 
+    public ?array $contacts = [];
+
 
     public string $mode = '';
 

@@ -32,7 +32,11 @@ $data = $view->data;
                 </div>
                 <div class="form-group">
                     <label>Interní číslo</label>
-                <?= 'WO-' . str_pad(($data['internal_number'] ?? '0'), 5, '0', STR_PAD_LEFT) ?>
+                    <?php if(!isset($data['internal_number'])): ?>
+                    Interní číslo zakázky bude vytvořeno až při uložení zakázky.
+                    <?php else: ?>
+                    <?= e($data['internal_number']) ?>
+                    <?php endif; ?>
                 </div>
                 <!-- Název -->
                 <div class="form-group">
@@ -98,14 +102,14 @@ $data = $view->data;
                 </div>
 
 <!-- Fakturace -->
-    <div class="section-label">Fakturace</div>
+    <div class="section-label">Zákazník: </div>
 
     <div class="form-group">
-        <label>Odběratel <span class="req">*</span></label>
+        <label>Odběratel: </label>
 
-        <select name="contact_id" required>
-            <option value="">— vyber odběratele —</option>
+        <select name="contact_id">
 
+            <option value="">— bez zákazníka —</option>
             <?php foreach ($view->contacts ?? [] as $c): ?>
                 <option value="<?= $c['id'] ?>"
                     <?= (($data['contact_id'] ?? null) == $c['id']) ? 'selected' : '' ?>

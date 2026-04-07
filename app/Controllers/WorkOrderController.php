@@ -8,11 +8,14 @@ use App\Core\Controller;
 use App\Core\Flash;
 use App\Core\ViewContext;
 use App\Core\Url;
-use App\Core\Logger;
+use App\Core\LoggerHolder;
+use App\Core\Database;
 use App\Models\WorkOrderModel;
 use App\Models\TaskModel;
 use App\Models\TeamModel;
 use App\Models\ContactsModel;
+use App\Services\WorkOrders\WorkOrderNumberService;
+use PDO;
 class WorkOrderController extends Controller
 {
     private WorkOrderModel $model;
@@ -31,15 +34,15 @@ public function index(): string
 
     public function createForm(): string
     {
-    	  //$contactsModel = new ContactsModel();
-    	  //$this->view->contacts = $contactsModel->all();
+    	  $contactsModel = new ContactsModel();
+    	  $this->view->contacts = $contactsModel->all();
         $this->view->data     = [];
         $this->view->errors   = [];
 
         return $this->render('work_orders/create');
     }
 
-    public function createformStore(): string
+    public function createFormStore(): string
     {
         $data = $this->validate($_POST);
         $contactsModel = new ContactsModel();
@@ -50,54 +53,78 @@ public function index(): string
 
             return $this->render('work_orders/create');
         }
-        $data = [
-            'contact_id'         => (int)($post['contact_id'] ?? 0),
-            'price_per_hour'     => (int)$post['price_per_hour'],
-            'price_per_km'       => (int)$post['price_per_km'],
-            'external_number' 	=> trim($post['external_number'] ?? '') ?: null,
-            'title'           	=> trim($post['title'] ?? ''),
-            'description'     	=> trim($post['description'] ?? ''),
-            'source'          	=> $post['source'] ?? 'personal',
-            'requested_by'    	=> trim($post['requested_by'] ?? ''),
-            'contact_person'         	=> trim($post['contact_person'] ?? ''),
-            'priority'        	=> $post['priority'] ?? 'normal',
+        
+        $toDb = [
+            'contact_id'         => $data['contact_id'],
+            'price_per_hour'     => $data['price_per_hour'],
+            'price_per_km'       => $data['price_per_km'],
+            'external_number' 	=> $data['external_number'],
+            'title'           	=> $data['title'],
+            'description'     	=> $data['description'],
+            'source'          	=> $data['source'],
+            'requested_by'    	=> $data['requested_by'],
+            'contact_person'     => $data['contact_person'],
+            'priority'        	=> $data['priority'],
             'created_by_user_id' => Auth::id(),
         ];
 
-        $orderId = $this->model->create($data);
-        $this->model->recomputeStatus($orderId);
-			if(!$orderId) {
-				$this->addError('global', 'Zakázku se nepodařilo vytvořit.');
-            return $this->render('work_orders/create');
-			
-			}
+			$pdo = Database::work();
+			$pdo->beginTransaction();
+
+			try {
+			    $WONS = new WorkOrderNumberService();
+			    $orderId = $WONS->generateAndCreate($toDb, $pdo);
+
+			    $pdo->commit();
+
+			} catch (\Throwable $e) {
+				    $pdo->rollBack();
+
+				    LoggerHolder::get()->error('Create work order failed', [
+				        'message' => $e->getMessage(),
+				    ]);
+
+				    $this->addError('global', 'Zakázku se nepodařilo vytvořit.');
+
+				    $this->view->data = $data;
+				    $this->view->contacts = $contactsModel->all();
+
+				    return $this->render('work_orders/create');
+		   }
         Flash::success('Zakázka byla úspěšně vytvořena.');
 
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
     }
 
-    public function editForm(int $orderId): string
-    {
-        $order = $this->getOrderOrRedirect($orderId);
+public function editForm(int $orderId): string
+{
+    $order = $this->getOrderOrRedirect($orderId);
 
-        $this->view->data = $order;
-        return $this->render('work_orders/create');
-    }
+    $contactsModel = new ContactsModel();
+
+    $this->view->data = $order;
+    $this->view->contacts = $contactsModel->all(); // 🔥 DŮLEŽITÉ
+
+    return $this->render('work_orders/create');
+}
 
     public function editFormUpdate(int $orderId): string
     {
         $this->getOrderOrRedirect($orderId);
 
         $data = $this->validate($_POST);
-
         if ($this->hasErrors()) {
+            $contactsModel = new ContactsModel();
+            $this->view->contacts = $contactsModel->all();
             $this->view->data = $data;
             return $this->render('work_orders/create');
             
         }
 			$ok = $this->model->update($orderId, $data);
-			$add = $ok ? 'success' : 'error';
+			
 			if(!$ok){
+            $contactsModel = new ContactsModel();
+            $this->view->contacts = $contactsModel->all();
 				$this->addError('global','Zakázku se nepodařilo změnit.');
 				$this->view->data = $data;
 				return $this->render('work_orders/create');
@@ -117,6 +144,10 @@ public function detailOrder(int $orderId): string
 
     $teamModel = new TeamModel();
     $teams = $teamModel->byActive(true);
+
+    $contactsModel = new ContactsModel();
+    $contact = $contactsModel->find($order['contact_id']);
+
 
     // 1. Vytvoř lookup mapu týmů (id => [name, color])
     $teamMap = [];
@@ -178,6 +209,8 @@ public function detailOrder(int $orderId): string
     $order['open_tasks_count']      = $openTaskCount;
     $order['done_tasks_count']      = $doneTaskCount;
     $order['cancelled_tasks_count'] = $cancelledTaskCount;
+    $order['company_name']          = $contact['company_name'];
+
 
 
     // 5. Předání do view
@@ -215,7 +248,8 @@ private function getOrderOrRedirect(int $orderId): array
     {
         $this->checkCsrf();
         $data = [
-            'contact_id'         => (int)($post['contact_id'] ?? 0),
+
+            'contact_id'         => (int)($post['contact_id'] ?? 0) ?: null,
             'price_per_hour'     => (int)$post['price_per_hour'],
             'price_per_km'       => (int)$post['price_per_km'],
             'external_number' 	=> trim($post['external_number'] ?? '') ?: null,
@@ -239,7 +273,7 @@ private function getOrderOrRedirect(int $orderId): array
 			$this->maxLength('description', $data['description'], 10000, 'Popis zakázky');
 			
 			// `contact` varchar(255) DEFAULT NULL,
-			$this->maxLength('contact', $data['contact'], 255, 'Kontakt');
+			$this->maxLength('contact_person', $data['contact_person'], 255, 'Kontakt');
 						
 			// `source` enum('email','phone','personal','system') NOT NULL,
 			$sources = ['email','phone','personal','system'];
@@ -263,9 +297,6 @@ private function getOrderOrRedirect(int $orderId): array
 			if($data['price_per_km'] < 0)
 			{
 				$this->addError('price_per_km', 'Kilometrová sazba nemůže být záporná.');
-			}
-			if ($data['contact_id'] <= 0) {
-			    $this->addError('contact_id', 'Vyberte odběratele');
 			}
         return $data;
     }

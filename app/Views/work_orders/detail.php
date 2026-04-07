@@ -21,7 +21,7 @@ $teams = $view->teams;
 
 
 $err = $view->errors; 
-//var_dump($tasks,$teams);
+var_dump($tasks,$teams, $order);
 ?>
 
 
@@ -41,6 +41,10 @@ $err = $view->errors;
 			<!-- BASIC INFO -->
 			<div class="wo-section">
 				<h3>Základní informace</h3>
+				<div class="wo-info-box">
+					<span class="label">Zákazník: </span>
+					<span title="Jméno zákazníka, název firmy"><?= e($order['company_name']) ?></span>
+				</div>
 				<div class="wo-info-box">
 					<span class="label">Status zakázky: </span>
 					<span class="badge badge-status-<?= e($order['status']) ?>" title="Stav zakázky"><?= te($order['status']) ?></span>
@@ -68,7 +72,7 @@ $err = $view->errors;
 
 					<div class="wo-info-box">
 						<span class="label">Kontakt: </span>
-						<span class="value"><?= e($order['contact'] ?: 'Nezadán') ?></span>
+						<span class="value"><?= e($order['contact_person'] ?: 'Nezadán') ?></span>
 					</div>
 				</div>
 			</div>

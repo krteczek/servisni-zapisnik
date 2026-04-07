@@ -8,7 +8,8 @@ use App\Core\AuditLogCore;
 use App\Core\Config;
 use App\Core\Auth;
 use App\Core\TenantContext;
-
+use App\Core\LoggerHolder;
+use App\Models\WorkOrderSequencesModel;
 use PDO;
 use LogicException;
 use Throwable;
@@ -65,6 +66,12 @@ abstract class BaseModel
      */
     protected string $tenantColumn = 'company_id';
 
+    /**
+     * Ochrana proti více souběžným transakcím
+     *
+     * @var int
+     */
+    private int $transactionLevel = 0;
     /**
      * Inicializuje model a sestaví finální název tabulky.
      *
@@ -181,6 +188,36 @@ protected function tenantId(): int
         return $where;
     }
 
+
+public function begin()
+{
+    if ($this->transactionLevel === 0) {
+        $this->db()->beginTransaction();
+    }
+    $this->transactionLevel++;
+}
+
+public function commit()
+{
+    $this->transactionLevel--;
+
+    if ($this->transactionLevel === 0) {
+        $this->db()->commit();
+    }
+}
+
+public function rollback()
+{
+    $this->transactionLevel = 0;
+    $this->db()->rollBack();
+}
+
+public function setConnection(PDO $pdo): void
+{
+    $this->db = $pdo;
+}
+
+
     /* ==========================================================
      * AUDIT
      * ========================================================== */
@@ -276,6 +313,8 @@ protected function diff(array $before, array $after): array
      */
     public function all(): array
     {
+    	try
+    	{
         $where = $this->applyTenant([]);
 
         $sql = "SELECT * FROM {$this->tableName}";
@@ -292,6 +331,17 @@ protected function diff(array $before, array $after): array
         $sql .= ' ORDER BY id DESC';
 
         return $this->fetchAll($sql, $where);
+     }
+     catch (Throwable $e) {
+	        LoggerHolder::get()->error('BaseModel.all() failed', [
+				    'message'   => $e->getMessage(),
+				    'file'      => $e->getFile(),
+				    'line'      => $e->getLine(),
+				    'trace'     => $e->getTraceAsString(),
+
+				]);
+				return [];
+       }
     }
 
     /**
@@ -531,18 +581,28 @@ protected function diff(array $before, array $after): array
     }
     
     public function createWithTenant(int $tenantId, array $data): int
-{
-    if ($data === []) {
-        throw new LogicException('CreateWithTenant: empty data');
-    }
+    {
+	    if ($data === []) {
+	        throw new LogicException('CreateWithTenant: empty data');
+	    }
 
-    if ($this->tenantAware) {
-    	//echo "kikol";
-        $data[$this->tenantColumn] = $tenantId;
-    }
+	    //přidání:
+	    // interního čísla zakázky (internal_number),
+	    // a roku (year)
+	    // do work_order 
+	    $year = (int) date('Y');
+	    $number = (new WorkOrderSequencesModel())->next($year, $tenantId);//vrátí bezpečné internal_number
+	    $data['internal_number'] = $number;
+	    $data['year'] = $year;
 
-    return $this->insertRaw($data);
-}
+	    
+	    if ($this->tenantAware) {
+	    	//echo "kikol";
+	        $data[$this->tenantColumn] = $tenantId;
+	    }
+	
+	    return $this->insertRaw($data);
+	}
 
 
 

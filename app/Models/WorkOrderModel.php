@@ -11,6 +11,51 @@ class WorkOrderModel extends BaseModel
     protected string $table = 'work_orders';
     protected string $connection = 'work';
 
+    /* ==========================================================
+     * TRANSACTIONS
+     * ========================================================== */
+
+    /**
+     * Zahájí databázovou transakci.
+     * Používá se pro hromadné operace s tokeny (např. invalidace + vytvoření).
+     *
+     * Vedlejší efekty:
+     * - Nastaví DB připojení do transakčního režimu
+     *
+     * TODO: [MAINTENANCE] Přesunout transakční metody do BaseModel
+     *
+     * @return void
+     */
+    public function begin(): void
+    {
+        if (!$this->db()->inTransaction()) {
+            $this->db()->beginTransaction();
+        }
+    }
+
+    /**
+     * Potvrdí probíhající transakci.
+     *
+     * @return void
+     */
+    public function commit(): void
+    {
+        if ($this->db()->inTransaction()) {
+            $this->db()->commit();
+        }
+    }
+
+    /**
+     * Zruší probíhající transakci.
+     *
+     * @return void
+     */
+    public function rollback(): void
+    {
+        if ($this->db()->inTransaction()) {
+            $this->db()->rollBack();
+        }
+    }
 
 public function forIndex(): array
 {
@@ -21,7 +66,10 @@ public function forIndex(): array
     $sql = "
         SELECT
             w.*,
-
+				-- 🔹 zákazník
+				    c.company_name AS customer_name,
+				    c.city         AS customer_city,
+				    c.street       AS customer_street,
             -- TASKY
             COALESCE(t.tasks_total, 0)       AS tasks_total,
             COALESCE(t.tasks_open, 0)        AS tasks_open,
@@ -34,7 +82,11 @@ public function forIndex(): array
             COALESCE(r.total_minutes, 0)     AS total_minutes
 
         FROM work_orders w
-
+        -- napojení zákazníka
+			LEFT JOIN contacts c
+			    ON c.id = w.contact_id
+			   AND c.company_id = :company_id_contacts
+			   
         -- 🔹 agregace tasků
         LEFT JOIN (
             SELECT
@@ -47,7 +99,6 @@ public function forIndex(): array
             WHERE company_id = :company_id_tasks
             GROUP BY work_order_id
         ) t ON t.work_order_id = w.id
-
         -- 🔹 agregace reportů + minut + km
         LEFT JOIN (
             SELECT
@@ -71,10 +122,10 @@ public function forIndex(): array
     ";
 
 $params = [
-    'company_id_tasks'   => $companyId,
-    'company_id_reports' => $companyId,
-    'company_id_main'    => $companyId,
-   
+    'company_id_tasks'     => $companyId,
+    'company_id_reports'   => $companyId,
+    'company_id_main'      => $companyId,
+    'company_id_contacts'  => $companyId,
 ];
     if (in_array($role, ['admin', 'mistr'], true)) {
         $sql .= "
@@ -100,6 +151,12 @@ $params = [
             $order['tasks_total'] > 0
                 ? round(($order['tasks_done'] / $order['tasks_total']) * 100)
                 : 0;
+        $order['customer_name'] = $order['customer_name'] ?? '';
+
+        $order['customer_address'] = trim(
+                                        ($order['customer_street'] ?? '') . ' ' .
+                                        ($order['customer_city'] ?? '')
+                                       );
     }
 
     return $orders;
