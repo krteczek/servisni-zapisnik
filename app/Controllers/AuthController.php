@@ -9,6 +9,9 @@ use App\Core\Database;
 use App\Core\Url;
 use App\Core\Session;
 use App\Core\Mailer;
+use App\Core\Flash;
+use App\Core\LoggerHolder;
+
 use App\Models\UserModel;
 use App\Models\CompanyModel;
 use App\Models\RegistrationRequestModel;
@@ -24,8 +27,9 @@ use App\Services\Users\UserActivationService;
 use App\Services\Users\UserPasswordResetService;
 use App\Services\Guards\RateLimiterService;
 use App\Services\Users\BuildMailService;
+use App\Services\Onboarding\OnboardingService;
 
-use App\Core\Flash;
+use \Throwable;
 
 class AuthController extends Controller
 {
@@ -206,12 +210,7 @@ private function processToken(string $type, string $successMessage): string
     } elseif ($password !== $passwordZ) {
         $this->addError('password', 'Hesla se neshodují.');
     }
-/*
-    $tv = (new TokenService())->validate($token, $type);
-    if($tv['ok'] === false) {
-    	  $this->addError('token', 'Platnost odkazu z emailu již vypršela... Požádejte si o nový.');
-    }
-*/
+
     if ($this->hasErrors()) {
         $this->view->data['token'] = $token;
         return $this->render('auth/reset-password');
@@ -219,7 +218,7 @@ private function processToken(string $type, string $successMessage): string
 
     // ===== PROCESS =====
 
-    //try {
+    try {
         $ok = (new UserActivationService())->consumeAndProcess(
             $token,
             $type,
@@ -229,16 +228,20 @@ private function processToken(string $type, string $successMessage): string
         	 Flash::success($successMessage);
         	 Url::redirect('/login');
         }
-        else {
-        	  error_log('[processToken] ' . json_encode($ok['result']));
-           Flash::error('Operace se nezdařila.');
-           Url::redirect('/login');
-        }
-    }
 
+     } catch (Throwable $e) {
+		    LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
+		                'message' => $e->getMessage(),
+		                'file'    => $e->getFile(),
+		                'line'    => $e->getLine(),
+		                'trace'   => $e->getTraceAsString(),
+		                'data'    => json_encode([$token, $type, $password]),
 
-
-
+		    ]);
+		}
+		$this->view->data['token'] = $token;
+      return $this->render('auth/reset-password');
+}
 
 	/* Zapomenuté heslo */
 	public function forgotPassword(): string
@@ -494,27 +497,33 @@ public function forgotPasswordPost(): string
 			$companyData['name']     = $data['name'];
 			$companyData['ico']      = $data['ico'];
 
-			$ok = (new UserActivationService())->consumeAndProcess($token, TokenType::COMPANY_CREATE, $data['password'], $data);
+			
+         $payload = [
+            'token' => $token,
+            'type' => TokenType::COMPANY_CREATE,
+            'data' => $data
+         ];
+			$ok = (new OnboardingService())->run($payload);
 			
 			if($ok['ok'] === true) 
 			{
 				
 				//jdeme řešit přihlášení:
-				$data = $ok['data'];
+				$d = $ok['data'];
 				//print_r($data['db_name']['registrationWorkDbName']);
 			    Auth::login([
-			        'id'           => $data['user_id'],
-			        'email'        => $data['email'],
+			        'id'           => $d['user_id'],
+			        'email'        => $d['email'],
 			        'global_role'  => 'admin',
-			        'company_id'   => $data['company_id'],
-			        'company_name' => $data['company_name'],
-			        'tenant_slug'  => $data['slug'],
-			        'first_name'   => $data['first_name'],
-			        'last_name'    => $data['last_name'],
-			        'db_name'      => $data['db_name'],
+			        'company_id'   => $d['company_id'],
+			        'company_name' => $d['company_name'],
+			        'tenant_slug'  => $d['slug'],
+			        'first_name'   => $d['first_name'],
+			        'last_name'    => $d['last_name'],
+			        'db_name'      => $d['db_name'],
 			    ]);
 			
-			    Flash::success('Vítej v aplikaci, ' . ($data['first_name'] ?? $data['email']) . ' 👋'
+			    Flash::success('Vítej v aplikaci, ' . ($d['first_name'] ?? $d['email']) . ' 👋'
 			    );
 			    $url = '/' . Auth::tenantSlug() . '/tasks';
 			    Url::redirect($url);

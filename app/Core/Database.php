@@ -230,4 +230,35 @@ final class Database
     }
 }
 
+public static function getCurrentDatabase(): ?string
+{
+    return self::$currentWorkDb;
 }
+
+public static function useAdminDatabase(): void
+{
+    self::$currentWorkDb = null;
+}
+
+public static function setDatabase(?string $dbName): void
+{
+    self::$currentWorkDb = $dbName;
+}
+
+
+public static function connection(string $type): \PDO
+{
+    if ($type === 'admin') {
+        return self::admin();
+    }
+
+    if ($type === 'work') {
+        return self::work();
+    }
+
+    if (str_starts_with($type, 'work:')) {
+        return self::work(substr($type, 5));
+    }
+
+    throw new \RuntimeException("Unknown connection type: {$type}");
+}}
