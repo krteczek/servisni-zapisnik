@@ -276,7 +276,6 @@ public function forgotPasswordPost(): string
              email:   $email
     );
 
-
     Flash::success(
         'Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.'
     );
@@ -297,14 +296,15 @@ public function forgotPasswordPost(): string
             Flash::error($errMsg);
             Url::redirect('/login');
         }
-        $row = (new TokenService())->validate($token, $type);
-        if ($row['ok'] === false) {
-            Flash::error($errMsg);
-            Url::redirect('/login');
-
-        }
-       
         try {
+	        $row = (new TokenService())->validate($token, $type);
+	        if ($row['ok'] === false) {
+	            Flash::error($errMsg);
+	            Url::redirect('/login');
+
+	        }
+       
+        
         		//public function validate(string $rawToken, string $type): array
             $this->view->data = $row;
 				//$this->view->data['button'] = 'Nastavit heslo';

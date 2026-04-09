@@ -10,7 +10,26 @@ use App\Core\Url;
 
 final class BuildMailService
 {
-    public static function buildRegistration(string $activationUrl): array
+public static function build(string $template, array $data = []): array
+{
+    $map = [
+        'user.not-active' => 'Informace o účtu',
+        'user.reset-password' => 'Obnovení hesla',
+        'user.invitation' => 'Pozvánka do aplikace',
+    ];
+
+    $subject = $map[$template] ?? 'Zpráva z aplikace';
+    $data['title'] = $subject;
+    $html = MailView::render(str_replace('.', '/', $template), $data);
+
+    // jednoduchý text fallback
+    $text = strip_tags($html);
+
+    return [$subject, $html, $text];
+
+
+
+}    public static function buildRegistration(string $activationUrl): array
     {
         $subject = 'Dokončení registrace';
         $expiresMinutes = self::expiresHuman(TokenType::COMPANY_CREATE);
@@ -355,4 +374,45 @@ servisní zápisník
 TXT;
 
     return [$subject, $html, $text];
-}}
+}
+
+public static function userNotActive(array $companyData): array
+{
+    $subject = 'Pokus o obnovení hesla';
+
+    $html = '
+    <h1>Informace o účtu</h1>
+    <p>Dobrý den,</p>
+
+    <p>
+    byl zaznamenán pokus o obnovení hesla k vašemu účtu.
+    </p>
+
+    <p>
+    Váš účet není aktuálně aktivní. Pokud si myslíte, že jde o chybu, kontaktujte správce vaší organizace.
+    </p>
+
+    <p>
+    Pokud jste o obnovení hesla nežádali, můžete tuto zprávu ignorovat.
+    </p>
+
+    <p>Tým Bó</p>
+    ';
+
+    $text = '
+Dobrý den,
+
+byl zaznamenán pokus o obnovení hesla k vašemu účtu.
+
+Váš účet není aktuálně aktivní. Pokud si myslíte, že jde o chybu, kontaktujte správce vaší organizace.
+
+Pokud jste o obnovení hesla nežádali, můžete tuto zprávu ignorovat.
+
+Tým Bó
+';
+
+    return [$subject, $html, $text];
+}
+
+
+}

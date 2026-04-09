@@ -563,3 +563,10 @@
     "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Tokens\\TokenService.php(99): App\\Models\\TokenModel->findValidByHashForUpdate('6222caa38480b96...', 'invitation')\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\UserActivationService.php(93): App\\Services\\Tokens\\TokenService->consume('7ffe773432b9398...', 'invitation')\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\UserActivationService.php(46): App\\Services\\Users\\UserActivationService->processUserToken('7ffe773432b9398...', 'invitation', 'u\\xC5\\xBEivatele')\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(224): App\\Services\\Users\\UserActivationService->consumeAndProcess('7ffe773432b9398...', 'invitation', 'u\\xC5\\xBEivatele')\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(182): App\\Controllers\\AuthController->processToken('invitation', '\\xC3\\x9A\\xC4\\x8Det byl akti...')\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->activatePost()\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/activate/compl...', 'POST')\n#8 {main}",
     "token": "7ffe773432b93989bdd2..."
 }
+[2026-04-09 10:12:39.076586] ERROR:  Router exception
+{
+    "code": 500,
+    "message": "SMTP Error: Could not connect to SMTP host. Failed to connect to server",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\vendor\\phpmailer\\phpmailer\\src\\PHPMailer.php",
+    "line": 2461
+}

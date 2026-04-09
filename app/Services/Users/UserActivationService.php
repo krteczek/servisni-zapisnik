@@ -8,6 +8,7 @@ use App\Models\UserModel;
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
 use App\Services\Onboarding\OnboardingService;
+use App\Services\Mail\MailService;
 use App\Core\LoggerHolder;
 use App\Core\Database;
 use App\Core\Transaction;
@@ -133,7 +134,34 @@ final class UserActivationService
     private function handlePasswordReset(array $user, string $password): array
     {
         if ((int)$user["active"] !== 1) {
-            return [
+
+	        try {
+	        	   // pošleme email:
+	        	     //[$subject, $htmlBody, $textBody] = BuildMailService::($user);
+	        	     [$subject, $htmlBody, $textBody] = BuildMailService::build('user.not-active',
+	        	     ['user' => $user,]);
+
+			        $ok = (new MailService())->send(
+			  				toEmail:  $user['email'],
+							toName:   $user['first_name'] . ' ' . $user['last_name'],
+							subject:  $subject,
+							html:     $htmlBody,
+							text:     $textBody
+                 );
+
+
+	        } catch (Throwable $e) {
+	            LoggerHolder::get()->error('UserActivation send email  for not active failed.', [
+	                'message' => $e->getMessage(),
+	                'file'    => $e->getFile(),
+	                'line'    => $e->getLine(),
+	                'trace'   => $e->getTraceAsString(),
+	                'token'   => substr($rawToken, 0, 20) . '...',
+	            ]);
+
+
+	        }
+           return [
                 "ok" => false,
                 "result" => "Váš účet není aktivní, zřejmě byl administrátorem pozastaven..."];
         }
