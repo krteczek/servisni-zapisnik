@@ -397,3 +397,169 @@
 [2026-03-31 02:21:40.630429] ERROR:  Router exception
 [2026-03-31 02:50:08.881619] ERROR:  Router exception
 [2026-03-31 02:50:52.619254] ERROR:  Router exception
+[2026-04-08 01:39:57.270824] ERROR:  UserActivation failed
+[2026-04-08 14:21:31.885172] ERROR:  UserActivation failed
+{
+    "message": "Token consume requires transaction",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\TokenModel.php",
+    "line": 130,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Tokens\\TokenService.php(101): App\\Models\\TokenModel->findValidByHashForUpdate('8e260d137ec35ad...', 'company_create')\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\UserActivationService.php(31): App\\Services\\Tokens\\TokenService->consume('c47be0c0021b943...', 'company_create')\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(497): App\\Services\\Users\\UserActivationService->consumeAndProcess('c47be0c0021b943...', 'company_create', 'administr\\xC3\\xA1tor', Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#6 {main}",
+    "token": "c47be0c0021b9432c41e..."
+}
+[2026-04-08 21:54:08.040646] ERROR:  AuditLogCore failed
+{
+    "message": "SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'company_id' cannot be null",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php",
+    "line": 417,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(417): PDOStatement->execute(Array)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\AuditLogModel.php(33): App\\Models\\BaseModel->insertRaw(Array)\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\AuditLogCore.php(60): App\\Models\\AuditLogModel->insertLog(Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(424): App\\Core\\AuditLogCore::log('companies', 57, 'insert', Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(397): App\\Models\\BaseModel->insertRaw(Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(60): App\\Models\\BaseModel->create(Array)\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(39): App\\Services\\Users\\CompanyRegistrationService->completeAdmin(Array)\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(24): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#10 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#11 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#12 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#13 {main}",
+    "company_id": null,
+    "user_id": null,
+    "user_email": null,
+    "action": "insert",
+    "entity": "companies",
+    "entity_id": 57,
+    "diff": "{\"slug\":{\"from\":null,\"to\":\"bo---dokonceni-registrace-firmy\"},\"db_name\":{\"from\":null,\"to\":\"work\"},\"name\":{\"from\":null,\"to\":\"B\\u00f3 - Dokon\\u010den\\u00ed registrace firmy\"},\"ico\":{\"from\":null,\"to\":\"11224455\"},\"active\":{\"from\":null,\"to\":1},\"activated_at\":{\"from\":null,\"to\":\"2026-04-08 21:54:08\"}}",
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+}
+[2026-04-08 21:54:08.125466] ERROR:  Router exception
+{
+    "code": 500,
+    "message": "WORK database is not selected (missing db name or useWorkDatabase()).",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Database.php",
+    "line": 76
+}
+[2026-04-08 22:22:36.282470] ERROR:  AuditLogCore failed
+{
+    "message": "SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'company_id' cannot be null",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php",
+    "line": 417,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(417): PDOStatement->execute(Array)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\AuditLogModel.php(33): App\\Models\\BaseModel->insertRaw(Array)\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\AuditLogCore.php(60): App\\Models\\AuditLogModel->insertLog(Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(424): App\\Core\\AuditLogCore::log('companies', 58, 'insert', Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(397): App\\Models\\BaseModel->insertRaw(Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(60): App\\Models\\BaseModel->create(Array)\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(39): App\\Services\\Users\\CompanyRegistrationService->completeAdmin(Array)\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(24): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#10 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#11 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#12 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#13 {main}",
+    "company_id": null,
+    "user_id": null,
+    "user_email": null,
+    "action": "insert",
+    "entity": "companies",
+    "entity_id": 58,
+    "diff": "{\"slug\":{\"from\":null,\"to\":\"bo---dokonceni-registrace-firmy\"},\"db_name\":{\"from\":null,\"to\":\"work\"},\"name\":{\"from\":null,\"to\":\"B\\u00f3 - Dokon\\u010den\\u00ed registrace firmy\"},\"ico\":{\"from\":null,\"to\":\"11223344\"},\"active\":{\"from\":null,\"to\":1},\"activated_at\":{\"from\":null,\"to\":\"2026-04-08 22:22:36\"}}",
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+}
+[2026-04-08 22:22:36.379429] ERROR:  Router exception
+{
+    "code": 500,
+    "message": "SQLSTATE[42S22]: Column not found: 1054 Unknown column 'internal_number' in 'field list'",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php",
+    "line": 413
+}
+[2026-04-08 23:17:00.899563] ERROR:  AuditLogCore failed
+{
+    "message": "SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'company_id' cannot be null",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php",
+    "line": 417,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(417): PDOStatement->execute(Array)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\AuditLogModel.php(33): App\\Models\\BaseModel->insertRaw(Array)\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\AuditLogCore.php(60): App\\Models\\AuditLogModel->insertLog(Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(424): App\\Core\\AuditLogCore::log('companies', 59, 'insert', Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(397): App\\Models\\BaseModel->insertRaw(Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(60): App\\Models\\BaseModel->create(Array)\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(46): App\\Services\\Users\\CompanyRegistrationService->completeAdmin(Array)\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(25): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#10 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#11 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#12 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#13 {main}",
+    "company_id": null,
+    "user_id": null,
+    "user_email": null,
+    "action": "insert",
+    "entity": "companies",
+    "entity_id": 59,
+    "diff": "{\"slug\":{\"from\":null,\"to\":\"bo---dokonceni-registrace-firmy\"},\"db_name\":{\"from\":null,\"to\":\"work\"},\"name\":{\"from\":null,\"to\":\"B\\u00f3 - Dokon\\u010den\\u00ed registrace firmy\"},\"ico\":{\"from\":null,\"to\":\"11223344\"},\"active\":{\"from\":null,\"to\":1},\"activated_at\":{\"from\":null,\"to\":\"2026-04-08 23:17:00\"}}",
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+}
+[2026-04-08 23:17:00.983683] ERROR:  Router exception
+{
+    "code": 500,
+    "message": "Undefined variable $data",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php",
+    "line": 61
+}
+[2026-04-08 23:17:45.104517] ERROR:  AuditLogCore failed
+{
+    "message": "SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'company_id' cannot be null",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php",
+    "line": 417,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(417): PDOStatement->execute(Array)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\AuditLogModel.php(33): App\\Models\\BaseModel->insertRaw(Array)\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\AuditLogCore.php(60): App\\Models\\AuditLogModel->insertLog(Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(424): App\\Core\\AuditLogCore::log('companies', 60, 'insert', Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(397): App\\Models\\BaseModel->insertRaw(Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(60): App\\Models\\BaseModel->create(Array)\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(46): App\\Services\\Users\\CompanyRegistrationService->completeAdmin(Array)\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(25): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#10 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#11 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#12 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#13 {main}",
+    "company_id": null,
+    "user_id": null,
+    "user_email": null,
+    "action": "insert",
+    "entity": "companies",
+    "entity_id": 60,
+    "diff": "{\"slug\":{\"from\":null,\"to\":\"bo---dokonceni-registrace-firmy\"},\"db_name\":{\"from\":null,\"to\":\"work\"},\"name\":{\"from\":null,\"to\":\"B\\u00f3 - Dokon\\u010den\\u00ed registrace firmy\"},\"ico\":{\"from\":null,\"to\":\"11223344\"},\"active\":{\"from\":null,\"to\":1},\"activated_at\":{\"from\":null,\"to\":\"2026-04-08 23:17:45\"}}",
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+}
+[2026-04-08 23:17:45.184868] ERROR:  OnboardingService.run-admin: failed
+{
+    "message": "WORK database is not selected (missing db name or useWorkDatabase()).",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Database.php",
+    "line": 76,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(111): App\\Core\\Database::work()\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(126): App\\Models\\BaseModel->resolveDb()\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\WorkOrderSequencesModel.php(16): App\\Models\\BaseModel->db()\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(594): App\\Models\\WorkOrderSequencesModel->next(2026, 60)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(70): App\\Models\\BaseModel->createWithTenant(60, Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(46): App\\Services\\Users\\CompanyRegistrationService->completeAdmin(Array)\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(25): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#10 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#11 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#12 {main}",
+    "data": "{\"_token\":\"2b5583e1b12e855bb0d0f5b0f165e6c3e61405bc6b7c2e82130978fe9bc314d8\",\"token\":\"96bd66a2c6c7440760ec6b04a547c11f8cd225e665afb8ca665885891c7cf2f6\",\"name\":\"B\\u00f3 - Dokon\\u010den\\u00ed registrace firmy\",\"ico\":\"11223344\",\"first_name\":\"Petr\",\"last_name\":\"krteczek\",\"password\":\"administr\\u00e1tor\",\"passwordZ\":\"administr\\u00e1tor\"}"
+}
+[2026-04-08 23:24:48.743678] ERROR:  OnboardingService.run-admin: failed
+{
+    "message": "SQLSTATE[42S22]: Column not found: 1054 Unknown column 'internal_number' in 'field list'",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php",
+    "line": 413,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(413): PDO->prepare('INSERT INTO use...')\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(604): App\\Models\\BaseModel->insertRaw(Array)\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(70): App\\Models\\BaseModel->createWithTenant(61, Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(46): App\\Services\\Users\\CompanyRegistrationService->completeAdmin(Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(25): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#10 {main}",
+    "data": "{\"_token\":\"2b5583e1b12e855bb0d0f5b0f165e6c3e61405bc6b7c2e82130978fe9bc314d8\",\"token\":\"96bd66a2c6c7440760ec6b04a547c11f8cd225e665afb8ca665885891c7cf2f6\",\"name\":\"B\\u00f3 - Dokon\\u010den\\u00ed registrace firmy\",\"ico\":\"11223344\",\"first_name\":\"Petr\",\"last_name\":\"krteczek\",\"password\":\"administr\\u00e1tor\",\"passwordZ\":\"administr\\u00e1tor\"}"
+}
+[2026-04-08 23:40:31.849586] ERROR:  OnboardingService.run-admin: failed
+{
+    "message": "WORK database is not selected (missing db name or useWorkDatabase()).",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Database.php",
+    "line": 76,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(111): App\\Core\\Database::work()\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(126): App\\Models\\BaseModel->resolveDb()\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\WorkOrderSequencesModel.php(16): App\\Models\\BaseModel->db()\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(608): App\\Models\\WorkOrderSequencesModel->next(2026, 62)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(70): App\\Models\\BaseModel->createWithTenant(62, Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(46): App\\Services\\Users\\CompanyRegistrationService->completeAdmin(Array)\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(25): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#10 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#11 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#12 {main}",
+    "data": "{\"_token\":\"2b5583e1b12e855bb0d0f5b0f165e6c3e61405bc6b7c2e82130978fe9bc314d8\",\"token\":\"2e602b283e88360273bb26f4a9b2ec1bf577228b2ecca6ac01e46fda3494d0c2\",\"name\":\"B\\u00f3 - Dokon\\u010den\\u00ed registrace firmy\",\"ico\":\"11223344\",\"first_name\":\"Petr\",\"last_name\":\"krteczek\",\"password\":\"administr\\u00e1tor\",\"passwordZ\":\"administr\\u00e1tor\"}"
+}
+[2026-04-09 00:28:50.180715] ERROR:  OnboardingService.run-admin: failed
+{
+    "message": "Undefined array key \"email\"",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php",
+    "line": 38,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(38): App\\Core\\ExceptionHandler::handleError(2, 'Undefined array...', 'C:\\\\xampp\\\\htdocs...', 38)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(25): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#7 {main}",
+    "data": "{\"_token\":\"2b5583e1b12e855bb0d0f5b0f165e6c3e61405bc6b7c2e82130978fe9bc314d8\",\"token\":\"df37585094a97b2fb609d6fd9dc31143d78349b99150cd94d9a56894f318b1ec\",\"name\":\"Filozofie projektu\",\"ico\":\"11552244\",\"first_name\":\"Jan\",\"last_name\":\"krteczek\",\"password\":\"administr\\u00e1tor\",\"passwordZ\":\"administr\\u00e1tor\"}"
+}
+[2026-04-09 00:33:39.317410] ERROR:  BaseModel.insertRaw: failed
+{
+    "message": "SQLSTATE[HY000]: General error: 1364 Field 'contact_id' doesn't have a default value",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php",
+    "line": 421,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(421): PDOStatement->execute(Array)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(603): App\\Models\\BaseModel->insertRaw(Array)\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\WorkOrderModel.php(315): App\\Models\\BaseModel->createWithTenant(64, Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(131): App\\Models\\WorkOrderModel->createWithSequence(64, Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(91): App\\Services\\Users\\CompanyRegistrationService->completeWork(Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(89): App\\Core\\Transaction::run(Object(Closure), 'work')\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\DatabaseScope.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(88): App\\Core\\DatabaseScope::work('work', Object(Closure))\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#10 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#11 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#12 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#13 {main}",
+    "data": "{\"title\":\"Re\\u017eie firmy\",\"description\":\"\\n          **Re\\u017eijn\\u00ed pr\\u00e1ce** jsou b\\u011b\\u017en\\u00e9 pr\\u00e1ce vykon\\u00e1van\\u00e9 pro fungov\\u00e1n\\u00ed samotn\\u00e9 firmy.\\n\\n          Nap\\u0159\\u00edklad \\u010das str\\u00e1ven\\u00fd vytvo\\u0159en\\u00edm \\u00fa\\u010dtu v na\\u0161em syst\\u00e9mu a sezn\\u00e1men\\u00ed se s n\\u00edm,\\n          se d\\u00e1 pova\\u017eovat za re\\u017eijn\\u00ed n\\u00e1klad firmy.\\n\\n          K t\\u00e9hle zak\\u00e1zce je syst\\u00e9mem vytvo\\u0159eno n\\u011bkolik prvn\\u00edch \\u00fakol\\u016f pro sezn\\u00e1men\\u00ed se s na\\u0161\\u00edm syst\\u00e9mem.\\n\\n        \",\"priority\":\"normal\",\"status\":\"in_progress\",\"created_by_user_id\":75,\"internal_number\":1,\"year\":2026,\"company_id\":64}"
+}
+[2026-04-09 00:33:39.329367] ERROR:  OnboardingService.Work failed
+{
+    "message": "App\\Models\\BaseModel::insertRaw(): Return value must be of type int, null returned",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php",
+    "line": 450,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\BaseModel.php(603): App\\Models\\BaseModel->insertRaw(Array)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\WorkOrderModel.php(315): App\\Models\\BaseModel->createWithTenant(64, Array)\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\CompanyRegistrationService.php(131): App\\Models\\WorkOrderModel->createWithSequence(64, Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(91): App\\Services\\Users\\CompanyRegistrationService->completeWork(Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(89): App\\Core\\Transaction::run(Object(Closure), 'work')\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\DatabaseScope.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(88): App\\Core\\DatabaseScope::work('work', Object(Closure))\n#8 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#9 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#10 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#11 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#12 {main}",
+    "data": "{\"company_id\":64,\"db_name\":\"work\",\"user_id\":75,\"team_id\":21}"
+}
+[2026-04-09 01:05:05.239840] ERROR:  OnboardingService.run-admin: failed
+{
+    "message": "Undefined array key \"data\"",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php",
+    "line": 38,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(38): App\\Core\\ExceptionHandler::handleError(2, 'Undefined array...', 'C:\\\\xampp\\\\htdocs...', 38)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Transaction.php(17): App\\Services\\Onboarding\\OnboardingService->App\\Services\\Onboarding\\{closure}()\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(25): App\\Core\\Transaction::run(Object(Closure), 'admin')\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#7 {main}",
+    "data": "{\"_token\":\"2b5583e1b12e855bb0d0f5b0f165e6c3e61405bc6b7c2e82130978fe9bc314d8\",\"token\":\"aa43515db03176cbd7ae32bef97a6d70d1050fd3bd28a19a8fbb650762668b61\",\"name\":\"Filozofie projektu\",\"ico\":\"22558877\",\"first_name\":\"lotrando\",\"last_name\":\"krteczek\",\"password\":\"sezn\\u00e1men\\u00ed\",\"passwordZ\":\"sezn\\u00e1men\\u00ed\"}"
+}
+[2026-04-09 01:14:05.240977] WARNING: OnboardingService Mail po registraci uživatele selhal
+{
+    "message": "Undefined array key \"name\"",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\BuildMailService.php",
+    "line": 279,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\BuildMailService.php(279): App\\Core\\ExceptionHandler::handleError(2, 'Undefined array...', 'C:\\\\xampp\\\\htdocs...', 279)\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Onboarding\\OnboardingService.php(122): App\\Services\\Users\\BuildMailService::buildInfoAfterRegistration(Array)\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(504): App\\Services\\Onboarding\\OnboardingService->run(Array)\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->registrationStepTwo()\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/register/compl...', 'POST')\n#6 {main}",
+    "data": "{\"user_id\":76,\"email\":\"Jan@novak.ol\",\"company_id\":65,\"company_name\":\"Filozofie projektu\",\"slug\":\"filozofie-projektu-1\",\"first_name\":\"lotrando\",\"last_name\":\"krteczek\",\"global_role\":\"admin\",\"db_name\":\"work\",\"team_id\":22}"
+}
+[2026-04-09 01:25:59.953105] ERROR:  UserActivation failed
+{
+    "message": "Token consume requires transaction",
+    "file": "C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Models\\TokenModel.php",
+    "line": 130,
+    "trace": "#0 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Tokens\\TokenService.php(99): App\\Models\\TokenModel->findValidByHashForUpdate('6222caa38480b96...', 'invitation')\n#1 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\UserActivationService.php(93): App\\Services\\Tokens\\TokenService->consume('7ffe773432b9398...', 'invitation')\n#2 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Services\\Users\\UserActivationService.php(46): App\\Services\\Users\\UserActivationService->processUserToken('7ffe773432b9398...', 'invitation', 'u\\xC5\\xBEivatele')\n#3 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(224): App\\Services\\Users\\UserActivationService->consumeAndProcess('7ffe773432b9398...', 'invitation', 'u\\xC5\\xBEivatele')\n#4 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Controllers\\AuthController.php(182): App\\Controllers\\AuthController->processToken('invitation', '\\xC3\\x9A\\xC4\\x8Det byl akti...')\n#5 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(185): App\\Controllers\\AuthController->activatePost()\n#6 C:\\xampp\\htdocs\\servisni-zapisnik\\app\\Core\\Router.php(142): App\\Core\\Router->call(Array, Array)\n#7 C:\\xampp\\htdocs\\servisni-zapisnik\\public\\index.php(92): App\\Core\\Router->dispatch('/activate/compl...', 'POST')\n#8 {main}",
+    "token": "7ffe773432b93989bdd2..."
+}

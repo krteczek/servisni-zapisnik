@@ -7,8 +7,10 @@ use App\Models\TokenModel;
 use App\Models\UserModel;
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
+use App\Services\Onboarding\OnboardingService;
 use App\Core\LoggerHolder;
 use App\Core\Database;
+use App\Core\Transaction;
 use Throwable;
 use App\Core\TenantContext;
 
@@ -22,31 +24,75 @@ final class UserActivationService
     public function consumeAndProcess(
         string $rawToken,
         string $type,
-        ?string $password = null,
-        array $companyData = []
+        string $password
+
     ): array {
 
+        if (!$password) {
+            return [
+                "ok" => false,
+                "result" => "Chybí nové heslo."
+            ];
+        }
+
         try {
-            $token = $this->tokenService->consume($rawToken, $type);
+			    $result = Transaction::run(
+			        function () use ($password, $rawToken, $type) {
 
-            if ($token["ok"] === false) {
-                return $token;
-            }
+			            $tokenData = $this->tokenService->consume($rawToken, $type);
 
-            return match ($type) {
+			            if ($tokenData['ok'] === false) {
+			                return $tokenData;
+			            }
 
-                TokenType::COMPANY_CREATE =>
-                    $this->processCompanyCreate($token, $companyData),
+				        if (!$this->hasUser($tokenData)) {
+				            return [
+				                "ok" => false,
+				                "result" => "Token neobsahuje uživatele."
+				            ];
+				        }
+				        $userId = (int)$tokenData["user_id"];
 
-                TokenType::INVITATION,
-                TokenType::PASSWORD_RESET =>
-                    $this->processUserToken($token, $type, $password),
+				        $user = $this->userModel->findByIdWithoutTenant($userId);
+				        if (!$user) {
+				            return [
+				                "ok" => false,
+				                "result" => "Uživatel neexistuje."
+				            ];
+				        }
+							if (empty($user['company_id'])) {
+							    throw new \LogicException('User has no company_id');
+							}
 
-                default => [
-                    "ok" => false,
-                    "result" => "Neznámý typ tokenu."
-                ],
-            };
+				        TenantContext::set((int)$user['company_id']);
+
+			            if($type === TokenType::INVITATION)
+			            {
+                        return $this->handleInvitation($user, $password);
+			            }
+
+			            if($type === TokenType::PASSWORD_RESET)
+			            {
+                        return $this->handlePasswordReset($user, $password);
+			            }
+
+			            throw new \InvalidArgumentException("Unknown Token type: {$type}");
+
+			        },
+			        'admin'
+			    );
+
+			    if ($result['ok'] === false) {
+			        return [
+				                "ok" => false,
+				                "result" => $result["result"],
+				            ];
+			    }
+             return [
+				     "ok" => true,
+				     "result" => $result["result"],
+				 ];
+
 
         } catch (Throwable $e) {
 
@@ -67,57 +113,9 @@ final class UserActivationService
         }
     }
 
-	private function processCompanyCreate(array $token, array $companyData): array
-	{
-	    $companyData["email"]   = $token["email"];
-	    $companyData["tokenId"] = $token["id"];
 
-	    return (new OnboardingService())->run($companyData); // 🔥 místo CompanyRegistrationService
-	}
-
-    private function processUserToken(
-        array $token,
-        string $type,
-        ?string $password
-    ): array {
-
-        if (!$this->hasUser($token)) {
-            return [
-                "ok" => false,
-                "result" => "Token neobsahuje uživatele."
-            ];
-        }
-
-        $userId = (int)$token["user_id"];
-
-        $user = $this->userModel->findRawById($userId);
-
-        if (!$user) {
-            return [
-                "ok" => false,
-                "result" => "Uživatel neexistuje."
-            ];
-        }
-
-        TenantContext::set((int)$user['company_id']);
-
-        return match ($type) {
-            TokenType::INVITATION     => $this->handleInvitation($user, $password),
-            TokenType::PASSWORD_RESET => $this->handlePasswordReset($userId, $password),
-
-            default => [
-                "ok" => false,
-                "result" => "Neznámý typ tokenu."
-            ]
-        };
-    }
-
-    private function handleInvitation(array $user, ?string $password): array
+    private function handleInvitation(array $user, string $password): array
     {
-        if (!$password) {
-            return ["ok" => false, "result" => "Chybí nové heslo"];
-        }
-
 
         if ((int)$user["active"] === 1) {
             return ["ok" => false, "result" => "Účet je již aktivní"];
@@ -132,18 +130,17 @@ final class UserActivationService
             : ["ok" => true, "result" => "Uživatel byl úspěšně aktivován."];
     }
 
-    private function handlePasswordReset(int $userId, ?string $password): array
+    private function handlePasswordReset(array $user, string $password): array
     {
-        if (!$password) {
+        if ((int)$user["active"] !== 1) {
             return [
                 "ok" => false,
-                "result" => "Chybí nové heslo."
-            ];
+                "result" => "Váš účet není aktivní, zřejmě byl administrátorem pozastaven..."];
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
-        $row = $this->userModel->setPassword($userId, $hash);
+        $row = $this->userModel->setPassword($user['id'], $hash);
 
         return !$row
             ? ["ok" => false, "result" => "Heslo nebylo změněno."]

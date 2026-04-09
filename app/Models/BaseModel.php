@@ -406,6 +406,10 @@ protected function diff(array $before, array $after): array
      */
     protected function insertRaw(array $data): int
     {
+      $lastId = null;
+
+    	try
+    	{
         $cols   = array_keys($data);
         $fields = implode(', ', $cols);
         $values = ':' . implode(', :', $cols);
@@ -417,9 +421,19 @@ protected function diff(array $before, array $after): array
         $stmt->execute($data);
 
         $lastId = (int) $this->db()->lastInsertId();
+      } catch (Throwable $e) {
+		    LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
+		                'message' => $e->getMessage(),
+		                'file'    => $e->getFile(),
+		                'line'    => $e->getLine(),
+		                'trace'   => $e->getTraceAsString(),
+		                'data'    => json_encode($data),
+
+		    ]);
+		}
 
         if ($this->shouldAudit()) {
-        	error_log('AUDIT CALL: ' . $this->table);
+        	//error_log('AUDIT CALL: ' . $this->table);
             try {
                 AuditLogCore::log(
                     entity: $this->table,
@@ -579,8 +593,18 @@ protected function diff(array $before, array $after): array
 
         return " AND {$col} = :" . $this->tenantColumn;
     }
-    
-    public function createWithTenant(int $tenantId, array $data): int
+
+	public function createWithTenant(int $tenantId, array $data): int
+	{
+	    if ($this->tenantAware) {
+	        $data[$this->tenantColumn] = $tenantId;
+	    }
+
+	    return $this->insertRaw($data);
+	}
+
+	 
+    public function createWithTenantOLD(int $tenantId, array $data): int
     {
 	    if ($data === []) {
 	        throw new LogicException('CreateWithTenant: empty data');
@@ -604,6 +628,56 @@ protected function diff(array $before, array $after): array
 	    return $this->insertRaw($data);
 	}
 
+protected function firstWhere(string $column, mixed $value): ?array
+{
+    $where = $this->applyTenant([$column => $value]);
+
+    $parts = [];
+    foreach ($where as $col => $val) {
+        $parts[] = "{$col} = :{$col}";
+    }
+
+    $sql = "SELECT * FROM {$this->tableName}
+            WHERE " . implode(' AND ', $parts) . "
+            LIMIT 1";
+
+    return $this->fetchOne($sql, $where);
+}
 
 
+protected function updateWhere(string $column, mixed $value, array $data): bool
+{
+    if ($data === []) {
+        return false;
+    }
+
+    $where = $this->applyTenant([$column => $value]);
+
+    $set = [];
+    foreach ($data as $key => $val) {
+        $set[] = "{$key} = :set_{$key}";
+    }
+
+    $params = [];
+    foreach ($data as $key => $val) {
+        $params["set_{$key}"] = $val;
+    }
+
+    foreach ($where as $key => $val) {
+        $params[$key] = $val;
+    }
+
+    $parts = [];
+    foreach ($where as $col => $val) {
+        $parts[] = "{$col} = :{$col}";
+    }
+
+    $sql = "UPDATE {$this->tableName}
+            SET " . implode(', ', $set) . "
+            WHERE " . implode(' AND ', $parts);
+
+    $stmt = $this->db()->prepare($sql);
+
+    return $stmt->execute($params);
+}
 }

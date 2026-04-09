@@ -81,7 +81,7 @@ public function create(
         if (!$row) {
             return [
             'ok' => false,
-            'result' => TokenResult::EXPIRED->value
+            'result' => TokenResult::EXPIRED
             ];
         }
 
@@ -92,8 +92,37 @@ public function create(
     /* ==========================================================
      * CONSUME
      * ========================================================== */
+public function consume(string $rawToken, string $type): array
+{
+    $hash = self::hash($rawToken);
 
-    public function consume(string $rawToken, string $type): array
+    $row = $this->model->findValidByHashForUpdate($hash, $type);
+
+    if (!$row) {
+        return [
+            'ok' => false,
+            'result' => TokenResult::EXPIRED
+        ];
+    }
+
+    $updated = $this->model->markUsed((int)$row['id']);
+
+    if (!$updated) {
+        return [
+            'ok' => false,
+            'result' => TokenResult::USED
+        ];
+    }
+
+    return [
+        'ok'      => true,
+        'result'  => TokenResult::VALID,
+        'id'      => $row['id'],
+        'email'   => $row['email'],
+        'user_id' => $row['user_id'],
+    ];
+}
+    public function consumeOLD(string $rawToken, string $type): array
     {
 
             $hash = self::hash($rawToken);
@@ -117,10 +146,15 @@ public function create(
 
             }
 
-				$row['ok'] = true;
-				$row['result'] = TokenResult::VALID;
-            return $row;
-
+            return [
+                'ok'     => true,
+                'result' => TokenResult::VALID,
+                'data'   => [
+                    'id'      => $row['id'],
+                    'email'   => $row['email'],
+                    'user_id' => $row['user_id'],
+                ]
+            ];
      }
 
     /* ==========================================================

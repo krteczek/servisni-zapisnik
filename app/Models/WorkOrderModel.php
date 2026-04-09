@@ -304,4 +304,15 @@ public function closeAsDone(int $orderId): bool
 }
 
 
+    public function createWithSequence(int $tenantId, array $data): int
+    {
+        $year = (int) date('Y');
+        $number = (new WorkOrderSequencesModel())->next($year, $tenantId);
+
+        $data['internal_number'] = $number;
+        $data['year'] = $year;
+
+        return $this->createWithTenant($tenantId, $data);
+    }
+
 }

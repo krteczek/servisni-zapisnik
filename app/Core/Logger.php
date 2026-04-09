@@ -168,21 +168,28 @@ final class Logger implements LoggerInterface
      * @param array $context Kontextová data
      * @return void
      */
-    public function log(string $level, string $message, array $context = []): void
-    {
-        $date = (new DateTime())->format('Y-m-d H:i:s.u');
-        $msg  = $this->interpolate($message, $context);
-        
-        $line = sprintf(
-                   "[%s] %-7s %s\n",
-                   $date,
-                   strtoupper($level) . ':',
-                   $msg
-               );
-        // TODO: [SECURITY] Omezit velikost log souboru a implementovat rotaci
-        file_put_contents($this->logFile, $line, FILE_APPEND | LOCK_EX);
+public function log(string $level, string $message, array $context = []): void
+{
+    $date = (new DateTime())->format('Y-m-d H:i:s.u');
+
+    $msg = $this->interpolate($message, $context);
+
+    $line = sprintf(
+        "[%s] %-7s %s",
+        $date,
+        strtoupper($level) . ':',
+        $msg
+    );
+
+    // 🔥 přidat context vždy, ne jen přes placeholder
+    if (!empty($context)) {
+        $line .= PHP_EOL . json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
+    $line .= "\n";
+
+    file_put_contents($this->logFile, $line, FILE_APPEND | LOCK_EX);
+}
     /**
      * Nahradí placeholdery {key} v message hodnotami z context.
      * Podporuje pouze skalární hodnoty (string, int, float, bool).

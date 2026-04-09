@@ -17,6 +17,7 @@ use App\Core\LoggerHolder;
 use App\Controllers\TeamController;
 use App\Core\Database;
 use App\Core\Config;
+use App\Core\TenantContext;
 use RuntimeException;
 
 /*
@@ -28,7 +29,7 @@ final class CompanyRegistrationService
 
     public function __construct(
         private TokenService $tokenService = new TokenService(),
-        private TokenModel $tokenModel     = new TokenModel(),
+        //private TokenModel $tokenModel     = new TokenModel(),
         private CompanyModel $companies    = new CompanyModel,
         private UserModel $users           = new UserModel(),
         private TaskModel $tasks           = new TaskModel(),
@@ -50,252 +51,7 @@ final class CompanyRegistrationService
         return $token;
     }
 
- 
-    /* ==========================================================
-     * STEP 2 – dokončení registrace (POST)
-     * ========================================================== */
-
-   public function complete(array $companyData): array
-   {
-
-      //$pdo = Database::admin();
-    try {
-
-        /*
-         * 1️⃣ Vytvoření firmy
-         */
-        $dbName = Config::get('registrationWorkDbName.registrationWorkDbName');
-        $slug = $this->generateSlug($companyData['name']);
-
-        $companyId = $this->companies->create([
-            'slug'          => $slug,
-            'db_name'       => $dbName,
-            'name'          => $companyData['name'],
-            'ico'           => $companyData['ico'],
-            'active'        => 1,
-            'created_at'    => date('Y-m-d H:i:s'),
-            'activated_at'  => date('Y-m-d H:i:s'),
-        ]);
-
-        if(!$companyId)
-        {
-            $companyId = [];
-            $companyId['ok'] = false;
-            $companyId['error'] = 'Nepodařilo se vytvořit Vaši firmu v Bó systému. Zkuste to prosím později.';
-            return $companyId;
-
-        }
-        /*
-         * 2️⃣ Vytvoření admin uživatele
-         */
-         $data = [
-            'email'           => $companyData['email'],
-            'employee_number' => 'admin',
-            'first_name'      => $companyData['first_name'],
-            'last_name'       => $companyData['last_name'],
-            'password_hash'   => password_hash(
-                $companyData['password'],
-                PASSWORD_DEFAULT
-            ),
-            'global_role'     => 'admin',
-            'domain_admin'    => 1,
-            'active'          => 1,
-            'created_at'      => date('Y-m-d H:i:s'),
-
-         ];
-        $userId = $this->users->createWithTenant($companyId, $data);
-
-        if(!$userId)
-        {
-            $userId = [];
-            $userId['ok'] = false;
-            $userId['error'] = 'Nepodařilo se vytvořit Vašeho Admina v Bó systému. Zkuste to prosím později.';
-            return $userId;
-
-        }
-
-
-		/*  3
-		 *	vytvoření prvního defaultního týmu
-		 * name, color, active
-		 */
-		$TeamID = $this->teams->createWithTenant($companyId, [
-			'name' 	=> 'Základní tým',
-			'color' 	=> TeamController::getDefaultColor(),
-			'active'	=> 1
-		]);
-
-        if(!$TeamID)
-        {
-            $TeamID = [];
-            $TeamID['ok'] = false;
-            $TeamID['error'] = 'Nepodařilo se vytvořit Váš první tým v Bó systému. Zkuste to prosím později.';
-            return $TeamID;
-
-        }
-
-
-
-        /*
-         * 4 Vytvoření první defaultní zakázky. Ta slouží jako ukázka a
-         * zároven pro úkoly čistě firemního charakteru.
-         * company_id, title, description, source, priority, status, created_by_user_id, is_system
-         */
-
-$description1 = <<<TXT
-**Režijní práce** jsou běžné práce vykonávané pro fungování samotné firmy.
-Například čas strávený vytvořením účtu v našem systému a seznámení se s ním,
-se dá považovat za režijní náklad firmy.
-K téhle zakázce je systémem vytvořeno několik prvních úkolů.
-
-TXT;
-
-         Database::useWorkDatabase($dbName);
-			$WOID = $this->orders->createWithTenant($companyId, [
-
-			    'title' => 'Režie firmy',
-			    'description' => $description1,
-			    'priority' => 'normal',
-			    'status' => 'in_progress',
-			    'created_by_user_id' => $userId,
-
-			]);
-        if(!$WOID)
-        {
-            $WOID = [];
-            $WOID['ok'] = false;
-            $WOID['error'] = 'Nepodařilo se vytvořit Váši první zakázku v Bó systému. Zkuste to prosím později.';
-            return $WOID;
-
-        }
-
-
-        /*
-         * 5 Vytvoření prvních úkolů k první defaultní zakázce.
-         * tyto už bude možno dokončit běžným způsobem
-         * company_id, team_id, work_order_id, title, description,
-         * source, priority, status, created_by_user_id
-         */
-$description2 = <<<TXT
-Vítejte v Bó systému servisního zápisníku.
-
-Vaším prvním úkolem bude přidat sám sebe do **Základního týmu**.
- - Menu: Týmy > Aktivní > Karta: Základní tým > Upravit
- - v rozhraní můžete:
-  - sám sebe přidat a odebrat z týmu,
-  - změnit barvu týmu
-  - i jeho název
- - Až budete součástí týmu **Základní tým**, můžete napsat Report (nebo více) a úkol uzavřít.
-
-Tip: Pokud nemůžete na Kartě úkolu najít tlačítko **Přidat Report**, nejste členem týmu, který má úkol na starosti.
-
-Tip: Pokud v detailu úkolu nemůžete najít tlačítko **Uzavřít úkol**, tak k tomu úkolu nebyl napsán ani jeden Report.
-
-
-TXT;
-				$TID1 = $this->tasks->createWithTenant($companyId, [
-    'team_id' 					=> $TeamID,
-    'work_order_id'			=> $WOID,
-    'title' 					=> '#1: Přidejte svůj účet do Základního týmu',
-    'description' 			=> $description2,
-    'status' 					=> 'open',
-    'created_by_user_id' 	=> $userId,
-
-]);
-        if(!$TID1)
-        {
-            $TID1 = [];
-            $TID1['ok'] = false;
-            $TID1['error'] = 'Nepodařilo se vytvořit Váš první úkol v Bó systému. Zkuste to prosím později.';
-            return $TID1;
-
-        }
-
-$description3 = <<<TXT
-Máte první tým, jste jeho členem, vytvořil jste první Report o splnění úkolu a možná jste i úkol označil jako Uzavřený.
-
-Dalším Vaším úkolem bude přidat (pozvat) vaše spolupracovníky (pokud nějaké máte) do Bó systému:
- - Menu: Uživatelé > Přidat uživatele
- - Až budete hotovi, opět vypište Report a úkol ukončete.
-
-Systém funguje tak, že si volně můžete založit firmu v Bó systému. Spolupracovníkům potom vytváříte účty a tím je pozýváte do Bó systému.
-
-TXT;
-
-				$TID2 = $this->tasks->createWithTenant($companyId, [
-    'team_id' 					=> $TeamID,
-    'work_order_id'			=> $WOID,
-    'title' 					=> '#2: Pozvěte spolupracovníky',
-    'description' 			=> $description3,
-    'status' 					=> 'open',
-    'created_by_user_id' 	=> $userId,
-
-]);
-        if(!$TID2)
-        {
-            $TID2 = [];
-            $TID2['ok'] = false;
-            $TID2['error'] = 'Nepodařilo se vytvořit Váš druhý úkol zakázku v Bó systému. Zkuste to prosím později.';
-            return $TID2;
-
-        }
-
-         Database::admin();
-        /*
-         *  Smazání žádosti
-         */
-        $this->tokenModel->deleteById((int) $companyData['tokenId']);
-
-
-			/*
-			 *	vrátíme data pro první přihlášení
-			  */
-			$response = [
-			    'ok' => true,
-			    'data' => [
-			        'user_id' => $userId,
-			        'email' => $companyData['email'],
-			        'company_id' => $companyId,
-			        'company_name' => $companyData['name'],
-			        'slug' => $slug,
-			        'first_name' => $companyData['first_name'],
-			        'last_name' => $companyData['last_name'],
-			        'global_role' => 'admin',
-			        'db_name' => $dbName,
-			    ]
-			];
-		
-    } catch (\Throwable $e) {
-         Database::admin();
-	      LoggerHolder::get()->error('Company registration failed', [
-	         'exception' => $e,
-	         'userId' => $userId ?? null,
-	      ]);
-        return [
-            'ok' => false,
-            'error' => 'Registraci se nepodařilo dokončit. Zkuste to prosím znovu. '
-				
-        ];
-    }
-   Database::admin();
-   //pošleme email s informacemi o vytvořeném firemním uživateli...
-	try {
-	    [$subject, $htmlBody, $textBody] = BuildMailService::buildInfoAfterRegistration($companyData);
-	    (new MailService())->send(
-	  				toEmail: $companyData['email'],
-					toName: $companyData['first_name'] . ' ' . $companyData['last_name'],
-					subject: $subject,
-					html: $htmlBody,
-					text: $textBody
-	        );
-	} catch (\Throwable $e) {
-	    LoggerHolder::get()->warning('Mail po registraci selhal', [
-	        'exception' => $e,
-	        'email' => $companyData['email'],
-	    ]);
-	}     return $response;
-}
-public function completeAdmin(array $companyData): array
+ public function completeAdmin(array $companyData): array
 {
 	 //zízkáme aktuální používanou db pro nové klienty
     $dbName = Config::get('registrationWorkDbName.registrationWorkDbName');
@@ -328,22 +84,30 @@ public function completeAdmin(array $companyData): array
         'color' => TeamController::getDefaultColor(),
         'active' => 1
     ]);
-
     return [
-        'company_id' => $companyId,
-        'user_id' => $userId,
-        'team_id' => $teamId,
-        'db_name' => $dbName,
-        'slug' => $slug,
+	    'ok' => true,
+	    'data' => [
+	        'user_id'      => $userId,
+	        'email'        => $companyData['email'],
+	        'company_id'   => $companyId,
+	        'company_name' => $companyData['name'],
+	        'slug'         => $slug,
+	        'first_name'   => $companyData['first_name'],
+	        'last_name'    => $companyData['last_name'],
+	        'global_role'  => 'admin',
+	        'db_name'      => $dbName,
+	        'team_id'      => $teamId,
+	    ],
     ];
 }
 
 
-public function completeWork(array $data): void
+public function completeWork(array $data): bool
 {
     $companyId = $data['company_id'];
     $userId    = $data['user_id'];
-    $teamId    = $data['team_id'],
+    $teamId    = $data['team_id'];
+    $dbName    = $data['db_name'];
 
     TenantContext::set($companyId);
 
@@ -363,8 +127,8 @@ public function completeWork(array $data): void
 
         ';
 
-         Database::useWorkDatabase($dbName);
-			$WOID = $this->orders->createWithTenant($companyId, [
+         
+			$WOID = $this->orders->createWithSequence($companyId, [
 
 			    'title' => 'Režie firmy',
 			    'description' => $description1,
@@ -373,6 +137,9 @@ public function completeWork(array $data): void
 			    'created_by_user_id' => $userId,
 
 			]);
+			if(!$WOID) {
+				return false;
+			}
         /*
          * 2 Vytvoření prvních úkolů k první defaultní zakázce.
          * tyto už bude možno dokončit běžným způsobem
@@ -398,7 +165,7 @@ Tip: Pokud v detailu úkolu nemůžete najít tlačítko **Uzavřít úkol**, ta
 
 ';
 			$TID1 = $this->tasks->createWithTenant($companyId, [
-          'team_id' 					=> $TeamID,
+          'team_id' 					=> $teamId,
           'work_order_id'			=> $WOID,
           'title' 					=> '#1: Přidejte svůj účet do Základního týmu',
           'description' 			=> $description2,
@@ -406,6 +173,9 @@ Tip: Pokud v detailu úkolu nemůžete najít tlačítko **Uzavřít úkol**, ta
           'created_by_user_id' 	=> $userId,
 
 ]);
+			if(!$TID1) {
+				return false;
+			}
 
          $description3 = '
 Máte první tým, jste jeho členem, vytvořil jste první Report o splnění úkolu a možná jste i úkol označil jako Uzavřený.
@@ -419,7 +189,7 @@ Systém funguje tak, že si volně můžete založit firmu v Bó systému. Spolu
 ';
 
 			$TID2 = $this->tasks->createWithTenant($companyId, [
-          'team_id' 					=> $TeamID,
+          'team_id' 					=> $teamId,
           'work_order_id'			=> $WOID,
           'title' 					=> '#2: Pozvěte spolupracovníky',
           'description' 			=> $description3,
@@ -427,7 +197,10 @@ Systém funguje tak, že si volně můžete založit firmu v Bó systému. Spolu
           'created_by_user_id' 	=> $userId,
 
 ]);
-
+			if(!$TID2) {
+				return false;
+			}
+      return true;
 
 }    
 

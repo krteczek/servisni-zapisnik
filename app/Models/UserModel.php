@@ -139,15 +139,6 @@ public function activateUser(int $id, string $hash): array
 	}
 
 
-public function findRawById(int $id): ?array
-{
-    $this->tenantAware = false;
-    $user = $this->find($id);
-    $this->tenantAware = true;
-
-    return $user;
-}
-
     public function availableForTeam(int $teamId): array
     {
         $teamMembershipsTable = str_replace(
@@ -178,4 +169,12 @@ public function findRawById(int $id): ?array
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+public function findByIdWithoutTenant(int $id): ?array
+{
+    $sql = "SELECT * FROM {$this->tableName}
+            WHERE id = :id
+            LIMIT 1";
+
+    return $this->fetchOne($sql, ['id' => $id]);
+}
 }
