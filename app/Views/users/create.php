@@ -10,8 +10,8 @@ use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
-$old    = $view->data ?? [];
-$errors = $view->errors ?? [];
+$old    = $view->data;
+$errors = $view->errors;
 $roles  = $view->roles ?? []; // předpokládám, že roles jsou v $view
 ?>
 

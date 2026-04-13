@@ -1,6 +1,10 @@
+<?php
+declare(strict_types=1);
+
+
+?>
 <!-- views/emails/user/not-active.php -->
 
-<h1>Informace o vašem účtu</h1>
 
 <p>Dobrý den,</p>
 
@@ -10,3 +14,5 @@
 Váš účet není aktuálně aktivní. Pokud si myslíte, že jde o chybu,
 kontaktujte správce vaší organizace.
 </p>
+
+<!-- Not-active -->

@@ -11,8 +11,8 @@ use App\Core\Csrf;
 
 require __DIR__ . '/../../layout/header.php';
 
-$data   = $view->data ?? [];
-$errors = $view->errors ?? [];
+$data   = $view->data;
+$errors = $view->errors;
 ?>
 <h1>Exporty fakturace</h1>
 
@@ -29,22 +29,22 @@ $errors = $view->errors ?? [];
 
         <div>
             <strong>Období:</strong>
-            <?= htmlspecialchars($row['period_from']) ?>
+            <?= e($row['period_from']) ?>
             -
-            <?= htmlspecialchars($row['period_to']) ?>
+            <?= e($row['period_to']) ?>
         </div>
 
         <div>
             <strong>Vytvořeno:</strong>
-            <?= htmlspecialchars($row['created_at'] ?? '') ?>
+            <?= e($row['created_at'] ?? '') ?>
         </div>
 
         <div>
-            <a href="/<?= $tenant ?>/exports/billing/<?= $row['id'] ?>/detail">
+            <a href="<?= Url::to('/{tenant}/exports/billing/' . $row['id'] . '/detail') ?>">
                 Detail
             </a>
 
-            <a href="/<?= $tenant ?>/exports/billing/<?= $row['id'] ?>/pdf">
+            <a href="<?= Url::to('/{tenant}/exports/billing/' . $row['id'] . '/pdf') ?>">
                 PDF
             </a>
         </div>

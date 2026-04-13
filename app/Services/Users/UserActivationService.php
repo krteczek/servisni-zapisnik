@@ -138,8 +138,7 @@ final class UserActivationService
 	        try {
 	        	   // pošleme email:
 	        	     //[$subject, $htmlBody, $textBody] = BuildMailService::($user);
-	        	     [$subject, $htmlBody, $textBody] = BuildMailService::build('user.not-active',
-	        	     ['user' => $user,]);
+	        	     [$subject, $htmlBody, $textBody] = BuildMailService::build('user.not-active');
 
 			        $ok = (new MailService())->send(
 			  				toEmail:  $user['email'],
@@ -156,7 +155,7 @@ final class UserActivationService
 	                'file'    => $e->getFile(),
 	                'line'    => $e->getLine(),
 	                'trace'   => $e->getTraceAsString(),
-	                'token'   => substr($rawToken, 0, 20) . '...',
+
 	            ]);
 
 

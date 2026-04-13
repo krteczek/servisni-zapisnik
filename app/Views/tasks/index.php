@@ -7,7 +7,7 @@ use App\Core\Url;
 
 require __DIR__ . '/../layout/header.php';
 
-$tasks = $view->data ?? [];
+$tasks = $view->data;
 //var_dump($tasks);
 ?>
 

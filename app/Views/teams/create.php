@@ -11,8 +11,8 @@ use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
-$old    = $view->data ?? [];
-$errors = $view->errors ?? [];
+$old    = $view->data;
+$errors = $view->errors;
 ?>
 
 <!-- HLAVNÍ KONTEJNER (grid 2:1) -->

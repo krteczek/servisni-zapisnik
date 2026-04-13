@@ -7,7 +7,7 @@ use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
-$errors = $view->errors ?? [];
+$errors = $view->errors;
 $token  = $view->data['token'] ?? '';
 ?>
 

@@ -8,7 +8,7 @@ use App\Core\Url;
 
 require __DIR__ . '/../layout/header.php';
 
-$err = $view->errors ?? [];
+$err = $view->errors;
 ?>
 
 <div class="create-container">

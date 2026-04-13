@@ -11,8 +11,8 @@ use App\Core\UserGuard;
 
 require __DIR__ . '/../layout/header.php';
 
-$old    = $view->old ?? [];
-$errors = $view->errors ?? [];
+$old    = $view->old;
+$errors = $view->errors;
 
 $fullName = trim(
     ($old['first_name'] ?? '') . ' ' . ($old['last_name'] ?? '')

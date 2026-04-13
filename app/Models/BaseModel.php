@@ -241,15 +241,15 @@ public function setConnection(PDO $pdo): void
         }
 
         $config = Config::get('audit');
-        error_log('AUDIT CHECK: ' . $this->table);
-        error_log('AUDITABLES: ' . json_encode($config['auditables'] ?? []));
+        //error_log('AUDIT CHECK: ' . $this->table);
+        //error_log('AUDITABLES: ' . json_encode($config['auditables'] ?? []));
         if (in_array($this->table, $config['ignores'] ?? [], true)) {
-        	error_log('AUDIT SKIP IGNORE');
+        	//error_log('AUDIT SKIP IGNORE');
             return false;
         }
         $result = in_array($this->table, $config['auditables'] ?? [], true);
 
-        error_log('AUDIT RESULT: ' . ($result ? 'YES' : 'NO'));
+        //error_log('AUDIT RESULT: ' . ($result ? 'YES' : 'NO'));
 
         return $result;
     }
@@ -441,10 +441,18 @@ protected function diff(array $before, array $after): array
                     action: 'insert',
                     diff: $this->diff([], $data)
                 );
-            } catch (Throwable) {
+            } catch (Throwable $e) {
                 // TODO: [OBSERVABILITY] Lepší logování selhání auditu
-                error_log('Audit insert failed: ' . $lastId);
-            }
+                //error_log('Audit insert failed: ' . $lastId);
+ 		          LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
+		                'message' => $e->getMessage(),
+		                'file'    => $e->getFile(),
+		                'line'    => $e->getLine(),
+		                'trace'   => $e->getTraceAsString(),
+		                'data'    => json_encode($data),
+
+		    ]);
+           }
         }
 
         return $lastId;
@@ -510,8 +518,16 @@ protected function diff(array $before, array $after): array
                         diff: $diff
                     );
                 }
-            } catch (Throwable) {
-                error_log('Audit update failed: ' . $id);
+            } catch (Throwable $e) {
+                //error_log('Audit update failed: ' . $id);
+ 		          LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
+		                'message' => $e->getMessage(),
+		                'file'    => $e->getFile(),
+		                'line'    => $e->getLine(),
+		                'trace'   => $e->getTraceAsString(),
+		                'data'    => json_encode($data),
+
+		    ]);
             }
         }
 

@@ -34,8 +34,8 @@ abstract class Controller
     public function __construct(ViewContext $view)
     {
         $this->view = $view;
-        $this->view->errors ??= [];
-        $this->view->data   ??= [];
+        //$this->view->errors ??= [];
+        //$this->view->data   ??= [];
 
         // TODO: [MAINTENANCE] Přesunout logiku přepínání databází do middleware nebo samostatné služby
         // TODO: [PERFORMANCE] Zvážit cachování databázového připojení na úrovni requestu
