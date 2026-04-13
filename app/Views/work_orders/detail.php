@@ -4,7 +4,7 @@ declare(strict_types=1);
 //view/work_orders/detail.php
 
 /** @var \App\Core\ViewContext $view */
-
+/** @var int $expiresMinutes */
 require __DIR__ . '/../layout/header.php';
 
 use App\Core\Url;
@@ -16,12 +16,12 @@ use App\Models\Team;
 
 /** @var array[] $tasks */
 $order = $view->order;
-$tasks = $view->tasks ?? [];
+$tasks = $view->tasks;
 $teams = $view->teams;
 
 
 $err = $view->errors; 
-var_dump($tasks,$teams, $order);
+//var_dump($tasks,$teams, $order);
 ?>
 
 

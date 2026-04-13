@@ -56,7 +56,10 @@ final class Url
     public static function to(string $path = ''): string
     {
         self::init();
-
+		// 👉 ochrana proti absolutní URL
+		    if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+		        return $path;
+		    }
         if (str_starts_with($path, '/{tenant}')) {
             $tenant = Auth::tenantSlug();
 
@@ -137,7 +140,45 @@ final class Url
      *
      * @return string Základní URL (např. 'http://localhost' nebo 'https://app.example.com')
      */
-    public static function base(): string
+	public static function base(): string
+	{
+	    return Config::get('app.url') ?? self::detectBase();
+	}
+public static function detectBase(): string
+{
+    // 1️⃣ Detekce schématu (https/http)
+    $isHttps = false;
+
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        $isHttps = true;
+    } elseif (($_SERVER['SERVER_PORT'] ?? null) == 443) {
+        $isHttps = true;
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+        $isHttps = $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
+    }
+
+    $scheme = $isHttps ? 'https' : 'http';
+
+    // 2️⃣ Host (proxy-friendly)
+    $host = $_SERVER['HTTP_X_FORWARDED_HOST']
+        ?? $_SERVER['HTTP_HOST']
+        ?? $_SERVER['SERVER_NAME']
+        ?? 'localhost';
+
+    // 3️⃣ Port (jen pokud není standardní)
+    $port = $_SERVER['SERVER_PORT'] ?? null;
+
+    $portPart = '';
+    if ($port && !in_array((int)$port, [80, 443], true)) {
+        // Pozor: HTTP_HOST už může port obsahovat
+        if (!str_contains($host, ':')) {
+            $portPart = ':' . $port;
+        }
+    }
+
+    return $scheme . '://' . $host . $portPart;
+}
+    public static function baseOLD(): string
     {
         // TODO: [SECURITY] Detekovat HTTPS přes $_SERVER['HTTPS'] nebo $_SERVER['REQUEST_SCHEME']
         return 'http://' . $_SERVER["HTTP_HOST"];

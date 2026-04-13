@@ -20,6 +20,7 @@ class OnboardingService
     	  $d          = $load['data'];
     	  $token      = $load['token'];
     	  $type       = $load['type'];
+    	  $response   = [];
         // 1️⃣ ADMIN část (MUST SUCCEED)
 			try {
 			    $adminResult = Transaction::run(
@@ -110,16 +111,20 @@ class OnboardingService
                 'trace'   => $e->getTraceAsString(),
                 'data'    => json_encode($data),
             ]);
-
+            //uživatel je vytvořen, onboarding ne, to musíme ještě vykoumat,
+            //jak to udělat dodatečně... Možná nějaký pokus na tlačítko v rozhraní?
+            //moment! je nutno poslat email! takže tohle jdeme zakomentovat...
+            /**
             return [
                 'ok'   => true,
                 'data' => $adminData,
             ];
+            **/
         }
 
         // 📧 mail
         try {
-            [$subject, $htmlBody, $textBody] = BuildMailService::buildInfoAfterRegistration($response);
+            [$subject, $htmlBody, $textBody] = BuildMailService::build($response);
 
             (new MailService())->send(
                 toEmail: $response['data']['email'],

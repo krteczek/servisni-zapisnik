@@ -43,6 +43,7 @@ class AuthController extends Controller
     private const MIN_COMPANY_NAME_LENGTH    = 2;
     private const ICO_LENGTH    					= 8;
     private const BAD_LOGIN                  = 'BAD_LOGIN';
+    private const TOKEN_ERROR                = 'Odkaz je neplatný nebo expirovaný.';
 
     public function root(): string
     {
@@ -148,7 +149,7 @@ public function login(): string
 
     Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
     );
-    $url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : '/tasks' );
+    $url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : '/tasks/#main' );
     Url::redirect($url);
 
 }
@@ -163,7 +164,16 @@ public function login(): string
         Url::redirect('/login');
     }
     
+private static function ensureGuestRedirect(): void
+{
+    if (Auth::check()) {
+        Flash::info(
+            'Tato akce je dostupná pouze pro nepřihlášené uživatele.'
+        );
 
+        Url::redirect('/' . Auth::tenantSlug() . '/tasks/#main');
+    }
+}
 
     /* =========================
      *  PUBLIC ROUTES
@@ -171,23 +181,26 @@ public function login(): string
 
     public function activateGet(): string
     {
-    	
+    	  self::ensureGuestRedirect();
         return $this->handleTokenGet(TokenType::INVITATION);
     }
 
     public function resetPasswordGet(): string
     {
+    	  self::ensureGuestRedirect();
         return $this->handleTokenGet(TokenType::PASSWORD_RESET);
     }
 
 public function activatePost(): string
 {
+	 self::ensureGuestRedirect();
     return $this->processToken(TokenType::INVITATION, 'Účet byl aktivován.');
 }
 
 
 public function resetPasswordPost(): string
 {
+	 self::ensureGuestRedirect();
     return $this->processToken(TokenType::PASSWORD_RESET, 'Heslo bylo změněno.');
 }
 
@@ -230,7 +243,7 @@ private function processToken(string $type, string $successMessage): string
         }
 
      } catch (Throwable $e) {
-		    LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
+		    LoggerHolder::get()->error('AuthController.processToken: failed', [
 		                'message' => $e->getMessage(),
 		                'file'    => $e->getFile(),
 		                'line'    => $e->getLine(),
@@ -239,6 +252,7 @@ private function processToken(string $type, string $successMessage): string
 
 		    ]);
 		}
+		$this->addError('global', 'Něco se nepovedlo, zkuste to prosím později...');
 		$this->view->data['token'] = $token;
       return $this->render('auth/reset-password');
 }
@@ -246,6 +260,7 @@ private function processToken(string $type, string $successMessage): string
 	/* Zapomenuté heslo */
 	public function forgotPassword(): string
 	{
+      self::ensureGuestRedirect();
 		return $this->render('auth/forgot-password');
 	}
 	
@@ -290,7 +305,7 @@ public function forgotPasswordPost(): string
     private function handleTokenGet(string $type): string
     {
         $token = $_GET['token'] ?? null;
-        $errMsg = 'Odkaz je neplatný nebo expirovaný. Můžete si požádat o nový.';
+        $errMsg = self::TOKEN_ERROR;
 
         if (!$token) {
             Flash::error($errMsg);
@@ -305,7 +320,7 @@ public function forgotPasswordPost(): string
 	        }
        
         
-        		//public function validate(string $rawToken, string $type): array
+        		
             $this->view->data = $row;
 				//$this->view->data['button'] = 'Nastavit heslo';
             $this->view->data['token'] = $token;
@@ -313,6 +328,15 @@ public function forgotPasswordPost(): string
 				return $this->render('auth/reset-password');
 
         } catch (\Throwable $e) {
+		    LoggerHolder::get()->error('AuthController.handleTokenGet: failed', [
+		                'message' => $e->getMessage(),
+		                'file'    => $e->getFile(),
+		                'line'    => $e->getLine(),
+		                'trace'   => $e->getTraceAsString(),
+		                'data'    => json_encode([$token, $type]),
+
+		    ]);
+        	
         	//var_dump($e);exit;
             Flash::error($errMsg);
             Url::redirect('/login');
@@ -323,6 +347,7 @@ public function forgotPasswordPost(): string
 
 	public function registrationStepOne():  string
 	{
+		self::ensureGuestRedirect();
 		$data = [];
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 		{
@@ -357,8 +382,8 @@ public function forgotPasswordPost(): string
 
 			
 			$url = Url::base() . Url::to('/register/complete?token=' . $token);
-			
-			[$subject, $htmlBody, $textBody] = BuildMailService::buildRegistration($url);
+			//print_r($url);
+			[$subject, $htmlBody, $textBody] = BuildMailService::build('users.registration');
 			
 
 
@@ -391,28 +416,37 @@ public function forgotPasswordPost(): string
 	
 	public function registrationStepTwo(): string
 	{
+		self::ensureGuestRedirect();
+      $errMsg = 'Odkaz je neplatný nebo expirovaný. Můžete si požádat o nový.';
 		$token = $_GET['token'] ?? null;
+
+		if(empty($token))
+		{
+         Flash::error($errMsg);
+         Url::redirect('/login');
+
+		}
 		$data = [];
 		$companies 	= new CompanyModel();
 
 		$ok = (new TokenService())->validate($token,TokenType::COMPANY_CREATE);
+     if ($ok['ok'] === false) {
+         Flash::error($errMsg);
+         Url::redirect('/login');
 
+     }
 
-		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+ 		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 		{
 			$data = array_map(
 					fn($value) => is_string($value) ? trim($value) : $value,
 					$_POST
 					);
-			$token = $data['token'] ?? null;
-
-			if (!$token || !$ok)
-			{
-				// přesměrujeme na registraci znovu s Flash zprávou		    	
-				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
-		    	Flash::error('Neplatný odkaz, od vygenerování emailu k použití odkazu v něm uplynulo příliš mnoho času...');
-				Url::redirect('/register');
-			}
+		   if(empty($data['token']) || !hash_equals($token, $data['token']))
+		   {
+            Flash::error($errMsg);
+            Url::redirect('/register');
+		   }
 		    
 
 			$this->checkCsrf();
@@ -491,12 +525,13 @@ public function forgotPasswordPost(): string
 				$this->view->data = $data;
 				return $this->render('auth/registrationStepTwo');
 			}
+			/** zrušeno **
 			$adminData['first_name'] = $data['first_name'];
 			$adminData['last_name']  = $data['last_name'];
 			$adminData['password']   = $data['password'];
 			$companyData['name']     = $data['name'];
 			$companyData['ico']      = $data['ico'];
-
+**/
 			
          $payload = [
             'token' => $token,
@@ -533,19 +568,8 @@ public function forgotPasswordPost(): string
 				//var_dump($ok);
 				$this->addError('global', 'Litujeme, Váš účet se nepodařilo vytvořit. Zkuste to prosím za chvíli znovu.');
 			}
-		}  
-		else 
-		{
-			
-			//var_dump($ok);exit;
-			if (!$token || !$ok) 
-			{
-				// přesměrujeme na registraci znovu s Flash zprávou		    	
-				// nebo raději nová stránka, text: registrace trvala příliš dlouho, zkuste to prosím rychleji
-	    		Flash::error('Neplatný odkaz, od vygenerování emailu k použití odkazu v něm uplynulo příliš mnoho času...');
-				Url::redirect('/register');
-			}
 		}
+		
 		$data['token'] = $token;
 		//prozatím aby se mi to protáčelo
 		$this->view->data = $data;	

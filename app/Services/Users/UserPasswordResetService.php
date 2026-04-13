@@ -96,9 +96,13 @@ final class UserPasswordResetService
         // 5️⃣ Sestavit URL
         $resetUrl = Url::base() . Url::to('/reset-password?token=' . urlencode($token));
 
+        $to = [
+            'activationUrl' => $resetUrl,
+            'companyName'   => $company['name'],
+        ];
         // 6️⃣ Poslat email
         //musíme rozšířit informace kde a co
-        [$subject, $html, $text] = BuildMailService::buildPasswordRecovery($resetUrl, $company, $user);
+        [$subject, $html, $text] = BuildMailService::build('users.reset-password', $to);
         $mail = $this->mailService->send(
         toEmail:  $email,
         toName:   $company['name'],

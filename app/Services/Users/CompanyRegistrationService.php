@@ -51,7 +51,33 @@ final class CompanyRegistrationService
         return $token;
     }
 
- public function completeAdmin(array $companyData): array
+/**
+ * @param array{
+ *     name: string,
+ *     ico: string,
+ *     email: string,
+ *     first_name: string,
+ *     last_name: string,
+ *     password: string
+ * } $companyData
+ *
+ * @return array{
+ *     ok: bool,
+ *     data: array{
+ *         user_id: int,
+ *         email: string,
+ *         company_id: int,
+ *         company_name: string,
+ *         slug: string,
+ *         first_name: string,
+ *         last_name: string,
+ *         global_role: string,
+ *         db_name: string,
+ *         team_id: int
+ *     }
+ * }
+ */    
+public function completeAdmin(array $companyData): array
 {
 	 //zízkáme aktuální používanou db pro nové klienty
     $dbName = Config::get('registrationWorkDbName.registrationWorkDbName');
@@ -101,6 +127,14 @@ final class CompanyRegistrationService
     ];
 }
 
+/**
+ * @param array{
+ *     company_id: int,
+ *     user_id: int,
+ *     team_id: int,
+ *     db_name: string
+ * } $data
+ */    
 
 public function completeWork(array $data): bool
 {

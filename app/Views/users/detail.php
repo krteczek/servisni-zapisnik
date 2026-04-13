@@ -114,7 +114,7 @@ $active = active($user);
             <h4>Stav účtu</h4>
             <ul style="padding-left:1.2rem;">
                 <li><span class="badge badge-active">Aktivní</span> – může se přihlásit</li>
-                <li><span class="badge badge-inactive">Deaktivovaný</span> – nemůže se přihlásit</li>
+                <li><span class="badge badge-inactive"><?= te('inactive') ?></span> – nemůže se přihlásit</li>
                 <li><span class="badge badge-pending">Čeká na aktivaci</span> – ještě si nenastavil heslo</li>
             </ul>
 

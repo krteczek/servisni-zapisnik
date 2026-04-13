@@ -11,8 +11,8 @@ use App\Core\Csrf;
 
 require __DIR__ . '/../../layout/header.php';
 
-$data   = $view->data ?? [];
-$errors = $view->errors ?? [];
+$data   = $view->data;
+$errors = $view->errors;
 ?>
 
 

@@ -216,6 +216,9 @@ function a(array $user) : string
 
 function tx(?string $text): string
 {
+    if (!$text) {
+        return '';
+    }
     static $texy = null;
 
     if ($texy === null) {
@@ -223,10 +226,5 @@ function tx(?string $text): string
         Texy\Configurator::safeMode($texy);
     }
 
-    if (!$text) {
-        return '';
-    }
-
     return $texy->process($text);
 }
-?>
