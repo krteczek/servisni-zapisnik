@@ -1,12 +1,9 @@
 RewriteEngine On
 
-# základ – všechno relativně k public/
-RewriteBase /servisni-zapisnik/public/
-
-# existující soubory / adresáře neřeš
+# existující soubory neřeš
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# vše ostatní pošli do index.php
+# vše ostatní na index
 RewriteRule ^ index.php [QSA,L]
