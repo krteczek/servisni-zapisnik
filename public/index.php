@@ -67,7 +67,7 @@ Session::start();
 // -------------------------------------------------
 // ❗ PRVNÍ A NATVRDO PŘIPOJENÍ K DB = ADMIN
 // -------------------------------------------------
-Database::admin();
+//tabase::admin();
 
 if (Auth::check() && Session::has('user.company_db_name')) {
     Database::useWorkDatabase(

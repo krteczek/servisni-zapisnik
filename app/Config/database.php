@@ -5,7 +5,7 @@ return [
 
     'admin' => [
         'host'     => 'localhost',
-        'dbname'   => 'admin',
+        'dbname'   => 'bo_1',
         'user'     => 'root',
         'password' => '',
         'charset'  => 'utf8mb4',

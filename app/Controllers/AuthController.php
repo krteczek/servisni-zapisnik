@@ -383,7 +383,7 @@ public function forgotPasswordPost(): string
 			
 			$url = Url::base() . Url::to('/register/complete?token=' . $token);
 			//print_r($url);
-			[$subject, $htmlBody, $textBody] = BuildMailService::build('users.registration');
+			[$subject, $htmlBody, $textBody] = BuildMailService::build('users.registration', ['activationUrl' => $url]);
 			
 
 
