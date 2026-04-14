@@ -194,15 +194,20 @@ function getClientUserAgent(): string
 }
 
 //používá se při výpisu uživatelů, týmů,
-function active(array$user) : string
+function active(array $user): string
 {
-		$isActive = 'active';
-		if($user['password_hash'] === NULL && $user['active'] === 0) {
-			$isActive = 'pending';
-		} elseif((int) $user['active'] === 0) {
-			$isActive = 'inactive';
-		}
-		return $isActive;
+    $passwordHash = $user['password_hash'] ?? null;
+    $activeFlag   = isset($user['active']) ? (int)$user['active'] : 0;
+
+    if ($passwordHash === null && $activeFlag === 0) {
+        return 'pending';
+    }
+
+    if ($activeFlag === 0) {
+        return 'inactive';
+    }
+
+    return 'active';
 }
 
 function a(array $user) : string

@@ -22,7 +22,7 @@ final class AssignmentModel extends BaseModel
                 u.first_name as created_by_first_name,
                 u.last_name as created_by_last_name
             FROM {$this->tableName} ta
-            LEFT JOIN admin.users u ON u.id = ta.created_by_user_id
+            LEFT JOIN users u ON u.id = ta.created_by_user_id
             WHERE ta.task_id = :task_id 
                 AND ta.company_id = :company_id
             ORDER BY ta.created_at DESC
@@ -53,7 +53,7 @@ final class AssignmentModel extends BaseModel
                 u.first_name,
                 u.last_name
             FROM task_assignment_participants tap
-            LEFT JOIN admin.users u ON u.id = tap.user_id
+            LEFT JOIN users u ON u.id = tap.user_id
             WHERE tap.assignment_id = :assignment_id
                 AND tap.company_id = :company_id
             ORDER BY u.last_name, u.first_name

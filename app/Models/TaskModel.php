@@ -140,7 +140,7 @@ public function forIndex(?int $filterUserId = null): array
                 WHEN t.status = 'open'
                      AND EXISTS (
                         SELECT 1
-                        FROM admin.team_memberships tmu2
+                        FROM team_memberships tmu2
                         WHERE tmu2.team_id = t.team_id
                           AND tmu2.user_id = :current_user_id_perm
                           AND tmu2.company_id = :company_id_perm
@@ -156,7 +156,7 @@ public function forIndex(?int $filterUserId = null): array
             ON w.id = t.work_order_id
            AND w.company_id = :company_id_w
 
-        LEFT JOIN admin.teams tm
+        LEFT JOIN teams tm
             ON tm.id = t.team_id
            AND tm.company_id = :company_id_tm
 
@@ -199,7 +199,7 @@ public function forIndex(?int $filterUserId = null): array
         $sql .= "
             AND EXISTS (
                 SELECT 1
-                FROM admin.team_memberships tmu
+                FROM team_memberships tmu
                 WHERE tmu.team_id = t.team_id
                   AND tmu.user_id = :current_user_id_filter
                   AND tmu.company_id = :company_id_filter
@@ -240,7 +240,7 @@ public function canUserAddReport(int $taskId, int $userId): bool
           AND t.status = 'open'
           AND EXISTS (
                 SELECT 1
-                FROM admin.team_memberships tmu
+                FROM team_memberships tmu
                 WHERE tmu.team_id = t.team_id
                   AND tmu.user_id = :user_id
                   AND tmu.company_id = :company_id_membership

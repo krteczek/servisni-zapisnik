@@ -145,9 +145,14 @@ public function detailOrder(int $orderId): string
     $teamModel = new TeamModel();
     $teams = $teamModel->byActive(true);
 
-    $contactsModel = new ContactsModel();
-    $contact = $contactsModel->find($order['contact_id']);
-
+    if((int)$order['contact_id'] > 0)
+    {
+        $contactsModel = new ContactsModel();
+        $contact = $contactsModel->find($order['contact_id']);
+    } else {
+        $contact = ['company_name' => '—'];
+    }
+    
 
     // 1. Vytvoř lookup mapu týmů (id => [name, color])
     $teamMap = [];
