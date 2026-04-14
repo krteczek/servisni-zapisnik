@@ -56,6 +56,8 @@ return [
     'action' => [AuthController::class, 'registrationStepOne'],
     'auth'   => false,
     'title'  => 'Registrace firmy',
+    'menu'    => 'Registrace firmy',
+    'section' => 'register',
 ],
 
 [
@@ -86,7 +88,7 @@ return [
     'method' => 'POST',
     'path'   => '/register/complete',
     'action' => [AuthController::class, 'registrationStepTwo'],
-    '[auth'   => false,
+    'auth'   => false,
     'title'  => 'Dokončení registrace firmy',
 ],
 
@@ -110,6 +112,9 @@ return [
     'action' => [AuthController::class, 'loginForm'],
     'auth'   => false,
     'title'  => 'Přihlášení',
+    'menu'    => 'Přihlášení',
+    'section' => 'login',
+
 ],
 [
     'method' => 'POST',

@@ -13,9 +13,9 @@ require __DIR__ . '/../layout/header.php';
 /** @var array[] $tasks */
 
 $workOrder = $view->order;
-$teams = $view->teams;
-$post = $view->tasks;
-$errors = $view->errors; 
+$teams     = $view->teams;
+$post      = $view->post;
+$errors    = $view->errors; 
 var_dump($post);
 
 

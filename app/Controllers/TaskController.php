@@ -41,7 +41,7 @@ class TaskController extends Controller
 			$teams = $teamModel->byActive(true);
 	
 			$this->view->order = $order;
-			$this->view->tasks = $tasks;
+			$this->view->post = $tasks;
 			$this->view->teams = $teams;
 	    	
 			return $this->render('tasks/create');
@@ -120,7 +120,7 @@ private function saveTask(array $data, int $workOrderId): string
 
           ]);
           $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
-
+          return $this->render('tasks/create');
 	   }
 //print_r($row);//exit;
  		if(!$row)
@@ -154,15 +154,16 @@ private function saveTask(array $data, int $workOrderId): string
 	   }
 	   catch (Throwable $e)
 	   {
-	   	LoggerHolder::get()->error('UserActivation failed', [
+	   	    LoggerHolder::get()->error('UserActivation failed', [
 				    'message'   => $e->getMessage(),
 				    'file'      => $e->getFile(),
 				    'line'      => $e->getLine(),
 				    'trace'     => $e->getTraceAsString(),
 				    'toDb2'      => serialize($datadb2),
-          ]);
-          $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
-	   }
+            ]);
+            $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
+	        return $this->render('tasks/create');   
+        }
     }
     else
     {

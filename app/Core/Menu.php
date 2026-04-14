@@ -109,11 +109,21 @@ final class Menu
      */
     private static function isAllowed(array $route): bool
     {
-        if (($route['auth'] ?? false) && !Auth::check()) {
+        $isLogged = Auth::check();
+        $requiresAuth = $route['auth'] ?? false;
+
+        // ❌ nepřihlášený → nevidí chráněné
+        if (!$isLogged && $requiresAuth) {
             return false;
         }
 
-        if (!empty($route['roles']) && !Auth::hasRole($route['roles'])) {
+        // ❌ přihlášený → nevidí public (login, register…)
+        if ($isLogged && !$requiresAuth) {
+            return false;
+        }
+
+        // role check jen pro přihlášené
+        if ($isLogged && !empty($route['roles']) && !Auth::hasRole($route['roles'])) {
             return false;
         }
 

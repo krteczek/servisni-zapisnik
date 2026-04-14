@@ -14,7 +14,8 @@ final class BillingExportService
 
 public function __construct()
 {
-	Database::useWorkDatabase('work');
+    //zrušeno protože se přešlo na model jedné databáze pro uživatele i práci.
+	//Database::useWorkDatabase('work');
 }
     public function getExports(int $companyId): array
     {
@@ -232,7 +233,7 @@ public function getExportableItems(int $companyId, string $from, string $to): ar
             ON wo.id = ta.work_order_id
            AND wo.company_id = ta.company_id
 
-        JOIN admin.users u
+        JOIN users u
             ON u.id = tap.user_id
 
         WHERE tap.company_id = :company_id
