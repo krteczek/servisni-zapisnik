@@ -15,7 +15,7 @@ require __DIR__ . '/../layout/header.php';
     <div class="card">
         <div class="card-body">
 
-            <p>Zadejte údaje pro přístup do Vašeho pracovního prostoru.</p>
+            <p>Zadejte přihlašovací údaje do Vašeho firemního účtu.</p>
             <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 
             <form method="post" action="<?= Url::current() ?>">
@@ -31,11 +31,12 @@ require __DIR__ . '/../layout/header.php';
 
                 <!-- TENANT -->
                 <div class="form-group <?= !empty($view->errors['tenant']) ? 'has-error' : '' ?>">
-                    <label>IČO / název prostoru</label>
+                    <label>IČO Vaší firmy</label>
                     <input
                         class="form-control"
                         name="tenant"
-                        placeholder="IČO nebo název prostoru"
+                        placeholder="IČO Vaší firmy"
+                        autocomplete="organization-number"
                         value="<?= e($view->data['tenant'] ?? '') ?>"
                     >
 
@@ -50,6 +51,10 @@ require __DIR__ . '/../layout/header.php';
                     <input
                         class="form-control"
                         name="email"
+                        type="email"
+                        autocomplete="username"
+                        pattern="\d{8}"
+                        title="IČO musí mít 8 číslic"
                         value="<?= e($view->data['email'] ?? '') ?>"
                     >
 
@@ -64,6 +69,7 @@ require __DIR__ . '/../layout/header.php';
                     <input
                         type="password"
                         class="form-control"
+                        autocomplete="password"
                         name="password"
                     >
 
@@ -85,7 +91,7 @@ require __DIR__ . '/../layout/header.php';
             </p>
 				<p style="margin-top:20px; font-size: 13px; color: #666;">
 				    Tento web používá pouze nezbytné cookies pro přihlášení a bezpečný provoz aplikace.
-				    <a href="<?= Url::to('/cookies') ?>" class="link">Více informací</a>
+				    <a href="<?= Url::to('/pages/cookies') ?>" class="link">Více informací</a>
 				</p>
         </div>
     </div>
@@ -95,24 +101,37 @@ require __DIR__ . '/../layout/header.php';
     <div class="card card-help">
         <div class="card-body">
 
-            <h3>Nemáte účet?</h3>
+            <h3>Nápověda:</h3>
+            
+            <h4>Nemáte účet?</h4>
             <p>
-                Vytvořte si pracovní prostor a začněte evidovat zakázky.
+                Vytvořte si firemní účet a získejte pracovní prostor, 
+                ve kterém můžete evidovat a zpracovávat  Vaše zakázky a úkoly k nim.
             </p>
 
             <p>
                 <a href="<?= Url::to('/register') ?>" class="link">
-                    ➜ Vytvořit účet
+                    ➜ Vytvořit firemní účet
                 </a>
+            </p>
+            <p>
+               <strong>Poznámka: </strong>
+               Účty pro spolupracovníky a zaměstnance                            
+                se vytvářejí až po založení firemního účtu, a to v nastavení
+                Vašeho firemního pracovního prostoru.
             </p>
 
             <hr>
 
-            <h4>Co zadat jako název prostoru?</h4>
-            <p>
-                Použijte název, který jste zvolili při registraci
-                (např. <strong>servis-novak</strong>) nebo IČO Vaší firmy.
-            </p>
+            <h4>Přihlášení</h4>
+            
+                <p>K přihlášení potřebujete:</p>
+                <ul>
+                    <li>IČO Vaší firmy</li>
+                    <li>email</li>
+                    <li>heslo</li>
+                </ul>
+          
             <hr>
 
             <h4>Zapomněli jste heslo?</h4>
