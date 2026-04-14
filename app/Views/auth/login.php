@@ -37,6 +37,8 @@ require __DIR__ . '/../layout/header.php';
                         name="tenant"
                         placeholder="IČO Vaší firmy"
                         autocomplete="organization-number"
+                        pattern="\d{8}"
+                        title="IČO musí mít 8 číslic"
                         value="<?= e($view->data['tenant'] ?? '') ?>"
                     >
 
@@ -53,8 +55,6 @@ require __DIR__ . '/../layout/header.php';
                         name="email"
                         type="email"
                         autocomplete="username"
-                        pattern="\d{8}"
-                        title="IČO musí mít 8 číslic"
                         value="<?= e($view->data['email'] ?? '') ?>"
                     >
 
@@ -69,7 +69,7 @@ require __DIR__ . '/../layout/header.php';
                     <input
                         type="password"
                         class="form-control"
-                        autocomplete="password"
+                        autocomplete="current-password"
                         name="password"
                     >
 
@@ -91,7 +91,7 @@ require __DIR__ . '/../layout/header.php';
             </p>
 				<p style="margin-top:20px; font-size: 13px; color: #666;">
 				    Tento web používá pouze nezbytné cookies pro přihlášení a bezpečný provoz aplikace.
-				    <a href="<?= Url::to('/pages/cookies') ?>" class="link">Více informací</a>
+				    <a href="<?= Url::to('/pages/cookies') ?>" class="link">Více informací o cookies zde</a>.
 				</p>
         </div>
     </div>
@@ -110,9 +110,7 @@ require __DIR__ . '/../layout/header.php';
             </p>
 
             <p>
-                <a href="<?= Url::to('/register') ?>" class="link">
-                    ➜ Vytvořit firemní účet
-                </a>
+                <a href="<?= Url::to('/register') ?>" class="link"><strong> ➜ Vytvořit firemní účet</strong></a>
             </p>
             <p>
                <strong>Poznámka: </strong>
@@ -138,7 +136,7 @@ require __DIR__ . '/../layout/header.php';
             <p>
                 Máte již zde účet, ale zapomněli jste přístupové heslo?
                 Žádný problém! Na této stránce můžete <a href="<?= Url::to('/forgot-password') ?>"
-                title="Požádat o nové heslo do Bó systému"><strong>požádat o nové heslo</strong></a> do Bó systému.
+                title="Požádat o nové heslo do Bó systému" class="link"><strong>požádat o nové heslo</strong></a> do Bó systému.
 
             </p>
 
