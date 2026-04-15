@@ -38,6 +38,8 @@ public function index(): string
     	  $this->view->contacts = $contactsModel->all();
         $this->view->data     = [];
         $this->view->errors   = [];
+        $Tm = new TeamModel();
+        $this->view->teams = $Tm->byActive(true);         
 
         return $this->render('work_orders/create');
     }
@@ -50,47 +52,70 @@ public function index(): string
         if ($this->hasErrors()) {
             $this->view->data = $data;
             $this->view->contacts = $contactsModel->all();
+            $Tm = new TeamModel();
+            $this->view->teams = $Tm->byActive(true);         
 
             return $this->render('work_orders/create');
         }
         
-        $toDb = [
-            'contact_id'         => $data['contact_id'],
-            'price_per_hour'     => $data['price_per_hour'],
-            'price_per_km'       => $data['price_per_km'],
-            'external_number' 	=> $data['external_number'],
-            'title'           	=> $data['title'],
-            'description'     	=> $data['description'],
-            'source'          	=> $data['source'],
-            'requested_by'    	=> $data['requested_by'],
-            'contact_person'     => $data['contact_person'],
-            'priority'        	=> $data['priority'],
-            'created_by_user_id' => Auth::id(),
-        ];
+        try {
+            $toDb = [
+                'contact_id'         => $data['contact_id'],
+                'price_per_hour'     => $data['price_per_hour'],
+                'price_per_km'       => $data['price_per_km'],
+                'external_number' 	 => $data['external_number'],
+                'title'           	 => $data['title'],
+                'description'     	 => $data['description'],
+                'source'          	 => $data['source'],
+                'requested_by'    	 => $data['requested_by'],
+                'contact_person'     => $data['contact_person'],
+                'priority'        	 => $data['priority'],
+                'created_by_user_id' => $data['created_by_user_id'],
+            ];
 
 			$pdo = Database::work();
 			$pdo->beginTransaction();
 
-			try {
-			    $WONS = new WorkOrderNumberService();
-			    $orderId = $WONS->generateAndCreate($toDb, $pdo);
+		
+            $WONS = new WorkOrderNumberService();
+            $orderId = $WONS->generateAndCreate($toDb, $pdo);
 
-			    $pdo->commit();
+            // vytvoříme první úkol, pokud je to požadováno
+            if ($data['create_first_task'] === true) {
+                $taskModel = new TaskModel();
+                $taskModel->setConnection($pdo);
+                $taskModel->create([
+                    'work_order_id' => $orderId,
+                    'title'         => $data['title'], // můžeme použít název zakázky jako název úkolu
+                    'description'   => $data['description'], // můžeme použít popis zakázky jako popis úkolu
+                    'status'        => 'open',
+                    'team_id'       => $data['team_id'],
+                    'created_by_user_id' => $data['created_by_user_id'],
+                ]);
+             }
 
-			} catch (\Throwable $e) {
-				    $pdo->rollBack();
+            $pdo->commit();
+		} catch (\Throwable $e) {
+			if ($pdo && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            
+		    LoggerHolder::get()->error('WorkOrderController.createFormStore: failed', [
+		                'message' => $e->getMessage(),
+		                'file'    => $e->getFile(),
+		                'line'    => $e->getLine(),
+		                'trace'   => $e->getTraceAsString(),
+		                
 
-				    LoggerHolder::get()->error('Create work order failed', [
-				        'message' => $e->getMessage(),
-				    ]);
+		    ]);
+ 
+            $this->addError('global', 'Zakázku se nepodařilo vytvořit.');
 
-				    $this->addError('global', 'Zakázku se nepodařilo vytvořit.');
+            $this->view->data = $data;
+            $this->view->contacts = $contactsModel->all();
 
-				    $this->view->data = $data;
-				    $this->view->contacts = $contactsModel->all();
-
-				    return $this->render('work_orders/create');
-		   }
+            return $this->render('work_orders/create');
+		}
         Flash::success('Zakázka byla úspěšně vytvořena.');
 
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
@@ -255,8 +280,8 @@ private function getOrderOrRedirect(int $orderId): array
         $data = [
 
             'contact_id'         => (int)($post['contact_id'] ?? 0) ?: null,
-            'price_per_hour'     => (int)$post['price_per_hour'],
-            'price_per_km'       => (int)$post['price_per_km'],
+            'price_per_hour'     => (int)($post['price_per_hour'] ?? 0),
+            'price_per_km'       => (int)($post['price_per_km'] ?? 0),
             'external_number' 	=> trim($post['external_number'] ?? '') ?: null,
             'title'           	=> trim($post['title'] ?? ''),
             'description'     	=> trim($post['description'] ?? ''),
@@ -265,44 +290,63 @@ private function getOrderOrRedirect(int $orderId): array
             'contact_person'         	=> trim($post['contact_person'] ?? ''),
             'priority'        	=> $post['priority'] ?? 'normal',
             'created_by_user_id' => Auth::id(),
+            'create_first_task'  => !empty($post['create_first_task']),
+            'team_id' => isset($post['team_id']) ? (int)$post['team_id'] : 0,                       
         ];
-			//   `title` varchar(255) NOT NULL,
-			$this->maxLength('title', $data['title'], 255, 'Název zakázky');
-			if ($data['title'] === '') {
-				$this->addError('title', 'Název zakázky je povinný');
-			} 
-			//  `external_number` varchar(100) DEFAULT NULL,
-			$this->maxLength('external_number', $data['external_number'], 10000, 'Externí číslo zakázky');
-			
-			//   `description` text DEFAULT NULL, max 65 535 znaků omezíme na 10000
-			$this->maxLength('description', $data['description'], 10000, 'Popis zakázky');
-			
-			// `contact` varchar(255) DEFAULT NULL,
-			$this->maxLength('contact_person', $data['contact_person'], 255, 'Kontakt');
-						
-			// `source` enum('email','phone','personal','system') NOT NULL,
-			$sources = ['email','phone','personal','system'];
-			if (!in_array($data['source'], $sources, true)) {
-				$data['source'] = 'personal';
-			}
+		//   `title` varchar(255) NOT NULL,
+		$this->maxLength('title', $data['title'], 255, 'Název zakázky');
+		if ($data['title'] === '') {
+			$this->addError('title', 'Název zakázky je povinný');
+		} 
+        //  `external_number` varchar(100) DEFAULT NULL,
+        $this->maxLength('external_number', $data['external_number'], 100, 'Externí číslo zakázky');
+        
+        //   `description` text DEFAULT NULL, max 65 535 znaků omezíme na 10000
+        $this->maxLength('description', $data['description'], 10000, 'Popis zakázky');
+        
+        // `contact` varchar(255) DEFAULT NULL,
+        $this->maxLength('contact_person', $data['contact_person'], 255, 'Kontakt');
+                    
+        // `source` enum('email','phone','personal','system') NOT NULL,
+        $sources = ['email','phone','personal','system'];
+        if (!in_array($data['source'], $sources, true)) {
+            $data['source'] = 'personal';
+        }
 
-			//   `requested_by` varchar(255) DEFAULT NULL,
-			$this->maxLength('requested_by', $data['requested_by'], 255, 'Požadoval');
-			
-			//`priority` enum('low','normal','high','emergency') NOT NULL DEFAULT 'normal',
-			$prioritys = ['low','normal','high','emergency'];
-			if (!in_array($data['priority'], $prioritys, true)) {
-				$data['priority'] = 'normal';
-			}
+        //   `requested_by` varchar(255) DEFAULT NULL,
+        $this->maxLength('requested_by', $data['requested_by'], 255, 'Požadoval');
+        
+        //`priority` enum('low','normal','high','emergency') NOT NULL DEFAULT 'normal',
+        $prioritys = ['low','normal','high','emergency'];
+        if (!in_array($data['priority'], $prioritys, true)) {
+            $data['priority'] = 'normal';
+        }
 
-			if($data['price_per_hour'] < 0)
-			{
-				$this->addError('price_per_hour', 'Hodinová sazba nemůže být záporná.');
-			}
-			if($data['price_per_km'] < 0)
-			{
-				$this->addError('price_per_km', 'Kilometrová sazba nemůže být záporná.');
-			}
+        if($data['price_per_hour'] < 0)
+        {
+            $this->addError('price_per_hour', 'Hodinová sazba nemůže být záporná.');
+        }
+        if($data['price_per_km'] < 0)
+        {
+            $this->addError('price_per_km', 'Kilometrová sazba nemůže být záporná.');
+        }
+
+
+        if($data["create_first_task"] === true) {
+            if($data['team_id'] === 0) {
+                $this->addError('team_id', 'Pro vytvoření prvního úkolu je nutné vybrat tým.');
+            } else {
+                // Ověříme, že zadané team_id skutečně existuje
+                $teamModel = new TeamModel();
+                $team = $teamModel->find($data['team_id']);
+                if (!$team) {
+                    $this->addError('team_id', 'Vybraný tým neexistuje.');
+                } else {
+                    $data['team_id'] = (int)$team['id'];
+                }
+            }
+        }
+        // "create_first_task" tinyint(1) DEFAULT NULL,
         return $data;
     }
     
@@ -370,8 +414,8 @@ private function recomputeOrder(int $orderId): void
 			Flash::error('Úkol neexistuje');
 			Url::redirect('/{tenant}/tasks/#main');
 		}
-		Flash::error('Úkol byl úspěšně uzavřen.');
-		Url::redirect('/{tenant}/work-order/' . (int) $task['work_order_id'] . '/detail/#taskId_' . $taskId );
+		Flash::success('Úkol byl úspěšně uzavřen.');
+		Url::redirect('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/detail/#taskId_' . $taskId );
 	}
 
 }
