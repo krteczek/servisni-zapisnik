@@ -233,3 +233,9 @@ function tx(?string $text): string
 
     return $texy->process($text);
 }
+
+
+function checked($value): string
+{
+    return $value ? 'checked' : '';
+}
