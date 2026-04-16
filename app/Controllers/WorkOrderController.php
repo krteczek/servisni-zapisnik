@@ -46,8 +46,12 @@ public function index(): string
 
     public function createFormStore(): string
     {
-        $data = $this->validate($_POST);
+        $post = $_POST;
+        
+        $data = $this->validate($post, false);
         $contactsModel = new ContactsModel();
+        $data["is_edit"] = false; 
+        
 
         if ($this->hasErrors()) {
             $this->view->data = $data;
@@ -58,6 +62,7 @@ public function index(): string
             return $this->render('work_orders/create');
         }
         
+        $pdo = null;
         try {
             $toDb = [
                 'contact_id'         => $data['contact_id'],
@@ -72,29 +77,30 @@ public function index(): string
                 'priority'        	 => $data['priority'],
                 'created_by_user_id' => $data['created_by_user_id'],
             ];
-
-			$pdo = Database::work();
-			$pdo->beginTransaction();
+            
+            
+			    $pdo = Database::work();
+			    $pdo->beginTransaction();
 
 		
-            $WONS = new WorkOrderNumberService();
-            $orderId = $WONS->generateAndCreate($toDb, $pdo);
+                $WONS = new WorkOrderNumberService();
+                $orderId = $WONS->generateAndCreate($toDb, $pdo);
 
-            // vytvoříme první úkol, pokud je to požadováno
-            if ($data['create_first_task'] === true) {
-                $taskModel = new TaskModel();
-                $taskModel->setConnection($pdo);
-                $taskModel->create([
-                    'work_order_id' => $orderId,
-                    'title'         => $data['title'], // můžeme použít název zakázky jako název úkolu
-                    'description'   => $data['description'], // můžeme použít popis zakázky jako popis úkolu
-                    'status'        => 'open',
-                    'team_id'       => $data['team_id'],
-                    'created_by_user_id' => $data['created_by_user_id'],
-                ]);
-             }
+                // vytvoříme první úkol, pokud je to požadováno
+                if ($data['create_first_task'] === true) {
+                    $taskModel = new TaskModel();
+                    $taskModel->setConnection($pdo);
+                    $taskModel->create([
+                        'work_order_id' => $orderId,
+                        'title'         => $data['title'], // můžeme použít název zakázky jako název úkolu
+                        'description'   => $data['description'], // můžeme použít popis zakázky jako popis úkolu
+                        'status'        => 'open',
+                        'team_id'       => $data['team_id'],
+                        'created_by_user_id' => $data['created_by_user_id'],
+                    ]);
+               }
 
-            $pdo->commit();
+               $pdo->commit();
 		} catch (\Throwable $e) {
 			if ($pdo && $pdo->inTransaction()) {
                 $pdo->rollBack();
@@ -110,7 +116,8 @@ public function index(): string
 		    ]);
  
             $this->addError('global', 'Zakázku se nepodařilo vytvořit.');
-
+            $Tm = new TeamModel();
+            $this->view->teams = $Tm->byActive(true);
             $this->view->data = $data;
             $this->view->contacts = $contactsModel->all();
 
@@ -130,10 +137,18 @@ public function editForm(int $orderId): string
         Flash::error('Tuto zakázku nelze upravovat, protože je dokončená nebo zrušená.');
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
     }
-
+    
+    $TaM = new TaskModel();
+    $stats = $TaM->statsForWorkOrder($orderId);
+    $order['is_edit'] = true; // pro případné úpravy ve view ,
+    $order['task_count'] = $stats['total'] ?? 0; // počet úkolů pro zobrazení upozornění ve view, že nelze vytvořit první úkol ze zakázky, protože již nějaké úkoly existují
+    
     $contactsModel = new ContactsModel();
+    $TM = new TeamModel();
 
+    $this->view->teams = $TM->byActive(true);
     $this->view->data = $order;
+    
     $this->view->contacts = $contactsModel->all(); // 🔥 DŮLEŽITÉ
 
     return $this->render('work_orders/create');
@@ -147,39 +162,61 @@ public function editForm(int $orderId): string
            Flash::error('Tuto zakázku nelze upravit.');
            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
         }
-        $data = $this->validate($_POST);
+        $post = $_POST;
+        
+
+        $TaM = new TaskModel();
+        $stats = $TaM->statsForWorkOrder($orderId);
+        $data = $this->validate($post, true);
+        $data["is_edit"] = true;
+        $data['task_count'] = $stats['total'] ?? 0; // počet úkolů pro zobrazení upozornění ve view, že nelze vytvořit první úkol ze zakázky, protože již nějaké úkoly existují
+
         if ($this->hasErrors()) {
             $contactsModel = new ContactsModel();
+            $TM = new TeamModel();
+            $this->view->teams = $TM->byActive(true);
             $this->view->contacts = $contactsModel->all();
             $this->view->data = $data;
             return $this->render('work_orders/create');
             
         }
+        
+        try {
+            $toDb = [
+                'contact_id'         => $data['contact_id'],
+                'price_per_hour'     => $data['price_per_hour'],
+                'price_per_km'       => $data['price_per_km'],
+                'external_number' 	 => $data['external_number'],
+                'title'           	 => $data['title'],
+                'description'     	 => $data['description'],
+                'source'          	 => $data['source'],
+                'requested_by'    	 => $data['requested_by'],
+                'contact_person'     => $data['contact_person'],
+                'priority'        	 => $data['priority'],
+            ];
+            $ok = $this->model->update($orderId, $toDb);
+                
+            
+                
+            Flash::success('Zakázka byla úspěšně změněna.');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+        } catch (\Throwable $e) {
+            LoggerHolder::get()->error('WorkOrderController.editFormUpdate: failed', [
+                        'message' => $e->getMessage(),
+                        'file'    => $e->getFile(),
+                        'line'    => $e->getLine(),
+                        'trace'   => $e->getTraceAsString(),
+            ]);
+        }
 
-        $toDb = [
-            'contact_id'         => $data['contact_id'],
-            'price_per_hour'     => $data['price_per_hour'],
-            'price_per_km'       => $data['price_per_km'],
-            'external_number' 	 => $data['external_number'],
-            'title'           	 => $data['title'],
-            'description'     	 => $data['description'],
-            'source'          	 => $data['source'],
-            'requested_by'    	 => $data['requested_by'],
-            'contact_person'     => $data['contact_person'],
-            'priority'        	 => $data['priority'],
-        ];
-		$ok = $this->model->update($orderId, $toDb);
-			
-			if(!$ok){
-            $contactsModel = new ContactsModel();
-            $this->view->contacts = $contactsModel->all();
-				$this->addError('global','Zakázku se nepodařilo změnit.');
-				$this->view->data = $data;
-				return $this->render('work_orders/create');
-			}
-			
-        Flash::success('Zakázka byla úspěšně změněna.');
-        Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+        $TM = new TeamModel();
+        $this->view->teams = $TM->byActive(true);        
+        $contactsModel = new ContactsModel();
+        $this->view->contacts = $contactsModel->all();
+        $this->addError('global','Zakázku se nepodařilo změnit.');
+        $this->view->data = $data;
+        return $this->render('work_orders/create');
+              
     }
     
 
@@ -295,7 +332,7 @@ private function getOrderOrRedirect(int $orderId): array
     return $order;
 }
 
-    private function validate(array $post): array
+    private function validate(array $post, bool $isEdit = false): array
     {
         $this->checkCsrf();
         $data = [
@@ -338,8 +375,8 @@ private function getOrderOrRedirect(int $orderId): array
         $this->maxLength('requested_by', $data['requested_by'], 255, 'Požadoval');
         
         //`priority` enum('low','normal','high','emergency') NOT NULL DEFAULT 'normal',
-        $prioritys = ['low','normal','high','emergency'];
-        if (!in_array($data['priority'], $prioritys, true)) {
+        $priorities = ['low','normal','high','emergency'];
+        if (!in_array($data['priority'], $priorities, true)) {
             $data['priority'] = 'normal';
         }
 
@@ -352,8 +389,8 @@ private function getOrderOrRedirect(int $orderId): array
             $this->addError('price_per_km', 'Kilometrová sazba nemůže být záporná.');
         }
 
-
-        if($data["create_first_task"] === true) {
+        if ($data["create_first_task"] === true && $isEdit === false)
+        {
             if($data['team_id'] === 0) {
                 $this->addError('team_id', 'Pro vytvoření prvního úkolu je nutné vybrat tým.');
             } else {
@@ -367,7 +404,7 @@ private function getOrderOrRedirect(int $orderId): array
                 }
             }
         }
-        // "create_first_task" tinyint(1) DEFAULT NULL,
+       
         return $data;
     }
     

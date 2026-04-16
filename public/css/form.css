@@ -162,3 +162,8 @@ details[open] summary {
   align-items: center;
   gap: 10px;
 }
+
+
+input[type="number"].form-control {
+  appearance: textfield;
+}
