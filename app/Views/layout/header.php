@@ -20,7 +20,7 @@ use App\Core\Session;
 <link rel="icon" href="<?= Url::to('/favicon_io/favicon.ico') ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
 <link rel="apple-touch-icon" href="<?= Url::to('/favicon_io/apple-touch-icon.png') ?>">
-<!--	  -->
+<!--	  -->  
     <link rel="stylesheet" href="<?= Url::to('/css/base.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/logo.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/menu.css') ?>">
@@ -38,7 +38,7 @@ use App\Core\Session;
 <!--    -->
  <style>
  <?php
- /*
+ /* * /
 require __DIR__ . '/../../../public/css/base.css';
 require __DIR__ . '/../../../public/css/logo.css';
 require __DIR__ . '/../../../public/css/menu.css';
@@ -52,7 +52,7 @@ require __DIR__ . '/../../../public/css/meta.css';
 require __DIR__ . '/../../../public/css/form.css';
 require __DIR__ . '/../../../public/css/flash.css';
 require __DIR__ . '/../../../public/css/footer.css';
-*/
+/* */
 ?>
  </style>
 </head>

@@ -28,11 +28,17 @@ $errors = $view->errors;
 		    <div class="section-label">Zakázka: </div>
 
 		    <p>
-		        <strong><?= e($workOrder['title']) ?></strong>
-		        <span class="badge badge-status-<?= e($workOrder['status']) ?>">
-		            <?= te($workOrder['status']) ?>
-		        </span>
+		        <strong><?= te($workOrder['title']) ?></strong>
 		    </p>
+		   <p>
+					<span class="label">Status zakázky: </span>
+					<span class="badge badge-status-<?= e($workOrder['status']) ?>" title="Stav zakázky"><?= te($workOrder['status']) ?></span>
+            </p>
+
+			<p>
+					<span class="label">Priorita zakázky: </span>
+					<span class="badge badge-priority-<?= e($workOrder['priority']) ?>" title="Priorita zakázky"><?= te($workOrder['priority']) ?></span>
+            </p>
 
 		    <div><?= tx($workOrder['description']) ?></div>
 		</div>
@@ -84,7 +90,10 @@ $errors = $view->errors;
         			<div class="form-group"  class="card-section">
 						
 						<?php if ((int)($post['is_recurring'] ?? 0) !== 1): ?>
-							<label>Z normálního úkolu nelze dodatečně udělat opakovaný úkol.</label>
+							<label>Z normálního úkolu nelze dodatečně udělat 
+								opakovaný úkol. 
+								Můžete však klonovat tento úkol a upravit jeho 
+								kopii podle potřeby.</label>
 						<?php else: ?>      
 							<label>
 										Tento úkol je opakovací. Kliknutím na tlačítko <strong>Nastavit opakování úkolu</strong>

@@ -122,16 +122,10 @@ private function getOrderOrRedirect(?int $orderId): array
             $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
             return $this->render('tasks/create');
         }
-    //print_r($row);//exit;
-            if(!$row)
-            {
-            $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
-            return $this->render('tasks/create');
-            }
-
+    
         if($post['is_recurring'] === 1)
         {
-        $datadb2 = [
+            $datadb2 = [
                     'company_id' => Auth::companyId(),
                     'task_id' => $row,
                     'team_id' => $team_id,
@@ -143,17 +137,17 @@ private function getOrderOrRedirect(?int $orderId): array
                 ];
             try
             {
-            $RM = new RecurringTaskModel();
-            $recurringId = $RM->create($datadb2);
-            $TM->update($row, [
-                    'recurring_task_id' => $recurringId
-            ]);
+                $RM = new RecurringTaskModel();
+                $recurringId = $RM->create($datadb2);
+                $TM->update($row, [
+                        'recurring_task_id' => $recurringId
+                ]);
 
-            // Načíst nastavení pro recurring
-            Url::redirect('/{tenant}/tasks/' . $row . '/recurring');
-        }
-        catch (Throwable $e)
-        {
+                // Načíst nastavení pro recurring
+                Url::redirect('/{tenant}/tasks/' . $row . '/recurring');
+            }
+            catch (Throwable $e)
+            {
                 LoggerHolder::get()->error('UserActivation failed', [
                         'message'   => $e->getMessage(),
                         'file'      => $e->getFile(),
@@ -226,8 +220,12 @@ private function getOrderOrRedirect(?int $orderId): array
 		
 		//zjistíme jméno a barvu týmu
 		$team = (new TeamModel())->find($task['team_id']);
-		
-		$post = $this->validateTask($_POST);
+		$post = $_POST;
+        //nelze změnit tým, takže pro validaci 
+        //musíme nastavit původní team_id
+        $post['team_id'] = (int)$task['team_id'];
+        
+		$post = $this->validateTask($post);
 
         $title 			= $post['title'];
         $description 	= $post['description'];
@@ -296,7 +294,7 @@ private function validateTask(array $data): array
     $description     = trim($data['description'] ?? '');
     $is_recurring    = (int) ($data['is_recurring'] ?? 0);
     $team_id         = (int) ($data['team_id'] ?? 0);  
-    
+    print_r($data);
     if ($title === '') {
         $this->addError('title', 'Název úkolu je povinný');
     }
