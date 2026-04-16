@@ -5,7 +5,6 @@ namespace App\Services\Onboarding;
 
 use App\Core\Transaction;
 use App\Core\DatabaseScope;
-use App\Core\Database;
 use App\Core\LoggerHolder;
 use Throwable;
 use PDO;
@@ -20,10 +19,9 @@ class OnboardingService
 {
     public function run(array $load): array
     {
-        $d        = $load['data'];
-        $token    = $load['token'];
-        $type     = $load['type'];
-        $response = [];
+        $d     = $load['data'];
+        $token = $load['token'];
+        $type  = $load['type'];
 
         /*
          * ==========================
@@ -32,7 +30,7 @@ class OnboardingService
          */
         try {
             $adminResult = Transaction::run(
-                function (PDO $db) use ($d, $token, $type) {
+                function () use ($d, $token, $type) {
 
                     $tokenData = (new TokenService())->consume($token, $type);
 
@@ -50,22 +48,18 @@ class OnboardingService
                     ];
 
                     $service = new CompanyRegistrationService();
-                    $service->setConnection($db); // 🔥 klíčové
-
                     return $service->completeAdmin($data);
                 },
                 'admin'
             );
 
-            if (!isset($adminResult['ok']) || $adminResult['ok'] === false) {
+            if (!($adminResult['ok'] ?? false)) {
                 return $adminResult;
             }
 
         } catch (Throwable $e) {
             LoggerHolder::get()->error('OnboardingService.run-admin: failed', [
                 'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
                 'trace'   => $e->getTraceAsString(),
                 'data'    => json_encode($d),
             ]);
@@ -78,7 +72,7 @@ class OnboardingService
 
         /*
          * ==========================
-         * ADMIN DATA
+         * DATA
          * ==========================
          */
         $adminData = $adminResult['data'];
@@ -86,8 +80,8 @@ class OnboardingService
         $dbName    = $adminData['db_name'];
 
         $data = [
-            'company_id' => $adminData['company_id'],
-            'db_name'    => $adminData['db_name'],
+            'company_id' => $companyId,
+            'db_name'    => $dbName,
             'user_id'    => $adminData['user_id'],
             'team_id'    => $adminData['team_id'],
         ];
@@ -98,67 +92,52 @@ class OnboardingService
          * ==========================
          */
         try {
-            $workResult = DatabaseScope::work($dbName, function () use ($data) {
+            DatabaseScope::work($dbName, function () use ($data) {
                 return Transaction::run(
-                    function (PDO $db) use ($data) {
-
+                    function () use ($data) {
                         $service = new CompanyRegistrationService();
-                        $service->setConnection($db); // 🔥 klíčové
-
                         return $service->completeWork($data);
                     },
                     'work'
                 );
             });
 
-            // ✅ success
             $this->markOnboardingDone($companyId);
-            $response = $adminResult;
 
         } catch (Throwable $e) {
 
-            // ❌ fail (admin část zůstává)
             $this->markOnboardingFailed($companyId, $e);
 
-            LoggerHolder::get()->error('OnboardingService.Work failed', [
+            LoggerHolder::get()->error('OnboardingService.run-work: failed', [
                 'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
                 'trace'   => $e->getTraceAsString(),
                 'data'    => json_encode($data),
             ]);
-
-            // necháváme pokračovat → mail + návrat OK
-            $response = $adminResult;
         }
 
         /*
          * ==========================
-         * 📧 MAIL
+         * 📧 MAIL (nesmí shodit flow)
          * ==========================
          */
         try {
-            [$subject, $htmlBody, $textBody] = BuildMailService::build($response);
+            [$subject, $html, $text] = BuildMailService::build($adminResult);
 
             (new MailService())->send(
-                toEmail: $response['data']['email'],
-                toName: $response['data']['first_name'] . ' ' . $response['data']['last_name'],
+                toEmail: $adminResult['data']['email'],
+                toName:  $adminResult['data']['first_name'] . ' ' . $adminResult['data']['last_name'],
                 subject: $subject,
-                html: $htmlBody,
-                text: $textBody
+                html:    $html,
+                text:    $text
             );
 
         } catch (Throwable $e) {
-            LoggerHolder::get()->warning('OnboardingService Mail po registraci selhal', [
+            LoggerHolder::get()->warning('OnboardingService.mail failed', [
                 'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
-                'trace'   => $e->getTraceAsString(),
-                'data'    => json_encode($response['data'] ?? []),
             ]);
         }
 
-        return $response;
+        return $adminResult;
     }
 
     private function markOnboardingDone(int $companyId): void
