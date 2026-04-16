@@ -205,7 +205,7 @@ $canCloseCanceled = $task['can_cancel'];
 
         <div class="meta-item">
             <span class="meta-label">Reporty:</span>
-            <span class="meta-value"><?= (int)$task['stats']['assignments_count'] ?? 0 ?></span>
+            <span class="meta-value"><?= (int)($task['stats']['assignments_count'] ?? 0) ?></span>
         </div>
 
         <div class="meta-item">
@@ -215,7 +215,7 @@ $canCloseCanceled = $task['can_cancel'];
 
         <div class="meta-item">
             <span class="meta-label">Km:</span>
-            <span class="meta-value"><?= (int)$task['stats']['total_km'] ?? 0 ?></span>
+            <span class="meta-value"><?= (int)($task['stats']['total_km'] ?? 0) ?></span>
         </div>
 
     </div>
