@@ -82,8 +82,8 @@ $err = $view->errors;
             <span class="meta-label">Úkoly (všechny):</span>
             <span class="meta-value"><?= e($order['total_tasks_count']) ?></span>
         </div>
-
-        <div class="meta-item">
+        
+         <div class="meta-item">
             <span class="meta-label">Úkoly (otevřené):</span>
             <span class="meta-value"><?= e($order['open_tasks_count']) ?></span>
          </div>
@@ -119,6 +119,28 @@ $err = $view->errors;
 							Přidat nový úkol k této zakázce
 					</a>
 
+<?php if($order['ready_for_done']): ?>
+    <form method="post"
+          action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/done') ?>"
+          onsubmit="return confirm('Opravdu chcete zakázku uzavřít?');" style="display:inline-block;">
+
+        <?= Csrf::getField() ?>
+        <button class="btn btn-success">Uzavřít zakázku</button>
+
+    </form>
+
+<?php endif; ?>
+<?php if($order['ready_for_cancel']): ?>
+
+
+    <form method="post"
+          action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/cancel') ?>"
+          onsubmit="return confirm('Opravdu chcete zakázku stornovat?');" style="display:inline-block;">
+
+        <?= Csrf::getField() ?>
+        <button class="btn btn-danger">Stornovat zakázku</button>
+    </form>
+<?php endif; ?>
 
     <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
         ← Zpět na přehled
@@ -183,7 +205,7 @@ $canCloseCanceled = $task['can_cancel'];
 
         <div class="meta-item">
             <span class="meta-label">Reporty:</span>
-            <span class="meta-value"><?= $task['stats']['assignments_count'] ?></span>
+            <span class="meta-value"><?= (int)$task['stats']['assignments_count'] ?? 0 ?></span>
         </div>
 
         <div class="meta-item">
@@ -193,7 +215,7 @@ $canCloseCanceled = $task['can_cancel'];
 
         <div class="meta-item">
             <span class="meta-label">Km:</span>
-            <span class="meta-value"><?= $task['stats']['total_km'] ?? 0 ?></span>
+            <span class="meta-value"><?= (int)$task['stats']['total_km'] ?? 0 ?></span>
         </div>
 
     </div>
