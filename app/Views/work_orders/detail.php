@@ -121,7 +121,7 @@ $err = $view->errors;
 
 <?php if($order['ready_for_done']): ?>
     <form method="post"
-          action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/done') ?>"
+          action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/done') ?>"
           onsubmit="return confirm('Opravdu chcete zakázku uzavřít?');" style="display:inline-block;">
 
         <?= Csrf::getField() ?>
@@ -134,7 +134,7 @@ $err = $view->errors;
 
 
     <form method="post"
-          action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/cancel') ?>"
+          action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/canceled') ?>"
           onsubmit="return confirm('Opravdu chcete zakázku stornovat?');" style="display:inline-block;">
 
         <?= Csrf::getField() ?>
