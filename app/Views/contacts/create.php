@@ -13,7 +13,7 @@ require __DIR__ . '/../layout/header.php';
 
 $data = $view->data;
 $errors = $view->errors; 
-var_dump($data);
+//var_dump($data);
 
 
 ?>

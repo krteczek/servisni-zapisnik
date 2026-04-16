@@ -83,7 +83,23 @@ abstract class BaseModel
      *
      * @throws LogicException Pokud $table není definováno
      */
-    public function __construct()
+    public function __construct(?PDO $pdo = null)
+    {
+        if (!isset($this->table) || $this->table === '') {
+            throw new LogicException(
+                static::class . ' must define protected string $table'
+            );
+        }
+
+        if ($pdo !== null) {
+            $this->db = $pdo;
+        }
+
+        $this->tableName = $this->resolveTableName();
+    }
+
+/**
+ * public function __construct()
     {
         if (!isset($this->table) || $this->table === '') {
             throw new LogicException(
@@ -93,7 +109,7 @@ abstract class BaseModel
 
         $this->tableName = $this->resolveTableName();
     }
-
+*/
     /* ==========================================================
      * DB
      * ========================================================== */

@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace App\Core;
 
 use Throwable;
+use App\Core\Database;
+use App\Core\LoggerHolder;
+
 
 class Transaction
 {
@@ -14,7 +17,7 @@ class Transaction
         try {
             $db->beginTransaction();
 
-            $result = $callback();
+            $result = $callback($db); // 🔥 tady změna
 
             $db->commit();
 
@@ -25,7 +28,13 @@ class Transaction
                 $db->rollBack();
             }
 
-            throw $e; // necháš to bublat nahoru
+	        LoggerHolder::get()->error('Transaction.run failed', [
+				    'message'   => $e->getMessage(),
+				    'file'      => $e->getFile(),
+				    'line'      => $e->getLine(),
+				    'trace'     => $e->getTraceAsString(),
+
+				]);
         }
     }
 }

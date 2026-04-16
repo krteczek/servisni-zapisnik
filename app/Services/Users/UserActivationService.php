@@ -14,6 +14,8 @@ use App\Core\Database;
 use App\Core\Transaction;
 use Throwable;
 use App\Core\TenantContext;
+use PDO;
+
 
 final class UserActivationService
 {
@@ -38,7 +40,7 @@ final class UserActivationService
 
         try {
 			    $result = Transaction::run(
-			        function () use ($password, $rawToken, $type) {
+			        function (PDO $db) use ($password, $rawToken, $type) {
 
 			            $tokenData = $this->tokenService->consume($rawToken, $type);
 

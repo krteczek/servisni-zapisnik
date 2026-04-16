@@ -25,7 +25,7 @@ $errors = $view->errors;
 	<div class="card">
 
 		<div class="card-section card-section--wo">
-		    <div class="section-label">Úkol: </div>
+		    <div class="section-label">Zakázka: </div>
 
 		    <p>
 		        <strong><?= e($workOrder['title']) ?></strong>
@@ -38,56 +38,58 @@ $errors = $view->errors;
 		</div>
 		<!-- FORMULÁŘ -->
 		<!-- Zobrazení chyb (stejné jako v report šabloně) -->
-<?php require __DIR__ . '/../layout/formsErrors.php'; ?>		<div class="card-body">
+		<?php require __DIR__ . '/../layout/formsErrors.php'; ?>		<div class="card-body">
 
-			<!-- HLAVNÍ FORMULÁŘ -->
-			<div class="form-container">
-				<form method="post" 
-						class="form" 
-						autocomplete="off" 
-						data-lpignore="true">
-		
-						<?= Csrf::getField() ?>
-						<!-- jednotlivá pole formuláře TLAČÍTKA -->		
-        <div class="form-group">
-            <label>Název úkolu: <span class="req">*</span></label>
-            <input type="text" name="title" value="<?= e($post['title'] ?? '') ?>"  required>
-        </div>
+		<!-- HLAVNÍ FORMULÁŘ -->
+		<div class="form-container">
+			<div class="section-label">Úkol: </div>
+			<form method="post" 
+					class="form" 
+					autocomplete="off" 
+					data-lpignore="true">
+	
+					<?= Csrf::getField() ?>
+				<!-- jednotlivá pole formuláře TLAČÍTKA -->		
+				<div class="form-group">
+					<label>Název úkolu: <span class="req">*</span></label>
+					<input type="text" name="title" value="<?= e($post['title'] ?? '') ?>"  required>
+				</div>
 
-        <div class="form-group">
-            <label>Popis: </label>
-            <textarea name="description" rows="10"><?= e($post['description'] ?? '') ?></textarea>
-        </div>
-<div class="form-group team-box">
-    <label>Úkol je svěřen týmu: </label>
+				<div class="form-group">
+					<label>Popis: </label>
+					<textarea name="description" rows="10"><?= e($post['description'] ?? '') ?></textarea>
+				</div>
+				<div class="form-group team-box">
+					<label>Úkol je svěřen týmu: </label>
 
-    <div class="team-box-card" style="--team-color: <?= e($team['color'] ?? '#ccc') ?>">
-        <strong><?= e($team['name']) ?></strong>
-        <p class="team-note">
-            Úkol patří vždy jednomu týmu a nelze jej změnit.
-            Můžete však:
-        </p>
+					<div class="team-box-card" style="--team-color: <?= e($team['color'] ?? '#ccc') ?>">
+						<strong><?= e($team['name']) ?></strong>
+						<p class="team-note">
+							Úkol patří vždy jednomu týmu a nelze jej změnit.
+							Můžete však:
+						</p>
 
 
-<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/clone/#main') ?>"
-   class="btn btn-secondary"
-   target="_blank"
-   rel="noopener noreferrer"
-   title="Otevře se v nové záložce">
-    Klonovat tento úkol
-    <span class="btn-icon">→</span>
-</a>
+						<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/clone/#main') ?>"
+							class="btn btn-secondary"
+							target="_blank"
+							rel="noopener noreferrer"
+							title="Otevře se v nové záložce">
+								Klonovat tento úkol
+							<span class="btn-icon">→</span>
+						</a>
 
-</div>
+					</div>
 
-        <div class="form-group">
-<?php if ((int)($post['is_recurring'] ?? 0) !== 1): ?>
-          <label>Z normálního úkolu nelze dodatečně udělat opakovaný úkol.</label>
-<?php else: ?>      
-          <label>
-				Tento úkol je opakovací. Kliknutím na tlačítko <strong>Nastavit opakování úkolu</strong>
-				se dostanete na stránku, kde můžete nastavit frekvenci opakování úkolu.
-			 </label>
+        			<div class="form-group"  class="card-section">
+						
+						<?php if ((int)($post['is_recurring'] ?? 0) !== 1): ?>
+							<label>Z normálního úkolu nelze dodatečně udělat opakovaný úkol.</label>
+						<?php else: ?>      
+							<label>
+										Tento úkol je opakovací. Kliknutím na tlačítko <strong>Nastavit opakování úkolu</strong>
+										se dostanete na stránku, kde můžete nastavit frekvenci opakování úkolu.
+									</label>
 							<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/recurringEdit') ?>" 
 								class="btn btn-secondary">
 								<span class="btn-icon">←</span>
@@ -95,37 +97,37 @@ $errors = $view->errors;
 							</a>
               
 
-<?php endif; ?>
-        </div>
+                        <?php endif; ?>
+                    </div>
 
-        </div>
+                </div>
 		
-						<!-- FORMULÁŘOVÉ TLAČÍTKA -->
-						<div class="form-actions">
-							<button type="submit" class="btn btn-primary">
-								<span class="btn-icon"></span>
-								Upravit úkol
-							</button>
-		
-							<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $workOrder['id'] . '/detail/#main') ?>" 
-								class="btn btn-secondary">
-								<span class="btn-icon">←</span>
-								Na detail zakázky
-							</a>
+				<!-- FORMULÁŘOVÉ TLAČÍTKA -->
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary">
+						<span class="btn-icon"></span>
+						Upravit úkol
+					</button>
 
-							<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" 
-								class="btn btn-secondary">
-								<span class="btn-icon">←</span>
-								Na výpis úkolů
-							</a>
-						</div>
+					<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $workOrder['id'] . '/detail/#main') ?>" 
+						class="btn btn-secondary">
+						<span class="btn-icon">←</span>
+						Na detail zakázky
+					</a>
+
+					<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" 
+						class="btn btn-secondary">
+						<span class="btn-icon">←</span>
+						Na výpis úkolů
+					</a>
+				</div>
 		
-				</form>
-			</div>
-		
-		
-			</div>
+			</form>
 		</div>
+		
+		
+		</div>
+	</div>
 
 	<div class="card card-help" id="helpCard">
 

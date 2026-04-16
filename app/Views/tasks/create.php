@@ -16,7 +16,7 @@ $workOrder = $view->order;
 $teams     = $view->teams;
 $post      = $view->post;
 $errors    = $view->errors; 
-var_dump($post);
+//var_dump($post);
 
 
 ?>
@@ -37,7 +37,8 @@ var_dump($post);
 		</div>
 		<!-- FORMULÁŘ -->
 		<!-- Zobrazení chyb (stejné jako v report šabloně) -->
-      <?php require __DIR__ . '/../layout/formsErrors.php'; ?>		<div class="card-body">
+      <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
+	  		<div class="card-body">
 
 			<!-- HLAVNÍ FORMULÁŘ -->
 			<div class="form-container">
