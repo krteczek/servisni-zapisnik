@@ -237,6 +237,7 @@ public function detailOrder(int $orderId): string
     } else {
         $contact = ['company_name' => '—'];
     }
+
     
 
     // 1. Vytvoř lookup mapu týmů (id => [name, color])
@@ -301,6 +302,26 @@ public function detailOrder(int $orderId): string
     $order['cancelled_tasks_count'] = $cancelledTaskCount;
     $order['company_name']          = $contact['company_name'];
     
+        // příznak pro zobrazení odkazu na dokončení zakázky, pokud jsou všechny 
+    // úkoly hotové nebo zrušené, nebo pokud nejsou žádné úkoly
+    $order['ready_for_done'] = false;
+    if(((int)$order['total_tasks_count'] === 0) ||     
+            ((int)$order['total_tasks_count'] > 0 && 
+            ((int)$order['done_tasks_count'] + (int)$order['cancelled_tasks_count']) === (int)$order['total_tasks_count'])) 
+    {
+                //odkaz na uzavření zakázky, pokud jsou všechny úkoly hotové nebo zrušené 
+                //nebo pokud nejsou žádné úkoly
+                $order['ready_for_done'] = true;
+    }
+
+    $order['ready_for_cancel'] = false;
+    if(((int)$order['total_tasks_count'] === 0) ||
+        ((int)$order['total_tasks_count'] === (int)$order['cancelled_tasks_count']))
+    {
+        //odkaz na zrušení zakázky, pokud jsou všechny úkoly zrušené
+        $order['ready_for_cancel'] = true;
+    }
+
     // 5. Předání do view
     $this->view->order = $order;
     $this->view->tasks = $tasks;
@@ -345,7 +366,7 @@ private function getOrderOrRedirect(int $orderId): array
             'description'     	=> trim($post['description'] ?? ''),
             'source'          	=> $post['source'] ?? 'personal',
             'requested_by'    	=> trim($post['requested_by'] ?? ''),
-            'contact_person'         	=> trim($post['contact_person'] ?? ''),
+            'contact_person'    => trim($post['contact_person'] ?? ''),
             'priority'        	=> $post['priority'] ?? 'normal',
             'created_by_user_id' => Auth::id(),
             'create_first_task'  => !empty($post['create_first_task']),
