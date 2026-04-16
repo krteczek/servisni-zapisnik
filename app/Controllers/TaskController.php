@@ -159,11 +159,10 @@ private function getOrderOrRedirect(?int $orderId): array
                 return $this->render('tasks/create');   
             }
         }
-        else
-        {
-            Url::redirect('/{tenant}/work-orders/' . $workOrderId . '/detail/#taskId_' . $row);
-        }
-        return $this->render('tasks/create');
+        
+        Url::redirect('/{tenant}/work-orders/' . $workOrderId . '/detail/#taskId_' . $row);
+        
+        //return $this->render('tasks/create');
     }
     public function createFormPost(?int $orderId): string
     {

@@ -322,10 +322,10 @@ public function forgotPasswordPost(): string
         
         		
             $this->view->data = $row;
-				//$this->view->data['button'] = 'Nastavit heslo';
+			
             $this->view->data['token'] = $token;
 
-				return $this->render('auth/reset-password');
+			return $this->render('auth/reset-password');
 
         } catch (\Throwable $e) {
 		    LoggerHolder::get()->error('AuthController.handleTokenGet: failed', [
@@ -442,11 +442,11 @@ public function forgotPasswordPost(): string
 					fn($value) => is_string($value) ? trim($value) : $value,
 					$_POST
 					);
-		   if(empty($data['token']) || !hash_equals($token, $data['token']))
-		   {
-            Flash::error($errMsg);
-            Url::redirect('/register');
-		   }
+		    if(empty($data['token']) || !hash_equals($token, $data['token']))
+		    {
+                Flash::error($errMsg);
+                Url::redirect('/register');
+		    }
 		    
 
 			$this->checkCsrf();
@@ -506,38 +506,31 @@ public function forgotPasswordPost(): string
 				$this->addError('last_name', 'Příjmení je příliš dlouhé.');
 			}
 			
-   		if($data['password'] === '') 
-   		{
-    			$this->addError('password', 'Heslo je povinné');
-    		} 
-    		elseif (mb_strlen($data['password']) < self::MIN_PASSWORD_LENGTH) 
-    		{
-    			$this->addError('password', 'Heslo je příliš krátké');
-    		} 
-    		elseif($data['password'] !== $data['passwordZ']) 
-    		{
-    			$this->addError('password', 'Hesla se neshodují, věnujte zápisu více pozornosti.');
-    		}
-		 
+			if($data['password'] === '') 
+			{
+					$this->addError('password', 'Heslo je povinné');
+			} 
+			elseif (mb_strlen($data['password']) < self::MIN_PASSWORD_LENGTH) 
+			{
+				$this->addError('password', 'Heslo je příliš krátké');
+			} 
+			elseif($data['password'] !== $data['passwordZ']) 
+			{
+				$this->addError('password', 'Hesla se neshodují, věnujte zápisu více pozornosti.');
+			}
+		
 			// pokud chyby, zobrazíme znovu form
 			if ($this->hasErrors()) 
 			{
 				$this->view->data = $data;
 				return $this->render('auth/registrationStepTwo');
 			}
-			/** zrušeno **
-			$adminData['first_name'] = $data['first_name'];
-			$adminData['last_name']  = $data['last_name'];
-			$adminData['password']   = $data['password'];
-			$companyData['name']     = $data['name'];
-			$companyData['ico']      = $data['ico'];
-**/
 			
-         $payload = [
-            'token' => $token,
-            'type' => TokenType::COMPANY_CREATE,
-            'data' => $data
-         ];
+			$payload = [
+				'token' => $token,
+				'type' => TokenType::COMPANY_CREATE,
+				'data' => $data
+			];
 			$ok = (new OnboardingService())->run($payload);
 			
 			if($ok['ok'] === true) 
@@ -546,22 +539,22 @@ public function forgotPasswordPost(): string
 				//jdeme řešit přihlášení:
 				$d = $ok['data'];
 				//print_r($data['db_name']['registrationWorkDbName']);
-			    Auth::login([
-			        'id'           => $d['user_id'],
-			        'email'        => $d['email'],
-			        'global_role'  => 'admin',
-			        'company_id'   => $d['company_id'],
-			        'company_name' => $d['company_name'],
-			        'tenant_slug'  => $d['slug'],
-			        'first_name'   => $d['first_name'],
-			        'last_name'    => $d['last_name'],
-			        'db_name'      => $d['db_name'],
-			    ]);
+				Auth::login([
+					'id'           => $d['user_id'],
+					'email'        => $d['email'],
+					'global_role'  => 'admin',
+					'company_id'   => $d['company_id'],
+					'company_name' => $d['company_name'],
+					'tenant_slug'  => $d['slug'],
+					'first_name'   => $d['first_name'],
+					'last_name'    => $d['last_name'],
+					'db_name'      => $d['db_name'],
+				]);
 			
-			    Flash::success('Vítej v aplikaci, ' . ($d['first_name'] ?? $d['email']) . ' 👋'
-			    );
-			    $url = '/' . Auth::tenantSlug() . '/tasks';
-			    Url::redirect($url);
+				Flash::success('Vítej v aplikaci, ' . ($d['first_name'] ?? $d['email']) . ' 👋'
+				);
+				$url = '/' . Auth::tenantSlug() . '/tasks';
+				Url::redirect($url);
 			} 
 			else 
 			{
