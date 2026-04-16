@@ -60,76 +60,43 @@ class TeamModel extends BaseModel
     /**
      * Vrátí barvy týmů podle ID (tenant-aware!)
      */
-public function getColorsByIds(array $teamIds): array
-{
-    $teamIds = array_values(array_unique(
-        array_filter(array_map('intval', $teamIds))
-    ));
+    public function getColorsByIds(array $teamIds): array
+    {
+        $teamIds = array_values(array_unique(
+            array_filter(array_map('intval', $teamIds))
+        ));
 
-    if ($teamIds === []) {
-        return [];
+        if ($teamIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+        $sql = "
+            SELECT id, color
+            FROM {$this->tableName}
+            WHERE id IN ($placeholders)
+        ";
+
+        $params = $teamIds;
+
+        if ($this->tenantAware) {
+            $sql .= " AND {$this->tenantColumn} = ?";
+            $params[] = parent::tenantId();
+        }
+
+        $stmt = $this->db()->prepare($sql);
+        $stmt->execute($params);
+
+        $out = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $out[(int)$row['id']] = $row['color'];
+        }
+
+        return $out;
     }
 
-    $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
 
-    $sql = "
-        SELECT id, color
-        FROM {$this->tableName}
-        WHERE id IN ($placeholders)
-    ";
-
-    $params = $teamIds;
-
-    if ($this->tenantAware) {
-        $sql .= " AND {$this->tenantColumn} = ?";
-        $params[] = parent::tenantId();
-    }
-
-    $stmt = $this->db()->prepare($sql);
-    $stmt->execute($params);
-
-    $out = [];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $out[(int)$row['id']] = $row['color'];
-    }
-
-    return $out;
-}
-
-public function getColorsAndNamesByIdsOld(array $ids): array
-{
-    if (empty($ids)) {
-        return [];
-    }
-
-    $params = [];
-    $placeholders = [];
-
-    foreach ($ids as $i => $id) {
-        $key = "id_$i";
-        $placeholders[] = ":$key";
-        $params[$key] = (int) $id;
-    }
-
-    $sql = "
-        SELECT id, name, color
-        FROM {$this->tableName}
-        WHERE id IN (" . implode(',', $placeholders) . ")
-    ";
-
-    $rows = $this->fetchAll($sql, $params);
-
-    $result = [];
-
-    foreach ($rows as $row) {
-        $result[(int) $row['id']] = [
-            'name'  => $row['name'],
-            'color' => $row['color'],
-        ];
-    }
-
-    return $result;
-}
 
     
     /**

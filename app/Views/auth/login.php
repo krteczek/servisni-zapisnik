@@ -14,33 +14,39 @@ require __DIR__ . '/../layout/header.php';
     <!-- 🔹 LEVÁ STRANA – FORM -->
     <div class="card">
         <div class="card-body">
+            <p class="ui-alert ui-alert-warning">
+                BETA VERZE - TESTOVACÍ REŽIM<br>
+                Systém běží v testovacím režimu.
+                rozsah funkcí a přístupů může být 
+                omezený, ale základní funkčnost je 
+                zachována. Děkujeme za pochopení.
+                Případné chyby hlaste na 
+                <a href="mailto:krteczek01@gmail.cz" class="link">
+                    krteczek01@gmail.cz
+                </a>
+            </p>
 
             <p>Zadejte přihlašovací údaje do Vašeho firemního účtu.</p>
-            <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 
-            <form method="post" action="<?= Url::current() ?>">
+            <form method="post">
                 <?= Csrf::getField() ?>
 
-                <?php if (!empty($view->errors['_csrf'])): ?>
-                    <div class="flash flash-error"><?= e($view->errors['_csrf'][0]) ?></div>
-                <?php endif; ?>
-
-                <?php if (!empty($view->errors['global'])): ?>
-                    <div class="flash flash-error"><?= e($view->errors['global'][0]) ?></div>
-                <?php endif; ?>
+                <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 
                 <!-- TENANT -->
                 <div class="form-group <?= !empty($view->errors['tenant']) ? 'has-error' : '' ?>">
-                    <label>IČO Vaší firmy</label>
+                    <label for="tenant">IČO Vaší firmy</label>
                     <input
                         class="form-control"
                         name="tenant"
+                        id="tenant"
+                        inputmode="numeric"
                         placeholder="IČO Vaší firmy"
                         autocomplete="organization-number"
                         pattern="\d{8}"
                         title="IČO musí mít 8 číslic"
                         value="<?= e($view->data['tenant'] ?? '') ?>"
-                    >
+                        required>
 
                     <?php if (!empty($view->errors['tenant'])): ?>
                         <div class="error-message"><?= e($view->errors['tenant'][0]) ?></div>
@@ -49,14 +55,15 @@ require __DIR__ . '/../layout/header.php';
 
                 <!-- EMAIL -->
                 <div class="form-group <?= !empty($view->errors['email']) ? 'has-error' : '' ?>">
-                    <label>Email</label>
+                    <label for="email">Email</label>
                     <input
                         class="form-control"
                         name="email"
+                        id="email"
                         type="email"
                         autocomplete="username"
                         value="<?= e($view->data['email'] ?? '') ?>"
-                    >
+                        required>
 
                     <?php if (!empty($view->errors['email'])): ?>
                         <div class="error-message"><?= e($view->errors['email'][0]) ?></div>
@@ -65,12 +72,14 @@ require __DIR__ . '/../layout/header.php';
 
                 <!-- PASSWORD -->
                 <div class="form-group <?= !empty($view->errors['password']) ? 'has-error' : '' ?>">
-                    <label>Heslo</label>
+                    <label for="password">Heslo</label>
                     <input
                         type="password"
                         class="form-control"
                         autocomplete="current-password"
                         name="password"
+                        id="password"
+                        required
                     >
 
                     <?php if (!empty($view->errors['password'])): ?>

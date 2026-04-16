@@ -124,6 +124,12 @@ public function index(): string
 public function editForm(int $orderId): string
 {
     $order = $this->getOrderOrRedirect($orderId);
+    
+    if($order['status'] === 'cancelled' || $order['status'] === 'done')
+    {
+        Flash::error('Tuto zakázku nelze upravovat, protože je dokončená nebo zrušená.');
+        Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+    }
 
     $contactsModel = new ContactsModel();
 
@@ -135,8 +141,12 @@ public function editForm(int $orderId): string
 
     public function editFormUpdate(int $orderId): string
     {
-        $this->getOrderOrRedirect($orderId);
+        $order = $this->getOrderOrRedirect($orderId);
 
+        if ($order['status'] === 'cancelled' || $order['status'] === 'done') {
+           Flash::error('Tuto zakázku nelze upravit.');
+           Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+        }
         $data = $this->validate($_POST);
         if ($this->hasErrors()) {
             $contactsModel = new ContactsModel();
@@ -145,7 +155,20 @@ public function editForm(int $orderId): string
             return $this->render('work_orders/create');
             
         }
-			$ok = $this->model->update($orderId, $data);
+
+        $toDb = [
+            'contact_id'         => $data['contact_id'],
+            'price_per_hour'     => $data['price_per_hour'],
+            'price_per_km'       => $data['price_per_km'],
+            'external_number' 	 => $data['external_number'],
+            'title'           	 => $data['title'],
+            'description'     	 => $data['description'],
+            'source'          	 => $data['source'],
+            'requested_by'    	 => $data['requested_by'],
+            'contact_person'     => $data['contact_person'],
+            'priority'        	 => $data['priority'],
+        ];
+		$ok = $this->model->update($orderId, $toDb);
 			
 			if(!$ok){
             $contactsModel = new ContactsModel();
@@ -240,13 +263,11 @@ public function detailOrder(int $orderId): string
     $order['done_tasks_count']      = $doneTaskCount;
     $order['cancelled_tasks_count'] = $cancelledTaskCount;
     $order['company_name']          = $contact['company_name'];
-
-
-
+    
     // 5. Předání do view
     $this->view->order = $order;
     $this->view->tasks = $tasks;
-    // $this->view->teams = $teams;  // nepotřebuješ, pokud ho nepoužíváš ve view
+    //$this->view->teams = $teamMap;  // nepotřebuješ, pokud ho nepoužíváš ve view
 
     return $this->render('work_orders/detail');
 }		

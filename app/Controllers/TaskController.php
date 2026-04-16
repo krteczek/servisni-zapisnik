@@ -68,109 +68,109 @@ private function getOrderOrRedirect(?int $orderId): array
 
 }
 
-private function saveTask(array $data, int $workOrderId): string
-{
-	$this->checkCsrf();
-   $order = $this->getOrderOrRedirect($workOrderId);
-//print_r($data);
-   $post = $this->validateTask($data);
-
-   $team_id = (int) ($data['team_id'] ?? 0);
-
-   // vyhledáme týmy
-   $TM = new TeamModel();
-   $teams = $TM->byActive(true);
-	$team  = $TM->find($team_id);
-	if (!$team) {
-	  $this->addError('team_id', 'Vybraný tým neexistuje');
-	}
-
-  	$this->view->post  = $data;
-  	$this->view->teams = $teams;
-  	$this->view->order = $order;
-
-
-   if ($this->hasErrors()) {
-
-     return $this->render('tasks/create');
-   }
-//print_r($post);
-    $row = null;
-    $TM = new TaskModel();
-    $toDb1 = [
-        'title'              => $post['title'],
-        'description'        => $post['description'],
-        'team_id'            => $team_id,
-        'work_order_id'      => $workOrderId,
-        'created_by_user_id' => Auth::id(),
-        'is_recurring'       => $post['is_recurring'],
-    ];
-    try
+    private function saveTask(array $data, int $workOrderId): string
     {
-    		$row = $TM->create($toDb1);
-    }
-    catch (Throwable $e)
-	   {
-	   	LoggerHolder::get()->error('UserActivation failed', [
-				    'message'   => $e->getMessage(),
-				    'file'      => $e->getFile(),
-				    'line'      => $e->getLine(),
-				    'trace'     => $e->getTraceAsString(),
-				    'toDb1'      => serialize($toDb1),
+        $this->checkCsrf();
+        $order = $this->getOrderOrRedirect($workOrderId);
+        
+        $post = $this->validateTask($data);
 
-          ]);
-          $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
-          return $this->render('tasks/create');
-	   }
-//print_r($row);//exit;
- 		if(!$row)
- 		{
-   		$this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
-   		return $this->render('tasks/create');
- 		}
+        $team_id = (int)$data['team_id'];
 
-    if($post['is_recurring'] === 1)
-    {
-	   $datadb2 = [
-	            'company_id' => Auth::companyId(),
-	            'task_id' => $row,
-	            'team_id' => $team_id,
-	            'frequency_type' => Config::get('recurring.default.frequency_type'),
-	            'frequency_value' => Config::get('recurring.default.frequency_value'),
-	            'next_due_date' => Config::get('recurring.default.next_due_date'),
-	            'warning_days_before' => Config::get('recurring.default.warning_days_before'),
-	            'active' => 1,
-	        ];
-    	try
-    	{
-	   	$RM = new RecurringTaskModel();
-	      $recurringId = $RM->create($datadb2);
-	      $TM->update($row, [
-	            'recurring_task_id' => $recurringId
-	      ]);
+        // vyhledáme týmy
+        $TM = new TeamModel();
+        $teams = $TM->byActive(true);
+        $team  = $TM->find($team_id);
+        if (!$team) {
+            $this->addError('team_id', 'Vybraný tým neexistuje');
+        }
 
-	      // Načíst nastavení pro recurring
-	      Url::redirect('/{tenant}/tasks/' . $row . '/recurring');
-	   }
-	   catch (Throwable $e)
-	   {
-	   	    LoggerHolder::get()->error('UserActivation failed', [
-				    'message'   => $e->getMessage(),
-				    'file'      => $e->getFile(),
-				    'line'      => $e->getLine(),
-				    'trace'     => $e->getTraceAsString(),
-				    'toDb2'      => serialize($datadb2),
+        $this->view->post  = $data;
+        $this->view->teams = $teams;
+        $this->view->order = $order;
+
+
+        if ($this->hasErrors()) {
+
+            return $this->render('tasks/create');
+        }
+        //print_r($post);
+        $row = null;
+        $TM = new TaskModel();
+        $toDb1 = [
+            'title'              => $post['title'],
+            'description'        => $post['description'],
+            'team_id'            => $team_id,
+            'work_order_id'      => $workOrderId,
+            'created_by_user_id' => Auth::id(),
+            'is_recurring'       => $post['is_recurring'],
+        ];
+        try
+        {
+                $row = $TM->create($toDb1);
+        }
+        catch (Throwable $e)
+        {
+            LoggerHolder::get()->error('UserActivation failed', [
+                        'message'   => $e->getMessage(),
+                        'file'      => $e->getFile(),
+                        'line'      => $e->getLine(),
+                        'trace'     => $e->getTraceAsString(),
+                        'toDb1'      => serialize($toDb1),
+
             ]);
             $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
-	        return $this->render('tasks/create');   
+            return $this->render('tasks/create');
         }
+    //print_r($row);//exit;
+            if(!$row)
+            {
+            $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
+            return $this->render('tasks/create');
+            }
+
+        if($post['is_recurring'] === 1)
+        {
+        $datadb2 = [
+                    'company_id' => Auth::companyId(),
+                    'task_id' => $row,
+                    'team_id' => $team_id,
+                    'frequency_type' => Config::get('recurring.default.frequency_type'),
+                    'frequency_value' => Config::get('recurring.default.frequency_value'),
+                    'next_due_date' => Config::get('recurring.default.next_due_date'),
+                    'warning_days_before' => Config::get('recurring.default.warning_days_before'),
+                    'active' => 1,
+                ];
+            try
+            {
+            $RM = new RecurringTaskModel();
+            $recurringId = $RM->create($datadb2);
+            $TM->update($row, [
+                    'recurring_task_id' => $recurringId
+            ]);
+
+            // Načíst nastavení pro recurring
+            Url::redirect('/{tenant}/tasks/' . $row . '/recurring');
+        }
+        catch (Throwable $e)
+        {
+                LoggerHolder::get()->error('UserActivation failed', [
+                        'message'   => $e->getMessage(),
+                        'file'      => $e->getFile(),
+                        'line'      => $e->getLine(),
+                        'trace'     => $e->getTraceAsString(),
+                        'toDb2'      => serialize($datadb2),
+                ]);
+                $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
+                return $this->render('tasks/create');   
+            }
+        }
+        else
+        {
+            Url::redirect('/{tenant}/work-orders/' . $workOrderId . '/detail/#taskId_' . $row);
+        }
+        return $this->render('tasks/create');
     }
-    else
-    {
-    	Url::redirect('/{tenant}/work-orders/' . $workOrderId . '/detail/#taskId_' . $row);
-    }
-    return $this->render('tasks/create');
-}
     public function createFormPost(?int $orderId): string
     {
     	 return $this->saveTask($_POST, $orderId);
@@ -199,7 +199,7 @@ private function saveTask(array $data, int $workOrderId): string
 		    Flash::error('Tento úkol byl vygenerován automaticky a nelze jej upravovat.');
 		    Url::redirect('/{tenant}/tasks');
 		}		
-		//potřebujeme vytáhnoutzakázku (podle work_order_id)
+		//potřebujeme vytáhnout zakázku (podle work_order_id)
 		$order = (new WorkOrderModel())->find($task['work_order_id']);
 		//print_r($task);
 		
@@ -217,27 +217,48 @@ private function saveTask(array $data, int $workOrderId): string
 	public function editTaskPost(int $taskId): string 
 	{
 		$task = $this->getTaskOrRedirect($taskId);
-		//$row = $this->saveTask($_POST, $task['work_order_id']);
+        if (!empty($task['recurring_task_id']) && $task['is_recurring'] != 1) {
+            Flash::error('Tento úkol byl vygenerován automaticky a nelze jej upravovat.');
+            Url::redirect('/{tenant}/tasks');
+        }
+		//potřebujeme vytáhnout zakázku (podle work_order_id)
+		$order = (new WorkOrderModel())->find($task['work_order_id']);
+		
+		//zjistíme jméno a barvu týmu
+		$team = (new TeamModel())->find($task['team_id']);
+		
 		$post = $this->validateTask($_POST);
-      $title 			= trim($post['title'] ?? '');
-      $description 	= trim($post['description'] ?? '');
+
+        $title 			= $post['title'];
+        $description 	= $post['description'];
+        $team_id 		= $post['team_id'];
 
 		$this->checkCsrf();
 
 	  if ($this->hasErrors())
 	  {
+		$this->view->team = $team;
+		$this->view->order = $order;
+		$this->view->task = $task;
+		$this->view->post = $post;
 	     return $this->render('tasks/edit');
 	  }
 
        $row = (new TaskModel())->update($taskId, [
             'title'              => $title,
             'description'        => $description,
+            'team_id'            => $team_id,  
         ]);
         
         if(!$row)
         {
-           $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
-           return $this->render('tasks/edit');
+            $this->view->team = $team;
+            $this->view->order = $order;
+            $this->view->task = $task;
+            $this->view->post = $post;
+
+            $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
+            return $this->render('tasks/edit');
         }
 
 	    Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#taskId_' . $taskId);
@@ -271,9 +292,11 @@ public function cloneTaskPost(int $taskId): string
 
 private function validateTask(array $data): array
 {
-    $title = trim($data['title'] ?? '');
-    $description = trim($data['description'] ?? '');
-    $is_recurring = (int) ($data['is_recurring'] ?? 0);
+    $title           = trim($data['title'] ?? '');
+    $description     = trim($data['description'] ?? '');
+    $is_recurring    = (int) ($data['is_recurring'] ?? 0);
+    $team_id         = (int) ($data['team_id'] ?? 0);  
+    
     if ($title === '') {
         $this->addError('title', 'Název úkolu je povinný');
     }
@@ -286,14 +309,16 @@ private function validateTask(array $data): array
         $this->addError('description', 'Popis úkolu je příliš dlouhý');
     }
 
-    if ($title === '') {
-        $this->addError('title', 'Název úkolu je povinný');
+    if ($team_id === 0) {
+        $this->addError('team_id', 'Tým je povinný');
     }
+
 
     return [
         'title' => $title,
         'description' => $description,
         'is_recurring' => $is_recurring,
+        'team_id' => $team_id,
     ];
 }
 

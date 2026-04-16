@@ -17,7 +17,7 @@ use App\Models\Team;
 /** @var array[] $tasks */
 $order = $view->order;
 $tasks = $view->tasks;
-$teams = $view->teams;
+//$teams = $view->teams;
 
 
 $err = $view->errors; 
@@ -167,7 +167,9 @@ $canCloseCanceled = $task['can_cancel'];
 
         <div class="meta-item">
             <span class="meta-label">Úkol řeší tým:</span>
-            <span class="meta-value"><?= tx($task['team_name']) ?: 'Bez popisu' ?></span>
+            <span class="meta-value">
+                <?= te($task['team_name']) ?>
+            </span>
         </div>
         <div class="meta-item">
             <span class="meta-label">Popis:</span>
@@ -208,7 +210,7 @@ $canCloseCanceled = $task['can_cancel'];
            Upravit
         </a>
 
-        <?php if ($task['can_cancel']) : ?>
+        <?php if ($task['can_cancel'] && $task['status'] !== 'cancelled') : ?>
         <form method="post"
               action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
               onsubmit="return confirm('Opravdu chcete úkol stornovat?');">

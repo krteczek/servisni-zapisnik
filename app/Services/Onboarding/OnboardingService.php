@@ -5,8 +5,11 @@ namespace App\Services\Onboarding;
 
 use App\Core\Transaction;
 use App\Core\DatabaseScope;
+use App\Core\Database;
 use App\Core\LoggerHolder;
 use Throwable;
+use PDO;
+
 use App\Services\Users\CompanyRegistrationService;
 use App\Services\Mail\MailService;
 use App\Services\Users\BuildMailService;
@@ -17,79 +20,92 @@ class OnboardingService
 {
     public function run(array $load): array
     {
-    	  $d          = $load['data'];
-    	  $token      = $load['token'];
-    	  $type       = $load['type'];
-    	  $response   = [];
-        // 1️⃣ ADMIN část (MUST SUCCEED)
-			try {
-			    $adminResult = Transaction::run(
-			        function () use ($d, $token, $type) {
+        $d        = $load['data'];
+        $token    = $load['token'];
+        $type     = $load['type'];
+        $response = [];
 
-			            $tokenData = (new TokenService())->consume($token, $type);
+        /*
+         * ==========================
+         * 1️⃣ ADMIN část (MUST SUCCEED)
+         * ==========================
+         */
+        try {
+            $adminResult = Transaction::run(
+                function (PDO $db) use ($d, $token, $type) {
 
-			            if ($tokenData['ok'] === false) {
-			                return $tokenData;
-			            }
+                    $tokenData = (new TokenService())->consume($token, $type);
 
-			            // ✅ žádný array_merge
-			            // jen explicitní složení kontraktu
+                    if ($tokenData['ok'] === false) {
+                        return $tokenData;
+                    }
 
-			            $data = [
-			                'email'      => $tokenData['email'],
-			                'first_name' => $d['first_name'],
-			                'last_name'  => $d['last_name'],
-			                'password'   => $d['password'],
-			                'name'       => $d['name'],
-			                'ico'        => $d['ico'],
-			            ];
+                    $data = [
+                        'email'      => $tokenData['email'],
+                        'first_name' => $d['first_name'],
+                        'last_name'  => $d['last_name'],
+                        'password'   => $d['password'],
+                        'name'       => $d['name'],
+                        'ico'        => $d['ico'],
+                    ];
 
-			            return (new CompanyRegistrationService())->completeAdmin($data);
-			        },
-			        'admin'
-			    );
+                    $service = new CompanyRegistrationService();
+                    $service->setConnection($db); // 🔥 klíčové
 
-			    if ($adminResult['ok'] === false) {
-			        return $adminResult;
-			    }
+                    return $service->completeAdmin($data);
+                },
+                'admin'
+            );
 
-			} catch (Throwable $e) {
-			    LoggerHolder::get()->error('OnboardingService.run-admin: failed', [
-			                'message' => $e->getMessage(),
-			                'file'    => $e->getFile(),
-			                'line'    => $e->getLine(),
-			                'trace'   => $e->getTraceAsString(),
-			                'data'    => json_encode($d),
+            if (!isset($adminResult['ok']) || $adminResult['ok'] === false) {
+                return $adminResult;
+            }
 
-			    ]);
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error('OnboardingService.run-admin: failed', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+                'data'    => json_encode($d),
+            ]);
 
-			    return [
-			        'ok' => false,
-			        'error' => 'Admin onboarding failed',
-			    ];
-			}
+            return [
+                'ok'    => false,
+                'error' => 'Admin onboarding failed',
+            ];
+        }
 
-			// 🔥 TADY MUSÍŠ CHECKNOUT RESULT
-			if ($adminResult["ok"] === false) {
-			    return $adminResult;
-			}
-
-//var_dump($adminResult); exit;
+        /*
+         * ==========================
+         * ADMIN DATA
+         * ==========================
+         */
         $adminData = $adminResult['data'];
         $companyId = $adminData['company_id'];
         $dbName    = $adminData['db_name'];
 
-        $data['company_id'] = $adminData['company_id'];
-        $data['db_name']    = $adminData['db_name'];
-        $data['user_id']    = $adminData['user_id'];
-        $data['team_id']    = $adminData['team_id'];
+        $data = [
+            'company_id' => $adminData['company_id'],
+            'db_name'    => $adminData['db_name'],
+            'user_id'    => $adminData['user_id'],
+            'team_id'    => $adminData['team_id'],
+        ];
 
-        // 2️⃣ WORK část (MAY FAIL)
+        /*
+         * ==========================
+         * 2️⃣ WORK část (MAY FAIL)
+         * ==========================
+         */
         try {
             $workResult = DatabaseScope::work($dbName, function () use ($data) {
                 return Transaction::run(
-                    function () use ($data) {
-                        return (new CompanyRegistrationService())->completeWork($data);
+                    function (PDO $db) use ($data) {
+
+                        $service = new CompanyRegistrationService();
+                        $service->setConnection($db); // 🔥 klíčové
+
+                        return $service->completeWork($data);
                     },
                     'work'
                 );
@@ -101,7 +117,7 @@ class OnboardingService
 
         } catch (Throwable $e) {
 
-            // ❌ fail (ale admin část zůstává)
+            // ❌ fail (admin část zůstává)
             $this->markOnboardingFailed($companyId, $e);
 
             LoggerHolder::get()->error('OnboardingService.Work failed', [
@@ -111,18 +127,16 @@ class OnboardingService
                 'trace'   => $e->getTraceAsString(),
                 'data'    => json_encode($data),
             ]);
-            //uživatel je vytvořen, onboarding ne, to musíme ještě vykoumat,
-            //jak to udělat dodatečně... Možná nějaký pokus na tlačítko v rozhraní?
-            //moment! je nutno poslat email! takže tohle jdeme zakomentovat...
-            /**
-            return [
-                'ok'   => true,
-                'data' => $adminData,
-            ];
-            **/
+
+            // necháváme pokračovat → mail + návrat OK
+            $response = $adminResult;
         }
 
-        // 📧 mail
+        /*
+         * ==========================
+         * 📧 MAIL
+         * ==========================
+         */
         try {
             [$subject, $htmlBody, $textBody] = BuildMailService::build($response);
 
@@ -133,13 +147,14 @@ class OnboardingService
                 html: $htmlBody,
                 text: $textBody
             );
+
         } catch (Throwable $e) {
-            LoggerHolder::get()->warning('OnboardingService Mail po registraci uživatele selhal', [
+            LoggerHolder::get()->warning('OnboardingService Mail po registraci selhal', [
                 'message' => $e->getMessage(),
                 'file'    => $e->getFile(),
                 'line'    => $e->getLine(),
                 'trace'   => $e->getTraceAsString(),
-                'data'    => json_encode($response['data']),
+                'data'    => json_encode($response['data'] ?? []),
             ]);
         }
 
