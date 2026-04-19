@@ -31,42 +31,42 @@ final class TokenService
      * CREATE
      * ========================================================== */
 
-public function create(
-    string $type,
-    string $email,
-    ?int $userId = null,
-): string {
+    public function create(
+        string $type,
+        string $email,
+        ?int $userId = null,
+    ): string {
 
-    if (!in_array($type, TokenType::all())) {
-        throw new RuntimeException('Požadavek na neznámý typ tokenu: ' . $type);
+        if (!in_array($type, TokenType::all())) {
+            throw new RuntimeException('Požadavek na neznámý typ tokenu: ' . $type);
+        }
+
+        $expiresMinutes = (int) Config::get('tokenExpires.' . $type);
+
+        $ip = Request::ip();
+        $ua = Request::ua();
+
+        $this->invalidate($email, $type);
+
+        $rawToken = bin2hex(random_bytes(self::TOKEN_BYTES));
+        $hash     = self::hash($rawToken);
+
+        $expiresAt = (new DateTimeImmutable())
+            ->modify("+{$expiresMinutes} minutes")
+            ->format('Y-m-d H:i:s');
+
+        $this->model->create([
+            'type'        => $type,
+            'email'       => $email,
+            'user_id'     => $userId,
+            'token_hash'  => $hash,
+            'expires_at'  => $expiresAt,
+            'ip_address'  => $ip,
+            'user_agent'  => $ua,
+        ]);
+
+        return $rawToken;
     }
-
-    $expiresMinutes = (int) Config::get('tokenExpires.' . $type);
-
-    $ip = Request::ip();
-    $ua = Request::ua();
-
-    $this->invalidate($email, $type);
-
-    $rawToken = bin2hex(random_bytes(self::TOKEN_BYTES));
-    $hash     = self::hash($rawToken);
-
-    $expiresAt = (new DateTimeImmutable())
-        ->modify("+{$expiresMinutes} minutes")
-        ->format('Y-m-d H:i:s');
-
-    $this->model->create([
-        'type'        => $type,
-        'email'       => $email,
-        'user_id'     => $userId,
-        'token_hash'  => $hash,
-        'expires_at'  => $expiresAt,
-        'ip_address'  => $ip,
-        'user_agent'  => $ua,
-    ]);
-
-    return $rawToken;
-}
 
     /* ==========================================================
      * VALIDATE
@@ -79,6 +79,7 @@ public function create(
         $row = $this->model->findValidByHash($hash, $type);
 
         if (!$row) {
+            
             return [
             'ok' => false,
             'result' => TokenResult::EXPIRED

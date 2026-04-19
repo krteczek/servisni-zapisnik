@@ -36,4 +36,15 @@ final class Response
     {
         self::download($binaryPdf, $filename, 'application/pdf');
     }
+
+    public static function applySecurityHeaders(): void
+    {
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Content-Type-Options: nosniff');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+
+        header("Content-Security-Policy: default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'");
+
+        header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+    }
 }
