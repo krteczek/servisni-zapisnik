@@ -103,6 +103,10 @@ final class Router
             if (($route['auth'] ?? false) && !Auth::user()) {
                 Url::redirect('/login');
             }
+            if (($route['auth'] ?? false) && !Auth::user()) {
+                Flash::info('Byli jste odhlášeni systémem(změna oprávnění nebo neplatná session).');
+                Url::redirect('/login');
+            }
 
             // roles
             if (!empty($route['roles']) && !Auth::hasGlobalRole($route['roles'])) {

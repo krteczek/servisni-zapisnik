@@ -133,20 +133,21 @@ public function login(): string
         $this->addError('global', 'Neplatné přihlašovací údaje. Pokud problém přetrvává, kontaktujte správce vašeho prostoru.');
         return $this->render('auth/login');
     }
-
-    /* ===== LOGIN OK ===== */
- 	Auth::login([
+	$toLogin = [
 			'id'                => (int) $user['id'],
 			'email'             => $user['email'],
 			'global_role'       => $user['global_role'],
 			'company_id'        => (int) $company['id'],
 			'company_name'      => $company['name'],
-			'tenant_slug'       => $company['tenant_slug'],
+			'tenant_slug'       => $company['slug'],
 			'first_name'        => $user['first_name'] ?? null,
 			'last_name'         => $user['last_name'] ?? null,
 			'db_name'		    => $company['db_name'],
 			'session_version'   => $user['session_version'],
-		]);
+		];
+		//var_dump($toLogin);exit;
+    /* ===== LOGIN OK ===== */
+ 	Auth::login($toLogin);
    
 
     Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
@@ -156,22 +157,6 @@ public function login(): string
 
 }
 
-	private static function aLogin(array $data): void
-	{
-	Auth::login([
-			'id'                => (int) $data['id'],
-			'email'             => $data['email'],
-			'global_role'       => $data['global_role'],
-			'company_id'        => (int) $data['company_id'],
-			'company_name'      => $data['company_name'],
-			'tenant_slug'       => $data['tenant_slug'],
-			'first_name'        => $data['first_name'] ?? null,
-			'last_name'         => $data['last_name'] ?? null,
-			'db_name'		    => $data['db_name'],
-			'session_version'   => $data['session_version'],
-		]);
-
-	}
 
     public function logout(): string
     {
@@ -556,7 +541,7 @@ public function forgotPasswordPost(): string
 				//jdeme řešit přihlášení:
 				$d = $ok['data'];
 				//print_r($data['db_name']['registrationWorkDbName']);
-				self::aLogin([
+				Auth::login([
 					'id'              => $d['user_id'],
 					'email'           => $d['email'],
 					'global_role'     => 'admin',
