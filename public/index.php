@@ -7,20 +7,11 @@ ob_start();
 //echo phpversion();exit;
 require dirname(__DIR__) . '/bootstrap.php';
 
-// -------------------------------------------------
-// Logger
-// -------------------------------------------------
+
+use App\Core\Response;
 use App\Core\LoggerHolder;
 use App\Core\Logger;
-LoggerHolder::set(new Logger(__DIR__ . '/../storage/logs/app.log'));
-
-// -------------------------------------------------
-// ExceptionHandler
-// -------------------------------------------------
 use App\Core\ExceptionHandler;
-ExceptionHandler::register();
-
-
 // -------------------------------------------------
 // Ostatní Use statement
 // -------------------------------------------------
@@ -32,6 +23,25 @@ use App\Core\Database;
 use App\Core\Auth;
 use App\Core\Roles;
 use App\Services\Guards\BanService;
+
+
+// -------------------------------------------------
+// Security Headers
+// -------------------------------------------------
+Response::applySecurityHeaders();
+
+// -------------------------------------------------
+// Logger
+// -------------------------------------------------
+LoggerHolder::set(new Logger(__DIR__ . '/../storage/logs/app.log'));
+
+// -------------------------------------------------
+// ExceptionHandler
+// -------------------------------------------------
+
+ExceptionHandler::register();
+
+
 
 require dirname(__DIR__) . '/app/Core/helpers.php';
 

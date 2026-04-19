@@ -47,8 +47,12 @@ final class Router
     {
         // shared view context
         $this->view = new ViewContext();
-        $this->view->isLogged = Auth::check();
-        $this->view->user     = Auth::user();
+        //$this->view->isLogged = Auth::check();
+        //$this->view->user     = Auth::user();
+        $user = Auth::user();
+
+        $this->view->user     = $user;
+        $this->view->isLogged = $user !== null;
 
         foreach ($routes as $route) {
             $this->routes[] = [
@@ -96,7 +100,7 @@ final class Router
             }
 
             // auth
-            if (($route['auth'] ?? false) && !Auth::check()) {
+            if (($route['auth'] ?? false) && !Auth::user()) {
                 Url::redirect('/login');
             }
 
@@ -116,7 +120,7 @@ final class Router
 
             // TODO: [FEATURE] Při implementaci multi-tenant admina upravit podmínku - admin může přistupovat k různým tenantům
             // tenant guard – dokud tenant existuje
-            if (isset($params['tenant']) && Auth::check()) {
+            if (isset($params['tenant']) && Auth::user()) {
                 $current = Auth::tenantSlug();
 
                 if ($params['tenant'] !== $current) {

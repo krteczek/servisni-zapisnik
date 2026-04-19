@@ -11,10 +11,7 @@ namespace App\Core;
  */
 class Session
 {
-    /**
-     * @var bool Stav inicializace session pro prevenci opakovaného volání session_start()
-     */
-    private static bool $started = false;
+ 
 
     // TODO: [SECURITY] Přidat konfiguraci session cookie parametrů (secure, httponly, samesite)
     // TODO: [PERFORMANCE] Zvážit session locking pro kritické sekce s paralelními requesty
@@ -37,44 +34,31 @@ class Session
      */
 public static function start(): void
 {
-    if (self::$started) {
+    if (session_status() === PHP_SESSION_ACTIVE) {
         return;
     }
 
-    if (session_status() !== PHP_SESSION_ACTIVE) {
+    $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
 
-        $appEnv = Config::get('app.env');
-        $secure = $appEnv === 'prod';
+    session_name($secure ? '__Host-PHPSESSID' : 'PHPSESSID');
 
-        session_set_cookie_params([
-            'lifetime' => 0,
-            'path'     => '/',
-            'secure'   => $secure,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $secure,
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ]);
 
-        ini_set('session.use_strict_mode', '1');
-        ini_set('session.cookie_httponly', '1');
-        ini_set('session.cookie_secure', $secure ? '1' : '0');
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_secure', $secure ? '1' : '0');
+    ini_set('session.cookie_samesite', 'Strict');
+    ini_set('session.use_only_cookies', '1');
 
-        session_start();
-    }
+    session_start();
+}    
 
-    self::$started = true;
-}
-    public static function startOld(): void
-    {
-        if (self::$started) {
-            return;
-        }
-
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        self::$started = true;
-    }
 
     /**
      * Regeneruje session ID pro prevenci session fixation útoků.
@@ -237,35 +221,33 @@ public static function start(): void
      *
      * @return void
      */
+
 public static function destroy(): void
 {
     self::start();
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        return;
+    }
 
     $_SESSION = [];
 
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
-
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params["path"],
-            $params["domain"],
-            $params["secure"],
-            $params["httponly"]
-        );
+        setcookie(session_name(), '', [
+            'expires'  => time() - 42000,
+            'path'     => $params['path'],
+            'secure'   => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => 'Strict',
+        ]);
     }
 
     session_destroy();
-    self::$started = false;
+
+    // 🔥 důležité:
+    session_write_close();
 }
-    public static function destroyOld(): void
-    {
-        self::start();
-        session_destroy();
-        self::$started = false;
-    }
+
     
     /* =========================
        FLASH ZPRÁVY

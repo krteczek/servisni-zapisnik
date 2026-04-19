@@ -135,17 +135,19 @@ public function login(): string
     }
 
     /* ===== LOGIN OK ===== */
-    Auth::login([
-        'id'          => (int) $user['id'],
-        'email'       => $user['email'],
-        'global_role' => $user['global_role'],
-        'company_id'  => (int) $company['id'],
-        'company_name'     => $company['name'],
-			'tenant_slug'     => $company['slug'],
-        'first_name'  => $user['first_name'] ?? null,
-        'last_name'   => $user['last_name'] ?? null,
-        'db_name'		 => $company['db_name'],
-    ]);
+ 	Auth::login([
+			'id'                => (int) $user['id'],
+			'email'             => $user['email'],
+			'global_role'       => $user['global_role'],
+			'company_id'        => (int) $company['id'],
+			'company_name'      => $company['name'],
+			'tenant_slug'       => $company['tenant_slug'],
+			'first_name'        => $user['first_name'] ?? null,
+			'last_name'         => $user['last_name'] ?? null,
+			'db_name'		    => $company['db_name'],
+			'session_version'   => $user['session_version'],
+		]);
+   
 
     Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
     );
@@ -154,7 +156,22 @@ public function login(): string
 
 }
 
+	private static function aLogin(array $data): void
+	{
+	Auth::login([
+			'id'                => (int) $data['id'],
+			'email'             => $data['email'],
+			'global_role'       => $data['global_role'],
+			'company_id'        => (int) $data['company_id'],
+			'company_name'      => $data['company_name'],
+			'tenant_slug'       => $data['tenant_slug'],
+			'first_name'        => $data['first_name'] ?? null,
+			'last_name'         => $data['last_name'] ?? null,
+			'db_name'		    => $data['db_name'],
+			'session_version'   => $data['session_version'],
+		]);
 
+	}
 
     public function logout(): string
     {
@@ -539,16 +556,18 @@ public function forgotPasswordPost(): string
 				//jdeme řešit přihlášení:
 				$d = $ok['data'];
 				//print_r($data['db_name']['registrationWorkDbName']);
-				Auth::login([
-					'id'           => $d['user_id'],
-					'email'        => $d['email'],
-					'global_role'  => 'admin',
-					'company_id'   => $d['company_id'],
-					'company_name' => $d['company_name'],
-					'tenant_slug'  => $d['slug'],
-					'first_name'   => $d['first_name'],
-					'last_name'    => $d['last_name'],
-					'db_name'      => $d['db_name'],
+				self::aLogin([
+					'id'              => $d['user_id'],
+					'email'           => $d['email'],
+					'global_role'     => 'admin',
+					'company_id'      => $d['company_id'],
+					'company_name'    => $d['company_name'],
+					'tenant_slug'     => $d['slug'],
+					'first_name'      => $d['first_name'],
+					'last_name'       => $d['last_name'],
+					'db_name'         => $d['db_name'],
+					'session_version' => $d['session_version'],
+					
 				]);
 			
 				Flash::success('Vítej v aplikaci, ' . ($d['first_name'] ?? $d['email']) . ' 👋'

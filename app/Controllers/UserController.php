@@ -184,11 +184,20 @@ final class UserController extends Controller
         // email, globas_role s active
 			if (!UserGuard::isProtected($old))
 			{
+                 $data['active'] = isset($data['active']) ? 1 : 0;
+
 				$arr2 = [
 				'email'           => strtolower(trim($data['email'])),
 				'global_role'     => $data['global_role'],
-				'active'          => isset($data['active']) ? 1 : 0,
+				'active'          => $data['active'],
 				];
+
+                // uživatel byl deaktivován,. jdeme ho i odhlásit, pokud je přihlášený
+                if ($data['active'] === 0 && $old['active'] === 1)
+                    {
+                        $data['session_version'] = $old['session_version'] + 1;
+                        $arr2['session_version'] = $data['session_version'];
+                    }
 
 			}
 

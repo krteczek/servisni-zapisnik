@@ -30,6 +30,10 @@ class Auth
     // TODO: [SECURITY] Přidat časovou značku poslední aktivity pro timeout session
     // TODO: [PERFORMANCE] Zvážit cacheování rolí a oprávnění na úrovni uživatele
 
+
+    private static bool $userLoaded = false;
+
+
     /* ========================= ZÁKLAD ========================= */
 
     /**
@@ -41,11 +45,18 @@ class Auth
      *
      * @return bool TRUE pokud je uživatel přihlášen, jinak FALSE
      */
-    public static function check(): bool
-    {
-        Session::start();
-        return (bool) Session::get(self::USER_KEY . '.id');
+public static function check(): bool
+{
+    Session::start();
+
+    $id = Session::get(self::USER_KEY . '.id');
+    if (!is_int($id) && !ctype_digit((string)$id)) {
+        return false;
     }
+
+    return true;
+}
+
 
     /**
      * Vrátí ID přihlášeného uživatele.
@@ -105,19 +116,35 @@ class Auth
      *
      * @return array|null Data uživatele nebo null pokud není přihlášen
      */
+
     public static function user(): ?array
     {
         if (!self::check()) {
             return null;
         }
 
-        if (self::$cachedUser === null) {
+        if (!self::$userLoaded) {
             $model = new UserModel();
-            self::$cachedUser = $model->find(self::id());
+            $user  = $model->find(self::id());
+
+            $sessionVersion = (int) Session::get(self::USER_KEY . '.session_version', 0);
+
+            if (
+                !$user ||
+                (int)$user['active'] !== 1 ||
+                (int)$user['session_version'] !== $sessionVersion
+            ) {
+                self::logout();
+                return null;
+            }
+
+            self::$cachedUser = $user;
+            self::$userLoaded = true;
         }
 
         return self::$cachedUser;
     }
+
 
     /* ========================= JMÉNO / LABEL ========================= */
 
@@ -128,53 +155,57 @@ class Auth
      */
     public static function name(): ?string
     {
+        $user = self::user();
+        if (!$user) {
+             return null;
+        }
+
+        $name = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+        return $name !== '' ? $name : null;
+    }
+
+    /**
+     * Vrátí popisek uživatele pro zobrazení v UI.
+     * Obsahuje jméno, efektivní roli a název firmy (tenanta).
+     *
+     * Příklady:
+     * - "Franta Jonáš (mistr, Zateplovačky s.r.o.)"
+     * - "Admin (ACME Corp)"
+     *
+     * @return string|null Formátovaný popisek nebo null pokud není přihlášen
+     */
+    public static function label(): ?string
+    {
         if (!self::check()) {
             return null;
         }
 
-        Session::start();
-        $first = Session::get(self::USER_KEY . '.first_name', '');
-        $last  = Session::get(self::USER_KEY . '.last_name', '');
+        $name    = self::name();
+        $role    = self::effectiveRole();
+        $company = self::company();
 
-        $name = trim($first . ' ' . $last);
-        return $name !== '' ? $name : null;
+        $parts = [];
+
+        if ($role) {
+            $parts[] = $role;
+        }
+
+        if ($company) {
+            $parts[] = $company;
+        }
+
+        $suffix = $parts ? ' (' . implode(', ', $parts) . ')' : '';
+
+        if ($name) {
+            return $name . $suffix;
+        }
+
+        if (!empty($parts)) {
+            return ucfirst($parts[0]) . ($company ? ' (' . $company . ')' : '');
+        }
+
+       return null;    
     }
-
-/**
- * Vrátí popisek uživatele pro zobrazení v UI.
- * Obsahuje jméno, efektivní roli a název firmy (tenanta).
- *
- * Příklady:
- * - "Franta Jonáš (mistr, Zateplovačky s.r.o.)"
- * - "Admin (ACME Corp)"
- *
- * @return string|null Formátovaný popisek nebo null pokud není přihlášen
- */
-public static function label(): ?string
-{
-    if (!self::check()) {
-        return null;
-    }
-
-    $name    = self::name();
-    $role    = self::effectiveRole();
-    $company = self::company();
-
-    $parts = [];
-
-    if ($role) {
-        $parts[] = $role;
-    }
-
-    if ($company) {
-        $parts[] = $company;
-    }
-
-    $suffix = $parts ? ' (' . implode(', ', $parts) . ')' : '';
-
-    return $name
-           ? $name . $suffix
-           : ucfirst($parts[0]) . ($company ? ' (' . $company . ')' : '');}
 
     /* ========================= ROLE ========================= */
 
@@ -233,8 +264,8 @@ public static function label(): ?string
     {
         Session::start();
         AccessLogger::log(AccessLogger::TYPE_LOGOUT);
-        Session::forget(self::USER_KEY);
-        Session::regenerate();
+        
+        Session::destroy();
         self::$cachedUser = null;
     }
 
