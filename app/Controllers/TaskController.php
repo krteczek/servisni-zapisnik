@@ -111,7 +111,7 @@ private function getOrderOrRedirect(?int $orderId): array
         }
         catch (Throwable $e)
         {
-            LoggerHolder::get()->error('UserActivation failed', [
+            LoggerHolder::get()->error('TaskController.saveTask:  failed', [
                         'message'   => $e->getMessage(),
                         'file'      => $e->getFile(),
                         'line'      => $e->getLine(),
@@ -148,7 +148,7 @@ private function getOrderOrRedirect(?int $orderId): array
             }
             catch (Throwable $e)
             {
-                LoggerHolder::get()->error('UserActivation failed', [
+                LoggerHolder::get()->error('TaskController.saveTask:  failed', [
                         'message'   => $e->getMessage(),
                         'file'      => $e->getFile(),
                         'line'      => $e->getLine(),
