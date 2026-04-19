@@ -128,40 +128,45 @@ public function index(): string
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
     }
 
-public function editForm(int $orderId): string
-{
-    $order = $this->getOrderOrRedirect($orderId);
-    
-    if($order['status'] === 'cancelled' || $order['status'] === 'done')
+    private function guardEditable(array $order, int $orderId): void
     {
-        Flash::error('Tuto zakázku nelze upravovat, protože je dokončená nebo zrušená.');
-        Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+        if ($order['status'] === 'cancelled') {
+            Flash::error('Tuto zakázku nelze upravovat, protože je zrušená.');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+        }
+
+        if ($order['status'] === 'done') {
+            Flash::error('Tuto zakázku nelze upravovat, protože je dokončená.');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+        }
     }
-    
-    $TaM = new TaskModel();
-    $stats = $TaM->statsForWorkOrder($orderId);
-    $order['is_edit'] = true; // pro případné úpravy ve view ,
-    $order['task_count'] = $stats['total'] ?? 0; // počet úkolů pro zobrazení upozornění ve view, že nelze vytvořit první úkol ze zakázky, protože již nějaké úkoly existují
-    
-    $contactsModel = new ContactsModel();
-    $TM = new TeamModel();
 
-    $this->view->teams = $TM->byActive(true);
-    $this->view->data = $order;
-    
-    $this->view->contacts = $contactsModel->all(); // 🔥 DŮLEŽITÉ
+    public function editForm(int $orderId): string
+    {
+        $order = $this->getOrderOrRedirect($orderId);
+        $this->guardEditable($order, $orderId);
 
-    return $this->render('work_orders/create');
-}
+        $TaM = new TaskModel();
+        $stats = $TaM->statsForWorkOrder($orderId);
+        $order['is_edit'] = true; // pro případné úpravy ve view ,
+        $order['task_count'] = $stats['total'] ?? 0; // počet úkolů pro zobrazení upozornění ve view, že nelze vytvořit první úkol ze zakázky, protože již nějaké úkoly existují
+        
+        $contactsModel = new ContactsModel();
+        $TM = new TeamModel();
+
+        $this->view->teams = $TM->byActive(true);
+        $this->view->data = $order;
+        
+        $this->view->contacts = $contactsModel->all(); // 🔥 DŮLEŽITÉ
+
+        return $this->render('work_orders/create');
+    }
 
     public function editFormUpdate(int $orderId): string
     {
         $order = $this->getOrderOrRedirect($orderId);
+        $this->guardEditable($order, $orderId);
 
-        if ($order['status'] === 'cancelled' || $order['status'] === 'done') {
-           Flash::error('Tuto zakázku nelze upravit.');
-           Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
-        }
         $post = $_POST;
         
 
@@ -429,71 +434,70 @@ private function getOrderOrRedirect(int $orderId): array
     }
     
  public function closeOrderCanceled(int $orderId)
-{
-    $taskModel = new TaskModel();
-    $woModel   = new WorkOrderModel();
+{   
+    $order = $this->getOrderOrRedirect($orderId);
+    $this->guardEditable($order, $orderId);
+    try {
+        $taskModel = new TaskModel();
+        $woModel   = new WorkOrderModel();
 
-    $stats = $taskModel->statsForWorkOrder($orderId);
+        $stats = $taskModel->statsForWorkOrder($orderId);
 
-    if ($stats['open'] > 0 || $stats['done'] > 0) {
-        Flash::error(
-            'Zakázku nelze zrušit, protože obsahuje otevřené nebo dokončené úkoly.'
-        );
-        Url::redirect("/{tenant}/work-orders/{$orderId}/detail/#main");
-    }
+        if ($stats['open'] > 0 || $stats['done'] > 0) {
+            Flash::error(
+                'Zakázku nelze zrušit, protože obsahuje otevřené nebo dokončené úkoly.'
+            );
+            Url::redirect("/{tenant}/work-orders/{$orderId}/detail/#main");
+        }
 
-    $woModel->update($orderId, [
-        'status'    => 'cancelled',
-        'closed_at'=> date('Y-m-d H:i:s'),
-    ]);
+        $woModel->update($orderId, [
+            'status'    => 'cancelled',
+            'closed_at'=> date('Y-m-d H:i:s'),
+        ]);
 
-    Flash::success('Zakázka byla zrušena.');
-    Url::redirect('/{tenant}/work-orders/#main');
+        Flash::success('Zakázka byla zrušena.');
+        Url::redirect('/{tenant}/work-orders/#main');
+
+        } catch (\Throwable $e) {
+            LoggerHolder::get()->error('WorkOrderController.closeOrderCanceled: failed', [
+                        'message' => $e->getMessage(),
+                        'file'    => $e->getFile(),
+                        'line'    => $e->getLine(),
+                        'trace'   => $e->getTraceAsString(),
+            ]);
+            Flash::error('Zakázku se nepodařilo zrušit.');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
+        }
+    
 }
 
 public function closeOrderDone(int $orderId)
 {
-    $woModel = new WorkOrderModel();
+    $order = $this->getOrderOrRedirect($orderId);
+    $this->guardEditable($order, $orderId);
+    try{
+        $woModel = new WorkOrderModel();
+        $ok = $woModel->closeAsDone($orderId);
+        if($ok === false)
+        {
+            Flash::error('Zakázku se nepodařilo dokončit.');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
+        }
+        Flash::success('Zakázka byla dokončena.');
+        Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
 
-    if (!$woModel->closeAsDone($orderId)) {
+    } catch (\Throwable $e) {
+        LoggerHolder::get()->error('WorkOrderController.closeOrderDone: failed', [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                    'trace'   => $e->getTraceAsString(),
+        ]);
         Flash::error('Zakázku se nepodařilo dokončit.');
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
     }
+ 
 
-    Flash::success('Zakázka byla dokončena.');
-    Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
 }
-
-/* nepoužívaná metoda dle phpstan
-private function recomputeOrder(int $orderId): void
-{
-    $this->model->recomputeStatus($orderId);
-}
-*/
-	public function closeTaskDone(int $taskId): void
-	{
-		if ($taskId <= 0)
-		{
-			Flash::error('Úkol neexistuje');
-			Url::redirect('/{tenant}/tasks/#main');
-		}
-
-		$model = (new TaskModel());
-		$task = $model->find($taskId);
-		if(!$task)
-		{
-			Flash::error('Úkol neexistuje');
-			Url::redirect('/{tenant}/tasks/#main');
-		}
-		$ok = $model->closeTask($taskId, 'done');
-		
-		if ($ok === false)
-		{
-			Flash::error('Úkol neexistuje');
-			Url::redirect('/{tenant}/tasks/#main');
-		}
-		Flash::success('Úkol byl úspěšně uzavřen.');
-		Url::redirect('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/detail/#taskId_' . $taskId );
-	}
 
 }
