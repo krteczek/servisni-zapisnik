@@ -306,86 +306,143 @@ public function canUserAddReport(int $taskId, int $userId): bool
     }
 
 
-public function statsForWorkOrder(int $orderId): array
-{
-    $row = $this->fetchOne(
-        "
-        SELECT
-            COUNT(*) AS total,
-            SUM(status = 'open') AS open,
-            SUM(status = 'done') AS done,
-            SUM(status = 'cancelled') AS cancelled
-        FROM {$this->tableName}
-        WHERE work_order_id = :order_id
-          AND {$this->tenantColumn} = :company_id
-        ",
-        [
-            'order_id'  => $orderId,
-            'company_id'=> $this->tenantId(),
-        ]
-    );
+    public function statsForWorkOrder(int $orderId): array
+    {
+        $row = $this->fetchOne(
+            "
+            SELECT
+                COUNT(*) AS total,
+                SUM(status = 'open') AS open,
+                SUM(status = 'done') AS done,
+                SUM(status = 'cancelled') AS cancelled
+            FROM {$this->tableName}
+            WHERE work_order_id = :order_id
+            AND {$this->tenantColumn} = :company_id
+            ",
+            [
+                'order_id'  => $orderId,
+                'company_id'=> $this->tenantId(),
+            ]
+        );
 
-    return [
-        'total'     => (int) ($row['total'] ?? 0),
-        'open'      => (int) ($row['open'] ?? 0),
-        'done'      => (int) ($row['done'] ?? 0),
-        'cancelled' => (int) ($row['cancelled'] ?? 0),
-    ];
-}
-
-public function statsForTasks(array $taskIds): array
-{
-    if (empty($taskIds)) {
-        return [];
-    }
-
-    $placeholders = [];
-    $params = ['company_id' => $this->tenantId()];
-
-    foreach ($taskIds as $i => $id) {
-        $key = "task_$i";
-        $placeholders[] = ":$key";
-        $params[$key] = (int) $id;
-    }
-
-    $sql = "
-        SELECT
-            ta.task_id,
-            COUNT(DISTINCT ta.id)              AS assignments_count,
-            COALESCE(SUM(ta.kilometers), 0)    AS total_km,
-            COALESCE(SUM(ta.minutes_spent), 0) AS total_minutes,
-            COUNT(DISTINCT tap.user_id)        AS workers_count
-        FROM task_assignments ta
-        LEFT JOIN task_assignment_participants tap
-            ON tap.assignment_id = ta.id
-           AND tap.company_id = ta.company_id
-        WHERE ta.task_id IN (" . implode(',', $placeholders) . ")
-          AND ta.company_id = :company_id
-        GROUP BY ta.task_id
-    ";
-
-    $rows = $this->fetchAll($sql, $params);
-
-    $result = [];
-
-    foreach ($taskIds as $taskId) {
-        $result[$taskId] = [
-            'assignments_count' => 0,
-            'total_minutes'     => 0,
-            'total_km'          => 0,
-            'workers_count'     => 0,
+        return [
+            'total'     => (int) ($row['total'] ?? 0),
+            'open'      => (int) ($row['open'] ?? 0),
+            'done'      => (int) ($row['done'] ?? 0),
+            'cancelled' => (int) ($row['cancelled'] ?? 0),
         ];
     }
 
-    foreach ($rows as $row) {
-        $result[(int)$row['task_id']] = [
-            'assignments_count' => (int)$row['assignments_count'],
-            'total_minutes'     => (int)$row['total_minutes'],
-            'total_km'          => (int)$row['total_km'],
-            'workers_count'     => (int)$row['workers_count'],
-        ];
+    public function statsForTasks(array $taskIds): array
+    {
+        if (empty($taskIds)) {
+            return [];
+        }
+
+        $placeholders = [];
+        $params = ['company_id' => $this->tenantId()];
+
+        foreach ($taskIds as $i => $id) {
+            $key = "task_$i";
+            $placeholders[] = ":$key";
+            $params[$key] = (int) $id;
+        }
+
+        $sql = "
+            SELECT
+                ta.task_id,
+                COUNT(DISTINCT ta.id)              AS assignments_count,
+                COALESCE(SUM(ta.kilometers), 0)    AS total_km,
+                COALESCE(SUM(ta.minutes_spent), 0) AS total_minutes,
+                COUNT(DISTINCT tap.user_id)        AS workers_count
+            FROM task_assignments ta
+            LEFT JOIN task_assignment_participants tap
+                ON tap.assignment_id = ta.id
+            AND tap.company_id = ta.company_id
+            WHERE ta.task_id IN (" . implode(',', $placeholders) . ")
+            AND ta.company_id = :company_id
+            GROUP BY ta.task_id
+        ";
+
+        $rows = $this->fetchAll($sql, $params);
+
+        $result = [];
+
+        foreach ($taskIds as $taskId) {
+            $result[$taskId] = [
+                'assignments_count' => 0,
+                'total_minutes'     => 0,
+                'total_km'          => 0,
+                'workers_count'     => 0,
+            ];
+        }
+
+        foreach ($rows as $row) {
+            $result[(int)$row['task_id']] = [
+                'assignments_count' => (int)$row['assignments_count'],
+                'total_minutes'     => (int)$row['total_minutes'],
+                'total_km'          => (int)$row['total_km'],
+                'workers_count'     => (int)$row['workers_count'],
+            ];
+        }
+
+        return $result;
+    }  
+    /*
+    * Exporty
+    */
+    public function findByIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $sql = "
+            SELECT *
+            FROM {$this->tableName}
+            WHERE id IN ($placeholders)
+            AND {$this->tenantColumn} = ?
+        ";
+
+        $params = [...$ids, $this->tenantId()];
+
+        $stmt = $this->db()->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    return $result;
-}    
+    public function filter(array $filters): array
+    {
+        $sql = "SELECT t.*, tm.name AS team_name
+                FROM {$this->tableName} t
+                LEFT JOIN teams tm ON tm.id = t.team_id
+                WHERE 1=1";
+
+        $params = [];
+
+        if (!empty($filters['date'])) {
+            $sql .= " AND DATE(t.created_at) = :date";
+            $params['date'] = $filters['date'];
+        }
+
+        if (!empty($filters['team_id'])) {
+            $sql .= " AND t.team_id = :team_id";
+            $params['team_id'] = (int)$filters['team_id'];
+        }
+
+        if (!empty($filters['status'])) {
+            $sql .= " AND t.status = :status";
+            $params['status'] = $filters['status'];
+        }
+
+        $sql .= " AND t.{$this->tenantColumn} = :company_id";
+        $params['company_id'] = $this->tenantId();
+
+        $sql .= " ORDER BY t.id DESC";
+
+        return $this->fetchAll($sql, $params);
+    }
 }

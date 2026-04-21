@@ -100,8 +100,7 @@ require __DIR__ . '/../layout/header.php';
                                        value="<?= (int) $m['membership_id'] ?>">
 
                                 <select name="role_in_team"
-                                        onchange="this.form.submit()"
-                                        class="form-control">
+                                    class="form-control js-auto-submit">
                                     <?php foreach ($rolesInTeam as $key => $label): ?>
                                         <option value="<?= e($key) ?>"
                                             <?= $key === $m['role_in_team'] ? 'selected' : '' ?>>

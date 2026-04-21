@@ -77,6 +77,7 @@ private function getOrderOrRedirect(?int $orderId): array
 private function saveTask(array $data, int $workOrderId): string
 {
     $this->checkCsrf();
+    $result = null;
 
     // 1️⃣ Guard na zakázku
     $order = $this->getOrderOrRedirect($workOrderId);
@@ -128,7 +129,7 @@ private function saveTask(array $data, int $workOrderId): string
                 $recurringModel = new RecurringTaskModel();
 
                 $recurringId = $recurringModel->create([
-                    'company_id'          => Auth::companyId(),
+                    // 'company_id'          => Auth::companyId(),
                     'task_id'             => $taskId,
                     'team_id'             => $teamId,
                     'frequency_type'      => Config::get('recurring.default.frequency_type'),
@@ -179,6 +180,10 @@ private function saveTask(array $data, int $workOrderId): string
     }
 
     // 4️⃣ REDIRECT mimo transaction (SPRÁVNĚ)
+    if (!$result || !isset($result['redirect'])) {
+        return $this->render('tasks/create');
+    }
+
     Url::redirect($result['redirect']);
 }
 

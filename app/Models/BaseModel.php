@@ -412,7 +412,7 @@ protected function diff(array $before, array $after): array
     public function create(array $data): int
     {
         if (isset($data[$this->tenantColumn])) {
-            throw new LogicException("Cannot set tenant column manually.");
+            throw new LogicException("Cannot set tenant column manually. Use tenant-aware model.");
         }
 
         if ($data === []) {

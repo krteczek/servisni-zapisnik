@@ -34,7 +34,7 @@ use App\Core\Session;
     <link rel="stylesheet" href="<?= Url::to('/css/form.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/flash.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/footer.css') ?>">
-
+<script src="/js/app.js"></script>
 <!--    -->
  <style>
  <?php
@@ -120,10 +120,12 @@ require __DIR__ . '/../../../public/css/footer.css';
                 <li class="<?= implode(' ', array_filter($classes)) ?>">
 
                     <?php if ($section['method'] === 'POST'): ?>
-                        <form method="post"
-                              action="<?= $section['path'] ?>"
-                              onsubmit="return confirm('Opravdu se chcete odhlásit?');">
+                        <form method="post" 
+                            action="/logout" 
+                            data-confirm="Opravdu se chcete odhlásit?"
+                            >
                             <?= Csrf::getField() ?>
+                              
                             <button type="submit">
                                 <?= e($section['label']) ?>
                             </button>

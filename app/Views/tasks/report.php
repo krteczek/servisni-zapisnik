@@ -232,39 +232,5 @@ Pokud chcete přidat report, musíte se nejprve stát členem týmu, který má 
     <?php endforeach; ?>
 </div>
 
-<!-- JavaScript pro zobrazení časových polí po zaškrtnutí -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.user-checkbox');
-    
-    checkboxes.forEach(checkbox => {
-        // Při načtení nastavíme správné zobrazení podle checked
-        const userId = checkbox.dataset.userId;
-        const timeDiv = document.getElementById('time-' + userId);
-        if (checkbox.checked) {
-            timeDiv.style.display = 'block';
-        }
-        
-        checkbox.addEventListener('change', function() {
-            const userId = this.dataset.userId;
-            const timeDiv = document.getElementById('time-' + userId);
-            
-            if (this.checked) {
-                timeDiv.style.display = 'block';
-                // Nastavíme výchozí hodnoty jen pokud jsou prázdné
-                const hoursInput = timeDiv.querySelector('.time-input:first-of-type');
-                const minutesInput = timeDiv.querySelector('.time-input:last-of-type');
-                if (hoursInput.value === '' && minutesInput.value === '') {
-                    hoursInput.value = '1'; // default 1 hodina
-                    minutesInput.value = '0';
-                }
-            } else {
-                timeDiv.style.display = 'none';
-            }
-        });
-    });
-});
-</script>
-
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>
