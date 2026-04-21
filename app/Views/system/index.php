@@ -11,6 +11,10 @@ $companies = $view->companies;
 <?php if (empty($companies)): ?>
     <p><em>Zatím nejsou založeny žádné firmy.</em></p>
 <?php else: ?>
+    <form method="get">
+        <input type="text" name="search" value="<?= e($view->search ?? '') ?>" placeholder="Hledat firmu...">
+        <button type="submit">Hledat</button>
+    </form>
     <table>
         <thead>
             <tr>
@@ -22,11 +26,11 @@ $companies = $view->companies;
         </thead>
         <tbody>
             <?php foreach ($companies as $company): ?>
-                <tr>
+                <tr onclick="window.location='/system/companies/<?= (int)$company['id'] ?>'" style="cursor:pointer;">
                     <td><?= (int) $company['id'] ?></td>
                     <td><?= e($company['name']) ?></td>
                     <td><?= e($company['slug']) ?></td>
-                    <td><?= formatMinutes($company['created_at']) ?></td>
+                    <td><?= date('d.m.Y H:i', strtotime($company['created_at'])) ?></td>
                 </tr>
             <?php endforeach ?>
         </tbody>

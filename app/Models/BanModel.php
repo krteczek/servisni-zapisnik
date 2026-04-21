@@ -13,7 +13,7 @@ public function isBanned(int $fingerprint): bool
 {
     $sql = "
         SELECT id
-        FROM bans
+        FROM {$this->tableName}
         WHERE fingerprint = ?
         AND banned_until > NOW()
         LIMIT 1

@@ -98,18 +98,7 @@ abstract class BaseModel
         $this->tableName = $this->resolveTableName();
     }
 
-/**
- * public function __construct()
-    {
-        if (!isset($this->table) || $this->table === '') {
-            throw new LogicException(
-                static::class . ' must define protected string $table'
-            );
-        }
 
-        $this->tableName = $this->resolveTableName();
-    }
-*/
     /* ==========================================================
      * DB
      * ========================================================== */
@@ -174,20 +163,21 @@ abstract class BaseModel
      * @return int
      * @throws LogicException Pokud model není tenant-aware nebo chybí kontext
      */
-protected function tenantId(): int
-{
-    if (!$this->tenantAware) {
-        throw new LogicException('Model is not tenant-aware');
+    protected function tenantId(): int
+    {
+        if (!$this->tenantAware) {
+            throw new LogicException('Model is not tenant-aware');
+        }
+
+        $companyId = TenantContext::get() ?? Auth::companyId();
+
+        if (!$companyId) {
+            throw new LogicException('Tenant context missing');
+        }
+
+        return $companyId;
     }
 
-    $companyId = TenantContext::get() ?? Auth::companyId();
-
-    if (!$companyId) {
-        throw new LogicException('Tenant context missing');
-    }
-
-    return $companyId;
-}
     /**
      * Aplikuje tenant podmínku na WHERE pole.
      * Pokud je model tenant-aware, přidá company_id = aktuální tenant.
@@ -196,6 +186,26 @@ protected function tenantId(): int
      * @return array WHERE podmínky s tenantem
      */
     protected function applyTenant(array $where): array
+    {
+        if (!$this->tenantAware) {
+            return $where;
+        }
+
+        $tenantId = $this->tenantId();
+
+        // ❗ zakázat ruční company_id
+        if (array_key_exists($this->tenantColumn, $where)) {
+            throw new LogicException(
+                "Manual {$this->tenantColumn} condition is not allowed on tenant-aware model."
+            );
+        }
+
+        $where[$this->tenantColumn] = $tenantId;
+
+        return $where;
+    }
+
+    protected function applyTenantOLD(array $where): array
     {
         if ($this->tenantAware) {
             $where[$this->tenantColumn] = $this->tenantId();
@@ -401,6 +411,10 @@ protected function diff(array $before, array $after): array
      */
     public function create(array $data): int
     {
+        if (isset($data[$this->tenantColumn])) {
+            throw new LogicException("Cannot set tenant column manually.");
+        }
+
         if ($data === []) {
         	/* TODO: přepsat tak, aby nebyl exception pro uživatele, ale například false a logger mechat udělat záznam pro roota */
             throw new LogicException('Create: empty data');
@@ -511,6 +525,10 @@ protected function diff(array $before, array $after): array
             $params[$this->tenantColumn] = $this->tenantId();
         }
 
+        if (isset($data[$this->tenantColumn])) {
+            throw new LogicException("Cannot modify tenant column.");
+        }
+
         $sql = "UPDATE {$this->tableName}
                 SET " . implode(', ', $set) . "
                 WHERE id = :id";
@@ -615,7 +633,7 @@ protected function diff(array $before, array $after): array
      * @param string $alias Alias tabulky v dotazu
      * @return string SQL podmínka (např. " AND company_id = :company_id")
      */
-    protected function tenantWhere(string $alias = ''): string
+    protected function tenantWhereOLD(string $alias = ''): string
     {
         if (!$this->tenantAware) {
             return '';
@@ -636,80 +654,61 @@ protected function diff(array $before, array $after): array
 	}
 
 	 
-    public function createWithTenantOLD(int $tenantId, array $data): int
+    protected function firstWhere(string $column, mixed $value): ?array
     {
-	    if ($data === []) {
-	        throw new LogicException('CreateWithTenant: empty data');
-	    }
+        $where = $this->applyTenant([$column => $value]);
 
-	    //přidání:
-	    // interního čísla zakázky (internal_number),
-	    // a roku (year)
-	    // do work_order 
-	    $year = (int) date('Y');
-	    $number = (new WorkOrderSequencesModel())->next($year, $tenantId);//vrátí bezpečné internal_number
-	    $data['internal_number'] = $number;
-	    $data['year'] = $year;
+        $parts = [];
+        foreach ($where as $col => $val) {
+            $parts[] = "{$col} = :{$col}";
+        }
 
-	    
-	    if ($this->tenantAware) {
-	    	//echo "kikol";
-	        $data[$this->tenantColumn] = $tenantId;
-	    }
-	
-	    return $this->insertRaw($data);
-	}
+        $sql = "SELECT * FROM {$this->tableName}
+                WHERE " . implode(' AND ', $parts) . "
+                LIMIT 1";
 
-protected function firstWhere(string $column, mixed $value): ?array
-{
-    $where = $this->applyTenant([$column => $value]);
-
-    $parts = [];
-    foreach ($where as $col => $val) {
-        $parts[] = "{$col} = :{$col}";
+        return $this->fetchOne($sql, $where);
     }
 
-    $sql = "SELECT * FROM {$this->tableName}
-            WHERE " . implode(' AND ', $parts) . "
-            LIMIT 1";
 
-    return $this->fetchOne($sql, $where);
-}
+    protected function updateWhere(string $column, mixed $value, array $data): bool
+    {
+        if ($data === []) {
+            return false;
+        }
 
+        $where = $this->applyTenant([$column => $value]);
 
-protected function updateWhere(string $column, mixed $value, array $data): bool
-{
-    if ($data === []) {
-        return false;
+        $set = [];
+        foreach ($data as $key => $val) {
+            $set[] = "{$key} = :set_{$key}";
+        }
+
+        $params = [];
+        foreach ($data as $key => $val) {
+            $params["set_{$key}"] = $val;
+        }
+
+        foreach ($where as $key => $val) {
+            $params[$key] = $val;
+        }
+
+        $parts = [];
+        foreach ($where as $col => $val) {
+            $parts[] = "{$col} = :{$col}";
+        }
+
+        $sql = "UPDATE {$this->tableName}
+                SET " . implode(', ', $set) . "
+                WHERE " . implode(' AND ', $parts);
+
+        $stmt = $this->db()->prepare($sql);
+
+        return $stmt->execute($params);
     }
 
-    $where = $this->applyTenant([$column => $value]);
-
-    $set = [];
-    foreach ($data as $key => $val) {
-        $set[] = "{$key} = :set_{$key}";
+    protected function isTenantAware(): bool
+    {
+        return $this->tenantAware;
     }
-
-    $params = [];
-    foreach ($data as $key => $val) {
-        $params["set_{$key}"] = $val;
-    }
-
-    foreach ($where as $key => $val) {
-        $params[$key] = $val;
-    }
-
-    $parts = [];
-    foreach ($where as $col => $val) {
-        $parts[] = "{$col} = :{$col}";
-    }
-
-    $sql = "UPDATE {$this->tableName}
-            SET " . implode(', ', $set) . "
-            WHERE " . implode(' AND ', $parts);
-
-    $stmt = $this->db()->prepare($sql);
-
-    return $stmt->execute($params);
-}
 }

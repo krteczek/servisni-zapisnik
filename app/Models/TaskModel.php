@@ -287,7 +287,8 @@ public function canUserAddReport(int $taskId, int $userId): bool
         
         //$assignmentModel = new AssignmentModel();
         //$statsMap = $assignmentModel->statsForTasks($taskIds);
-			$statsMap = $this->statsForTasks($taskIds);
+		
+        $statsMap = $this->statsForTasks($taskIds);
         foreach ($tasks as $i => $task) {
 						$stats = $statsMap[$task['id']] ?? [
 						    'assignments_count' => 0,
@@ -297,7 +298,7 @@ public function canUserAddReport(int $taskId, int $userId): bool
 						];
             $tasks[$i]['stats'] = $stats;
             $tasks[$i]['can_cancel'] = $this->canBeCancelled($stats);
-				$tasks[$i]['can_close']  = $this->canBeDone($stats);
+			$tasks[$i]['can_close']  = $this->canBeDone($stats);
 				
         }
 

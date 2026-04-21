@@ -34,11 +34,14 @@ public function index(): string
 
     public function createForm(): string
     {
-    	  $contactsModel = new ContactsModel();
-    	  $this->view->contacts = $contactsModel->all();
+        $contactsModel = new ContactsModel();
+    	$this->view->contacts = $contactsModel->all();
+
         $this->view->data     = [];
         $this->view->errors   = [];
         $Tm = new TeamModel();
+        $this->view->data["is_edit"] = true;
+
         $this->view->teams = $Tm->byActive(true);         
 
         return $this->render('work_orders/create');
@@ -50,7 +53,7 @@ public function index(): string
         
         $data = $this->validate($post, false);
         $contactsModel = new ContactsModel();
-        $data["is_edit"] = false; 
+        $data["is_edit"] = true; 
         
 
         if ($this->hasErrors()) {

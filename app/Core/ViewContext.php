@@ -163,6 +163,8 @@ class ViewContext
 
     public ?array $contacts = [];
 
+    public ?array $company = [];
+
 
     public string $mode = '';
 

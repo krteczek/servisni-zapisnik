@@ -17,8 +17,8 @@ use App\Services\Guards\BanService;
  */
 final class AccessLogger
 {
-	 public const TYPE_403 = 403;
-    public const TYPE_404 = 404;
+	 public const TYPE_403 = 403;//forbidden
+    public const TYPE_404 = 404;//not found
 	 public const TYPE_LOGIN = 100; //login
     public const TYPE_LOGOUT = 999;//logout
 

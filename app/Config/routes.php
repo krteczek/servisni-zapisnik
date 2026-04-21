@@ -780,6 +780,14 @@ Přepínaní rolí u admina
 
 [
     'method' => 'GET',
+    'path'   => '/{tenant}/system/companies/{id}',
+    'action' => [SystemController::class, 'companyDetail'],
+    'roles'  => ['root'],
+    'auth'   => true,
+],
+
+[
+    'method' => 'GET',
     'path'   => '/{tenant}/admin/audit',
     'action' => [AuditLogController::class, 'index'],
     'roles'  => ['admin'],
