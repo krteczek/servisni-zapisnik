@@ -122,7 +122,8 @@ $err = $view->errors;
 <?php if($order['ready_for_done']): ?>
     <form method="post"
           action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/done') ?>"
-          onsubmit="return confirm('Opravdu chcete zakázku uzavřít?');" style="display:inline-block;">
+          data-confirm="Opravdu chcete zakázku uzavřít jako hotovou?"          
+          style="display:inline-block;">
 
         <?= Csrf::getField() ?>
         <button class="btn btn-success">Uzavřít zakázku</button>
@@ -135,7 +136,8 @@ $err = $view->errors;
 
     <form method="post"
           action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/canceled') ?>"
-          onsubmit="return confirm('Opravdu chcete zakázku stornovat?');" style="display:inline-block;">
+          data-confirm="Opravdu chcete zakázku stornovat?"
+          style="display:inline-block;">
 
         <?= Csrf::getField() ?>
         <button class="btn btn-danger">Stornovat zakázku</button>
@@ -235,7 +237,7 @@ $canCloseCanceled = $task['can_cancel'];
         <?php if ($task['can_cancel'] && $task['status'] !== 'cancelled') : ?>
         <form method="post"
               action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
-              onsubmit="return confirm('Opravdu chcete úkol stornovat?');">
+              data-confirm="Opravdu chcete úkol stornovat?">
 
             <?= Csrf::getField() ?>
             <button class="btn btn-sm btn-danger">Stornovat</button>
@@ -246,7 +248,8 @@ $canCloseCanceled = $task['can_cancel'];
         <?php if ($task['can_close'] && $task['status'] !== 'done') : ?>
         <form method="post"
               action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/done') ?>"
-              onsubmit="return confirm('Opravdu chcete úkol uzavřít?');">
+              data-confirm="Opravdu chcete úkol uzavřít?"
+              >
 
             <?= Csrf::getField() ?>
             <button class="btn btn-sm btn-success">Uzavřít</button>

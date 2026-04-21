@@ -101,7 +101,8 @@ $isActive = '';
                         <a class="btn btn-secondary"
                            href="<?= Url::to('/{tenant}/teams/toggle/' . (int)$team['id']) ?>"
                            title="<?= e($team['active'] ? 'Deaktivovat tým' : 'Aktivovat tým') ?>"
-                           onclick="return confirm('Opravdu chcete změnit stav týmu?')">
+                           data-confirm="Opravdu chcete změnit stav týmu?"
+                           >
                             <?= e($team['active'] ? '🔒 Deaktivovat' : '🔓 Aktivovat') ?>
                         </a>
                     <?php endif ?>

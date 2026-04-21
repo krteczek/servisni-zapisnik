@@ -14,6 +14,7 @@ use App\Controllers\PageController;
 use App\Controllers\TaskRecurringController;
 use App\Controllers\BillingExportController;
 use App\Controllers\ContactsController;
+use App\Controllers\ExportsController;
 return [
 
 /*
@@ -688,7 +689,7 @@ return [
 
 
 /*-------------------------------------
-   Exporty, nejprve fakturace
+   Fakturace
 -------------------------------------**/
 [
     'method'  => 'GET',
@@ -746,6 +747,29 @@ return [
     'menu'    => 'Exporty',
     'section' => 'exports',
     'title'   => 'Exporty: Export do PDF',
+],
+
+/*-------------------------------------
+   Exporty
+-------------------------------------**/
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/exports/data/tasks',
+    'action'  => [ExportsController::class, 'exportTasksGet'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'exports',
+    'menu'   => 'Exporty',
+    'submenu'=> 'Výpis datových exportů',
+    'title'   => 'Exporty: Výpis datových exportů',
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/exports/data/tasks',
+    'action'  => [ExportsController::class, 'exportTasksPost'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
 ],
 
 /*-------------------------------------

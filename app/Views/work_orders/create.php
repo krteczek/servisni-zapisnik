@@ -310,21 +310,5 @@ $teams = $view->teams;
 </div>
 
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const checkbox = document.getElementById('create_task');
-    const select = document.getElementById('team_id');
-
-    if (!checkbox || !select) return;
-
-    function toggleTeam() {
-        select.disabled = !checkbox.checked;
-    }
-
-    checkbox.addEventListener('change', toggleTeam);
-    toggleTeam(); // init
-});
-</script>
-
 <?php require __DIR__ . '/../layout/footer.php';
 
