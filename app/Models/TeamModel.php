@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use PDO;
+use LogicException;
+
 
 class TeamModel extends BaseModel
 {
@@ -41,21 +43,21 @@ class TeamModel extends BaseModel
     /**
      * Vrátí týmy podle aktivního stavu
      */
-    public function byActive(bool $active): array
-    {
-        $sql = "
-            SELECT *
-            FROM {$this->tableName}
-            WHERE active = :active
-            {$this->tenantWhere()}
-            ORDER BY name
-        ";
+public function byActive(bool $active): array
+{
+    $sql = "
+        SELECT *
+        FROM {$this->tableName}
+        WHERE active = :active
+          AND {$this->tenantColumn} = :{$this->tenantColumn}
+        ORDER BY name
+    ";
 
-        return $this->fetchAll($sql, [
-            'active' => $active ? 1 : 0,
-            'company_id' => parent::tenantId()
-        ]);
-    }
+    return $this->fetchAll($sql, [
+        'active' => $active ? 1 : 0,
+        $this->tenantColumn => $this->tenantId(),
+    ]);
+}
 
     /**
      * Vrátí barvy týmů podle ID (tenant-aware!)
@@ -167,5 +169,13 @@ class TeamModel extends BaseModel
             'company_id' => $this->tenantId()
         ]);
     }
+
+
+    protected function tenantWhere(string $alias = ''): string
+    {
+        throw new LogicException('Nepoužívej tenantWhere(), použij explicitní podmínku.');
+    }
+
+
 }
 

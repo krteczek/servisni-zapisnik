@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Auth;
+use App\Core\Transaction;
 
 final class AssignmentModel extends BaseModel
 {
@@ -68,42 +69,48 @@ final class AssignmentModel extends BaseModel
     /**
      * Vytvoří nový report i s účastníky
      */
-     
-public function createReport(int $taskId, int $workOrderId, array $data): int
-{
-    // Spočítáme celkový čas z účastníků
-    $totalMinutes = 0;
-    $participants = [];
-    
-    foreach ($data['participants'] as $userId => $pData) {
-        if (!empty($pData['selected'])) {
-            $minutes = ((int)($pData['hours'] ?? 0) * 60) + (int)($pData['minutes'] ?? 0);
-            if ($minutes > 0) {
-                $totalMinutes += $minutes;
-                $participants[$userId] = $minutes;
+    public function createReport(int $taskId, int $workOrderId, array $data): int
+    {
+        return Transaction::run(function () use ($taskId, $workOrderId, $data) {
+
+            $totalMinutes = 0;
+            $participants = [];
+
+            foreach ($data['participants'] as $userId => $pData) {
+                if (!empty($pData['selected'])) {
+                    $minutes = ((int)($pData['hours'] ?? 0) * 60) + (int)($pData['minutes'] ?? 0);
+                    if ($minutes > 0) {
+                        $totalMinutes += $minutes;
+                        $participants[$userId] = $minutes;
+                    }
+                }
             }
-        }
+
+            $assignmentId = $this->create([
+                'task_id' => $taskId,
+                'work_order_id' => $workOrderId,
+                'user_id' => Auth::id(),
+                'minutes_spent' => $totalMinutes,
+                'kilometers' => (int) ($data['kilometers'] ?? 0),
+                'note' => $data['report'] ?? '',
+                'created_by_user_id' => Auth::id(),
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+
+            if (!$assignmentId) {
+                throw new \RuntimeException('Assignment create failed');
+            }
+
+            foreach ($participants as $userId => $minutes) {
+                if (!$this->addParticipant($assignmentId, $userId, $minutes)) {
+                    throw new \RuntimeException('Participant insert failed');
+                }
+            }
+
+            return $assignmentId;
+        });
     }
-    
-    // 1. Vytvoříme report s celkovým časem
-    $assignmentId = $this->create([
-        'task_id' => $taskId,
-        'work_order_id' => $workOrderId,
-        'user_id' => Auth::id(),
-        'minutes_spent' => $totalMinutes,  // ✅ celkový čas rovnou
-        'kilometers' => (int) ($data['kilometers'] ?? 0),
-        'note' => $data['report'] ?? '',
-        'created_by_user_id' => Auth::id(),
-        'created_at' => date('Y-m-d H:i:s')
-    ]);
-    
-    // 2. Přidáme účastníky
-    foreach ($participants as $userId => $minutes) {
-        $this->addParticipant($assignmentId, $userId, $minutes);
-    }
-    
-    return $assignmentId;
-}
+ 
 
 
     public function createReportOld(int $taskId, int $workOrderId, array $data): int
@@ -236,4 +243,6 @@ public function createReport(int $taskId, int $workOrderId, array $data): int
         
         return $result;
     }
+
+
 }

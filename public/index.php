@@ -62,10 +62,30 @@ RecurringRunner::run();
 // -------------------------------------------------
 
 
-if(BanService::isBanned() === true)
-{
-	echo "Bylo zaznamenáno vícenásobné nevhodné chování. Přístup je Vám dočasně odepřen. ";
-	exit;
+if (BanService::isBanned() === true) {
+
+    ob_end_clean();
+
+    http_response_code(403);
+    header('Content-Type: text/html; charset=utf-8');
+    header('X-Robots-Tag: noindex, nofollow');
+
+    echo '
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přístup odepřen</title>
+</head>
+<body>
+    <h1>Přístup odepřen</h1>
+    <p>Bylo zaznamenáno vícenásobné nevhodné chování. Přístup je Vám dočasně odepřen.</p>
+    <h1>Access Denied</h1>
+<p>Repeated inappropriate behavior has been detected. Your access has been temporarily restricted.</p>
+</body>
+</html>';
+
+    exit;
 }
 
 

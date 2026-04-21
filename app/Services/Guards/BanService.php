@@ -30,6 +30,8 @@ class BanService
             'fingerprint' => self::fingerprint(),
             'banned_until' => date('Y-m-d H:i:s', time() + $config['ban'] * 60),
             'created_at' => date('Y-m-d H:i:s'),
+            'ip' => Request::ip(),
+            'user_agent' => Request::ua(),
         ]);
     }
 

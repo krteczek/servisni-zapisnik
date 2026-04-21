@@ -158,8 +158,8 @@ $teams = $view->teams;
 
                 <div class="form-group">
                     <label>Úkol ze zakázky</label>
-                    <?php if(isset($data['is_edit']) && $data['is_edit'] === true
-                            && ($data['count_tasks'] ?? 0) === 0
+                    <?php if(isset($data['is_edit']) && ($data['is_edit'] === true)
+                            && (($data['count_tasks'] ?? 0) === 0)
                     ): ?>
                         <label for="create_task"><input 
                             type="checkbox" 

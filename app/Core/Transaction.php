@@ -13,18 +13,35 @@ class Transaction
     public static function run(callable $callback, string $connection = 'work')
     {
         $db = Database::connection($connection);
+        $isOuter = false;
 
         try {
-            $db->beginTransaction();
+            //$db->beginTransaction();
+            if (!$db->inTransaction()) {
+                $db->beginTransaction();
+                $isOuter = true;
+            } else {
+                $isOuter = false;
+            }
 
             $result = $callback($db); // 🔥 tady změna
 
-            $db->commit();
+            if ($result === false) {
+                throw new \RuntimeException('Transaction callback returned false');
+            }
+
+            // $db->commit();
+            if ($isOuter) {
+                $db->commit();
+            }
 
             return $result;
 
         } catch (Throwable $e) {
-            if ($db->inTransaction()) {
+            //if ($db->inTransaction()) {
+            //    $db->rollBack();
+            //}
+            if ($isOuter && $db->inTransaction()) {
                 $db->rollBack();
             }
 
@@ -33,8 +50,12 @@ class Transaction
 				    'file'      => $e->getFile(),
 				    'line'      => $e->getLine(),
 				    'trace'     => $e->getTraceAsString(),
+                    'connection' => $connection,
+                    'isOuter'    => $isOuter,
 
 				]);
+
+            throw $e; // 🔥 KRITICKÉ
         }
     }
 }

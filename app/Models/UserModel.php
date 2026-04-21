@@ -169,12 +169,29 @@ public function activateUser(int $id, string $hash): array
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-public function findByIdWithoutTenant(int $id): ?array
-{
-    $sql = "SELECT * FROM {$this->tableName}
-            WHERE id = :id
-            LIMIT 1";
+    public function findByIdWithoutTenant(int $id): ?array
+    {
+        $sql = "SELECT * FROM {$this->tableName}
+                WHERE id = :id
+                LIMIT 1";
 
-    return $this->fetchOne($sql, ['id' => $id]);
-}
+        return $this->fetchOne($sql, ['id' => $id]);
+    }
+
+    public function findByCompanyIdGlobal(int $companyId): array
+    {
+        $sql = "
+            SELECT *
+            FROM {$this->tableName}
+            WHERE company_id = :company_id
+            ORDER BY last_name, first_name
+        ";
+
+        $stmt = $this->db()->prepare($sql);
+        $stmt->execute([
+            'company_id' => $companyId,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

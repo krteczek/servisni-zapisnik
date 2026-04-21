@@ -16,9 +16,6 @@ class DatabaseScope
 
             return $callback();
 
-        } catch (Throwable $e) {
-            throw $e;
-
         } finally {
             Database::setDatabase($previous);
         }
