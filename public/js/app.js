@@ -18,10 +18,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-});
+    // 🔥 TOHLE TAM CHYBĚLO
+    document.querySelectorAll('.user-checkbox').forEach(cb => {
+        const userId = cb.dataset.userId;
+        const timeBox = document.getElementById(`time-${userId}`);
 
-document.querySelectorAll('.js-auto-submit').forEach(el => {
-    el.addEventListener('change', () => {
-        el.form.submit();
+        if (!timeBox) return;
+
+        // inicializace (když je už checked po reloadu)
+        timeBox.style.display = cb.checked ? 'block' : 'none';
+
+        cb.addEventListener('change', () => {
+            timeBox.style.display = cb.checked ? 'block' : 'none';
+        });
     });
+
 });

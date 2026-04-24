@@ -458,26 +458,27 @@ private function saveTask(array $data, int $workOrderId): string
         
         // 4. Validace účastníků (nepovinné, ale pokud jsou zaškrtnutí, musí mít čas)
         
-        foreach ($participants as $userId => $participantData) {
-            if (!empty($participantData['selected'])) {
-                // Pokud je zaškrtnutý, musí mít čas
-                $hours = isset($participantData['hours']) ? trim($participantData['hours']) : '';
-                $minutes = isset($participantData['minutes']) ? trim($participantData['minutes']) : '';
-                
-                if ($hours === '' && $minutes === '') {
-                    $this->addError("participants[$userId]", 'Vyplň čas nebo odškrtni pracovníka');
-                } else {
-                    // Validace hodin
-                    if ($hours !== '' && (!is_numeric($hours) || $hours < -24 || $hours > 24)) {
-                        $this->addError("participants[$userId][hours]", 'Hodiny musí být v rozmezí -24 až 24');
-                    }
-                    // Validace minut
-                    if ($minutes !== '' && (!is_numeric($minutes) || $minutes < -59 || $minutes > 59)) {
-                        $this->addError("participants[$userId][minutes]", 'Minuty musí být v rozmezí -59 až 59');
-                    }
-                }
-            }
+foreach ($participants as $userId => $participantData) {
+
+    if (!empty($participantData['selected'])) {
+
+        $hours   = trim($participantData['hours'] ?? '');
+        $minutes = trim($participantData['minutes'] ?? '');
+
+        if ($hours === '' && $minutes === '') {
+            $this->addError("participants.$userId", 'Vyplň čas nebo odškrtni pracovníka');
+            continue;
         }
+
+        if ($hours !== '' && (!is_numeric($hours) || $hours < -24 || $hours > 24)) {
+            $this->addError("participants.$userId", 'Hodiny musí být v rozmezí -24 až 24');
+        }
+
+        if ($minutes !== '' && (!is_numeric($minutes) || $minutes < -59 || $minutes > 59)) {
+            $this->addError("participants.$userId", 'Minuty musí být v rozmezí -59 až 59');
+        }
+    }
+}
         
             // 5. Pokud jsou chyby, vrať se zpět (bez reloadu)
             if ($this->hasErrors()) {

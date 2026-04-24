@@ -55,7 +55,11 @@ $errors = $view->errors; // chyby validace
 					                rows="5"
 					            ><?= e($oldData['report'] ?? '') ?></textarea>
 					            <?php if (isset($errors['report'])): ?>
-					                <span class="error-message"><?= e($errors[0]['report']) ?></span>
+					                <?php if (!empty($errors['report'])): ?>
+    									<?php foreach ((array)$errors['report'] as $msg): ?>
+        									<span class="error-message"><?= e($msg) ?></span><br>
+    									<?php endforeach; ?>
+									<?php endif; ?>
 					            <?php endif; ?>
 					        </div>
 					        
@@ -76,60 +80,73 @@ $errors = $view->errors; // chyby validace
 					            <?php endif; ?>
 					        </div>
 					        
-					        <div class="form-group">
-					            <label>Kdo pracoval?</label>
-					            <div class="member-list">
-					                <?php foreach ($teamMembers as $user): 
-					                    $userId = $user['id'];
-					                    $checked = isset($oldData['participants'][$userId]['selected']);
-					                    $hours = $oldData['participants'][$userId]['hours'] ?? '';
-					                    $minutes = $oldData['participants'][$userId]['minutes'] ?? '';
-					                ?>
-					                    <div class="member-row <?= isset($errors["participants[$userId]"]) ? 'has-error' : '' ?>">
-					                        <div class="member-checkbox">
-					                            <input 
-					                                type="checkbox" 
-					                                name="participants[<?= $userId ?>][selected]" 
-					                                id="user-<?= $userId ?>"
-					                                class="user-checkbox"
-					                                data-user-id="<?= $userId ?>"
-					                                <?= $checked ? 'checked' : '' ?>
-					                            >
-					                        </div>                        
-					                        <div class="member-name">
-					                            <label for="user-<?= $userId ?>">
-					                                <?= e($user['first_name'] . ' ' . $user['last_name']); ?>
-					                            </label>
-					                        </div>
-					                        
-					                        <div class="member-time" id="time-<?= $userId ?>" style="display: <?= $checked ? 'block' : 'none' ?>;">
-					                            <div class="time-input-group">
-					                                <input type="number" 
-					                                       name="participants[<?= $userId ?>][hours]" 
-					                                       class="time-input" 
-					                                       placeholder="h" 
-					                                       min="-24"
-					                                       max="24"
-					                                       value="<?= e($hours) ?>">
-					                                <span class="time-separator">h</span>
-					                                <input type="number" 
-					                                       name="participants[<?= $userId ?>][minutes]" 
-					                                       class="time-input" 
-					                                       placeholder="m" 
-					                                       min="-59" 
-					                                       max="59"
-					                                       value="<?= e($minutes) ?>">
-					                                <span class="time-separator">m</span>
-					                            </div>
-					                        </div>
-					                        <?php if (isset($errors["participants[$userId]"])): ?>
-					                            <span class="error-message"><?= e($errors["participants[$userId]"]) ?></span>
-					                        <?php endif; ?>
-					                    </div>
-					                <?php endforeach; ?>
-					            </div>
-					        </div>
-					        
+<div class="form-group">
+    <label>Kdo pracoval?</label>
+    <div class="member-list">
+        <?php foreach ($teamMembers as $user): 
+            $userId = $user['id'];
+
+            $checked = !empty($oldData['participants'][$userId]['selected']);
+            $hours   = $oldData['participants'][$userId]['hours'] ?? '';
+            $minutes = $oldData['participants'][$userId]['minutes'] ?? '';
+
+            $userErrors = $errors['participants'][$userId] ?? [];
+        ?>
+            <div class="member-row <?= !empty($userErrors) ? 'has-error' : '' ?>">
+
+                <div class="member-checkbox">
+                    <input 
+                        type="checkbox" 
+                        name="participants[<?= $userId ?>][selected]" 
+                        id="user-<?= $userId ?>"
+                        class="user-checkbox"
+                        data-user-id="<?= $userId ?>"
+                        <?= $checked ? 'checked' : '' ?>
+                    >
+                </div>                        
+
+                <div class="member-name">
+                    <label for="user-<?= $userId ?>">
+                        <?= e($user['first_name'] . ' ' . $user['last_name']); ?>
+                    </label>
+                </div>
+
+                <div class="member-time" id="time-<?= $userId ?>" style="display: <?= $checked ? 'block' : 'none' ?>;">
+                    <div class="time-input-group">
+
+                        <input type="number" 
+                               name="participants[<?= $userId ?>][hours]" 
+                               class="time-input" 
+                               placeholder="h" 
+                               min="-24"
+                               max="24"
+                               value="<?= e($hours) ?>">
+
+                        <span class="time-separator">h</span>
+
+                        <input type="number" 
+                               name="participants[<?= $userId ?>][minutes]" 
+                               class="time-input" 
+                               placeholder="m" 
+                               min="-59" 
+                               max="59"
+                               value="<?= e($minutes) ?>">
+
+                        <span class="time-separator">m</span>
+                    </div>
+                </div>
+
+                <!-- 🔥 chyby -->
+                <?php if (!empty($userErrors)): ?>
+                    <?php foreach ($userErrors as $msg): ?>
+                        <span class="error-message"><?= e($msg) ?></span><br>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>			        
 					        <div class="form-actions">
 					            <button type="submit" class="btn btn-primary">
 					                Uložit report
