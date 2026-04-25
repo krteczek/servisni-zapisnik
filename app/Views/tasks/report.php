@@ -40,7 +40,13 @@ $errors = $view->errors; // chyby validace
 
 				<!-- START: výpis chyb způsobených při vyplnování formuláře -->
             <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
-<?php if($task['canUserAddReport'] === true): ?>
+<?php if (in_array($task['status'], ['done', 'cancelled'])): ?>
+
+    <div class="ui-alert ui-alert-info">
+        Tento úkol je <?= ($task['status'] === 'done' ? 'uzavřený' : 'stornovaný') ?>, nelze k němu přidávat další reporty.
+    </div>
+
+<?php elseif ($task['canUserAddReport'] === true): ?>
 				<!-- START: Formulář pro zadávání reportů k úkolům -->
 				<div class="form-container">
 					    <form method="POST" class="form">
