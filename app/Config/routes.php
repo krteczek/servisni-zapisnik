@@ -15,6 +15,7 @@ use App\Controllers\TaskRecurringController;
 use App\Controllers\BillingExportController;
 use App\Controllers\ContactsController;
 use App\Controllers\ExportsController;
+use App\Controllers\ArchiveController;
 return [
 
 /*
@@ -471,7 +472,7 @@ return [
 |--------------------------------------------------------------------------
 |  routy pro zavření tasku k zakázce (done, canceled) Ještě možná budeme rušit/přesouvat
 |--------------------------------------------------------------------------
-*/
+* /
 
 [
     'method'  => 'POST',
@@ -487,6 +488,46 @@ return [
     'action'  => [WorkOrderController::class, 'closeTaskCanceled'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
+],
+*/
+
+/*
+|--------------------------------------------------------------------------
+|  Archiv
+|--------------------------------------------------------------------------
+*/
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/archive',
+    'action'  => [ArchiveController::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+ 
+],
+
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/archive/tasks',
+    'action'  => [ArchiveController::class, 'tasks'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'menu'    => 'Archiv',
+    'submenu' => 'Úkoly',
+    'section' => 'archive',
+    'title'   => 'Archiv: Úkoly',
+
+],
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/archive/work-orders',
+    'action'  => [ArchiveController::class, 'workOrders'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'menu'    => 'Archiv',
+    'submenu' => 'Zakázky',
+    'section' => 'archive',
+    'title'   => 'Archiv: Zakázky',
+
 ],
 
 

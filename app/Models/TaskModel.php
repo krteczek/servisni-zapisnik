@@ -445,4 +445,42 @@ public function canUserAddReport(int $taskId, int $userId): bool
 
         return $this->fetchAll($sql, $params);
     }
+
+    public function filterArchive(array $filters): array
+    {
+        $sql = "
+            SELECT t.*, w.title AS work_order_title
+            FROM {$this->tableName} t
+            INNER JOIN work_orders w 
+                ON w.id = t.work_order_id
+                AND w.company_id = t.company_id
+        ";
+
+        $sql .= " WHERE t.company_id = ?";
+        $params = [$this->tenantId()];
+
+        // status
+        if ($filters['status'] !== 'all') {
+            $sql .= " AND t.status = ?";
+            $params[] = $filters['status'];
+        } else {
+            $sql .= " AND t.status IN ('done','cancelled')";
+        }
+
+        // search
+        if ($filters['q'] !== '') {
+            $sql .= " AND t.title LIKE ?";
+            $params[] = '%' . $filters['q'] . '%';
+        }
+
+        // team
+        if (!empty($filters['team_id'])) {
+            $sql .= " AND t.team_id = ?";
+            $params[] = $filters['team_id'];
+        }
+
+        $sql .= " ORDER BY t.created_at DESC";
+
+        return $this->fetchAll($sql, $params);
+    }
 }

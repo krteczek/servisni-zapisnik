@@ -315,4 +315,29 @@ public function closeAsDone(int $orderId): bool
         return $this->createWithTenant($tenantId, $data);
     }
 
+
+    public function filterArchive(array $filters): array
+    {
+        $sql = "SELECT * FROM {$this->tableName} WHERE company_id = ?";
+        $params = [$this->tenantId()];
+
+        // status
+        if ($filters['status'] !== 'all') {
+            $sql .= " AND status = ?";
+            $params[] = $filters['status'];
+        } else {
+            $sql .= " AND status IN ('done','cancelled')";
+        }
+
+        // search
+        if ($filters['q'] !== '') {
+            $sql .= " AND title LIKE ?";
+            $params[] = '%' . $filters['q'] . '%';
+        }
+
+        $sql .= " ORDER BY created_at DESC";
+
+        return $this->fetchAll($sql, $params);
+    }
+
 }

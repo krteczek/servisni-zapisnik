@@ -169,6 +169,10 @@ class ViewContext
     public string $mode = '';
 
     public ?string $exception = '';
+
+    public string $type = '';
+
+    public array $statuses = [];
     // TODO: [MAINTENANCE] Přidat __construct() pro nastavení výchozích hodnot
     // TODO: [TYPING] Zvážit použití typed properties s nullable pro všechny proměnné
 }

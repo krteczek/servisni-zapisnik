@@ -711,4 +711,53 @@ protected function diff(array $before, array $after): array
     {
         return $this->tenantAware;
     }
+
+    // výběr z db podle statusu
+    public function whereStatus(
+        array $statuses,
+        string $orderBy = 'updated_at',
+        string $direction = 'DESC'
+    ): array
+    {
+        if (empty($statuses)) {
+            return [];
+        }
+
+        $allowedColumns = ['updated_at', 'created_at', 'title', 'status'];
+        $allowedDirections = ['ASC', 'DESC'];
+
+        if (!in_array($orderBy, $allowedColumns, true)) {
+            $orderBy = 'updated_at';
+        }
+
+        if (!in_array(strtoupper($direction), $allowedDirections, true)) {
+            $direction = 'DESC';
+        }
+
+        $in = implode(',', array_fill(0, count($statuses), '?'));
+
+        $sql = "SELECT * FROM {$this->tableName}
+                WHERE status IN ($in)";
+
+        $params = $statuses;
+
+        if ($this->tenantAware) {
+            $sql .= " AND {$this->tenantColumn} = ?";
+            $params[] = $this->tenantId();
+        }
+
+        $sql .= " ORDER BY $orderBy $direction";
+
+        return $this->fetchAll($sql, $params);
+    }
+
+    protected function buildSearchCondition(string $column, string $q, array &$params): string
+    {
+        if ($q === '') {
+            return '';
+        }
+
+        $params[] = '%' . $q . '%';
+        return " AND {$column} LIKE ?";
+    }
 }
