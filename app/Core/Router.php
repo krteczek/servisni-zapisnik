@@ -101,9 +101,6 @@ final class Router
 
             // auth
             if (($route['auth'] ?? false) && !Auth::user()) {
-                Url::redirect('/login');
-            }
-            if (($route['auth'] ?? false) && !Auth::user()) {
                 Flash::info('Byli jste odhlášeni systémem(změna oprávnění nebo neplatná session).');
                 Url::redirect('/login');
             }
