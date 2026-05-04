@@ -62,7 +62,10 @@ require __DIR__ . '/_filters.php';
                             ♻️ Klonovat
                         </a>
                         <?php else : ?>
-                            <p>Zakázka je již uzavřena, úkol nelze klonovat.</p>
+                            <a class="btn btn-secondary disabled"
+                                title="Zakázka je uzavřená, nelze klonovat">
+                                ♻️ Klonovat
+                            </a>
                             
                         <?php endif; ?>
 
