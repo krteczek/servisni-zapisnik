@@ -449,7 +449,7 @@ public function canUserAddReport(int $taskId, int $userId): bool
     public function filterArchive(array $filters): array
     {
         $sql = "
-            SELECT t.*, w.title AS work_order_title
+            SELECT t.*, w.title AS work_order_title, w.status AS work_order_status
             FROM {$this->tableName} t
             INNER JOIN work_orders w 
                 ON w.id = t.work_order_id
