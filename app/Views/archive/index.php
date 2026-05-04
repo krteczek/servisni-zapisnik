@@ -52,7 +52,7 @@ require __DIR__ . '/_filters.php';
                 <div class="card-footer">
                     <div class="actions">
 
-                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/detail/#main') ?>"
+                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>"
                         class="btn btn-secondary">
                             🔍 Detail
                         </a>
@@ -62,7 +62,7 @@ require __DIR__ . '/_filters.php';
                             ♻️ Klonovat
                         </a>
                         <?php else : ?>
-                            <p>Zakázka je již uzavřenaa nelze ji klonovat.</p>
+                            <p>Zakázka je již uzavřena, úkol nelze klonovat.</p>
                             
                         <?php endif; ?>
 
