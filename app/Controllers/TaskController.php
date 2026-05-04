@@ -310,7 +310,7 @@ private function saveTask(array $data, int $workOrderId): string
     public function cloneTaskGet(int $taskId): string
     {
         $task = $this->getTaskOrRedirect($taskId);
-        $this->ensureTaskEditable($task);
+        // $this->ensureTaskEditable($task);
 
         $order = (new WorkOrderModel())->find($task['work_order_id']);
         $teams = (new TeamModel())->byActive(true);
@@ -330,7 +330,7 @@ private function saveTask(array $data, int $workOrderId): string
     public function cloneTaskPost(int $taskId): string
     {
         $task = $this->getTaskOrRedirect($taskId);
-        $this->ensureTaskEditable($task);
+        // $this->ensureTaskEditable($task);
         return $this->saveTask($_POST, (int) $task['work_order_id']);
     }
 

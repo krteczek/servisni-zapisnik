@@ -56,11 +56,15 @@ require __DIR__ . '/_filters.php';
                         class="btn btn-secondary">
                             🔍 Detail
                         </a>
-
+<?php if ($order['status'] === 'new' || $order['status'] === 'in_progress') : ?>
                         <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/clone/#main') ?>"
                         class="btn btn-secondary">
                             ♻️ Klonovat
                         </a>
+                        <?php else : ?>
+                            <p>Zakázka je již uzavřenaa nelze ji klonovat.</p>
+                            
+                        <?php endif; ?>
 
                     </div>
                 </div>
