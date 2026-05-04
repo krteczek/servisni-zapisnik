@@ -313,6 +313,10 @@ private function saveTask(array $data, int $workOrderId): string
         // $this->ensureTaskEditable($task);
 
         $order = (new WorkOrderModel())->find($task['work_order_id']);
+        if (!$order) {
+            Flash::error('Zakázka neexistuje.');
+            Url::redirect('/{tenant}/work-orders');
+        }
 
         if (!in_array($order['status'], ['new', 'in_progress'], true)) {
             Flash::error('Zakázka je uzavřená, nelze klonovat.');
@@ -338,6 +342,10 @@ private function saveTask(array $data, int $workOrderId): string
         // $this->ensureTaskEditable($task);
         
         $order = (new WorkOrderModel())->find($task['work_order_id']);
+        if (!$order) {
+            Flash::error('Zakázka neexistuje.');
+            Url::redirect('/{tenant}/work-orders');
+        }
 
         if (!in_array($order['status'], ['new', 'in_progress'], true)) {
             Flash::error('Zakázka je uzavřená, nelze klonovat.');
