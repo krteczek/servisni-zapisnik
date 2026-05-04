@@ -39,6 +39,11 @@ a.link:hover {
   text-decoration: underline;
 }
 
+a.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
 .create-container {
   max-width: 900px;
   margin: 0 auto;
