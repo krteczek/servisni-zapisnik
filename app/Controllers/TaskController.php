@@ -313,6 +313,11 @@ private function saveTask(array $data, int $workOrderId): string
         // $this->ensureTaskEditable($task);
 
         $order = (new WorkOrderModel())->find($task['work_order_id']);
+
+        if (!in_array($order['status'], ['new', 'in_progress'], true)) {
+            Flash::error('Zakázka je uzavřená, nelze klonovat.');
+            Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail');
+        }
         $teams = (new TeamModel())->byActive(true);
 
         // předvyplníme formulář
@@ -331,6 +336,14 @@ private function saveTask(array $data, int $workOrderId): string
     {
         $task = $this->getTaskOrRedirect($taskId);
         // $this->ensureTaskEditable($task);
+        
+        $order = (new WorkOrderModel())->find($task['work_order_id']);
+
+        if (!in_array($order['status'], ['new', 'in_progress'], true)) {
+            Flash::error('Zakázka je uzavřená, nelze klonovat.');
+            Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail');
+        }
+    
         return $this->saveTask($_POST, (int) $task['work_order_id']);
     }
 

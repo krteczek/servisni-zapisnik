@@ -63,8 +63,10 @@ require __DIR__ . '/_filters.php';
                         </a>
                         <?php else : ?>
                             <a class="btn btn-secondary disabled"
-                                title="Zakázka je uzavřená, nelze klonovat">
-                                ♻️ Klonovat
+                                title="Zakázka je uzavřená, nelze klonovat"
+                                tabindex="-1"
+                                aria-disabled="true">
+                                ♻️ <s>Klonovat</s>
                             </a>
                             
                         <?php endif; ?>
