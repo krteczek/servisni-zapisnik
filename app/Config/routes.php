@@ -870,7 +870,7 @@ Přepínaní rolí u admina
 
 [
     'method' => 'POST',
-    'path'   => '/{tenant}/logout',
+    'path'   => '/logout',
     'action' => [AuthController::class, 'logout'],
     'auth'   => true,
     'menu'   => 'Odhlásit',
