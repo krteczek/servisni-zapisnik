@@ -69,6 +69,10 @@ public static function get(string $key, mixed $default = null): mixed
         var_dump(self::$cache[$file]);
 
         $value = self::$cache[$file];
+        if (!is_array($path)) {
+            throw new \RuntimeException("Invalid config path for key '{$key}'");
+        }
+
 foreach ($path as $segment) {
     if (!is_array($value)) {
         throw new \RuntimeException(
