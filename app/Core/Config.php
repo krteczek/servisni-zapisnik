@@ -46,7 +46,13 @@ final class Config
 
             // TODO: [SECURITY] Zvážit validaci struktury načtené konfigurace
             // TODO: [MAINTENANCE] Přidat logování načtených konfigurací v dev prostředí
+            
             self::$cache[$file] = require $configPath;
+
+if (!is_array(self::$cache[$file])) {
+    var_dump($file, self::$cache[$file]);
+    die('CONFIG ERROR');
+}
         }
 var_dump(self::$cache[$file]);
 
