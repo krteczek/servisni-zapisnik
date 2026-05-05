@@ -35,6 +35,7 @@ final class Config
      */
     public static function get(string $key, mixed $default = null): mixed
     {
+        error_log('CONFIG KEY: ' . $key);
         [$file, $path] = self::parseKey($key);
         //var_dump($key, $path);
         if (!isset(self::$cache[$file])) {
