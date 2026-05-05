@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use RuntimeException;
+
+
 /**
  * Služba pro správu konfigurace aplikace s podporou dot notation a lazy loading.
  * Načítá konfigurační soubory z adresáře Config a cachuje je pro celý request.
@@ -52,10 +55,6 @@ final class Config
             self::$cache[$file] = require $configPath;
             if (!is_array(self::$cache[$file])) {
                 throw new RuntimeException("Config '{$file}' musí vracet array.");
-            }
-            if (!is_array(self::$cache[$file])) {
-                var_dump($file, self::$cache[$file]);
-                die('CONFIG ERROR');
             }
         }
         var_dump(self::$cache[$file]);
