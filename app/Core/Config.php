@@ -46,7 +46,8 @@ final class Config
 
             // TODO: [SECURITY] Zvážit validaci struktury načtené konfigurace
             // TODO: [MAINTENANCE] Přidat logování načtenýchonfigurací v dev prostředí
-            
+            var_dump(__FILE__, filemtime(__FILE__));
+die;
             self::$cache[$file] = require $configPath;
 
             if (!is_array(self::$cache[$file])) {
@@ -54,7 +55,7 @@ final class Config
                 die('CONFIG ERROR');
             }
         }
-var_dump(self::$cache[$file]);
+        var_dump(self::$cache[$file]);
 
         $value = self::$cache[$file];
 foreach ($path as $segment) {
@@ -69,7 +70,9 @@ foreach ($path as $segment) {
     }
 
     $value = $value[$segment];
-}/*
+}
+
+/*
         foreach ($path as $segment) {
             if (!is_array($value) || !array_key_exists($segment, $value)) {
                 return $default;
