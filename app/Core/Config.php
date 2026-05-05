@@ -75,6 +75,8 @@ error_log('CONFIG RAW KEY VALUE: ' . print_r($key, true));
         }
 
 foreach ($path as $segment) {
+    error_log("SEGMENT: {$segment}, TYPE: " . gettype($value));
+
     if (!is_array($value)) {
         throw new \RuntimeException(
             "Config error for key '{$key}' – segment '{$segment}', value type: " . gettype($value)
