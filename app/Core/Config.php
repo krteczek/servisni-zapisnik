@@ -36,8 +36,17 @@ final class Config
      * @return mixed Konfigurační hodnota nebo výchozí hodnota
      * @throws \RuntimeException Pokud konfigurační soubor neexistuje
      */
-    public static function get(string $key, mixed $default = null): mixed
-    {
+public static function get(string $key, mixed $default = null): mixed
+{
+    if (!is_string($key)) {
+        throw new \RuntimeException('Config key must be string, got: ' . gettype($key));
+    }
+
+    [$file, $path] = self::parseKey($key);
+
+    if (!is_array($path)) {
+        throw new \RuntimeException('Config path must be array');
+    }
         error_log('CONFIG KEY: ' . $key);
         [$file, $path] = self::parseKey($key);
         //var_dump($key, $path);
