@@ -49,7 +49,7 @@ final class Config
             self::$cache[$file] = require $configPath;
         }
 var_dump(self::$cache[$file]);
-die;
+
         $value = self::$cache[$file];
 
         foreach ($path as $segment) {
