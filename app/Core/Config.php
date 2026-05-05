@@ -50,7 +50,9 @@ final class Config
             var_dump(__FILE__, filemtime(__FILE__));
 
             self::$cache[$file] = require $configPath;
-
+            if (!is_array(self::$cache[$file])) {
+                throw new RuntimeException("Config '{$file}' musí vracet array.");
+            }
             if (!is_array(self::$cache[$file])) {
                 var_dump($file, self::$cache[$file]);
                 die('CONFIG ERROR');
