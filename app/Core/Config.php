@@ -36,7 +36,7 @@ final class Config
     public static function get(string $key, mixed $default = null): mixed
     {
         [$file, $path] = self::parseKey($key);
-
+var_dump($key, $path);
         if (!isset(self::$cache[$file])) {
             $configPath = __DIR__ . '/../Config/' . $file . '.php';
 
