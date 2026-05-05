@@ -5,6 +5,7 @@ namespace App\Core;
 
 use Throwable;
 use App\Core\LoggerHolder;
+use App\Core\Config;
 
 /**
  * Globální handler pro nezachycené výjimky v aplikaci.
@@ -82,7 +83,7 @@ final class ExceptionHandler
      */
     private static function isDev(): bool
     {
-        return ($_ENV['APP_ENV'] ?? 'prod') === 'dev';
+        return Config::get('app.env') === 'dev';
     }
 
     /**
