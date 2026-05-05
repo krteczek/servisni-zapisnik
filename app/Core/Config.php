@@ -57,13 +57,25 @@ if (!is_array(self::$cache[$file])) {
 var_dump(self::$cache[$file]);
 
         $value = self::$cache[$file];
+foreach ($path as $segment) {
+    if (!is_array($value)) {
+        throw new \RuntimeException(
+            "Config error for key '{$key}' – segment '{$segment}', value type: " . gettype($value)
+        );
+    }
 
+    if (!array_key_exists($segment, $value)) {
+        return $default;
+    }
+
+    $value = $value[$segment];
+}/*
         foreach ($path as $segment) {
             if (!is_array($value) || !array_key_exists($segment, $value)) {
                 return $default;
             }
             $value = $value[$segment];
-        }
+        }*/
 
         return $value;
     }
