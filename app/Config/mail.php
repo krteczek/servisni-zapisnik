@@ -1,4 +1,10 @@
 <?php
 declare(strict_types=1);
 
-return dirname(__DIR__, 3) . '/bo.mail.php';
+$path = dirname(__DIR__, 3) . '/bo.mail.php';
+
+if (!file_exists($path)) {
+    throw new RuntimeException('Missing config file: ' . $path);
+}
+
+return require $path;
