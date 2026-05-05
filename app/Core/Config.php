@@ -41,7 +41,8 @@ public static function get(string $key, mixed $default = null): mixed
     if (!is_string($key)) {
         throw new \RuntimeException('Config key must be string, got: ' . gettype($key));
     }
-
+error_log('CONFIG RAW KEY TYPE: ' . gettype($key));
+error_log('CONFIG RAW KEY VALUE: ' . print_r($key, true));
     [$file, $path] = self::parseKey($key);
 
     if (!is_array($path)) {
