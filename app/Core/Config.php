@@ -47,7 +47,7 @@ final class Config
             // TODO: [SECURITY] Zvážit validaci struktury načtené konfigurace
             // TODO: [MAINTENANCE] Přidat logování načtenýchonfigurací v dev prostředí
             var_dump(__FILE__, filemtime(__FILE__));
-die;
+
             self::$cache[$file] = require $configPath;
 
             if (!is_array(self::$cache[$file])) {
