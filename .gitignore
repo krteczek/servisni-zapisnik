@@ -4,3 +4,5 @@ public/. htaccess ~
 /storage
 *.log
 sql/aktéry.parentid.sql~
+app/Config/app.php
+app/Config/database.php
