@@ -34,7 +34,7 @@ final class Config
      * @throws \RuntimeException Pokud konfigurační soubor neexistuje
      */
     public static function get(string $key, mixed $default = null): mixed
-    {
+    {die('NEW CONFIG LOADED');
         [$file, $path] = self::parseKey($key);
 var_dump($key, $path);
         if (!isset(self::$cache[$file])) {
