@@ -34,9 +34,9 @@ final class Config
      * @throws \RuntimeException Pokud konfigurační soubor neexistuje
      */
     public static function get(string $key, mixed $default = null): mixed
-    {die('NEW CONFIG LOADED');
+    {
         [$file, $path] = self::parseKey($key);
-var_dump($key, $path);
+        //var_dump($key, $path);
         if (!isset(self::$cache[$file])) {
             $configPath = __DIR__ . '/../Config/' . $file . '.php';
 
@@ -45,14 +45,14 @@ var_dump($key, $path);
             }
 
             // TODO: [SECURITY] Zvážit validaci struktury načtené konfigurace
-            // TODO: [MAINTENANCE] Přidat logování načtených konfigurací v dev prostředí
+            // TODO: [MAINTENANCE] Přidat logování načtenýchonfigurací v dev prostředí
             
             self::$cache[$file] = require $configPath;
 
-if (!is_array(self::$cache[$file])) {
-    var_dump($file, self::$cache[$file]);
-    die('CONFIG ERROR');
-}
+            if (!is_array(self::$cache[$file])) {
+                var_dump($file, self::$cache[$file]);
+                die('CONFIG ERROR');
+            }
         }
 var_dump(self::$cache[$file]);
 
