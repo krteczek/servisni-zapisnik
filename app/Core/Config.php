@@ -47,7 +47,8 @@ public static function get(string $key, mixed $default = null): mixed
             throw new \RuntimeException("Config soubor {$file} neexistuje");
         }
 
-        $data = require $configPath;
+        //$data = require $configPath;
+        $data = (static fn($p) => require $p)($configPath);
 
         if (!is_array($data)) {
             throw new \RuntimeException("Config '{$file}' musí vracet array.");

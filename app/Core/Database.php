@@ -204,61 +204,63 @@ final class Database
     }
     
     public static function workDatabaseExists(string $dbName): bool
-{
-    $cfg = Config::get('database.work');
+    {
+        $cfg = Config::get('database.work');
 
-    $dsn = sprintf(
-        'mysql:host=%s;charset=utf8mb4',
-        $cfg['host']
-    );
-
-    try {
-        $pdo = new PDO($dsn, $cfg['user'], $cfg['password'], self::options());
-
-        $stmt = $pdo->prepare(
-            "SELECT SCHEMA_NAME
-             FROM INFORMATION_SCHEMA.SCHEMATA
-             WHERE SCHEMA_NAME = :name"
+        $dsn = sprintf(
+            'mysql:host=%s;charset=utf8mb4',
+            $cfg['host']
         );
 
-        $stmt->execute(['name' => $dbName]);
+        try {
+            $pdo = new PDO($dsn, $cfg['user'], $cfg['password'], self::options());
 
-        return (bool) $stmt->fetch();
+            $stmt = $pdo->prepare(
+                "SELECT SCHEMA_NAME
+                FROM INFORMATION_SCHEMA.SCHEMATA
+                WHERE SCHEMA_NAME = :name"
+            );
 
-    } catch (PDOException) {
-        return false;
-    }
-}
+            $stmt->execute(['name' => $dbName]);
 
-public static function getCurrentDatabase(): ?string
-{
-    return self::$currentWorkDb;
-}
+            return (bool) $stmt->fetch();
 
-public static function useAdminDatabase(): void
-{
-    self::$currentWorkDb = null;
-}
-
-public static function setDatabase(?string $dbName): void
-{
-    self::$currentWorkDb = $dbName;
-}
-
-
-public static function connection(string $type): \PDO
-{
-    if ($type === 'admin') {
-        return self::admin();
+        } catch (PDOException) {
+            return false;
+        }
     }
 
-    if ($type === 'work') {
-        return self::work();
+    public static function getCurrentDatabase(): ?string
+    {
+        return self::$currentWorkDb;
     }
 
-    if (str_starts_with($type, 'work:')) {
-        return self::work(substr($type, 5));
+    public static function useAdminDatabase(): void
+    {
+        self::$currentWorkDb = null;
     }
 
-    throw new \RuntimeException("Unknown connection type: {$type}");
-}}
+    public static function setDatabase(?string $dbName): void
+    {
+        self::$currentWorkDb = $dbName;
+    }
+
+
+    public static function connection(string $type): \PDO
+    {
+        if ($type === 'admin') {
+            return self::admin();
+        }
+
+        if ($type === 'work') {
+            return self::work();
+        }
+
+        if (str_starts_with($type, 'work:')) {
+            return self::work(substr($type, 5));
+        }
+
+        throw new \RuntimeException("Unknown connection type: {$type}");
+    }
+    
+}
