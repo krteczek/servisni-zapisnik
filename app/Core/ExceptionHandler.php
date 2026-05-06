@@ -83,7 +83,8 @@ final class ExceptionHandler
      */
     private static function isDev(): bool
     {
-        return Config::get('app.env') === 'dev';
+        //return Config::get('app.env') === 'dev';
+        return false;
     }
 
     /**
