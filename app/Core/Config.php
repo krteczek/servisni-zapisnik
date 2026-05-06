@@ -38,68 +38,36 @@ final class Config
      */
 public static function get(string $key, mixed $default = null): mixed
 {
-    if (!is_string($key)) {
-        throw new \RuntimeException('Config key must be string, got: ' . gettype($key));
-    }
-error_log('CONFIG RAW KEY TYPE: ' . gettype($key));
-error_log('CONFIG RAW KEY VALUE: ' . print_r($key, true));
     [$file, $path] = self::parseKey($key);
 
-    if (!is_array($path)) {
-        throw new \RuntimeException('Config path must be array');
-    }
-        error_log('CONFIG KEY: ' . $key);
-        [$file, $path] = self::parseKey($key);
-        //var_dump($key, $path);
-        if (!isset(self::$cache[$file])) {
-            $configPath = __DIR__ . '/../Config/' . $file . '.php';
+    if (!isset(self::$cache[$file])) {
+        $configPath = __DIR__ . '/../Config/' . $file . '.php';
 
-            if (!is_file($configPath)) {
-                throw new \RuntimeException("Config soubor {$file} neexistuje");
-            }
-
-            // TODO: [SECURITY] Zvážit validaci struktury načtené konfigurace
-            // TODO: [MAINTENANCE] Přidat logování načtenýchonfigurací v dev prostředí
-            var_dump(__FILE__, filemtime(__FILE__));
-
-            self::$cache[$file] = require $configPath;
-            if (!is_array(self::$cache[$file])) {
-                throw new RuntimeException("Config '{$file}' musí vracet array.");
-            }
-        }
-        var_dump(self::$cache[$file]);
-
-        $value = self::$cache[$file];
-        if (!is_array($path)) {
-            throw new \RuntimeException("Invalid config path for key '{$key}'");
+        if (!is_file($configPath)) {
+            throw new \RuntimeException("Config soubor {$file} neexistuje");
         }
 
-foreach ($path as $segment) {
-    error_log("SEGMENT: {$segment}, TYPE: " . gettype($value));
+        $data = require $configPath;
 
-    if (!is_array($value)) {
-        throw new \RuntimeException(
-            "Config error for key '{$key}' – segment '{$segment}', value type: " . gettype($value)
-        );
+        if (!is_array($data)) {
+            throw new \RuntimeException("Config '{$file}' musí vracet array.");
+        }
+
+        self::$cache[$file] = $data;
     }
 
-    if (!array_key_exists($segment, $value)) {
-        return $default;
+    $value = self::$cache[$file];
+
+    foreach ($path as $segment) {
+        if (!is_array($value) || !array_key_exists($segment, $value)) {
+            return $default;
+        }
+
+        $value = $value[$segment];
     }
 
-    $value = $value[$segment];
+    return $value;
 }
-
-/*
-        foreach ($path as $segment) {
-            if (!is_array($value) || !array_key_exists($segment, $value)) {
-                return $default;
-            }
-            $value = $value[$segment];
-        }*/
-
-        return $value;
-    }
 
     /**
      * Parsuje dot notation klíč na název souboru a cestu v poli.
