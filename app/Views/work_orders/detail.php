@@ -230,6 +230,7 @@ $canCloseCanceled = $task['can_cancel'];
            Detail + reporty
         </a>
 
+        <?php if($task['can_edit']) : ?>
         <a class="btn btn-sm btn-primary"
            href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>"
            title="Upravit úkol">
