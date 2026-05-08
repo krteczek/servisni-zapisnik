@@ -149,7 +149,8 @@ final class Router
                 if ($response !== null) {
                     // ------- tady by to mělo podle mne být ------
                     // TODO: [UX] Zvážit ukládání full URL včetně query parametrů pro zpětné přesměrování
-                    Session::set('last_page', $path);
+                    //Session::set('last_page', $path);
+                    self::setLastPage($method);
                     
                     return $response;
                 }
@@ -263,5 +264,15 @@ final class Router
         );
 
         return '#^' . $regex . '$#';
+    }
+
+    private static function setLastPage(string $method): void
+    {
+        if (strtoupper($method) === 'GET') {
+            Session::set(
+                'last_page',
+                $_SERVER['REQUEST_URI']
+            );
+        }        
     }
 }
