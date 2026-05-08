@@ -42,9 +42,14 @@ $errors = $view->errors; // chyby validace
             <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 <?php if (in_array($task['status'], ['done', 'cancelled'])): ?>
 
-    <div class="ui-alert ui-alert-info">
+    <p class="ui-alert ui-alert-warning">
         Tento úkol je <?= ($task['status'] === 'done' ? 'uzavřený' : 'stornovaný') ?>, nelze k němu přidávat další reporty.
-    </div>
+
+</br></br>
+	
+		<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" class="btn btn-secondary" title="Jít na výpis úkolů">Jít na výpis úkolů</a>
+		<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/detail/#main') ?>" class="btn btn-secondary" title="Jít na detail Zakázky k níž patří tento úkol">Jít na detail Zakázky</a>
+    </p>
 
 <?php elseif ($task['canUserAddReport'] === true): ?>
 				<!-- START: Formulář pro zadávání reportů k úkolům -->
@@ -157,9 +162,8 @@ $errors = $view->errors; // chyby validace
 					            <button type="submit" class="btn btn-primary">
 					                Uložit report
 					            </button>
-					            <a href="<?= Url::to('/{tenant}/tasks/#main') ?>" class="btn btn-secondary">
-					                Zpět na přehled
-					            </a>
+								<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" class="btn btn-secondary" title="Jít na výpis úkolů">Jít na výpis úkolů</a>
+								<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/detail/#main') ?>" class="btn btn-secondary" title="Jít na detail Zakázky k níž patří tento úkol">Jít na detail Zakázky</a>
 					        </div>
 					    </form>
 				</div>

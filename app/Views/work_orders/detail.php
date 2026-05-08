@@ -140,11 +140,11 @@ $err = $view->errors;
           style="display:inline-block;">
 
         <?= Csrf::getField() ?>
-        <button class="btn btn-danger">Stornovat zakázku</button>
+        <button class="btn btn-danger" title="Stornovat zakázku">Stornovat zakázku</button>
     </form>
 <?php endif; ?>
 
-    <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
+    <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary" title="Zpět na přehled zakázek">
         ← Zpět na přehled
     </a>
 
@@ -225,12 +225,14 @@ $canCloseCanceled = $task['can_cancel'];
     <div class="card-footer">
 
         <a class="btn btn-sm btn-secondary"
-           href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>">
+           href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>"
+           title="Jít na detail úkolu a reporty">
            Detail + reporty
         </a>
 
         <a class="btn btn-sm btn-primary"
-           href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>">
+           href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>"
+           title="Upravit úkol">
            Upravit
         </a>
 
@@ -240,7 +242,7 @@ $canCloseCanceled = $task['can_cancel'];
               data-confirm="Opravdu chcete úkol stornovat?">
 
             <?= Csrf::getField() ?>
-            <button class="btn btn-sm btn-danger">Stornovat</button>
+            <button class="btn btn-sm btn-danger" title="Stornovat úkol">Stornovat</button>
 
         </form>
         <?php endif; ?>
@@ -252,7 +254,7 @@ $canCloseCanceled = $task['can_cancel'];
               >
 
             <?= Csrf::getField() ?>
-            <button class="btn btn-sm btn-success">Uzavřít</button>
+            <button class="btn btn-sm btn-success" title="Uzavřít úkol">Uzavřít</button>
 
         </form>
         <?php endif; ?>

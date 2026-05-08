@@ -178,12 +178,7 @@ public static function detectBase(): string
 
     return $scheme . '://' . $host . $portPart;
 }
-    public static function baseOLD(): string
-    {
-        // TODO: [SECURITY] Detekovat HTTPS přes $_SERVER['HTTPS'] nebo $_SERVER['REQUEST_SCHEME']
-        return 'http://' . $_SERVER["HTTP_HOST"];
-    }
-
+ 
     /**
      * Přesměruje zpět na předchozí stránku (HTTP referer) nebo na fallback.
      * Kontroluje, že referer je z stejné domény pro prevenci open redirect útoků.
@@ -198,7 +193,13 @@ public static function detectBase(): string
      * @param string $fallback Záložní cesta pokud referer není platný
      * @return never
      */
-    public static function back(string $fallback = '/'): never
+    public static function back(): never
+    {
+        $old = Session::get('last_page', '/');
+        self::redirect($old);
+    }
+
+    public static function back_OLD(string $fallback = '/'): never
     {
         $referer = $_SERVER['HTTP_REFERER'] ?? null;
 
