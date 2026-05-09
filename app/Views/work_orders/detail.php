@@ -230,13 +230,13 @@ $canCloseCanceled = $task['can_cancel'];
            Detail + reporty
         </a>
 
-        <?php if($task['can_edit']) : ?>
-        <a class="btn btn-sm btn-primary"
-           href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>"
-           title="Upravit úkol">
-           Upravit
-        </a>
-
+        <?php if ($task['can_edit']) : ?>
+            <a class="btn btn-sm btn-primary"
+            href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>"
+            title="Upravit úkol">
+            Upravit
+            </a>
+        <?php endif; ?>
         <?php if ($task['can_cancel'] && $task['status'] !== 'cancelled') : ?>
         <form method="post"
               action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
