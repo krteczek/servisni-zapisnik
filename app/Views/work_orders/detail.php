@@ -176,6 +176,11 @@ $err = $view->errors;
 <?php
 $canCloseDone = $task['can_close'];
 $canCloseCanceled = $task['can_cancel'];
+$canEdit = true;
+if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
+    $canEdit = false;
+} 
+ 
 ?>
 <div class="task-card card status-<?= e($task['status']) ?>" id="taskId_<?= (int)$task['id'] ?>" style="--task-color: <?= e($task['team_color']) ?>">
 
@@ -230,7 +235,7 @@ $canCloseCanceled = $task['can_cancel'];
            Detail + reporty
         </a>
 
-        <?php if ($task['can_edit']) : ?>
+        <?php if ($canEdit) : ?>
             <a class="btn btn-sm btn-primary"
             href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>"
             title="Upravit úkol">
