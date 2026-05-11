@@ -354,6 +354,7 @@ return [
     'method' => 'POST',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/done',
     'action' => [TaskController::class, 'done'],
+    'roles'   => ['admin', 'mistr'],
     'auth'   => true,
 ],
 
@@ -361,6 +362,7 @@ return [
     'method' => 'POST',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/cancel',
     'action' => [TaskController::class, 'cancel'],
+    'roles'   => ['admin', 'mistr'],
     'auth'   => true,
 ],
 

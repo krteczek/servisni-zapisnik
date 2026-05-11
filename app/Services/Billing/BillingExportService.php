@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace App\Services\Billing;
 
 use App\Core\Database;
-use App\Core\Auth;
+use \Throwable;
+//use App\Core\Auth;
 use PDO;
 
 final class BillingExportService
@@ -12,11 +13,12 @@ final class BillingExportService
 	 
     protected string $connection = 'work';
 
-public function __construct()
-{
-    //zrušeno protože se přešlo na model jedné databáze pro uživatele i práci.
-	//Database::useWorkDatabase('work');
-}
+    public function __construct()
+    {
+        //zrušeno protože se přešlo na model jedné databáze pro uživatele i práci.
+        //Database::useWorkDatabase('work');
+    }
+
     public function getExports(int $companyId): array
     {
 
@@ -237,9 +239,11 @@ public function getExportableItems(int $companyId, string $from, string $to): ar
             ON u.id = tap.user_id
 
         WHERE tap.company_id = :company_id
-          AND tap.created_at BETWEEN :from AND :to
-          AND tap.billing_export_id IS NULL
-          AND ta.billing_export_id IS NULL
+            AND tap.created_at BETWEEN :from AND :to
+            AND tap.billing_export_id IS NULL
+            AND ta.billing_export_id IS NULL
+            AND t.billing_export_id IS NULL
+            AND t.status = 'done'
         FOR UPDATE
     ");
 
@@ -312,6 +316,30 @@ private function markAsExported(
     $pdo = Database::work();
 
     // =========================
+    // 0) TASKS
+    // =========================
+    $taskIds = array_unique(array_column($items, 'task_id'));
+
+    if ($taskIds) {
+
+        $in = implode(',', array_fill(0, count($taskIds), '?'));
+
+        $stmt = $pdo->prepare("
+            UPDATE tasks
+            SET billing_export_id = ?
+            WHERE company_id = ?
+            AND status = 'done'
+            AND billing_export_id IS NULL
+            AND id IN ($in)
+        ");
+
+        $stmt->execute(array_merge(
+            [$exportId, $companyId],
+            $taskIds
+        ));
+    }
+
+    // =========================
     // 1) ASSIGNMENTS
     // =========================
     $assignmentIds = array_unique(array_column($items, 'task_assignment_id'));
@@ -368,6 +396,185 @@ private function markAsExported(
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
+}
+
+
+
+public function cancelExport(
+    int $companyId,
+    int $exportId,
+    int $userId,
+    ?string $reason = null
+): void {
+
+    $pdo = Database::work();
+
+    $pdo->beginTransaction();
+
+    try {
+
+        // =========================
+        // 1) LOCK EXPORT
+        // =========================
+        $stmt = $pdo->prepare("
+            SELECT *
+            FROM billing_exports
+            WHERE id = :id
+              AND company_id = :company_id
+            LIMIT 1
+            FOR UPDATE
+        ");
+
+        $stmt->execute([
+            'id' => $exportId,
+            'company_id' => $companyId,
+        ]);
+
+        $export = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$export) {
+            throw new \RuntimeException('Export not found');
+        }
+
+        if ($export['status'] === 'cancelled') {
+            throw new \LogicException('Export already cancelled');
+        }
+
+        // =========================
+        // 2) LOAD SNAPSHOT ITEMS
+        // =========================
+        $stmt = $pdo->prepare("
+            SELECT
+                task_id,
+                task_assignment_id,
+                user_id
+            FROM billing_export_items
+            WHERE billing_export_id = :export_id
+              AND company_id = :company_id
+            FOR UPDATE
+        ");
+
+        $stmt->execute([
+            'export_id' => $exportId,
+            'company_id' => $companyId,
+        ]);
+
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // =========================
+        // 3) CANCEL EXPORT
+        // =========================
+        $stmt = $pdo->prepare("
+            UPDATE billing_exports
+            SET
+                status = 'cancelled',
+                cancelled_at = NOW(),
+                cancelled_by_user_id = :user_id,
+                cancel_reason = :reason
+            WHERE id = :id
+              AND company_id = :company_id
+        ");
+
+        $stmt->execute([
+            'id' => $exportId,
+            'company_id' => $companyId,
+            'user_id' => $userId,
+            'reason' => $reason,
+        ]);
+
+        // =========================
+        // 4) RETURN TASKS
+        // =========================
+        $taskIds = array_unique(array_column($items, 'task_id'));
+
+        if ($taskIds) {
+
+            $in = implode(',', array_fill(0, count($taskIds), '?'));
+
+            $stmt = $pdo->prepare("
+                UPDATE tasks
+                SET billing_export_id = NULL
+                WHERE company_id = ?
+                  AND billing_export_id = ?
+                  AND id IN ($in)
+            ");
+
+            $stmt->execute(array_merge(
+                [$companyId, $exportId],
+                $taskIds
+            ));
+        }
+
+        // =========================
+        // 5) RETURN ASSIGNMENTS
+        // =========================
+        $assignmentIds = array_unique(
+            array_column($items, 'task_assignment_id')
+        );
+
+        if ($assignmentIds) {
+
+            $in = implode(',', array_fill(0, count($assignmentIds), '?'));
+
+            $stmt = $pdo->prepare("
+                UPDATE task_assignments
+                SET billing_export_id = NULL
+                WHERE company_id = ?
+                  AND billing_export_id = ?
+                  AND id IN ($in)
+            ");
+
+            $stmt->execute(array_merge(
+                [$companyId, $exportId],
+                $assignmentIds
+            ));
+        }
+
+        // =========================
+        // 6) RETURN PARTICIPANTS
+        // =========================
+        if ($items) {
+
+            $conditions = [];
+            $params = [
+                'company_id' => $companyId,
+                'export_id'  => $exportId,
+            ];
+
+            foreach ($items as $i => $item) {
+
+                $conditions[] =
+                    "(assignment_id = :a{$i} AND user_id = :u{$i})";
+
+                $params["a{$i}"] =
+                    $item['task_assignment_id'];
+
+                $params["u{$i}"] =
+                    $item['user_id'];
+            }
+
+            $sql = "
+                UPDATE task_assignment_participants
+                SET billing_export_id = NULL
+                WHERE company_id = :company_id
+                  AND billing_export_id = :export_id
+                  AND (
+                      " . implode(' OR ', $conditions) . "
+                  )
+            ";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+        }
+
+        $pdo->commit();
+
+    } catch (\Throwable $e) {
+
+        $pdo->rollBack();
+
+        throw $e;
+    }
 }
 
 
