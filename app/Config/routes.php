@@ -16,6 +16,8 @@ use App\Controllers\BillingExportController;
 use App\Controllers\ContactsController;
 use App\Controllers\ExportsController;
 use App\Controllers\ArchiveController;
+use App\Controllers\WorkbenchController;
+
 return [
 
 /*
@@ -204,6 +206,16 @@ return [
 ],
 
 */
+
+[ 
+    'method' => 'GET', 
+    'path' => '/dashboard', 
+    'action' => [WorkbenchController::class, 'index'], 
+    'auth' => true, 
+    'roles' => ['admin', 'mistr'], 
+    'menu' => 'Pracovní stůl', 
+    'section' => 'workbench', 
+    'title' => 'Pracovní stůl', ],
 /*
 |--------------------------------------------------------------------------
 | TASKY
