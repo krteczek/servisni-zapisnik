@@ -38,6 +38,7 @@ public function canBeClosed(array $task, string $newStatus): bool
         default     => false,
     };
 }
+
 private function canBeDone(array $stats): bool
 {
     return $stats['assignments_count'] > 0;

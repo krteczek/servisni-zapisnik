@@ -77,7 +77,7 @@ $data = $view->data;
 
                         </td>
 
-                        </td>
+                       
                     </tr>
                 <?php endforeach; ?>
             </tbody>

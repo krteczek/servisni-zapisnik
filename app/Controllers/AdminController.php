@@ -20,7 +20,7 @@ final class AdminController extends Controller
 public function switchRole(string $role): void
 {
     Auth::switchRole($role);
-    Url::back('/');
+    Url::back();
 }
 
 }

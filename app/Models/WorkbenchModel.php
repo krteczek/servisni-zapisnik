@@ -18,14 +18,21 @@ class WorkbenchModel extends BaseModel
         $teamIds = array_column($myTeams, 'id');
         
         return [
-            'myTeams'         => $myTeams,
-            'otherTeams'      => $this->otherTeams($teamIds),
-            'myTeamTasks'     => $this->openTasksForMyTeams($teamIds),
-            'otherTeamTasks'  => $this->openTasksForOtherTeams($teamIds),
-            //'myBillingTasks'    => $this->myBillingTasks($teamIds),
-            //'otherBillingTasks'    => $this->otherBillingTasks($teamIds),
-            //'myPrepareToDoneTask' => $this->myPrepareToDoneTask($teamIds),
-            //'otherPrepareToDoneTask' => $this->otherPrepareToDoneTask($teamIds),
+            'myTeams'                   => $myTeams,
+            'otherTeams'                => $this->otherTeams($teamIds),
+
+            'myTeamTasks'               => $this->openTasksForMyTeams($teamIds),
+            'otherTeamTasks'            => $this->openTasksForOtherTeams($teamIds),
+
+            'myReadyToDoneTasks'       => $this->myReadyToDoneTasks($teamIds),
+            'otherReadyToDoneTasks'    => $this->otherReadyToDoneTasks($teamIds),
+
+            //'myReadyToDoneOrders'     => $this->myReadyToDoneOrders($teamIds),
+            //'otherReadyToDoneOrders'    => $this->otherReadyToDoneOrders($teamIds),
+
+           //'myBillingTasks'           => $this->myBillingTasks($teamIds),
+            //'otherBillingTasks'       => $this->otherBillingTasks($teamIds),
+            //
         ];
     }
 
@@ -237,5 +244,113 @@ private function openTasksForOtherTeams(array $teamIds): array
 
     return $this->fetchAll($sql, $params);
 }
+
+
+    private function myReadyToDoneTasks(array $teamIds): array
+    {
+        if ($teamIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+        $sql = 
+            "SELECT
+                t.id,
+                t.title,
+                t.team_id,
+                t.work_order_id,
+                t.status,
+
+                COUNT(ta.id) AS assignments_count
+
+            FROM tasks t
+
+            LEFT JOIN task_assignments ta
+                ON ta.task_id = t.id
+            AND ta.company_id = t.company_id
+
+            WHERE
+                t.company_id = ?
+                AND t.team_id IN ($placeholders)
+                AND t.status = 'open'
+
+            GROUP BY t.id
+
+            HAVING COUNT(ta.id) >= 1
+
+            ORDER BY t.created_at ASC";
+
+            return $this->fetchAll($sql, array_merge([Auth::companyId()], $teamIds));
+    }
+
+    private function otherReadyToDoneTasks(array $teamIds): array
+    {
+
+        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+                $sql = 
+            "SELECT
+                t.id,
+                t.title,
+                t.team_id,
+                t.work_order_id,
+                t.status,
+
+                COUNT(ta.id) AS assignments_count
+
+            FROM tasks t
+
+            LEFT JOIN task_assignments ta
+                ON ta.task_id = t.id
+            AND ta.company_id = t.company_id
+
+            WHERE
+                t.company_id = ?
+                AND t.status = 'open'
+                ";
+                
+
+        $params = [Auth::companyId()];
+
+        if ($teamIds !== []) {
+            $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+            $sql .= " AND t.team_id NOT IN ($placeholders)";
+
+            $params = array_merge($params, $teamIds);
+        }
+
+        $sql .= "
+            GROUP BY t.id
+
+            HAVING COUNT(ta.id) >= 1
+
+            ORDER BY t.created_at ASC";
+
+            return $this->fetchAll($sql, array_merge([Auth::companyId()], $teamIds));
+
+
+
+    }
+
+    private function myReadyToDoneOrders(array $teamIds): array
+    {
+        if ($teamIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+    }
+
+    private function otherReadyToDoneOrders(array $teamIds): array
+    {
+        if ($teamIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+    }
 
 }
