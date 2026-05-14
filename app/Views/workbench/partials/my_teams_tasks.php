@@ -56,7 +56,7 @@ $data = $view->data;
                         </td>
                         
                         <td><?= e($task['due_date'] ?? 'Neuveden') ?></td>
-                        <td>                        <td>
+                        <td>                        
                             <?php if ($task['is_recurring_master']): ?>
                                 <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurringEdit/#main') ?>" 
                                     title="Upravit nastavení tohoto opakujícího se úkolu"
