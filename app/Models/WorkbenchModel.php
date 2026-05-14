@@ -22,7 +22,7 @@ class WorkbenchModel extends BaseModel
             'otherTeams'      => $this->otherTeams($teamIds),
             'myTeamTasks'     => $this->openTasksForMyTeams($teamIds),
             'otherTeamTasks'  => $this->openTasksForOtherTeams($teamIds),
-            'myBillingTasks'    => $this->myBillingTasks($teamIds),
+            //'myBillingTasks'    => $this->myBillingTasks($teamIds),
             //'otherBillingTasks'    => $this->otherBillingTasks($teamIds),
             //'myPrepareToDoneTask' => $this->myPrepareToDoneTask($teamIds),
             //'otherPrepareToDoneTask' => $this->otherPrepareToDoneTask($teamIds),
