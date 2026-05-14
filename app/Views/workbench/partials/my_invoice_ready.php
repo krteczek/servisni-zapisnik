@@ -25,9 +25,9 @@ $data = $view->data;
         <?php foreach ($data['myBillingTasks'] as $task): ?>
         <tr>
             <td><?= e($task['title']) ?></td>
-            <td><?= e($task['title']) ?></td>
-            <td><?= e($task['title']) ?></td>
-            <td><?= e($task['title']) ?></td>
+            <td><?= e($task['team_name']) ?></td>
+            <td> <?= e($task['work_order_title']) ?></td>
+            <td></td>
         </tr>
         <?php endforeach; ?>
      </tbody>
