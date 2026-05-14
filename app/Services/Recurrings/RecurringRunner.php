@@ -184,6 +184,7 @@ private static function processCompany(array $company): void
                     'description'          => $source['description'],
                     'status'               => 'open',
                     'created_by_user_id'   => $source['created_by_user_id'],
+                    'due_date'             => $rt['next_due_date'],
                 ]);
 
                 $nextDate = self::calculateNextDate(

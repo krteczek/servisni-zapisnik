@@ -351,7 +351,8 @@ private function markAsExported(
             UPDATE task_assignments
             SET billing_export_id = ?
             WHERE company_id = ?
-              AND id IN ($in)
+                AND billing_export_id IS NULL
+                AND id IN ($in)
         ");
 
         $stmt->execute(array_merge([$exportId, $companyId], $assignmentIds));
