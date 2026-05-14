@@ -10,45 +10,6 @@ use App\Core\Url;
 $data = $view->data;
 //var_dump($data);
 ?>
-<style>
-    table, th, td {
-        border: 1px solid #ccc;
-        border-collapse: collapse;
-
-    }
-    tbody tr:nth-child(even) {
-        background: #fafafa;
-    }
-
-    .open-new-tab {
-    margin-left: .35rem;
-    opacity: .5;
-    text-decoration: none;
-}
-    .open-new-tab:hover {
-        opacity: 1;
-    }
-
-    .tabs {
-    display: flex;
-    gap: .25rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #ccc;
-}
-
-.tab-button {
-    padding: .6rem 1rem;
-    border: 1px solid #ccc;
-    border-bottom: none;
-    background: #f3f3f3;
-    cursor: pointer;
-}
-
-.tab-button.active {
-    background: white;
-    font-weight: bold;
-}
-</style>
 
 <div class="workbench-container">
     <h2>Moje týmy</h2>
@@ -74,13 +35,26 @@ $data = $view->data;
 
     <h2>Důležité akce</h2>
     <div>
-        <button class="tab-button" data-target="my-tasks" title="úkoly týmů, kterých jsem členem">Otevřené úkoly pro mé týmy</button>
-        <button class="tab-button" data-target="other-tasks" title="úkoly týmů, kterých nejsem členem">Otevřené úkoly pro ostatní týmy</button>
-        <button class="tab-button" data-target="billing-tasks" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci</button>
-        <button class="tab-button" data-target="prepare-to-done-tasks" title="úkoly, které lze uzavřít">K uzavření</button>
-        <button class="tab-button" data-target="prepare-to-cancel-tasks" title="úkoly, které lze stornovat">Ke stornování</button>
-        <button class="tab-button" data-target="recurring-tasks" title="opakované úkoly">Opakované úkoly</button>
+        <button class="tab-button" data-target="myTabsButtons" title="Moje Akce">Moje Akce</button>
+        <button class="tab-button" data-target="otherTabsButtons" title="Akce pro ostatní týmy">Ostatní týmy</button>
     </div>
+    <div>
+        <div id="myTabsButtons"  class="tab-content">
+                <button class="tab-button" data-target="my-tasks" title="úkoly týmů, kterých jsem členem">Otevřené úkoly (mé) [<?= count($data['myTeamTasks']) ?>]</button>
+                <button class="tab-button" data-target="my-prepare-to-done" title="moje úkoly a zakázky, které lze uzavřít">K uzavření (mé) [<?= count($data['myReadyToDoneTasks']) ?>]</button>
+                <button class="tab-button" data-target="my-prepare-to-cancel" title="úkoly, které lze stornovat">Ke stornování (mé) []</button>
+                <button class="tab-button" data-target="my-billing" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (mé)</button>
+        </div>
+
+        <div id="otherTabsButtons"  class="tab-content" hidden>
+            <button class="tab-button" data-target="other-tasks" title="úkoly týmů, kterých nejsem členem">Otevřené úkoly (ostatní) [<?= count($data['otherTeamTasks']) ?>]</button>
+            <button class="tab-button" data-target="other-prepare-to-done" title="ostatní úkoly a zakázky, které lze uzavřít">K uzavření (ostatní) [<?= count($data['otherReadyToDoneTasks']) ?>]</button>
+            <button class="tab-button" data-target="other-prepare-to-cancel" title="úkoly, které lze stornovat">Ke stornování (ostatní)</button>
+            <button class="tab-button" data-target="other-billing" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (ostatní)</button>
+        </div>
+    </div>
+
+
 
 
     <div id="my-tasks" class="tab-content">
@@ -89,33 +63,45 @@ $data = $view->data;
         
     </div>
     
-    <div id="other-tasks" class="tab-content" hidden>
-        <!-- úkoly pro ostatní týmy -->
-        <?php require __DIR__ . '/partials/other_teams_tasks.php'; ?>
+    <div id="my-prepare-to-done" class="tab-content" hidden>
+        <!-- Připraveno k uzavření -->
+        <?php require __DIR__ . '/partials/my_prepare_to_done.php'; ?>
     </div>
-    <div id="billing-tasks" class="tab-content" hidden>
+
+    <div id="my-prepare-to-cancel" class="tab-content" hidden>
+        <h2>Připraveno k stornování</h2>
+        <p>Sed pulvinar mi at mollis...</p>
+    </div>
+
+    <div id="my-billing" class="tab-content" hidden>
         <!-- úkoly pro mé týmy k fakturaci -->
         <h2>Seznam úkolů připravených k fakturaci</h2>
         <p>Lorem ipsum dolor sit ... </p>
     </div>
 
 
-    <div id="prepare-to-done-tasks" class="tab-content" hidden>
-        <h2>Seznam úkolů připravených k uzavření</h2>
-        <p>Sed pulvinar mi at mollis...</p>
+    <!-- Akce pro ostatní týmy -->
+    <div id="other-tasks" class="tab-content" hidden>
+        <!-- úkoly pro ostatní týmy -->
+        <?php require __DIR__ . '/partials/other_teams_tasks.php'; ?>
     </div>
 
+     <div id="other-prepare-to-done" class="tab-content" hidden>
+        <!-- Připraveno k uzavření -->
+        <?php require __DIR__ . '/partials/other_prepare_to_done.php'; ?>
+    </div>
 
-    <div id="prepare-to-cancel-tasks" class="tab-content" hidden>
-        <h2>Seznam úkolů připravených ke stornování</h2>
+    <div id="other-prepare-to-cancel" class="tab-content" hidden>
+        <h2>Seznam úkolů a zakázek připravených ke stornování</h2>
         <p>Maecenas sit amet purus at turpis sceleriivamus ... </p>
     </div>
 
-
-    <div id="recurring-tasks" class="tab-content" hidden>
-        <h2>Seznam opakujících se úkolů</h2>
-        <p>Integer fringilla, arcu vitae consequat congue,</p>
+   <div id="other-billing" class="tab-content" hidden>
+        <!-- úkoly pro mé týmy k fakturaci -->
+        <h2>Seznam úkolů připravených k fakturaci</h2>
+        <p>Lorem ipsum dolor sit ... </p>
     </div>
+
 
 
 </div><!-- .workbench-container -->

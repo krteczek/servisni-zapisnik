@@ -144,40 +144,40 @@ final class Url
 	{
 	    return Config::get('app.url') ?? self::detectBase();
 	}
-public static function detectBase(): string
-{
-    // 1️⃣ Detekce schématu (https/http)
-    $isHttps = false;
+    public static function detectBase(): string
+    {
+        // 1️⃣ Detekce schématu (https/http)
+        $isHttps = false;
 
-    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-        $isHttps = true;
-    } elseif (($_SERVER['SERVER_PORT'] ?? null) == 443) {
-        $isHttps = true;
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-        $isHttps = $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
-    }
-
-    $scheme = $isHttps ? 'https' : 'http';
-
-    // 2️⃣ Host (proxy-friendly)
-    $host = $_SERVER['HTTP_X_FORWARDED_HOST']
-        ?? $_SERVER['HTTP_HOST']
-        ?? $_SERVER['SERVER_NAME']
-        ?? 'localhost';
-
-    // 3️⃣ Port (jen pokud není standardní)
-    $port = $_SERVER['SERVER_PORT'] ?? null;
-
-    $portPart = '';
-    if ($port && !in_array((int)$port, [80, 443], true)) {
-        // Pozor: HTTP_HOST už může port obsahovat
-        if (!str_contains($host, ':')) {
-            $portPart = ':' . $port;
+        if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+            $isHttps = true;
+        } elseif (($_SERVER['SERVER_PORT'] ?? null) == 443) {
+            $isHttps = true;
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+            $isHttps = $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
         }
-    }
 
-    return $scheme . '://' . $host . $portPart;
-}
+        $scheme = $isHttps ? 'https' : 'http';
+
+        // 2️⃣ Host (proxy-friendly)
+        $host = $_SERVER['HTTP_X_FORWARDED_HOST']
+            ?? $_SERVER['HTTP_HOST']
+            ?? $_SERVER['SERVER_NAME']
+            ?? 'localhost';
+
+        // 3️⃣ Port (jen pokud není standardní)
+        $port = $_SERVER['SERVER_PORT'] ?? null;
+
+        $portPart = '';
+        if ($port && !in_array((int)$port, [80, 443], true)) {
+            // Pozor: HTTP_HOST už může port obsahovat
+            if (!str_contains($host, ':')) {
+                $portPart = ':' . $port;
+            }
+        }
+
+        return $scheme . '://' . $host . $portPart;
+    }
  
     /**
      * Přesměruje zpět na předchozí stránku (HTTP referer) nebo na fallback.
@@ -190,7 +190,7 @@ public static function detectBase(): string
      *
      * TODO: [SECURITY] Přidat whitelist povolených domén pro cross-domain referery
      *
-     * @param string $fallback Záložní cesta pokud referer není platný
+     * 
      * @return never
      */
     public static function back(): never
@@ -199,18 +199,7 @@ public static function detectBase(): string
         self::redirect($old);
     }
 
-    public static function back_OLD(string $fallback = '/'): never
-    {
-        $referer = $_SERVER['HTTP_REFERER'] ?? null;
 
-        if ($referer && str_starts_with($referer, self::to(''))) {
-            header('Location: ' . $referer);
-        } else {
-            self::redirect($fallback);
-        }
-
-        exit;
-    }
 
     /**
      * Přesměruje na stejnou stránku (refresh).
