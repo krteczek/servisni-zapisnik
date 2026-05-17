@@ -23,7 +23,12 @@ $tasks = $view->data;
         <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
-                <span class="card-title">
+                <?php if ($task['is_recurring_master']): ?>
+                    <span class="badge badge-recurring" title="opakující se, master">🔁</span>
+                <?php elseif ($task['is_generated_task']): ?>
+                    <span class="badge badge-recurring" title="generovaný úkol">↻</span>
+                <?php endif; ?>
+               <span class="card-title">
                     <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>"
                        title="Přidat report k tomuto úkolu">
                     <?= e($task['title']) ?>
@@ -31,11 +36,7 @@ $tasks = $view->data;
                 <span class="badge badge-status-<?= e($task['status']) ?>">
                     <?= te($task['status']) ?>
                 </span>
-<?php if ($task['is_recurring_master']): ?>
-<span class="badge badge-recurring">🔁</span>
-<?php elseif ($task['is_generated_task']): ?>
-<span class="badge badge-recurring">↻</span>
-<?php endif; ?>
+
             </div>
 
             <!-- TĚLO KARTY -->
@@ -52,8 +53,37 @@ $tasks = $view->data;
             
                         </div>
                     <?php endif; ?>
+                            <?php
+                            $deadlineClass = 'deadline-none';
+                            $deadlineText  = 'Neuvedeno';
+
+                            if ($task['due_date']) {
+
+                                $today = date('Y-m-d');
+                                $due   = date('Y-m-d', strtotime($task['due_date']));
+
+                                $deadlineText = date('d.m.Y', strtotime($task['due_date']));
+
+                                if ($due < $today) {
+                                    $deadlineClass = 'deadline-late';
+                                } elseif ($due === $today) {
+                                    $deadlineClass = 'deadline-today';
+                                } else {
+                                    $deadlineClass = 'deadline-future';
+                                }
+                            }
+                            ?>
+
+                            <div class="meta-item">
+                                <span class="meta-label">Termín:</span>
+
+                                <span class="meta-value <?= $deadlineClass ?>">
+                                    <?= e($deadlineText) ?>
+                                </span>
+                            </div>                            
+                   
 							<div class="meta-item">
-								<span class="meta-label">Počer reportů: </span>
+								<span class="meta-label">Počet reportů: </span>
 								<span class="meta-value"><?= (int)$task['reports_count'] ?></span>
 							</div>
 							<div class="meta-item">
@@ -70,18 +100,24 @@ $tasks = $view->data;
             <!-- PATIČKA KARTY -->
             <div class="card-footer">
                 <div class="actions">
+                    <?php if ($task['is_recurring_master'] === 1 || $task['is_generated_task'] === 0): ?>
 
-						  <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
-                       class="btn btn-secondary" 
-                       title="Upravit úkol">
-                        ✏️ Upravit úkol
-                    </a>
+                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
+                        class="btn btn-secondary" 
+                        title="Upravit úkol">
+                            ✏️ Upravit úkol
+                        </a>
+                    <?php endif; ?>
                     <?php if($task['can_add_report'] === true): ?>
                     <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Přidat report k tomuto úkolu">
                         📝 Napsat Report
                     </a>
+                    <?php else: ?>
+                    <span class="btn btn-secondary disabled" title="Nelze přidat report k tomuto úkolu">
+                        📝 Napsat Report
+                    </span>
                     <?php endif;?>
                 </div>
             </div>

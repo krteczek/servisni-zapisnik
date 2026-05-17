@@ -35,6 +35,7 @@ use App\Core\Session;
     <link rel="stylesheet" href="<?= Url::to('/css/flash.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/footer.css') ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/table.css') ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/deadline.css') ?>">
 <script src="<?= Url::to('/js/app.js') ?>"></script>
 <!--    -->
  <style>
@@ -54,6 +55,7 @@ require __DIR__ . '/../../../public/css/form.css';
 require __DIR__ . '/../../../public/css/flash.css';
 require __DIR__ . '/../../../public/css/footer.css';
 require __DIR__ . '/../../../public/css/table.css';
+require __DIR__ . '/../../../public/css/deadline.css';
 /* */
 ?>
  </style>

@@ -185,6 +185,13 @@ if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
 <div class="task-card card status-<?= e($task['status']) ?>" id="taskId_<?= (int)$task['id'] ?>" style="--task-color: <?= e($task['team_color']) ?>">
 
     <div class="card-header">
+
+                <?php if ($task['is_recurring_master']): ?>
+                    <span class="badge badge-recurring" title="opakující se, master">🔁</span>
+                <?php elseif ($task['is_generated_task']): ?>
+                    <span class="badge badge-recurring" title="generovaný úkol">↻</span>
+                <?php endif; ?>
+
         <strong><?= e($task['title'] ?? 'Bez názvu') ?></strong>
 
         <span class="badge badge-status-<?= e($task['status']) ?>">
@@ -193,6 +200,34 @@ if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
     </div>
 
     <div class="card-body">
+                            <?php
+                            $deadlineClass = 'deadline-none';
+                            $deadlineText  = 'Neuvedeno';
+
+                            if ($task['due_date']) {
+
+                                $today = date('Y-m-d');
+                                $due   = date('Y-m-d', strtotime($task['due_date']));
+
+                                $deadlineText = date('d.m.Y', strtotime($task['due_date']));
+
+                                if ($due < $today) {
+                                    $deadlineClass = 'deadline-late';
+                                } elseif ($due === $today) {
+                                    $deadlineClass = 'deadline-today';
+                                } else {
+                                    $deadlineClass = 'deadline-future';
+                                }
+                            }
+                            ?>
+
+                            <div class="meta-item">
+                                <span class="meta-label">Termín:</span>
+
+                                <span class="meta-value <?= $deadlineClass ?>">
+                                    <?= e($deadlineText) ?>
+                                </span>
+                            </div>                            
 
         <div class="meta-item">
             <span class="meta-label">Úkol řeší tým:</span>
@@ -236,21 +271,27 @@ if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
         </a>
 
         <?php if ($canEdit) : ?>
-            <a class="btn btn-sm btn-primary"
-            href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>"
-            title="Upravit úkol">
-            Upravit
-            </a>
+            <?php if ($task['is_recurring_master'] === 1 || $task['is_generated_task'] === 0): ?>
+
+                <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
+                class="btn btn-secondary" 
+                title="Upravit úkol">
+                    ✏️ Upravit úkol
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
         <?php if ($task['can_cancel'] && $task['status'] !== 'cancelled') : ?>
-        <form method="post"
-              action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
-              data-confirm="Opravdu chcete úkol stornovat?">
+            <?php if ($task['is_generated_task'] === 0): ?>
+                
+                <form method="post"
+                    action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
+                    data-confirm="Opravdu chcete úkol stornovat?">
 
-            <?= Csrf::getField() ?>
-            <button class="btn btn-sm btn-danger" title="Stornovat úkol">Stornovat</button>
+                    <?= Csrf::getField() ?>
+                    <button class="btn btn-sm btn-danger" title="Stornovat úkol">Stornovat</button>
 
-        </form>
+                </form>
+            <?php endif; ?>
         <?php endif; ?>
 
         <?php if ($task['can_close'] && $task['status'] !== 'done') : ?>

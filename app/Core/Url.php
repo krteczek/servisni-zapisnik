@@ -54,22 +54,36 @@ final class Url
      * @return string Absolutní URL včetně basePath
      */
     public static function to(string $path = ''): string
-    {
-        self::init();
-		// 👉 ochrana proti absolutní URL
-		    if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-		        return $path;
-		    }
-        if (str_starts_with($path, '/{tenant}')) {
-            $tenant = Auth::tenantSlug();
+{
+    self::init();
 
-            if ($tenant) {
-                $path = '/' . $tenant . substr($path, 9);
-            }
-        }
-
-        return self::$basePath . '/' . ltrim($path, '/');
+    // absolutní URL
+    if (
+        str_starts_with($path, 'http://')
+        || str_starts_with($path, 'https://')
+    ) {
+        return $path;
     }
+
+    // už obsahuje basePath → nepřidávat znovu
+    if (
+        self::$basePath !== ''
+        && str_starts_with($path, self::$basePath . '/')
+    ) {
+        return $path;
+    }
+
+    if (str_starts_with($path, '/{tenant}')) {
+
+        $tenant = Auth::tenantSlug();
+
+        if ($tenant) {
+            $path = '/' . $tenant . substr($path, 9);
+        }
+    }
+
+    return self::$basePath . '/' . ltrim($path, '/');
+}
 
     /**
      * Vrátí aktuální cestu bez query stringu.
@@ -196,9 +210,10 @@ final class Url
     public static function back(): never
     {
         $old = Session::get('last_page', '/');
-        self::redirect($old);
-    }
 
+        header('Location: ' . $old, true, 302);
+        exit;
+    }
 
 
     /**

@@ -277,50 +277,68 @@ public function canUserAddReport(int $taskId, int $userId): bool
     return $result !== null;
 }
 
-   public function forWorkOrderWithStats(int $orderId): array
-    {
-        $sql = "
-            SELECT *
-            FROM {$this->tableName}
-            WHERE work_order_id = :order
-              AND {$this->tenantColumn} = :tenant
-            ORDER BY
-                status IN ('done','cancelled'),  -- otevřené nahoře
-                created_at DESC
-        ";
+public function forWorkOrderWithStats(int $orderId): array
+{
+    $sql = "
+        SELECT
+            t.*,
 
-        $tasks = $this->fetchAll($sql, [
-            'order'  => $orderId,
-            'tenant'=> $this->tenantId(),
-        ]);
+            CASE
+                WHEN rt.task_id IS NOT NULL THEN 1
+                ELSE 0
+            END AS is_recurring_master,
 
-        if ($tasks === []) {
-            return [];
-        }
+            CASE
+                WHEN t.recurring_task_id IS NOT NULL THEN 1
+                ELSE 0
+            END AS is_generated_task
 
-        $taskIds = array_column($tasks, 'id');
+        FROM {$this->tableName} t
 
-        
-        //$assignmentModel = new AssignmentModel();
-        //$statsMap = $assignmentModel->statsForTasks($taskIds);
-		
-        $statsMap = $this->statsForTasks($taskIds);
-        foreach ($tasks as $i => $task) {
-						$stats = $statsMap[$task['id']] ?? [
-						    'assignments_count' => 0,
-						    'total_minutes'     => 0,
-						    'total_km'          => 0,
-						    'workers_count'     => 0,
-						];
-            $tasks[$i]['stats'] = $stats;
-            $tasks[$i]['can_cancel'] = $this->canBeCancelled($stats);
-			$tasks[$i]['can_close']  = $this->canBeDone($stats);
-				
-        }
+        LEFT JOIN recurring_tasks rt
+            ON rt.task_id = t.id
+           AND rt.company_id = t.company_id
 
-        return $tasks;
+        WHERE
+            t.work_order_id = :order
+            AND t.{$this->tenantColumn} = :tenant
+
+        ORDER BY
+            t.status IN ('done','cancelled'),
+            t.created_at DESC
+    ";
+
+    $tasks = $this->fetchAll($sql, [
+        'order'  => $orderId,
+        'tenant' => $this->tenantId(),
+    ]);
+
+    if ($tasks === []) {
+        return [];
     }
 
+    $taskIds = array_column($tasks, 'id');
+
+    $statsMap = $this->statsForTasks($taskIds);
+
+    foreach ($tasks as $i => $task) {
+
+        $stats = $statsMap[$task['id']] ?? [
+            'assignments_count' => 0,
+            'total_minutes'     => 0,
+            'total_km'          => 0,
+            'workers_count'     => 0,
+        ];
+
+        $tasks[$i]['stats'] = $stats;
+
+        $tasks[$i]['can_cancel'] = $this->canBeCancelled($stats);
+
+        $tasks[$i]['can_close'] = $this->canBeDone($stats);
+    }
+
+    return $tasks;
+}
 
     public function statsForWorkOrder(int $orderId): array
     {
