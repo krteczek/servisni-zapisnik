@@ -31,7 +31,11 @@ $tasks = $view->data;
                 <span class="badge badge-status-<?= e($task['status']) ?>">
                     <?= te($task['status']) ?>
                 </span>
-                
+<?php if ($task['is_recurring_master']): ?>
+<span class="badge badge-recurring">🔁</span>
+<?php elseif ($task['is_generated_task']): ?>
+<span class="badge badge-recurring">↻</span>
+<?php endif; ?>
             </div>
 
             <!-- TĚLO KARTY -->

@@ -118,9 +118,20 @@ public function forIndex(?int $filterUserId = null): array
         'status'               => 'open',
     ];
 
-    $sql = "
-        SELECT
+
+    $sql = 
+        "SELECT
             t.*,
+
+        CASE
+            WHEN rt.task_id IS NOT NULL THEN 1
+            ELSE 0
+        END AS is_recurring_master,
+
+        CASE
+            WHEN t.recurring_task_id IS NOT NULL THEN 1
+            ELSE 0
+        END AS is_generated_task,
 
             -- zakázka
             w.title    AS work_order_title,
@@ -153,13 +164,17 @@ public function forIndex(?int $filterUserId = null): array
 
         FROM tasks t
 
+        LEFT JOIN recurring_tasks rt
+            ON rt.task_id = t.id
+            AND rt.company_id = t.company_id
+
         LEFT JOIN work_orders w
             ON w.id = t.work_order_id
-           AND w.company_id = :company_id_w
+            AND w.company_id = :company_id_w
 
         LEFT JOIN teams tm
             ON tm.id = t.team_id
-           AND tm.company_id = :company_id_tm
+            AND tm.company_id = :company_id_tm
 
         LEFT JOIN (
             SELECT
