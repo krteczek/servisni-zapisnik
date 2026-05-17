@@ -361,7 +361,8 @@ private function saveTask(array $data, int $workOrderId): string
         $title           = trim($data['title'] ?? '');
         $description     = trim($data['description'] ?? '');
         $is_recurring    = (int) ($data['is_recurring'] ?? 0);
-        $team_id         = (int) ($data['team_id'] ?? 0);  
+        $team_id         = (int) ($data['team_id'] ?? 0);
+        $dueDate         = $this->validateDate($data['due_date'] ?? null);
         //print_r($data);
         if ($title === '') {
             $this->addError('title', 'Název úkolu je povinný');
@@ -385,8 +386,30 @@ private function saveTask(array $data, int $workOrderId): string
             'description' => $description,
             'is_recurring' => $is_recurring,
             'team_id' => $team_id,
+            'due_date' => $dueDate,
         ];
     }
+
+private function validateDate(?string $date): ?string
+{
+    $date = trim($date ?? '');
+
+    if ($date === '') {
+        return null;
+    }
+
+    $dt = \DateTime::createFromFormat('Y-m-d', $date);
+
+    $isValid =
+        $dt !== false
+        && $dt->format('Y-m-d') === $date;
+
+    if (!$isValid) {
+        return null;
+    }
+
+    return $date;
+}
 
 
     public function done(int $taskId): void

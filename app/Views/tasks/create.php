@@ -59,6 +59,11 @@ $errors    = $view->errors;
             <textarea name="description" rows="10"><?= e($post['description'] ?? '') ?></textarea>
         </div>
 
+		<div class="form-group">
+			<label>Termín dokončení</label>
+			<input type="date" name="due_date" value="<?= e($post['due_date'] ?? '') ?>">
+		</div>
+
         <div class="form-group">
             <label>Tým <span class="req">*</span></label>
             <select name="team_id" required>
@@ -136,6 +141,14 @@ $errors    = $view->errors;
 						Tím přenášíte zodpovědnost za vykonání úkolů na konkrétní Tým a lidi v něm. 
 						Oni Vám zpětně prostřednictvím reportů k úkolům, vykazují práci, čas a najeté kilometry.						
 						</p>
+
+					<p><strong>Opakované úkoly</strong></p>
+					<ul>
+						<li>Opakující se úkoly jsou určeny pro pravidelné činnosti, které se musí vykonávat opakovaně (např. údržba, kontroly, pravidelné schůzky).</li>
+						<li>Opakující se úkoly se automaticky generují podle nastaveného vzorce (denně, týdně, měsíčně) a mohou být spuštěny s předstihem pro včasné upozornění.</li>
+						<li>Opakující se úkoly mají "master" záznam, který určuje jejich opakovací vzorec. Generované úkoly jsou potomky tohoto master záznamu.</li>
+						<li>Úprava master záznamu umožňuje změnit vzorec opakování pro všechny budoucí generované úkoly.</li>
+			</ul>
 
 		</div>
 	</div>

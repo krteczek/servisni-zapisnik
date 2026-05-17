@@ -65,6 +65,13 @@ $errors = $view->errors;
 					<label>Popis: </label>
 					<textarea name="description" rows="10"><?= e($post['description'] ?? '') ?></textarea>
 				</div>
+
+				<div class="form-group">
+					<label>Termín dokončení: </label>
+					<input type="date" name="due_date" value="<?= e($post['due_date'] ?? '') ?>">
+				</div>
+
+
 				<div class="form-group team-box">
 					<label>Úkol je svěřen týmu: </label>
 
@@ -101,8 +108,9 @@ $errors = $view->errors;
 									</label>
 							<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/recurringEdit') ?>" 
 								class="btn btn-secondary">
-								<span class="btn-icon">←</span>
+								
 								Nastavit opakování úkolu
+								<span class="btn-icon">→</span>
 							</a>
               
 
@@ -163,7 +171,13 @@ $errors = $view->errors;
 						</p>
 						<p><strong>Důvod: </strong>Vždy je vidět, kdo má úkol na starosti a co v průběhu zodpovědnosti udělal.
 						Snadno se to dohledává, snadno se to dokladuje. Neexistuje výmluva: tohle už měl dělat někdo jiný.</p>
-
+						<p><strong>Opakované úkoly</strong></p>
+						<ul>
+							<li>Opakující se úkoly jsou určeny pro pravidelné činnosti, které se musí vykonávat opakovaně (např. údržba, kontroly, pravidelné schůzky).</li>
+							<li>Opakující se úkoly se automaticky generují podle nastaveného vzorce (denně, týdně, měsíčně) a mohou být spuštěny s předstihem pro včasné upozornění.</li>
+							<li>Opakující se úkoly mají "master" záznam, který určuje jejich opakovací vzorec. Generované úkoly jsou potomky tohoto master záznamu.</li>
+							<li>Úprava master záznamu umožňuje změnit vzorec opakování pro všechny budoucí generované úkoly.</li>
+						</ul>
 
 		</div>
 	</div>

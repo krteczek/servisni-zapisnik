@@ -74,7 +74,7 @@ if (!$type || !array_key_exists($type, $frequencies)) {
                </div>
                <div class="form-group">
 
-				      <label>Spustit v předstihu: </label>
+				      <label>Spustit v předstihu (dny): </label>
 				      <input
 				          type="number"
 				          name="warning_days_before"
@@ -138,15 +138,25 @@ if (!$type || !array_key_exists($type, $frequencies)) {
 								</details>
 								<h3>Nápověda:</h3>
 								<p>
-			        <p><strong>Informace:</strong>
-			           Úkol je nějaká část zakázky, kterou má vykonat určitá osoba nebo tým. 
-		           </p>
-						<p>Náš systém je navržen tak, že úkoly mohou vznikat jen tehdy, patří-li nějaké zakázce. 
-						Úkol bez zakázky, ke které by patřil, nám nedává smysl. </p>
-						<p>Zde úkol vytvoříte a přiřadíte ho některému z vašich aktivních týmů. 
-						Tím přenášíte zodpovědnost za vykonání úkolů na konkrétní Tým a lidi v něm. 
-						Oni Vám zpětně prostřednictvím reportů k úkolům, vykazují práci, čas a najeté kilometry.						
-						</p>
+						<p><strong>Opakované úkoly</strong></p>
+						<ul>
+							<li>Frekvence: denně, týdně, měsíčně, ročně</li>
+							<li>Interval: každých X dní, týdnů, měsíců, roků</li>
+							<li>Spustit v předstihu: počet dní předem, kdy se má vygenerovat úkol pro upozornění</li>
+							<li>První spuštění: datum, kdy se má poprvé vygenerovat úkol</li>
+							<li>Aktivní: zda je opakování aktivní, neaktivní opakování se neprojeví v generování úkolů
+						</ul>
+						<p>Pomocí frekvence a intervalu můžete nastavit, jak často se má úkol opakovat. 
+							Například "týdně" s intervalem "2" znamená, že se úkol bude generovat každé 2 týdny. 
+							Nastavení "spustit v předstihu (3 dny)" znamená, že se úkol vygeneruje 3 dny před jeho skutečným termínem, což umožní včasné upozornění.
+							První spuštění určuje, kdy se má poprvé vygenerovat úkol, a aktivní/ neaktivní stav umožňuje dočasně pozastavit gener
+	</p>
+						<ul>
+							<li>Opakující se úkoly jsou určeny pro pravidelné činnosti, které se musí vykonávat opakovaně (např. údržba, kontroly, pravidelné schůzky).</li>
+							<li>Opakující se úkoly se automaticky generují podle nastaveného vzorce (denně, týdně, měsíčně) a mohou být spuštěny s předstihem pro včasné upozornění.</li>
+							<li>Opakující se úkoly mají "master" záznam, který určuje jejich opakovací vzorec. Generované úkoly jsou potomky tohoto master záznamu.</li>
+							<li>Úprava master záznamu umožňuje změnit vzorec opakování pro všechny budoucí generované úkoly.</li>
+						</ul>
 
 		</div>
 	</div>
