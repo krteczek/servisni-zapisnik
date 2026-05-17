@@ -368,16 +368,17 @@ private function getOrderOrRedirect(int $orderId): array
             'contact_id'         => (int)($post['contact_id'] ?? 0) ?: null,
             'price_per_hour'     => (int)($post['price_per_hour'] ?? 0),
             'price_per_km'       => (int)($post['price_per_km'] ?? 0),
-            'external_number' 	=> trim($post['external_number'] ?? '') ?: null,
-            'title'           	=> trim($post['title'] ?? ''),
-            'description'     	=> trim($post['description'] ?? ''),
-            'source'          	=> $post['source'] ?? 'personal',
-            'requested_by'    	=> trim($post['requested_by'] ?? ''),
-            'contact_person'    => trim($post['contact_person'] ?? ''),
-            'priority'        	=> $post['priority'] ?? 'normal',
+            'external_number' 	 => trim($post['external_number'] ?? '') ?: null,
+            'title'           	 => trim($post['title'] ?? ''),
+            'description'     	 => trim($post['description'] ?? ''),
+            'source'          	 => $post['source'] ?? 'personal',
+            'requested_by'    	 => trim($post['requested_by'] ?? ''),
+            'contact_person'     => trim($post['contact_person'] ?? ''),
+            'priority'        	 => $post['priority'] ?? 'normal',
             'created_by_user_id' => Auth::id(),
             'create_first_task'  => !empty($post['create_first_task']),
-            'team_id' => isset($post['team_id']) ? (int)$post['team_id'] : 0,                       
+            'team_id'            => isset($post['team_id']) ? (int)$post['team_id'] : 0, 
+            'due_date'           => isset($post['due_date']) ? $post['due_date'] : null
         ];
 		//   `title` varchar(255) NOT NULL,
 		$this->maxLength('title', $data['title'], 255, 'Název zakázky');
@@ -417,6 +418,12 @@ private function getOrderOrRedirect(int $orderId): array
             $this->addError('price_per_km', 'Kilometrová sazba nemůže být záporná.');
         }
 
+        $data['due_date'] = $this->validateDate($data['due_date']);
+        if ($data['due_date'] === null && isset($post['due_date']) && trim($post['due_date']) !== '') {
+            $this->addError('due_date', 'Neplatný formát data. Použijte formát RRRR-MM-DD.');
+        }
+
+        
         if ($data["create_first_task"] === true && $isEdit === false)
         {
             if($data['team_id'] === 0) {
@@ -435,8 +442,29 @@ private function getOrderOrRedirect(int $orderId): array
        
         return $data;
     }
-    
- public function closeOrderCanceled(int $orderId)
+  
+private function validateDate(?string $date): ?string
+{
+    $date = trim($date ?? '');
+
+    if ($date === '') {
+        return null;
+    }
+
+    $dt = \DateTime::createFromFormat('Y-m-d', $date);
+
+    $isValid =
+        $dt !== false
+        && $dt->format('Y-m-d') === $date;
+
+    if (!$isValid) {
+        return null;
+    }
+
+    return $date;
+}
+
+public function closeOrderCanceled(int $orderId)
 {   
     $order = $this->getOrderOrRedirect($orderId);
     $this->guardEditable($order, $orderId);
