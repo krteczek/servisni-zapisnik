@@ -63,7 +63,17 @@ $teams = $view->teams;
                         rows="4"
                     ><?= e($data['description'] ?? '') ?></textarea>
                 </div>
-
+                <!-- Termín dokončení -->
+                <div class="form-group">
+                    <label for="due_date">Termín dokončení</label>
+                    <input
+                        type="date"
+                        class="form-control"
+                        name="due_date"
+                        id="due_date"
+                        value="<?= e($data['due_date'] ?? '') ?>"
+                    >
+                </div>
                 <!-- Zdroj -->
                 <div class="form-group">
                     <label for="source">Zdroj</label>
