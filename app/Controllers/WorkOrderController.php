@@ -79,6 +79,8 @@ public function index(): string
                 'contact_person'     => $data['contact_person'],
                 'priority'        	 => $data['priority'],
                 'created_by_user_id' => $data['created_by_user_id'],
+                'wo_due_date'           => $data['wo_due_date'],
+                'estimated_hours'    => $data['estimated_hours'],
             ];
             
             
@@ -201,6 +203,8 @@ public function index(): string
                 'requested_by'    	 => $data['requested_by'],
                 'contact_person'     => $data['contact_person'],
                 'priority'        	 => $data['priority'],
+                'wo_due_date'        => $data['wo_due_date'],
+                'estimated_hours'    => $data['estimated_hours'],
             ];
             $ok = $this->model->update($orderId, $toDb);
                 
@@ -209,6 +213,7 @@ public function index(): string
             Flash::success('Zakázka byla úspěšně změněna.');
             Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
         } catch (\Throwable $e) {
+            
             LoggerHolder::get()->error('WorkOrderController.editFormUpdate: failed', [
                         'message' => $e->getMessage(),
                         'file'    => $e->getFile(),
@@ -378,7 +383,8 @@ private function getOrderOrRedirect(int $orderId): array
             'created_by_user_id' => Auth::id(),
             'create_first_task'  => !empty($post['create_first_task']),
             'team_id'            => isset($post['team_id']) ? (int)$post['team_id'] : 0, 
-            'due_date'           => isset($post['due_date']) ? $post['due_date'] : null
+            'wo_due_date'        => isset($post['wo_due_date']) ? $post['wo_due_date'] : null,
+            'estimated_hours'    => isset($post['estimated_hours']) ? (int)$post['estimated_hours'] : null,
         ];
 		//   `title` varchar(255) NOT NULL,
 		$this->maxLength('title', $data['title'], 255, 'Název zakázky');
@@ -418,12 +424,15 @@ private function getOrderOrRedirect(int $orderId): array
             $this->addError('price_per_km', 'Kilometrová sazba nemůže být záporná.');
         }
 
-        $data['due_date'] = $this->validateDate($data['due_date']);
-        if ($data['due_date'] === null && isset($post['due_date']) && trim($post['due_date']) !== '') {
-            $this->addError('due_date', 'Neplatný formát data. Použijte formát RRRR-MM-DD.');
+        $data['wo_due_date'] = $this->validateDate($data['wo_due_date']);
+        if ($data['wo_due_date'] === null && isset($post['wo_due_date']) && trim($post['wo_due_date']) !== '') {
+            $this->addError('wo_due_date', 'Neplatný formát data. Použijte formát RRRR-MM-DD.');
         }
 
-        
+        if ($data['estimated_hours'] !== null && $data['estimated_hours'] < 0) {
+            $this->addError('estimated_hours', 'Odhadované hodiny nemohou být záporné.');
+        }
+
         if ($data["create_first_task"] === true && $isEdit === false)
         {
             if($data['team_id'] === 0) {

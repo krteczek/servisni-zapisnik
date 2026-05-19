@@ -121,4 +121,21 @@ h4.card-header, h5.card-header {
     margin: 0 0 6px 0;
 }
 
+.workbench-grid {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
 
+
+.card-workbench {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    padding: 16px;
+    border-radius: 10px;
+    min-width: 0;
+}
+
+.card-wb-teams {
+    max-width:300px;
+}

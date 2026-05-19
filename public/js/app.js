@@ -33,41 +33,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-document.querySelectorAll('.tab-button').forEach(button => {
+    
+    document.querySelectorAll('.main-tab-button').forEach(button => {
 
-    button.addEventListener('click', () => {
+        button.addEventListener('click', () => {
 
-        const targetId = button.dataset.target;
+            const targetId = button.dataset.target;
 
-        // schovat všechny sekce
-        document.querySelectorAll('.tab-content').forEach(section => {
-            section.hidden = true;
+            document.querySelectorAll('.main-tab-content').forEach(section => {
+                section.hidden = true;
+            });
+
+            document.querySelectorAll('.main-tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const target = document.getElementById(targetId);
+
+            if (target) {
+                target.hidden = false;
+            }
+
+            button.classList.add('active');
         });
 
-        // deaktivovat všechny tlačítka
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        // zobrazit cílovou sekci
-        const target = document.getElementById(targetId);
-
-        if (target) {
-            target.hidden = false;
-        }
-
-        // aktivní tlačítko
-        button.classList.add('active');
     });
 
-});
+
+    document.querySelectorAll('.sub-tab-button').forEach(button => {
+
+        button.addEventListener('click', () => {
+
+            const targetId = button.dataset.target;
+
+            document.querySelectorAll('.sub-tab-content').forEach(section => {
+                section.hidden = true;
+            });
+
+            document.querySelectorAll('.sub-tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const target = document.getElementById(targetId);
+
+            if (target) {
+                target.hidden = false;
+            }
+
+            button.classList.add('active');
+        });
+
+    });
 
 
-});
-
-
-
-
-
-
-   
+});   
