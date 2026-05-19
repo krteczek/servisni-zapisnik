@@ -24,10 +24,13 @@ class WorkbenchModel extends BaseModel
             'myTeamTasks'               => $this->openTasksForMyTeams($teamIds),
             'otherTeamTasks'            => $this->openTasksForOtherTeams($teamIds),
 
+            
             'myReadyToDoneTasks'       => $this->myReadyToDoneTasks($teamIds),
             'otherReadyToDoneTasks'    => $this->otherReadyToDoneTasks($teamIds),
 
-            //'myReadyToDoneOrders'     => $this->myReadyToDoneOrders($teamIds),
+            'myOrdersInProgress'       => $this->myOrdersInProgress(),
+
+            'myReadyToDoneOrders'     => $this->myReadyToDoneOrders($teamIds),
             //'otherReadyToDoneOrders'    => $this->otherReadyToDoneOrders($teamIds),
 
            //'myBillingTasks'           => $this->myBillingTasks($teamIds),
@@ -333,15 +336,40 @@ private function openTasksForOtherTeams(array $teamIds): array
 
     }
 
-    private function myReadyToDoneOrders(array $teamIds): array
-    {
-        if ($teamIds === []) {
-            return [];
-        }
+private function myReadyToDoneOrders(): array
+{
+    $sql = 
+    "SELECT
+            wo.id,
+            wo.title,
+            wo.status,
 
-        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+            COUNT(DISTINCT t.id) AS open_tasks_count
 
-    }
+        FROM work_orders wo
+
+        INNER JOIN tasks t
+            ON t.work_order_id = wo.id
+           AND t.company_id = wo.company_id
+
+        WHERE
+            wo.company_id = ?
+            AND wo.created_by_user_id = ?
+            AND wo.status = 'in_progress'
+            AND t.status = 'open'
+
+        GROUP BY wo.id
+
+        HAVING COUNT(DISTINCT t.id) >= 1
+
+        ORDER BY wo.created_at ASC
+    ";
+
+    return $this->fetchAll($sql, [
+        Auth::companyId(),
+        Auth::id(),
+    ]);
+}
 
     private function otherReadyToDoneOrders(array $teamIds): array
     {
@@ -353,4 +381,44 @@ private function openTasksForOtherTeams(array $teamIds): array
 
     }
 
+
+private function myOrdersInProgress(): array
+{
+    return $this->fetchAll(
+        "
+        SELECT *
+        FROM work_orders
+        WHERE company_id = ?
+          AND created_by_user_id = ?
+          AND status IN ('in_progress', 'new')
+        ORDER BY created_at ASC
+        ",
+        [
+            Auth::companyId(),
+            Auth::id(),
+        ]
+    );
+}
+
+public function getTasksForOrders(array $orderIds): array
+{
+     if ($orderIds === []) {
+        return [];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
+
+    $sql = "
+        SELECT *
+        FROM tasks
+        WHERE company_id = ?
+          AND work_order_id IN ($placeholders)
+        ORDER BY created_at ASC
+    ";
+
+    return $this->fetchAll(
+        $sql,
+        array_merge([Auth::companyId()], $orderIds)
+    );
+}
 }

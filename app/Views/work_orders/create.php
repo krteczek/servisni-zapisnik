@@ -65,16 +65,28 @@ $teams = $view->teams;
                 </div>
                 <!-- Termín dokončení -->
                 <div class="form-group">
-                    <label for="due_date">Termín dokončení</label>
+                    <label for="wo_due_date">Termín dokončení</label>
                     <input
                         type="date"
                         class="form-control"
-                        name="due_date"
-                        id="due_date"
-                        value="<?= e($data['due_date'] ?? '') ?>"
+                        name="wo_due_date"
+                        id="wo_due_date"
+                        value="<?= e($data['wo_due_date'] ?? '') ?>"
                     >
                 </div>
-                <!-- Zdroj -->
+                 <!-- Předpokládané hodiny -->
+                <div class="form-group">
+                    <label for="estimated_hours">Předpokládaný počet hodin k dokončení zakázky</label>
+                    <input
+                        type="number"
+                        class="form-control"
+                        name="estimated_hours"
+                        id="estimated_hours"
+                        value="<?= e($data['estimated_hours'] ?? '') ?>"
+                    >
+                </div>
+               
+               <!-- Zdroj -->
                 <div class="form-group">
                     <label for="source">Zdroj</label>
                     <select class="form-control" name="source" id="source">
@@ -225,11 +237,12 @@ $teams = $view->teams;
             <h3>Nápověda</h3>
              <h4>Tip</h4>
             <p>
-               Vyplňte co nejvíce informací – usnadní to zpracování požadavku.
+               Vyplňte co nejvíce informací - usnadní to zpracování požadavku.
             </p>
              <h4>Externí číslo</h4>
             <p>
-                Externí číslo je číslo, které používá zákazník. Může to být například číslo z jeho systému, nebo číslo z objednávky.
+                Externí číslo je číslo, které používá zákazník. Může to být například číslo z jeho systému
+                 nebo číslo z objednávky.
             </p>
             <h4>Interní číslo</h4>
             <p>
@@ -237,7 +250,8 @@ $teams = $view->teams;
                 Je to unikátní identifikátor zakázky, který nám 
                 pomáhá ji rychle najít a odlišit od ostatních 
                 zakázek.
-                Je základem pro generování faktury a dalších dokumentů.
+                Je základem pro generování faktury a dalších dokumentů. Je vygenerováno systémem a 
+                nelze ho měnit, protože je základem pro všechny další procesy, které s zakázkou souvisí.
             </p>
             <h4>Název zakázky</h4>
             <p>
@@ -258,6 +272,16 @@ $teams = $view->teams;
                 ale může být velmi užitečné pro všechny,
                 kdo budou s zakázkou pracovat a vytvářet úkoly.
              </p>
+             <h4>Termín dokončení</h4>
+            <p>
+                Termín dokončení je datum, do kterého má být zakázka dokončena.
+            </p>
+            
+            <h4>Předpokládané hodiny</h4>
+            <p>Předpokládaný nebo jasně určený čas potřebný k dokončení zakázky. 
+                Tato informace nám pomáhá lépe plánovat a odhadovat, 
+                kolik práce bude potřeba k dokončení zakázky.
+            </p>
             <h4>Zdroj</h4>
             <p>
                 Zdroj zakázky je informace o tom, jak 

@@ -11,7 +11,9 @@ $data = $view->data;
 ?>
 
 <h2>Připraveno k uzavření</h2>
-
+<div class="workbench-grid">
+<div class="card card-workbench">
+    <h3>Úkoly</h3>
 <table>
     <thead>
         <tr>
@@ -37,3 +39,36 @@ $data = $view->data;
         <?php endforeach; ?>
     </tbody>
 </table>
+</div>
+<div class="card card-workbench">
+    <h3>Zakázky</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Název</th>
+                <th>Popis</th>
+                <th>Status</th>
+                <th>Počet reportů</th>
+            </tr>
+        </thead>
+    <tbody>
+        <?php foreach ($data['myReadyToDoneOrders'] as $orders): ?>
+            <tr>
+                <td><a href="<?= Url::to('/{tenant}/work-orders/' .  $orders['id'] . '/detail/#main') ?>" 
+                                    title="Jít na detail zakázky a zkontrolovat její úkoly."
+                                    >
+                                    <?= e($orders['title']) ?></a></td>
+                <td><?= e($orders['description'] ?? '') ?></td>
+                <td><span class="badge badge-status-<?= e($orders['status']) ?>">
+                    <?= te($orders['status']) ?>
+                </span></td>
+                <td><?= e($orders['can_be_done']) ?></td>
+                <td>ee<?= e($orders['can_be_cancelled']) ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+</div>
+
+        </div><!-- .workbench-grid -->
+     <pre>   <?php var_dump($data['myReadyToDoneOrders']); ?></pre>

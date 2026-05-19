@@ -207,9 +207,15 @@ return [
 
 */
 
+
+/*
+|--------------------------------------------------------------------------
+| Workbench - pracovní stůl pro rychlý přehled o úkolech a zakázkách
+|--------------------------------------------------------------------------
+*/
 [ 
     'method' => 'GET', 
-    'path' => '/dashboard', 
+    'path' => '/workbench', 
     'action' => [WorkbenchController::class, 'index'], 
     'auth' => true, 
     'roles' => ['admin', 'mistr'], 

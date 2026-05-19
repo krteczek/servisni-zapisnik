@@ -32,8 +32,80 @@ class WorkbenchController extends Controller
     }
 	public function index(): string
 	{
-        $this->view->data = $this->model->forIndex();
+        $data = $this->model->forIndex();
+        $data['myReadyToDoneOrders'] = $this->canOrdersBeDoneOrCancel($data['myOrdersInProgress']);
+        $this->view->data = $data;
         return $this->render('workbench/index');
 
     }
+
+ private function canOrdersBeDoneOrCancel(array $orders): array
+{
+    $orderIds = array_column($orders, 'id');
+
+    $tasks = $this->model->getTasksForOrders($orderIds);
+
+    $tasksByOrder = [];
+
+    foreach ($tasks as $task) {
+        $tasksByOrder[$task['work_order_id']][] = $task;
+        //$orders['']
+    }
+
+    foreach ($orders as &$order) {
+
+        $orderTasks = $tasksByOrder[$order['id']] ?? [];
+
+        $order['tasks'] = $orderTasks;
+
+        $doneCount = 0;
+        $cancelCount = 0;
+        $openCount = 0;
+
+        foreach ($orderTasks as $task) {
+
+            switch ($task['status']) {
+
+                case 'done':
+                    $doneCount++;
+                    break;
+
+                case 'cancelled':
+                    $cancelCount++;
+                    break;
+
+                default:
+                    $openCount++;
+                    break;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Zakázka lze dokončit
+        |--------------------------------------------------------------------------
+        */
+
+        $order['can_be_done'] =
+            $doneCount >= 1
+            && $openCount === 0;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Zakázka lze stornovat
+        |--------------------------------------------------------------------------
+        */
+
+        $order['can_be_cancelled'] =
+            $doneCount === 0
+            && (
+                count($orderTasks) === 0
+                || $cancelCount === count($orderTasks)
+            );
+    }
+
+    unset($order);
+
+    return $orders;
+}
 }

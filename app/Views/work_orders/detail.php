@@ -21,8 +21,8 @@ $tasks = $view->tasks;
 
 
 $err = $view->errors; 
-//var_dump($tasks,$teams, $order);
-?>
+/* */ ?><pre><?php var_dump($tasks, $order); ?></pre> /* */
+
 
 
 <!--
@@ -54,7 +54,8 @@ $err = $view->errors;
 					<span class="label">Priorita zakázky: </span>
 					<span class="badge badge-priority-<?= e($order['priority']) ?>" title="Priorita zakázky"><?= te($order['priority']) ?></span>
 				</div>
-				<div class="wo-info-main">
+
+                <div class="wo-info-main">
 						<strong>Popis: </strong><br>
 						<?= tx($order['description'] ?? '') ?: 'Nezadán' ?>
 				</div>
@@ -104,8 +105,12 @@ $err = $view->errors;
         </div>
 
         <div class="meta-item">
-            <span class="meta-label">Čas:</span>
-            <span class="meta-value"><?= e($order['total_time']) ?></span>
+            <span class="meta-label">Čas k dokončení: </span>
+            <span class="meta-value"><?= e($order['estimated_hours']?? '--') ?> hodin</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Z toho použité:</span>
+            <span class="meta-value"><?= e($order['total_time']) ?> hodin</span>
         </div>
 
         <div class="meta-item">
@@ -114,10 +119,16 @@ $err = $view->errors;
         </div>
 
 <div class="card-footer">
-                <a class="btn btn-primary"
-							href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create/#main') ?>">
-							Přidat nový úkol k této zakázce
-					</a>
+<?php if (in_array($order['status'], ['new', 'in_progress'])): ?>
+    <a href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/edit/#main') ?>" class="btn btn-primary" title="Upravit zakázku">
+        ✏️ Upravit zakázku
+    </a>
+<?php endif; ?>
+
+    <a class="btn btn-secondary"
+                href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create/#main') ?>">
+                Přidat nový úkol k této zakázce
+    </a>
 
 <?php if($order['ready_for_done']): ?>
     <form method="post"
@@ -132,8 +143,6 @@ $err = $view->errors;
 
 <?php endif; ?>
 <?php if($order['ready_for_cancel']): ?>
-
-
     <form method="post"
           action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/canceled') ?>"
           data-confirm="Opravdu chcete zakázku stornovat?"
@@ -143,7 +152,6 @@ $err = $view->errors;
         <button class="btn btn-danger" title="Stornovat zakázku">Stornovat zakázku</button>
     </form>
 <?php endif; ?>
-
     <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary" title="Zpět na přehled zakázek">
         ← Zpět na přehled
     </a>
@@ -200,34 +208,34 @@ if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
     </div>
 
     <div class="card-body">
-                            <?php
-                            $deadlineClass = 'deadline-none';
-                            $deadlineText  = 'Neuvedeno';
+        <?php
+        $deadlineClass = 'deadline-none';
+        $deadlineText  = 'Neuvedeno';
 
-                            if ($task['due_date']) {
+        if ($task['due_date']) {
 
-                                $today = date('Y-m-d');
-                                $due   = date('Y-m-d', strtotime($task['due_date']));
+            $today = date('Y-m-d');
+            $due   = date('Y-m-d', strtotime($task['due_date']));
 
-                                $deadlineText = date('d.m.Y', strtotime($task['due_date']));
+            $deadlineText = date('d.m.Y', strtotime($task['due_date']));
 
-                                if ($due < $today) {
-                                    $deadlineClass = 'deadline-late';
-                                } elseif ($due === $today) {
-                                    $deadlineClass = 'deadline-today';
-                                } else {
-                                    $deadlineClass = 'deadline-future';
-                                }
-                            }
-                            ?>
+            if ($due < $today) {
+                $deadlineClass = 'deadline-late';
+            } elseif ($due === $today) {
+                $deadlineClass = 'deadline-today';
+            } else {
+                $deadlineClass = 'deadline-future';
+            }
+        }
+        ?>
 
-                            <div class="meta-item">
-                                <span class="meta-label">Termín:</span>
+        <div class="meta-item">
+            <span class="meta-label">Termín:</span>
 
-                                <span class="meta-value <?= $deadlineClass ?>">
-                                    <?= e($deadlineText) ?>
-                                </span>
-                            </div>                            
+            <span class="meta-value <?= $deadlineClass ?>">
+                <?= e($deadlineText) ?>
+            </span>
+        </div>                            
 
         <div class="meta-item">
             <span class="meta-label">Úkol řeší tým:</span>
