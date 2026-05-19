@@ -123,10 +123,9 @@ h4.card-header, h5.card-header {
 
 .workbench-grid {
     display: flex;
-    gap: 24px;
     flex-wrap: wrap;
+    gap: 24px;
 }
-
 
 .card-workbench {
     border: 1px solid #e5e7eb;
@@ -137,5 +136,5 @@ h4.card-header, h5.card-header {
 }
 
 .card-wb-teams {
-    max-width:300px;
+    flex: 0 0 300px;
 }

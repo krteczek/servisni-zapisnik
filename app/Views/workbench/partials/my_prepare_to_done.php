@@ -71,4 +71,4 @@ $data = $view->data;
 </div>
 
         </div><!-- .workbench-grid -->
-     <pre>   <?php var_dump($data['myReadyToDoneOrders']); ?></pre>
+     
