@@ -17,7 +17,7 @@ require __DIR__ . '/../layout/header.php';
             <p class="ui-alert ui-alert-warning">
                 BETA VERZE - TESTOVACÍ REŽIM<br>
                 Systém běží v testovacím režimu.
-                rozsah funkcí a přístupů může být 
+                Rozsah funkcí a přístupů může být 
                 omezený, ale základní funkčnost je 
                 zachována. Děkujeme za pochopení.
                 Případné chyby hlaste na 
