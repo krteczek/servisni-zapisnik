@@ -85,7 +85,8 @@ $errors = $view->errors;
     <!-- PRAVÝ SLOUPEC – NÁPOVĚDA -->
     <div class="card card-help" id="helpCard">
         <div class="card-body">
-            <h3>O týmech</h3>
+            <detailks>
+                <summary>Nápověda k vytváření týmu</summary>
 
             <h4>K čemu jsou týmy?</h4>
             <p>
@@ -107,18 +108,6 @@ $errors = $view->errors;
 
             <hr style="margin:20px 0; border:0; border-top:1px solid #e5e7eb;">
 
-            <h4>Filozofie projektu</h4>
-            <details>
-                <summary style="cursor:pointer; font-weight:600;">Zobrazit</summary>
-                <p style="margin-top:12px;">
-                    Zakázka je Bůh. Aby se Bůh mohl realizovat, zažít, naplnit,
-                    sestoupil k nám a rozpadl se na jednotlivé úkoly.
-                    Skrze splnění těchto úkolů (reporty o vykonané práci),
-                    se Bůh, čili zakázka realizuje. Aby se úkoly mohly splnit,
-                    je potřeba (ještě stále) lidi – a ti pracují v týmech. 
-                    Každý fotbalový tým má své barvy, buďt skromnější, stačí Vám jedna barva na tým.
-                </p>
-            </details>
         </div>
     </div>
 

@@ -11,7 +11,7 @@ $data = $view->data;
 //var_dump($data);
 ?>
 
-<div class="workbench-container">
+<div class="workbench-container" id="main">
     <div class="workbench-grid">
         <div class="card card-wb-teams">
             <div class="card-header">Moje týmy</div>
@@ -75,7 +75,7 @@ $data = $view->data;
     </div>
     
     <div id="my-prepare-to-done" class="sub-tab-content" hidden>
-        <!-- Připraveno k uzavření -->
+        <!-- Připraveno k uzavření (zakázky i úkoly-->
         <?php require __DIR__ . '/partials/my_prepare_to_done.php'; ?>
     </div>
 
