@@ -25,13 +25,17 @@ class WorkbenchModel extends BaseModel
             'otherTeamTasks'            => $this->openTasksForOtherTeams($teamIds),
 
             
-            'myReadyToDoneTasks'       => $this->myReadyToDoneTasks($teamIds),
-            'otherReadyToDoneTasks'    => $this->otherReadyToDoneTasks($teamIds),
+            'myReadyToDoneTasks'        => $this->myReadyToDoneTasks($teamIds),
+            'otherReadyToDoneTasks'     => $this->otherReadyToDoneTasks($teamIds),
 
-            'myOrdersInProgress'       => $this->myOrdersInProgress(),
+            'myOrdersInProgress'        => $this->myOrdersInProgress(),
+            //'otherOrdersInProgress'     => $this->otherOrdersInProgress(),
 
-            'myReadyToDoneOrders'     => $this->myReadyToDoneOrders($teamIds),
-            //'otherReadyToDoneOrders'    => $this->otherReadyToDoneOrders($teamIds),
+            'myReadyToCancelTasks'      => $this->myReadyToCancelTasks($teamIds),
+            //'otherReadyToCancelTasks'   => $this->otherReadyToCancelTasks($teamIds),
+
+            //'myReadyToDoneOrders'     => $this->myReadyToDoneOrders($teamIds),
+            //'otherReadyToDoneOrders'  => $this->otherReadyToDoneOrders($teamIds),
 
            //'myBillingTasks'           => $this->myBillingTasks($teamIds),
             //'otherBillingTasks'       => $this->otherBillingTasks($teamIds),
@@ -336,6 +340,56 @@ private function openTasksForOtherTeams(array $teamIds): array
 
     }
 
+private function myReadyToCancelTasks(array $teamIds): array
+{
+    $sql =
+        "SELECT
+            t.id,
+            t.title,
+            t.team_id,
+            t.work_order_id,
+            t.status,
+
+            COUNT(ta.id) AS assignments_count
+
+        FROM tasks t
+
+        LEFT JOIN task_assignments ta
+            ON ta.task_id = t.id
+            AND ta.company_id = t.company_id
+
+        WHERE
+            t.company_id = ?
+            AND t.status = 'open'
+            AND (
+                    t.is_recurring IS NULL
+                    OR t.is_recurring = 0
+                )
+        ";
+
+    $params = [Auth::companyId()];
+
+    if ($teamIds !== []) {
+
+        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+        $sql .= " AND t.team_id NOT IN ($placeholders)";
+
+        $params = array_merge($params, $teamIds);
+    }
+
+    $sql .= "
+        GROUP BY t.id
+
+        HAVING COUNT(ta.id) = 0
+
+        ORDER BY t.created_at ASC
+    ";
+
+    return $this->fetchAll($sql, $params);
+}
+
+
 private function myReadyToDoneOrders(): array
 {
     $sql = 
@@ -400,25 +454,25 @@ private function myOrdersInProgress(): array
     );
 }
 
-public function getTasksForOrders(array $orderIds): array
-{
-     if ($orderIds === []) {
-        return [];
+    public function getTasksForOrders(array $orderIds): array
+    {
+        if ($orderIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
+
+        $sql = "
+            SELECT *
+            FROM tasks
+            WHERE company_id = ?
+            AND work_order_id IN ($placeholders)
+            ORDER BY created_at ASC
+        ";
+
+        return $this->fetchAll(
+            $sql,
+            array_merge([Auth::companyId()], $orderIds)
+        );
     }
-
-    $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
-
-    $sql = "
-        SELECT *
-        FROM tasks
-        WHERE company_id = ?
-          AND work_order_id IN ($placeholders)
-        ORDER BY created_at ASC
-    ";
-
-    return $this->fetchAll(
-        $sql,
-        array_merge([Auth::companyId()], $orderIds)
-    );
-}
 }
