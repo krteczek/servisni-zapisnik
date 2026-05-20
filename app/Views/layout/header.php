@@ -62,7 +62,7 @@ require __DIR__ . '/../../../public/css/deadline.css';
 ?>
  </style>
 
- <script src="<?= Url::to('/js/app.js') ?>"></script>
+ <script src="<?= Url::to('/js/app.js?v=' . filemtime(__DIR__ . '/../../../public/js/app.js')) ?>"></script>
 </head>
 <body>
 
