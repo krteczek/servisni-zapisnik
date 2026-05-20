@@ -51,7 +51,7 @@ $data = $view->data;
         <div id="myTabsButtons"  class="main-tab-content">
                 <button class="sub-tab-button" data-target="my-tasks" title="úkoly týmů, kterých jsem členem">Otevřené úkoly (mé) [<?= count($data['myTeamTasks']) ?>]</button>
                 <button class="sub-tab-button" data-target="my-prepare-to-done" title="moje úkoly a zakázky, které lze uzavřít">K uzavření (mé) [<?= (count($data['myReadyToDoneTasks']) + count($data['myReadyToDoneOrders'])) ?>]</button>
-                <button class="sub-tab-button" data-target="my-prepare-to-done-orders" title="moje úkoly a zakázky, které lze stornovat">Ke stornování (mé) []</button>
+                <button class="sub-tab-button" data-target="my-prepare-to-cancel" title="moje úkoly a zakázky, které lze stornovat">Ke stornování (mé) [<?= (count($data['myReadyToCancelTasks']) + count($data['myReadyToCancelOrders'])) ?>]</button>
                 <button class="sub-tab-button" data-target="my-prepare-to-cancel" title="úkoly, které lze stornovat">Ke stornování (mé) []</button>
                 <button class="sub-tab-button" data-target="my-billing" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (mé)</button>
         </div>
@@ -80,8 +80,8 @@ $data = $view->data;
     </div>
 
     <div id="my-prepare-to-cancel" class="sub-tab-content" hidden>
-        <h2>Připraveno k stornování</h2>
-        <p>Sed pulvinar mi at mollis...</p>
+        <!-- připraveno ke stornování -->
+        <?php require __DIR__ . '/partials/my_prepare_to_cancel.php'; ?>
     </div>
 
     <div id="my-prepare-to-done-orders" class="sub-tab-content" hidden>
@@ -102,8 +102,8 @@ $data = $view->data;
     </div>
 
     <div id="other-prepare-to-cancel" class="sub-tab-content" hidden>
-        <h2>Seznam úkolů a zakázek připravených ke stornování</h2>
-        <p>Maecenas sit amet purus at turpis sceleriivamus ... </p>
+        <!-- připraveno ke stornování -->
+        <?php require __DIR__ . '/partials/other_prepare_to_cancel.php'; ?>
     </div>
 
    <div id="other-billing" class="sub-tab-content" hidden>
