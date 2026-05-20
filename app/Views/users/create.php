@@ -149,19 +149,9 @@ $roles  = $view->roles ?? []; // předpokládám, že roles jsou v $view
 	<div class="card card-help" id="helpCard">
 
 		<div class="card-body">
-								<h3>Filozofie projektu</h3>
-								<details>
-								<p>
-									Když jsem přemýšlel nad vytvořením tohoto systému, měl jsem jasnou vizi: 
-									<span>Zakázka je Bůh. Aby se Bůh mohl realizovat, zažít, naplnit, sestoupil k nám a rozpadl se na jednotlivé úkoly.
-											Skrze splnění těchto úkolů (reporty o vykonané práci), se Bůh, čili zakázka realizuje. 
-											Aby se úkoly mohly splnit, je potřeba (ještě stále) lidi. V tomhle rozhraní si je můžete přidat a nadále s 
-											nimi v rámci našeho systému, komunikovat.
-									</span>
-								</p>
-								</details>
-								<h3>Nápověda:</h3>
-								<p>
+			<details>
+				<summary>Informace pro administrátory</summary>
+					<p>
 						Pro registraci uživatele je nutné zadat platnou emailovou adresu,
 						na kterou bude odeslán aktivační email pro nastavení hesla.
 						</p>
@@ -185,7 +175,7 @@ $roles  = $view->roles ?? []; // předpokládám, že roles jsou v $view
 							<li><strong>Předák</strong> – koordinuje práci v rámci party a dohlíží na plnění úkolů.</li>
 							<li><strong>Montér</strong> – vykonává práci a reportuje splněné úkoly.</li>
 						</ul>
-
+			</details>
 		</div>
 	</div>
 

@@ -120,19 +120,29 @@ h4.card-header, h5.card-header {
 .card-section--wo p {
     margin: 0 0 6px 0;
 }
-
+/* =========================
+   WORKBENCH GRID
+   ========================= */
+   /* Flex verze */
+   /*
 .workbench-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 24px;
 }
-
+*/
+.workbench-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
 .card-workbench {
     border: 1px solid #e5e7eb;
     background: #f9fafb;
     padding: 16px;
     border-radius: 10px;
     min-width: 0;
+    /* width:48%; */
 }
 
 .card-wb-teams {

@@ -37,10 +37,11 @@ public function index(): string
         $contactsModel = new ContactsModel();
     	$this->view->contacts = $contactsModel->all();
 
+
         $this->view->data     = [];
         $this->view->errors   = [];
         $Tm = new TeamModel();
-        $this->view->data["is_edit"] = true;
+        $this->view->data["is_edit"] = false;
 
         $this->view->teams = $Tm->byActive(true);         
 
@@ -53,10 +54,11 @@ public function index(): string
         
         $data = $this->validate($post, false);
         $contactsModel = new ContactsModel();
-        $data["is_edit"] = true; 
+        $data["is_edit"] = false; 
         
-
+        
         if ($this->hasErrors()) {
+            
             $this->view->data = $data;
             $this->view->contacts = $contactsModel->all();
             $Tm = new TeamModel();
@@ -79,7 +81,7 @@ public function index(): string
                 'contact_person'     => $data['contact_person'],
                 'priority'        	 => $data['priority'],
                 'created_by_user_id' => $data['created_by_user_id'],
-                'wo_due_date'           => $data['wo_due_date'],
+                'wo_due_date'        => $data['wo_due_date'],
                 'estimated_hours'    => $data['estimated_hours'],
             ];
             
@@ -102,6 +104,12 @@ public function index(): string
                         'status'        => 'open',
                         'team_id'       => $data['team_id'],
                         'created_by_user_id' => $data['created_by_user_id'],
+                    ]);
+
+                    $this->model->setConnection($pdo);
+
+                    $this->model->update($orderId, [
+                                    'status' => 'in_progress',
                     ]);
                }
 

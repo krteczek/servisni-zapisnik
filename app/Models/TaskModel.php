@@ -279,8 +279,8 @@ public function canUserAddReport(int $taskId, int $userId): bool
 
 public function forWorkOrderWithStats(int $orderId): array
 {
-    $sql = "
-        SELECT
+    $sql = 
+        "SELECT
             t.*,
 
             CASE

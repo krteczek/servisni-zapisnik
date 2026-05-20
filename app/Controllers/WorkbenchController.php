@@ -33,79 +33,90 @@ class WorkbenchController extends Controller
 	public function index(): string
 	{
         $data = $this->model->forIndex();
-        $data['myReadyToDoneOrders'] = $this->canOrdersBeDoneOrCancel($data['myOrdersInProgress']);
+        [$data['myReadyToDoneOrders'], $data['myReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['myOrdersInProgress']);
         $this->view->data = $data;
         return $this->render('workbench/index');
 
     }
 
- private function canOrdersBeDoneOrCancel(array $orders): array
-{
-    $orderIds = array_column($orders, 'id');
+    private function canOrdersBeDoneOrCancel(array $orders): array
+    {
+        $woCancel = [];
+        $woDone = [];
 
-    $tasks = $this->model->getTasksForOrders($orderIds);
+        $orderIds = array_column($orders, 'id');
 
-    $tasksByOrder = [];
+        $tasks = $this->model->getTasksForOrders($orderIds);
 
-    foreach ($tasks as $task) {
-        $tasksByOrder[$task['work_order_id']][] = $task;
-        //$orders['']
-    }
+        $tasksByOrder = [];
 
-    foreach ($orders as &$order) {
-
-        $orderTasks = $tasksByOrder[$order['id']] ?? [];
-
-        $order['tasks'] = $orderTasks;
-
-        $doneCount = 0;
-        $cancelCount = 0;
-        $openCount = 0;
-
-        foreach ($orderTasks as $task) {
-
-            switch ($task['status']) {
-
-                case 'done':
-                    $doneCount++;
-                    break;
-
-                case 'cancelled':
-                    $cancelCount++;
-                    break;
-
-                default:
-                    $openCount++;
-                    break;
-            }
+        foreach ($tasks as $task) {
+            $tasksByOrder[$task['work_order_id']][] = $task;
+            //$orders['']
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Zakázka lze dokončit
-        |--------------------------------------------------------------------------
-        */
+        foreach ($orders as &$order) {
 
-        $order['can_be_done'] =
-            $doneCount >= 1
-            && $openCount === 0;
+            $orderTasks = $tasksByOrder[$order['id']] ?? [];
 
-        /*
-        |--------------------------------------------------------------------------
-        | Zakázka lze stornovat
-        |--------------------------------------------------------------------------
-        */
+            $order['tasks'] = $orderTasks;
 
-        $order['can_be_cancelled'] =
-            $doneCount === 0
-            && (
-                count($orderTasks) === 0
-                || $cancelCount === count($orderTasks)
-            );
+            $doneCount = 0;
+            $cancelCount = 0;
+            $openCount = 0;
+
+            foreach ($orderTasks as $task) {
+
+                switch ($task['status']) {
+
+                    case 'done':
+                        $doneCount++;
+                        break;
+
+                    case 'cancelled':
+                        $cancelCount++;
+                        break;
+
+                    default:
+                        $openCount++;
+                        break;
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Zakázka lze dokončit
+            |--------------------------------------------------------------------------
+            */
+
+            $order['can_be_done'] =
+                count($orderTasks) > 0
+                && ($doneCount + $cancelCount) === count($orderTasks);
+            
+            
+            /*
+            |--------------------------------------------------------------------------
+            | Zakázka lze stornovat
+            |--------------------------------------------------------------------------
+            */
+
+            $order['can_be_cancelled'] =
+                $doneCount === 0
+                && (
+                    count($orderTasks) === 0
+                    || $cancelCount === count($orderTasks)
+                );
+
+            if ($order['can_be_done']) {
+                $woDone[] = $order;
+            }
+
+            if ($order['can_be_cancelled']) {
+                $woCancel[] = $order;
+            }
+
+            unset($order);
+        }
+            return [$woDone, $woCancel];
     }
-
-    unset($order);
-
-    return $orders;
-}
 }

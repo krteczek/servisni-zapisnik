@@ -123,6 +123,12 @@ private function saveTask(array $data, int $workOrderId): string
                 throw new \RuntimeException('Task create failed');
             }
 
+            // aktualizace stavu zakázky na "in_progress", pokud ještě není
+            $WO = new WorkOrderModel();
+            $WO->update($workOrderId, [
+                'status' => 'in_progress',
+            ]);
+
             // 🔁 recurring
             if ((int) $post['is_recurring'] === 1) {
 

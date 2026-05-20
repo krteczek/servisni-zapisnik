@@ -180,23 +180,14 @@ $teams = $view->teams;
 
                 <div class="form-group">
                     <label>Úkol ze zakázky</label>
-                    <?php if(isset($data['is_edit']) && ($data['is_edit'] === true)
-                            && (($data['count_tasks'] ?? 0) === 0)
-                    ): ?>
+                    <?php if(!isset($data['is_edit']) || ($data['is_edit'] !== true)): ?>
                         <label for="create_task"><input 
                             type="checkbox" 
                             name="create_first_task"
                             id="create_task" 
                             value="1" <?= checked($data['create_first_task'] ?? false) ?>>
                         Automaticky vytvořit první úkol ze zakázky</label>
-                    <?php else: ?>
-                        <label for="create_task">Pokud již existuje k 
-                            zakázce nějaký úkol, tak nelze ze zakázky 
-                            vytvořit automaticky úkol.</label>
-                    <?php endif; ?>
-                </div>
 
-                <div class="form-group">
                     <label for="team_id">Tým</label>
                     <select name="team_id"
                             id="team_id" 
@@ -216,7 +207,16 @@ $teams = $view->teams;
                       Vyberte tým, který bude mít úkol na starosti.<br>
                       
                     </small>
+
+                    <?php else: ?>
+                        <label for="create_task">Pokud již zakázka existuje, 
+                            tak nelze vytvořit první úkol ze zakázky.
+                        </label>
+                    <?php endif; ?>
                 </div>
+
+                <div class="form-group">
+                 </div>
 
                 <!-- ACTIONS -->
                 <div class="form-actions">
@@ -234,7 +234,8 @@ $teams = $view->teams;
     <!-- 🔹 HELP (klidně později) -->
     <div class="card card-help">
         <div class="card-body">
-            <h3>Nápověda</h3>
+            <details>
+                <summary>Nápověda k vytváření zakázky</summary>
              <h4>Tip</h4>
             <p>
                Vyplňte co nejvíce informací - usnadní to zpracování požadavku.
@@ -338,6 +339,7 @@ $teams = $view->teams;
                 Musíte zde vybrat tým, který bude mít na starosti 
                 zpracování zakázky a zodpovědnost za její dokončení.
             </p>
+                    </details>
      </div>
     </div>
 
