@@ -16,12 +16,29 @@ require __DIR__ . '/_filters.php';
 <?php if ($type === 'tasks'): ?>
     <div class="entity-grid">
         <?php foreach ($data as $task): ?>
+
+            <?php
+                $recurringBadge = '';
+                if(!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
+                    $recurringBadge = '<span 
+                                            class="badge badge-recurring" 
+                                            title="Generovaný opakující se úkol"
+                                            >↻</span>';
+                } elseif (!empty($task['is_recurring']) && (int)$task['is_recurring'] === 1) {
+                    $recurringBadge = '<span class="badge badge-recurring" 
+                                            title="Generátor opakujícího se úkolu"
+                                            >🔁</span>';
+                    //continue;
+                }
+            ?>
             <div class="card task-card">
 
                 <!-- HEADER -->
                 <div class="card-header">
                     <span class="card-title">
-                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/detail/#main') ?>">
+                        <?= $recurringBadge ?>
+                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>"
+                            title="zobrazit detail úkolu">
                             <?= e($task['title']) ?>
                         </a>
                     </span>
@@ -38,7 +55,8 @@ require __DIR__ . '/_filters.php';
                         <div class="meta-item">
                             <span class="meta-label">Zakázka</span>
                             <span class="meta-value">
-                                <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$task['work_order_id'] . '/detail/#main') ?>">
+                                <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$task['work_order_id'] . '/detail/#main') ?>"
+                                    title="zobrazit detail zakázky">
                                     #<?= (int)$task['work_order_id'] ?>:
                                     <?= e($task['work_order_title'] ?? 'Neznámá') ?>
                                 </a>
@@ -54,20 +72,21 @@ require __DIR__ . '/_filters.php';
 
                         <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>"
                         class="btn btn-secondary">
-                            🔍 Detail
+                            🔍 Detail + reporty
                         </a>
                         <?php if ($task['work_order_status'] === 'new' || $task['work_order_status'] === 'in_progress') : ?>
-                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/clone/#main') ?>"
-                        class="btn btn-secondary">
+                            <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/clone/#main') ?>"
+                                class="btn btn-secondary">
                             ♻️ Klonovat
-                        </a>
+                            </a>
                         <?php else : ?>
-                            <a class="btn btn-secondary disabled"
+                            <button class="btn btn-secondary disabled"
                                 title="Zakázka je uzavřená, nelze klonovat"
                                 tabindex="-1"
-                                aria-disabled="true">
+                                aria-disabled="true"
+                                disabled>
                                 ♻️ <s>Klonovat</s>
-                            </a>
+                            </button>
                             
                         <?php endif; ?>
 
