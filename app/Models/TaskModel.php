@@ -48,6 +48,30 @@ private function canBeCancelled(array $stats): bool
 {
     return $stats['assignments_count'] === 0;
 }
+
+
+    public function closeRecurringTask(int $taskId, string $newStatus = 'done'): bool
+    {        
+        $task = $this->findById($taskId);
+
+        if (!$task) {
+            return false;
+        }
+     
+        $data = [
+            'status' => $newStatus,
+        ];
+
+        if ($newStatus === 'done') {
+            $data['done_at'] = (new DateTime())->format('Y-m-d H:i:s');
+        }
+
+        if ($newStatus === 'cancelled') {
+            $data['done_at'] = null;
+        }
+
+        return $this->update($taskId, $data);
+    }
     /**
      * Uzavře úkol změnou statusu
      */

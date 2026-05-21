@@ -47,32 +47,32 @@ if (!$type || !array_key_exists($type, $frequencies)) {
       <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
       <div class="card-body">
          <div class="form-container">
-				<form method="post">
-               <div class="form-group">
-				      <label>Frekvence: </label>
-<select name="frequency_type">
+			<form method="post">
+				<?= Csrf::getField() ?>
+               	<div class="form-group">
+				    <label>Frekvence: </label>
+					<select name="frequency_type">
+						<?php foreach ($frequencies as $key => $value): ?>
+							<option value="<?= e($key) ?>"
+								<?= $key === ($data['frequency_type'] ?? $default['frequency_type']) ? 'selected' : '' ?>>
+								<?= e($value) ?>
+							</option>
+						<?php endforeach; ?>
+					</select>               
+				</div>
 
+                <div class="form-group">
 
-    <?php foreach ($frequencies as $key => $value): ?>
-        <option value="<?= e($key) ?>"
-           <?= $key === ($data['frequency_type'] ?? $default['frequency_type']) ? 'selected' : '' ?>>
-           <?= e($value) ?>
-        </option>
-    <?php endforeach; ?>
-</select>               </div>
-
-               <div class="form-group">
-
-				      <label>Interval: </label>
-				      <input
+				        <label>Interval: </label>
+				        <input
 				          type="number"
 				          name="frequency_value"
 				          value="<?= (int)($data['frequency_value'] ?? $default['frequency_value']) ?>"
 				          min="<?= (int)$limits['min_frequency_value'] ?>"
 				          max="<?= (int)$limits['max_frequency_value'] ?>"
 				      >
-               </div>
-               <div class="form-group">
+                </div>
+                <div class="form-group">
 
 				      <label>Spustit v předstihu (dny): </label>
 				      <input
@@ -82,19 +82,19 @@ if (!$type || !array_key_exists($type, $frequencies)) {
 				          min="<?= (int)$limits['min_frequency_value'] ?>"
 				          max="<?= (int)$limits['max_frequency_value'] ?>"
 				          >
-               </div>
+                </div>
 
-               <div class="form-group">
+                <div class="form-group">
 
-				      <label>První spuštění: </label>
-				      <input
+				        <label>První spuštění: </label>
+				        <input
 				          type="date"
 				          name="next_due_date"
 				          value="<?= e($data['next_due_date'] ?? '') ?>"
 				          >
-               </div>
+                </div>
 
-               <div class="form-group">
+                <div class="form-group">
 
 				      <label>
 				        <input type="checkbox" name="active"
@@ -103,61 +103,81 @@ if (!$type || !array_key_exists($type, $frequencies)) {
                         >
 				            Aktivní
 				      </label>
-               </div>
-               <div class="form-actions">
-							<button type="submit" class="btn btn-primary">
-								<span class="btn-icon"></span>
-								Uložit opakovaný úkol
-							</button>
-		
-							<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" 
-								class="btn btn-secondary">
-								<span class="btn-icon">←</span>
-								Na výpis úkolů
-							</a>
-					</div>
+                </div>
+                <div class="form-actions">
+					<button type="submit" class="btn btn-primary">
+						<span class="btn-icon"></span>
+						Uložit opakovaný úkol
+					</button>
 
-				</form>
-		  </div>
+					<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" 
+						class="btn btn-secondary">
+						<span class="btn-icon">←</span>
+						Na výpis úkolů
+					</a>
+				</div>	
+			</form>
+			<div class="form-actions alert alert-warning">
+				
+				<?php if (((int)($data['active'] ?? 0) === 0) && !in_array($task['status'], ['done', 'cancelled'])): ?>
 
-	   </div>
+					<form method="post"
+							action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring-done') ?>"
+							data-confirm="Opravdu chcete úkol uzavřít? Tato akce je nevratná..."
+					>
+					<?= Csrf::getField() ?>
+						<button type="submit" class="btn btn-danger" title="Uzavřít úkol">
+							<span class="btn-icon"></span>
+							Uzavřít opakovací šablonu
+						</button>
+					</form>
+
+				<?php endif; ?>
+			</div>	
+
+				
+		  	</div>
+
+	   	</div>
 	</div>
 	<div class="card card-help" id="helpCard">
 
 		<div class="card-body">
-								<h3>Filozofie projektu</h3>
-								<details>
-								<p>
-									Když jsem přemýšlel nad vytvořením tohoto systému, měl jsem jasnou vizi: 
-									<span>Zakázka je Bůh. Aby se Bůh mohl realizovat, zažít, naplnit, sestoupil k nám a rozpadl se 
-									na jednotlivé úkoly.
-											Skrze splnění těchto úkolů (reporty o vykonané práci), se Bůh, čili zakázka realizuje.
-											
-									</span>
-								</p>
-								</details>
-								<h3>Nápověda:</h3>
-								<p>
-						<p><strong>Opakované úkoly</strong></p>
-						<ul>
-							<li>Frekvence: denně, týdně, měsíčně, ročně</li>
-							<li>Interval: každých X dní, týdnů, měsíců, roků</li>
-							<li>Spustit v předstihu: počet dní předem, kdy se má vygenerovat úkol pro upozornění</li>
-							<li>První spuštění: datum, kdy se má poprvé vygenerovat úkol</li>
-							<li>Aktivní: zda je opakování aktivní, neaktivní opakování se neprojeví v generování úkolů
-						</ul>
-						<p>Pomocí frekvence a intervalu můžete nastavit, jak často se má úkol opakovat. 
-							Například "týdně" s intervalem "2" znamená, že se úkol bude generovat každé 2 týdny. 
-							Nastavení "spustit v předstihu (3 dny)" znamená, že se úkol vygeneruje 3 dny před jeho skutečným termínem, což umožní včasné upozornění.
-							První spuštění určuje, kdy se má poprvé vygenerovat úkol, a aktivní/ neaktivní stav umožňuje dočasně pozastavit gener
-	</p>
-						<ul>
-							<li>Opakující se úkoly jsou určeny pro pravidelné činnosti, které se musí vykonávat opakovaně (např. údržba, kontroly, pravidelné schůzky).</li>
-							<li>Opakující se úkoly se automaticky generují podle nastaveného vzorce (denně, týdně, měsíčně) a mohou být spuštěny s předstihem pro včasné upozornění.</li>
-							<li>Opakující se úkoly mají "master" záznam, který určuje jejich opakovací vzorec. Generované úkoly jsou potomky tohoto master záznamu.</li>
-							<li>Úprava master záznamu umožňuje změnit vzorec opakování pro všechny budoucí generované úkoly.</li>
-						</ul>
+			<details>
+				<summary>Opakované úkoly</summary>
+				<ul>
+					<li>Frekvence: denně, týdně, měsíčně, ročně</li>
+					<li>Interval: každých X dní, týdnů, měsíců, roků</li>
+					<li>Spustit v předstihu: počet dní předem, kdy se má vygenerovat úkol pro upozornění</li>
+					<li>První spuštění: datum, kdy se má poprvé vygenerovat úkol</li>
+					<li>Aktivní: zaškrtnuto: úkoly jsou automaticky generované podle nastavení.</li>
+					<li>Neaktivní: žádné nové úkoly se negenerují, ale stávající zůstávají.</li>
+					<li>V neaktivním stavu lze teprve tento úkol ukončit, ale nelze ho znovu aktivovat.</li>
+				</ul>
 
+				<p>
+    				<strong>Upozornění:</strong>
+   					Aktivní master úkol nelze dokončit ani zrušit.
+    				Nejprve je nutné deaktivovat opakování.
+				</p>
+				<p>Pomocí frekvence a intervalu můžete nastavit, jak často se má úkol opakovat. 
+					Například "týdně" s intervalem "2" znamená, že se úkol bude generovat každé 2 týdny. 
+					Nastavení "spustit v předstihu (3 dny)" znamená, že se úkol vygeneruje 3 dny před 
+					jeho skutečným termínem, což umožní včasné upozornění.
+					První spuštění určuje, kdy se má poprvé vygenerovat úkol, a aktivní/ neaktivní stav 
+					umožňuje dočasně pozastavit generování úkolů, aniž byste museli mazat nastavení opakování.
+				</p>
+				<ul>
+					<li>Opakující se úkoly jsou určeny pro pravidelné činnosti, které se musí 
+						vykonávat opakovaně (např. údržba, kontroly, pravidelné schůzky).</li>
+					<li>Opakující se úkoly se automaticky generují podle nastaveného vzorce 
+						(denně, týdně, měsíčně) a mohou být spuštěny s předstihem pro včasné upozornění.</li>
+					<li>Opakující se úkoly mají "master" záznam, který určuje jejich opakovací vzorec. 
+						Generované úkoly jsou potomky tohoto master záznamu.</li>
+					<li>Úprava master záznamu umožňuje změnit vzorec opakování pro všechny budoucí 
+						generované úkoly.</li>
+				</ul>
+			</details>
 		</div>
 	</div>
 

@@ -119,37 +119,72 @@ $errors    = $view->errors;
 	<div class="card card-help" id="helpCard">
 
 		<div class="card-body">
-								<h3>Filozofie projektu</h3>
-								<details>
-								<p>
-									Když jsem přemýšlel nad vytvořením tohoto systému, měl jsem jasnou vizi: 
-									<span>Zakázka je Bůh. Aby se Bůh mohl realizovat, zažít, naplnit, sestoupil k nám a rozpadl se 
-									na jednotlivé úkoly.
-											Skrze splnění těchto úkolů (reporty o vykonané práci), se Bůh, čili zakázka realizuje.
-											
-									</span>
-								</p>
-								</details>
-								<h3>Nápověda:</h3>
-								<p>
+			<details>
+				<summary>Co je to úkol?</summary>
+								
+				
 			        <p><strong>Informace:</strong>
 			           Úkol je nějaká část zakázky, kterou má vykonat určitá osoba nebo tým. 
 		           </p>
-						<p>Náš systém je navržen tak, že úkoly mohou vznikat jen tehdy, patří-li nějaké zakázce. 
-						Úkol bez zakázky, ke které by patřil, nám nedává smysl. </p>
-						<p>Zde úkol vytvoříte a přiřadíte ho některému z vašich aktivních týmů. 
+					<p>Náš systém je navržen tak, že úkoly mohou vznikat jen ze zakázky. 
+						Úkol bez zakázky, ke které by patřil, nám nedává smysl. 
+					</p>
+					<p>Druhá a neméně důležitá podminka pro vznik úkolu je, že musí být přiřazen nějakému týmu. 
+						Tím přenáší zodpovědnost za vykonání úkolů na konkrétní Tým a lidi v něm. 
+						Oni Vám zpětně prostřednictvím reportů k úkolům, vykazují práci, čas a najeté kilometry.
+					</p>
+					<p>Úkoly jsou základním stavebním kamenem našeho systému, protože nám umožňují rozdělit 
+						zakázku na menší části, které jsou snáze spravovatelné a sledovatelné. 
+					</p>
+					<p>
+						Každému úkolu můžete nastavit termín dokončení. Systém potom barevně rozlišuje stavy: 
+					</p>
+					<ul>
+						<li><span class="deadline-future">Zelená</span> - úkol je v pořádku, termín není blízko.</li>
+						<li><span class="deadline-today">Oranžová</span> - úkol je blízko termínu dokončení (např. 3 dny předem).</li>
+						<li><span class="deadline-late">Červená</span> - úkol je po termínu dokončení.</li>
+						<li><span class="deadline-none">Černá</span> - úkol nemá nastavený termín dokončení.</li>
+					</ul>
+					
+					<p>Zde úkol vytvoříte a přiřadíte ho některému z vašich aktivních týmů. 
 						Tím přenášíte zodpovědnost za vykonání úkolů na konkrétní Tým a lidi v něm. 
 						Oni Vám zpětně prostřednictvím reportů k úkolům, vykazují práci, čas a najeté kilometry.						
-						</p>
+					</p>
+			</details>
 
-					<p><strong>Opakované úkoly</strong></p>
-					<ul>
-						<li>Opakující se úkoly jsou určeny pro pravidelné činnosti, které se musí vykonávat opakovaně (např. údržba, kontroly, pravidelné schůzky).</li>
-						<li>Opakující se úkoly se automaticky generují podle nastaveného vzorce (denně, týdně, měsíčně) a mohou být spuštěny s předstihem pro včasné upozornění.</li>
-						<li>Opakující se úkoly mají "master" záznam, který určuje jejich opakovací vzorec. Generované úkoly jsou potomky tohoto master záznamu.</li>
-						<li>Úprava master záznamu umožňuje změnit vzorec opakování pro všechny budoucí generované úkoly.</li>
-			</ul>
+			<details>
+				<summary>Opakující se úkoly</summary>
 
+				<p>
+					Opakující se úkoly slouží pro pravidelné činnosti,
+					které se mají vykonávat opakovaně
+					(například kontroly, údržba nebo pravidelné servisní návštěvy).
+				</p>
+
+				<p>
+					Při vytvoření opakujícího se úkolu vznikne:
+				</p>
+
+				<ul>
+					<li>
+						<strong>Master úkol</strong> – šablona určující pravidla opakování.
+					</li>
+
+					<li>
+						<strong>Generované úkoly</strong> – běžné pracovní úkoly,
+						které vznikají automaticky podle nastaveného opakování.
+					</li>
+				</ul>
+
+				<p>
+					Reporty práce se zapisují pouze ke generovaným úkolům.
+					Master úkol slouží pouze jako konfigurace opakování.
+				</p>
+
+				<p>
+					Deaktivací opakování dojde k ukončení generování dalších úkolů.
+				</p>
+			</details>			
 		</div>
 	</div>
 

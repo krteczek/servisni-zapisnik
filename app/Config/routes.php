@@ -378,6 +378,14 @@ return [
 
 [
     'method' => 'POST',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/recurring-done',
+    'action' => [TaskController::class, 'doneRecurring'],
+    'roles'   => ['admin', 'mistr'],
+    'auth'   => true,
+],
+
+[
+    'method' => 'POST',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/cancel',
     'action' => [TaskController::class, 'cancel'],
     'roles'   => ['admin', 'mistr'],

@@ -20,15 +20,21 @@ $tasks = $view->data;
 
 <div class="entity-grid">
     <?php foreach ($tasks as $task): ?>
+        <?php
+        $recurringBadge = '';
+        if(!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
+            $recurringBadge = '<span class="badge badge-recurring" title="Generovaný opakující se úkol">↻</span>';
+        } elseif (!empty($task['is_recurring']) && (int)$task['is_recurring'] === 1) {
+            $recurringBadge = '<span class="badge badge-recurring" title="Generátor opakujícího se úkolu"> 🔁</span>';
+            continue;
+        }
+        ?>
         <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
-                <?php if ($task['is_recurring_master']): ?>
-                    <span class="badge badge-recurring" title="opakující se, master">🔁</span>
-                <?php elseif ($task['is_generated_task']): ?>
-                    <span class="badge badge-recurring" title="generovaný úkol">↻</span>
-                <?php endif; ?>
+                
                <span class="card-title">
+                    <?= $recurringBadge ?>
                     <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>"
                        title="Přidat report k tomuto úkolu">
                     <?= e($task['title']) ?>
