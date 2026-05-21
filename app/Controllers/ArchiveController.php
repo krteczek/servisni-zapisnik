@@ -22,9 +22,8 @@ use Throwable;
 
 class ArchiveController extends Controller
 {
-    public function tasks(): string
+    private function getFiltersFromRequest(): array
     {
-
         $status = $_GET['status'] ?? 'all';
         $q = trim($_GET['q'] ?? '');
 
@@ -32,13 +31,18 @@ class ArchiveController extends Controller
             $status = 'all';
         }
 
-        $filters = [
+        return [
             'status' => $status,
             'q'      => $q,
             // future:
             // 'date_from' => ...
         ];
+    }
+    public function tasks(): string
+    {
 
+        $filters = $this->getFiltersFromRequest();
+        
         $data = (new TaskModel())->filterArchive($filters);
 
         $this->view->data = $data;
@@ -47,5 +51,20 @@ class ArchiveController extends Controller
         $this->view->type = 'tasks'; // 👈 důležité pro view
 
         return $this->render('archive/index');
+    }
+
+    public function workOrders(): string
+    {
+        $filters = $this->getFiltersFromRequest();
+        
+        $data = (new WorkOrderModel())->filterArchive($filters);
+
+        $this->view->data = $data;
+        $this->view->title .= ' (' . count($data) . ')';
+        $this->view->filters = $filters;
+        $this->view->type = 'work-orders'; // 👈 důležité pro view
+
+        return $this->render('archive/index');
+
     }
 }
