@@ -17,6 +17,14 @@ $data = $view->data;
 <div class="workbench-grid">
 <div class="card card-workbench">
     <h3>Úkoly</h3>
+    <details>
+        <summary>Úkoly, které lze uzavřít</summary>
+        <ul>
+            <li>Mají alespoň jeden report práce.</li>
+            <li>Jejich stav musí být: Otevřeno.</li>
+            <li>Opakující se úkoly, které slouží jako šablona, lze uzavírat v nastavení opakujícího se úkolu.</li>
+        </ul>
+    </details>
 <table>
     <thead>
         <tr>

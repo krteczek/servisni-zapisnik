@@ -181,36 +181,26 @@ Pokud chcete přidat report, musíte se nejprve stát členem týmu, který má 
 	<div class="card card-help" id="helpCard">
 
 		<div class="card-body">
-			<h3>Filozofie projektu</h3>
 			<details>
+				<summary>Reporty</summary>
 				<p>
-					Když jsem přemýšlel nad vytvořením tohoto systému, měl jsem jasnou vizi: 
-					<span>Zakázka je Bůh. Aby se Bůh mohl realizovat, zažít, naplnit, sestoupil k nám a rozpadl se 
-							na jednotlivé úkoly.
-							Skrze splnění těchto úkolů (reporty o vykonané práci), se Bůh, čili zakázka realizuje.
-							Zde zapisujte, jak vám to šlo či nešlo, detaily a nebo prostě stručně. Je to pro Vás a Vešeho šéfa
-							a hlavně pro vaše budoucí já, abyste si mohli připomenout, co se tady tehdy pos... dělalo.											
-					</span>
+					Reporty slouží k evidenci udělané práce, času stráveného při práci a kilometrů ujetých při vykonání této práce.
 				</p>
-			</details>
-			<h3>Nápověda:</h3>
-			<p>
-				Reporty slouží k evidenci udělané práce, času stráveného při práci a kilometrů ujetých při vykonání této práce.
-			</p>
-			
-			<ul>
-				<li><strong>Report: </strong>Jakákoli textová informace popisující vykonanou práci. Je to pro Vašeho šéfa. Je to i pro vás v budoucnu, 
-					až budete vzpomínat, co jste tam dělali. Tady to najdete. A také: je to jediná povinná položka tohoto rozhraní.</li>
-				<li><strong>Kilometry: </strong>Zapisujte ujeté kilometry. Abyste si mohli nakonci zakázky spočítat, kolik jste 
-					celkem na této zakázce najezdili kilometrů.</li>
-				<li><strong>Kdo pracoval: </strong>V týmu bývá více lidí, někdy jsou všichni v práci, jindy ne, někdy někdo 
-					začne později nebo skončí dříve. Takový je život. Proto je zde možnost vybrat, kdo na tomto 
-					úkole pracoval a jak dlouho.</li>
-				<li>Systém funguje tak, že žádný odeslaný report nelze opravit ani odstranit. Můžete však napsat další report a
-					v něm provést opravu. Čas i najeté kilometry je možno zadávat i v záporných hodnotách, takže když se někde spletete,
-					můžete to v dalším reportu snadno opravit.</li>
 				
-			</ul>
+				<ul>
+					<li><strong>Report: </strong>Jakákoli textová informace popisující vykonanou práci. Je to pro Vašeho šéfa. Je to i pro vás v budoucnu, 
+						až budete vzpomínat, co jste tam dělali. Tady to najdete. A také: je to jediná povinná položka tohoto rozhraní.</li>
+					<li><strong>Kilometry: </strong>Zapisujte ujeté kilometry. Abyste si mohli nakonci zakázky spočítat, kolik jste 
+						celkem na této zakázce najezdili kilometrů.</li>
+					<li><strong>Kdo pracoval: </strong>V týmu bývá více lidí, někdy jsou všichni v práci, jindy ne, někdy někdo 
+						začne později nebo skončí dříve. Takový je život. Proto je zde možnost vybrat, kdo na tomto 
+						úkole pracoval a jak dlouho.</li>
+					<li>Systém funguje tak, že žádný odeslaný report nelze opravit ani odstranit. Můžete však napsat další report a
+						v něm provést opravu. Čas i najeté kilometry je možno zadávat i v záporných hodnotách, takže když se někde spletete,
+						můžete to v dalším reportu snadno opravit.</li>
+					
+				</ul>
+			</details>
 		</div>
 	</div>
 	

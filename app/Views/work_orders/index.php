@@ -14,6 +14,11 @@ $workOrders = $view->orders;
 
 <div class="entity-grid">
     <?php foreach ($workOrders as $wo): ?>
+        <?php
+        if (!empty($wo['status']) && in_array($wo['status'], ['done', 'cancelled'])) {
+            continue; // přeskočíme zakázky s těmito statusy
+        }
+        ?>
         <div class="card">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">

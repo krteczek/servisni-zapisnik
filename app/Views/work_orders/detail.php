@@ -30,8 +30,8 @@ $err = $view->errors;
 	Základní informace o zakázce
 ***************************************************************/
 -->
-<div class="create-container">
-	<div class="card">
+<div class="create-container"><!-- HLAVNÍ SLOUPEC – DETAIL ZAKÁZKY -->
+	<div class="card"><!-- karta zakázky -->
 		<div class="card-body">
 			<!-- HEADER -->
 			<div class="card-header">
@@ -118,262 +118,269 @@ $err = $view->errors;
             <span class="meta-value"><?= e($order['total_km']) ?></span>
         </div>
 
-<div class="card-footer">
-<?php if (in_array($order['status'], ['new', 'in_progress'])): ?>
-    <a href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/edit/#main') ?>" class="btn btn-primary" title="Upravit zakázku">
-        ✏️ Upravit zakázku
-    </a>
-<?php endif; ?>
-<?php if (in_array($order['status'], ['new', 'in_progress'])): ?>
-    <a class="btn btn-secondary"
-                href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create/#main') ?>">
-                Přidat nový úkol k této zakázce
-    </a>
-<?php endif; ?>
+        <div class="card-footer">
+        <?php if (in_array($order['status'], ['new', 'in_progress'])): ?>
+            <a href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/edit/#main') ?>" class="btn btn-primary" title="Upravit zakázku">
+                ✏️ Upravit zakázku
+            </a>
+        <?php endif; ?>
+        <?php if (in_array($order['status'], ['new', 'in_progress'])): ?>
+            <a class="btn btn-secondary"
+                        href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create/#main') ?>">
+                        Přidat nový úkol k této zakázce
+            </a>
+        <?php endif; ?>
 
-<?php if($order['ready_for_done']): ?>
-    <form method="post"
-          action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/done') ?>"
-          data-confirm="Opravdu chcete zakázku uzavřít jako hotovou?"          
-          style="display:inline-block;">
+        <?php if($order['ready_for_done']): ?>
+            <form method="post"
+                action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/done') ?>"
+                data-confirm="Opravdu chcete zakázku uzavřít jako hotovou?"          
+                style="display:inline-block;">
 
-        <?= Csrf::getField() ?>
-        <button class="btn btn-danger">Uzavřít zakázku</button>
+                <?= Csrf::getField() ?>
+                <button class="btn btn-danger">Uzavřít zakázku</button>
 
-    </form>
+            </form>
 
-<?php endif; ?>
+        <?php endif; ?>
 
 
-<?php if($order['ready_for_cancel']): ?>
-    <form method="post"
-          action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/canceled') ?>"
-          data-confirm="Opravdu chcete zakázku stornovat?"
-          style="display:inline-block;">
+        <?php if($order['ready_for_cancel']): ?>
+            <form method="post"
+                action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/canceled') ?>"
+                data-confirm="Opravdu chcete zakázku stornovat?"
+                style="display:inline-block;">
 
-        <?= Csrf::getField() ?>
-        <button class="btn btn-danger" title="Stornovat zakázku">Stornovat zakázku</button>
-    </form>
-<?php endif; ?>
-    <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary" title="Zpět na přehled zakázek">
-        ← Zpět na přehled
-    </a>
+                <?= Csrf::getField() ?>
+                <button class="btn btn-danger" title="Stornovat zakázku">Stornovat zakázku</button>
+            </form>
+        <?php endif; ?>
+            <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary" title="Zpět na přehled zakázek">
+                ← Zpět na přehled
+            </a>
 
-</div>
-	</div>
+        </div><!-- /.card-footer -->
+	</div><!-- /.card -->
     <!-- PRAVÝ SLOUPEC – NÁPOVĚDA / INFO (volitelně) -->
-    <div class="card card-help" id="helpCard">
+    <div class="card card-help" id="helpCard"><!-- karta s nápovědou -->
         <div class="card-body">
             <details>
                 <summary>Nápověda ke stavům a typům úkolů</summary>
 				<p>Každá zakázka může mít některý z těchto stavů:</p>
-            <ul style="padding-left:1.2rem;">
-                <li><span class="badge badge-status-<?= e('new') ?>"><?= te('new') ?></span> – Nová zakázka, ještě bez úkolů.</li>
-                <li><span class="badge badge-status-<?= e('in_progress') ?>"><?= te('in_progress') ?></span> – Zákázka obsahuje alespoň jeden úkol.</li>
-                <li><span class="badge badge-status-<?= e('done') ?>"><?= te('done') ?></span> – všechny úkoly byly dokončeny nebo zrušeny.</li>
-                <li><span class="badge badge-status-<?= e('exported') ?>"><?= te('exported') ?></span> – po dokončení byly provedeny exporty dat.</li>
-                <li><span class="badge badge-status-<?= e('cancelled') ?>"><?= te('cancelled') ?></span> – Zakázka byla stornována</li>
-            </ul>
+                <ul style="padding-left:1.2rem;">
+                    <li><span class="badge badge-status-<?= e('new') ?>"><?= te('new') ?></span> – Nová zakázka, ještě bez úkolů.</li>
+                    <li><span class="badge badge-status-<?= e('in_progress') ?>"><?= te('in_progress') ?></span> – Zákázka obsahuje alespoň jeden úkol.</li>
+                    <li><span class="badge badge-status-<?= e('done') ?>"><?= te('done') ?></span> – všechny úkoly byly dokončeny nebo zrušeny.</li>
+                    <li><span class="badge badge-status-<?= e('exported') ?>"><?= te('exported') ?></span> – po dokončení byly provedeny exporty dat.</li>
+                    <li><span class="badge badge-status-<?= e('cancelled') ?>"><?= te('cancelled') ?></span> – Zakázka byla stornována</li>
+                </ul>
 
-            <h4>Druhy úkolů</h4>
-            <p>Úkoly mohou být tří typů:</p>
-            <ul style="padding-left:1.2rem;">
-                <li>běžný úkol</li>
-                <li><span class="badge badge-recurring" title="opakující se, master">🔁</span> – Opakující se úkol (master)</li>
-                <li><span class="badge badge-recurring" title="generovaný úkol">↻</span> – Generovaný úkol</li>
+                <h4>Druhy úkolů</h4>
+                <p>Úkoly mohou být tří typů:</p>
+                <ul style="padding-left:1.2rem;">
+                    <li>běžný úkol</li>
+                    <li><span class="badge badge-recurring" title="opakující se, master">🔁</span> – Opakující se úkol (master)</li>
+                    <li><span class="badge badge-recurring" title="generovaný úkol">↻</span> – Generovaný úkol</li>
+                    
+                </ul>
+                <h5>🔁 Opakující se úkol (master)</h5>
+                    <p>Slouží jako šablona pro automatické vytváření dalších úkolů.</p>
+                    <ul>
+                        <li>lze jej upravovat</li>
+                        <li>nelze k němu přidávat reporty</li>
+                        <li>neslouží k evidenci práce</li>
+                        <li>určuje pravidla opakování</li>
+                    </ul>
+
+                <h5>↻ Generovaný úkol</h5>
+                    <p>Úkol automaticky vytvořený z opakujícího se master úkolu.</p>
+                    <ul>
+                        <li>nelze jej upravovat</li>
+                        <li>lze k němu přidávat reporty</li>
+                        <li>slouží k evidenci skutečně provedené práce</li>
+                    </ul>
                 
-            </ul>
-            <h5>🔁 Opakující se úkol (master)</h5>
-                <p>Slouží jako šablona pro automatické vytváření dalších úkolů.</p>
-                <ul>
-                    <li>lze jej upravovat</li>
-                    <li>nelze k němu přidávat reporty</li>
-                    <li>neslouží k evidenci práce</li>
-                    <li>určuje pravidla opakování</li>
-                </ul>
+                <h5>Běžný úkol</h5>
 
-            <h5>↻ Generovaný úkol</h5>
-                <p>Úkol automaticky vytvořený z opakujícího se master úkolu.</p>
-                <ul>
-                    <li>nelze jej upravovat</li>
-                    <li>lze k němu přidávat reporty</li>
-                    <li>slouží k evidenci skutečně provedené práce</li>
-                </ul>
-               
-            <h5>Běžný úkol</h5>
+                    <p>Standardní ručně vytvořený úkol.</p>
+                    <ul>
+                        <li>lze jej upravovat</li>
+                        <li>lze k němu přidávat reporty</li>
+                        <li>slouží k evidenci skutečně provedené práce</li>
+                    </ul>
+                <h5>Přístup k detailu a reportům</h5>
+                    <p>Detail a reporty jsou dostupné pouze pro:</p>
+                    <ul>
+                        <li>běžné úkoly</li>
+                        <li>generované úkoly</li>
+                    </ul>
 
-                <p>Standardní ručně vytvořený úkol.</p>
-                <ul>
-                    <li>lze jej upravovat</li>
-                    <li>lze k němu přidávat reporty</li>
-                    <li>slouží k evidenci skutečně provedené práce</li>
-                </ul>
-            <h5>Přístup k detailu a reportům</h5>
-                <p>Detail a reporty jsou dostupné pouze pro:</p>
-                <ul>
-                    <li>běžné úkoly</li>
-                    <li>generované úkoly</li>
-                </ul>
-
-                <p>🔁 Master úkoly pro opakování neslouží k vykazování práce, a proto k nim 
-                    reporty nejsou dostupné.
-                </p>
+                    <p>🔁 Master úkoly pro opakování neslouží k vykazování práce, a proto k nim 
+                        reporty nejsou dostupné.
+                    </p>
             </details>
         </div><!-- /.card-body -->
     </div><!-- /.card-help -->
 </div><!-- /.create-container -->
+
+
+<!-- **************************************************************	
+    Seznam úkolů pro zakázku
+*************************************************************** -->
 <?php if ($tasks === []) : ?>
     <p class="muted">Zatím nejsou přidány žádné úkoly.</p>
 <?php else : ?>
 
 
-    <div class="task-grid" id="task-list">
+<div class="task-grid" id="task-list"><!-- GRID S ÚKOLY -->
 
-<?php foreach ($tasks as $task) : ?>
-<?php
-$canCloseDone = $task['can_close'];
-$canCloseCanceled = $task['can_cancel'];
-$canEdit = true;
-if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
-    $canEdit = false;
-} 
- 
-?>
-<div class="task-card card status-<?= e($task['status']) ?>" id="taskId_<?= (int)$task['id'] ?>" style="--task-color: <?= e($task['team_color']) ?>">
+    <?php foreach ($tasks as $task) : ?>
+        <?php
+        $canCloseDone = $task['can_close'];
+        $canCloseCanceled = $task['can_cancel'];
+        $canEdit = true;
+        if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
+            $canEdit = false;
+        } 
+        
+        ?>
+        <div class="task-card card status-<?= e($task['status']) ?>" 
+                id="taskId_<?= (int)$task['id'] ?>" 
+                style="--task-color: <?= e($task['team_color']) ?>">
 
-    <div class="card-header">
+            <div class="card-header">
 
-                <?php if ($task['is_recurring_master']): ?>
-                    <span class="badge badge-recurring" title="opakující se, master">🔁</span>
-                <?php elseif ($task['is_generated_task']): ?>
-                    <span class="badge badge-recurring" title="generovaný úkol">↻</span>
+                        <?php if ($task['is_recurring_master']): ?>
+                            <span class="badge badge-recurring" title="opakující se, master">🔁</span>
+                        <?php elseif ($task['is_generated_task']): ?>
+                            <span class="badge badge-recurring" title="generovaný úkol">↻</span>
+                        <?php endif; ?>
+
+                <strong><?= e($task['title'] ?? 'Bez názvu') ?></strong>
+
+                <span class="badge badge-status-<?= e($task['status']) ?>">
+                    <?= te($task['status']) ?>
+                </span>
+            </div>
+
+            <div class="card-body">
+                <?php
+                $deadlineClass = 'deadline-none';
+                $deadlineText  = 'Neuvedeno';
+
+                if ($task['due_date']) {
+
+                    $today = date('Y-m-d');
+                    $due   = date('Y-m-d', strtotime($task['due_date']));
+
+                    $deadlineText = date('d.m.Y', strtotime($task['due_date']));
+
+                    if ($due < $today) {
+                        $deadlineClass = 'deadline-late';
+                    } elseif ($due === $today) {
+                        $deadlineClass = 'deadline-today';
+                    } else {
+                        $deadlineClass = 'deadline-future';
+                    }
+                }
+                ?>
+
+                <div class="meta-item">
+                    <span class="meta-label">Termín:</span>
+
+                    <span class="meta-value <?= $deadlineClass ?>">
+                        <?= e($deadlineText) ?>
+                    </span>
+                </div>                            
+
+                <div class="meta-item">
+                    <span class="meta-label">Úkol řeší tým:</span>
+                    <span class="meta-value">
+                        <?= te($task['team_name']) ?>
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Popis:</span>
+                    <span class="meta-value"><?= tx($task['description']) ?: 'Bez popisu' ?></span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Vytvořeno:</span>
+                    <span class="meta-value"><?= e(formatCzDate($task['created_at'])) ?></span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Reporty:</span>
+                    <span class="meta-value"><?= (int)($task['stats']['assignments_count'] ?? 0) ?></span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Čas:</span>
+                    <span class="meta-value"><?= formatMinutes($task['stats']['total_minutes'] ?? 0) ?></span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Km:</span>
+                    <span class="meta-value"><?= (int)($task['stats']['total_km'] ?? 0) ?></span>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                <?php if (!$task['is_recurring_master']): ?>
+                    <!-- detail úkolu a reporty jsou přístupné jen 
+                    pro úkoly, které nejsou master úkoly pro opakování -->
+                <a class="btn btn-sm btn-secondary"
+                href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>"
+                title="Jít na detail úkolu a reporty">
+                Detail + reporty
+                </a>
                 <?php endif; ?>
 
-        <strong><?= e($task['title'] ?? 'Bez názvu') ?></strong>
+                <?php if ($canEdit) : ?>
+                    <?php if ($task['is_recurring_master'] === 1 || $task['is_generated_task'] === 0): ?>
 
-        <span class="badge badge-status-<?= e($task['status']) ?>">
-            <?= te($task['status']) ?>
-        </span>
-    </div>
+                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
+                        class="btn btn-secondary" 
+                        title="Upravit úkol">
+                            ✏️ Upravit úkol
+                        </a>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php if ($task['can_cancel'] && $task['status'] !== 'cancelled' && $task['status'] !== 'done') : ?>
+                    <?php if ($task['is_generated_task'] === 0): ?>
+                        
+                        <form method="post"
+                            action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
+                            data-confirm="Opravdu chcete úkol stornovat?">
 
-    <div class="card-body">
-        <?php
-        $deadlineClass = 'deadline-none';
-        $deadlineText  = 'Neuvedeno';
+                            <?= Csrf::getField() ?>
+                            <button class="btn btn-sm btn-danger" title="Stornovat úkol">Stornovat</button>
 
-        if ($task['due_date']) {
+                        </form>
+                    <?php endif; ?>
+                <?php endif; ?>
 
-            $today = date('Y-m-d');
-            $due   = date('Y-m-d', strtotime($task['due_date']));
-
-            $deadlineText = date('d.m.Y', strtotime($task['due_date']));
-
-            if ($due < $today) {
-                $deadlineClass = 'deadline-late';
-            } elseif ($due === $today) {
-                $deadlineClass = 'deadline-today';
-            } else {
-                $deadlineClass = 'deadline-future';
-            }
-        }
-        ?>
-
-        <div class="meta-item">
-            <span class="meta-label">Termín:</span>
-
-            <span class="meta-value <?= $deadlineClass ?>">
-                <?= e($deadlineText) ?>
-            </span>
-        </div>                            
-
-        <div class="meta-item">
-            <span class="meta-label">Úkol řeší tým:</span>
-            <span class="meta-value">
-                <?= te($task['team_name']) ?>
-            </span>
-        </div>
-        <div class="meta-item">
-            <span class="meta-label">Popis:</span>
-            <span class="meta-value"><?= tx($task['description']) ?: 'Bez popisu' ?></span>
-        </div>
-
-        <div class="meta-item">
-            <span class="meta-label">Vytvořeno:</span>
-            <span class="meta-value"><?= e(formatCzDate($task['created_at'])) ?></span>
-        </div>
-
-        <div class="meta-item">
-            <span class="meta-label">Reporty:</span>
-            <span class="meta-value"><?= (int)($task['stats']['assignments_count'] ?? 0) ?></span>
-        </div>
-
-        <div class="meta-item">
-            <span class="meta-label">Čas:</span>
-            <span class="meta-value"><?= formatMinutes($task['stats']['total_minutes'] ?? 0) ?></span>
-        </div>
-
-        <div class="meta-item">
-            <span class="meta-label">Km:</span>
-            <span class="meta-value"><?= (int)($task['stats']['total_km'] ?? 0) ?></span>
-        </div>
-
-    </div>
-
-    <div class="card-footer">
-        <?php if (!$task['is_recurring_master']): ?>
-            <!-- detail úkolu a reporty jsou přístupné jen 
-             pro úkoly, které nejsou master úkoly pro opakování -->
-        <a class="btn btn-sm btn-secondary"
-           href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>"
-           title="Jít na detail úkolu a reporty">
-           Detail + reporty
-        </a>
-        <?php endif; ?>
-
-        <?php if ($canEdit) : ?>
-            <?php if ($task['is_recurring_master'] === 1 || $task['is_generated_task'] === 0): ?>
-
-                <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
-                class="btn btn-secondary" 
-                title="Upravit úkol">
-                    ✏️ Upravit úkol
-                </a>
-            <?php endif; ?>
-        <?php endif; ?>
-        <?php if ($task['can_cancel'] && $task['status'] !== 'cancelled' && $task['status'] !== 'done') : ?>
-            <?php if ($task['is_generated_task'] === 0): ?>
-                
+                <?php if ($task['can_close'] && $task['status'] !== 'done') : ?>
                 <form method="post"
-                    action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
-                    data-confirm="Opravdu chcete úkol stornovat?">
+                    action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/done') ?>"
+                    data-confirm="Opravdu chcete úkol uzavřít?"
+                    >
 
                     <?= Csrf::getField() ?>
-                    <button class="btn btn-sm btn-danger" title="Stornovat úkol">Stornovat</button>
+                    <button class="btn btn-sm btn-success" title="Uzavřít úkol">Uzavřít</button>
 
                 </form>
-            <?php endif; ?>
-        <?php endif; ?>
+                <?php endif; ?>
 
-        <?php if ($task['can_close'] && $task['status'] !== 'done') : ?>
-        <form method="post"
-              action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/done') ?>"
-              data-confirm="Opravdu chcete úkol uzavřít?"
-              >
+            </div>
 
-            <?= Csrf::getField() ?>
-            <button class="btn btn-sm btn-success" title="Uzavřít úkol">Uzavřít</button>
+        </div>
+    <?php endforeach; ?>
 
-        </form>
-        <?php endif; ?>
-
-    </div>
-
-</div><?php endforeach; ?>
-
-    </div>
+</div><!-- /.task-grid -->
 
 <?php endif; ?>
-</div>
 
 <p>
     <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
@@ -381,6 +388,6 @@ if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
     </a>
 </p>
 
-</div>
+
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

@@ -226,9 +226,58 @@ private function saveTask(array $data, int $workOrderId): string
 
         if (!empty($task['recurring_task_id']) && $task['is_recurring'] != 1) {
             Flash::info('Automaticky vygenerovaný úkol nelze upravovat.');
-            Url::redirect('/{tenant}/work-orders');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
         }
     }
+    private function ensureTaskClosable(array $task, string $action = 'done'):void
+    {
+        $label = $action === 'done' ? 'uzavřít' : 'zrušit';
+
+//print_r($task);exit;
+
+        if ($task['status'] === 'done') {
+            Flash::info("Tento úkol nelze $label, protože je již dokončený.");
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+        }
+
+        if ($task['status'] === 'cancelled') {
+            Flash::error("Tento úkol nelze $label, protože je již zrušený.");
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+        }
+        
+        
+
+        if (!empty($task['is_recurring']) && $task['is_recurring'] == 1) {
+
+            Flash::info(
+                'Opakující se master úkol nelze tímto způsobem uzavřít ani zrušit. '
+                . 'Pro ukončení opakování deaktivujte opakování v nastavení opakování úkolu.'
+            );
+
+            Url::redirect( 
+                '/{tenant}/tasks/' . $task['id'] . '/recurring'
+            );
+        }        
+    }
+
+    public function ensureRecurringTaskClosable(array $task): void
+    {
+        if (empty($task['recurring_task_id']) || $task['is_recurring'] != 1) {
+            Flash::info('Tato funkce je určena pouze pro opakující se úkoly.');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+        }
+
+        if ($task['status'] === 'done') {
+            Flash::info("Tento úkol nelze uzavřít, protože je již uzavřený.");
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+        }
+
+        if ($task['status'] === 'cancelled') {
+            Flash::error("Tento úkol nelze uzavřít, protože je již zrušený.");
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+        }
+    }
+
 
 	public function editTaskGet(int $taskId): string 
 	{
@@ -421,33 +470,85 @@ private function validateDate(?string $date): ?string
     public function done(int $taskId): void
     {
         $task = $this->getTaskOrRedirect($taskId);
-        $this->ensureTaskEditable($task);
+        $this->ensureTaskClosable($task, 'done');
 
-        $ok = (new TaskModel())->closeTask($taskId, 'done');
+        try {
 
-        if (!$ok) {
-            Flash::error('Nepodařilo se uzavřít úkol.');
+            $ok = (new TaskModel())->closeTask($taskId, 'done');
+
+            Flash::success('Úkol byl uzavřen.');
             Url::back();
-        }
+        } catch (Throwable $e) {
 
-        Flash::success('Úkol byl uzavřen.');
-        Url::back();
+                // 🔥 TECHNICKÝ LOG
+                LoggerHolder::get()->error('TaskController.done FAILED', [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                    'trace'   => $e->getTraceAsString(),
+                    'input'   => serialize($task),
+                ]);
+
+                Flash::error('Nepodařilo se uzavřít úkol.');
+                Url::back();
+
+
+        }
     }
 
+    public function doneRecurring(int $taskId): void
+    {
+        $task = $this->getTaskOrRedirect($taskId);
+        $this->ensureRecurringTaskClosable($task);
+
+        try {
+            $ok = (new TaskModel())->closeRecurringTask($taskId, 'done');
+
+            Flash::success('Úkol byl uzavřen.');
+            Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#taskId_' . $taskId);
+            
+        } catch (Throwable $e) {
+
+                // 🔥 TECHNICKÝ LOG
+                LoggerHolder::get()->error('TaskController.doneRecurring FAILED', [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                    'trace'   => $e->getTraceAsString(),
+                    'input'   => serialize($task),
+                ]);
+
+                Flash::error('Nepodařilo se uzavřít úkol.');
+                Url::back();
+        }
+    }
     public function cancel(int $taskId): void
     {
         $task = $this->getTaskOrRedirect($taskId);
-        $this->ensureTaskEditable($task);
+        $this->ensureTaskClosable($task, 'cancel');
 
-        $ok = (new TaskModel())->closeTask($taskId, 'cancelled');
-        if (!$ok) {
-            Flash::error('Nepodařilo se zrušit úkol.');
+        try {
+            $ok = (new TaskModel())->closeTask($taskId, 'cancelled');
+ 
+            Flash::success('Úkol byl zrušen.');
             Url::back();
-        }
+        } catch (Throwable $e) {
 
-        Flash::success('Úkol byl zrušen.');
-        Url::back();
+                // 🔥 TECHNICKÝ LOG
+                LoggerHolder::get()->error('TaskController.cancel FAILED', [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                    'trace'   => $e->getTraceAsString(),
+                    'input'   => serialize($task),
+                ]);
+
+                Flash::error('Nepodařilo se zrušit úkol.');
+                Url::back();
+        }
     }
+
+
     public function addTaskReportGet(int $taskId): string
     {
         //ověříme právo na přidání Reportu
@@ -620,12 +721,16 @@ foreach ($participants as $userId => $participantData) {
         //var_dump($task);
         if (!$task['is_recurring']) {
             Flash::error('Tento úkol není nastaven jako opakovaný.');
-            Url::redirect('/{tenant}/tasks');
+            Url::back();// ('/{tenant}/tasks');
         }
 
-        $RM = new RecurringTaskModel();
-        $recurring = ($RM->find($task['recurring_task_id']) ?? []);
-        //var_dump($recurring);
+        $recurring = [];
+        if (!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
+        
+            $RM = new RecurringTaskModel();
+            $recurring = ($RM->find($task['recurring_task_id']) ?? []);
+            //var_dump($recurring);
+        }
 
         $this->view->task = $task;
         $this->view->data = $recurring;
@@ -638,15 +743,21 @@ foreach ($participants as $userId => $participantData) {
         $this->checkCsrf();
 
         $task = $this->getTaskOrRedirect($taskId);
-
-        $RM = new RecurringTaskModel();
-        $recurring = $RM->find($task['recurring_task_id']);
-
-        if (!$recurring) {
-            Flash::error('Recurring konfigurace neexistuje.');
-            Url::redirect('/{tenant}/tasks');
+        if (!$task['is_recurring']) {
+            Flash::error('Tento úkol není nastaven jako opakovaný.');
+            Url::back();//('/{tenant}/tasks');
         }
 
+        $RM = new RecurringTaskModel();
+        
+        $recurring = [];
+        if (!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
+        
+            
+            $recurring = ($RM->find($task['recurring_task_id']) ?? []);
+            //var_dump($recurring);
+        }
+ 
         //validace
         $data = $this->validateRecurring($_POST, Config::get('recurring'));
         //uložení do db
