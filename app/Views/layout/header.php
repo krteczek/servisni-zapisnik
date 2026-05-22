@@ -70,103 +70,61 @@ require __DIR__ . '/../../../public/css/deadline.css';
 
     <!-- ================= HEADER ================= -->
     
-<header class="header">
-    
-
-    <?php if (Auth::check()): ?>
-        <a href="<?= Url::to('/{tenant}/tasks') ?>"  class="logo" title="Jít na výpis úkolů pro Vás">博</a>
-<div class="identity">
-    <div class="identity-company">
-        <?= e(Auth::company()) ?>
-    </div>
-
-    <div class="identity-user">
-        <?= e(Auth::name() ?? 'Uživatel') ?>
-    </div>
-
-    <div class="identity-role">
-        <?= e(Auth::effectiveRole()) ?>
-    </div>
-</div>
-    <?php else: ?>
-      <a href="<?= Url::to('/login') ?>"  class="logo" title="Jít na přihlašovací formulář">博</a>
-    <?php endif; ?>
-
-    <?php if (Auth::hasGlobalRole(['admin'])): ?>
-        <div class="role-switcher">
-            <small class="role-switcher-label">
-                Pohled jako: <strong><?= e(Auth::effectiveRole()) ?></strong>
-            </small>
-
-            <div class="role-switch">
-                <?php foreach (Roles::effective() as $key => $label): ?>
-                    <a
-                        href="<?= Url::to('/' . Auth::tenantSlug() . '/admin/switch-role/' . $key) ?>"
-                        class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"
-                    >
-                        <?= e($label) ?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    <?php endif; ?>
-</header>
-    <!-- ================= NAV ================= -->
-    <nav class="nav">
-        <ul class="menu">
-
-            <?php foreach ($view->menu as $section): ?>
-                <?php
-                $hasSubmenu = !empty($section['items']);
-                $classes = [
-                    'menu-item',
-                    $section['active'] ? 'active' : '',
-                    $hasSubmenu ? 'has-submenu' : 'no-submenu',
-                ];
-                ?>
-
-                <li class="<?= implode(' ', array_filter($classes)) ?>">
-
-                    <?php if ($section['method'] === 'POST'): ?>
-                        <form method="post" 
-                            action="<?= Url::to('/logout') ?>" 
-                            data-confirm="Opravdu se chcete odhlásit?"
-                            >
-                            <?= Csrf::getField() ?>
-                              
-                            <button type="submit">
-                                <?= e($section['label']) ?>
-                            </button>
-                        </form>
-                    <?php else: ?>
-                        <a href="<?= $section['path'] ?>/#main">
-                            <?= e($section['label']) ?>
-                        </a>
-                    <?php endif; ?>
-
-                    <?php if ($section['active'] && $hasSubmenu): ?>
-                        <ul class="submenu">
-                            <?php foreach ($section['items'] as $item): ?>
-                                <li class="submenu-item <?= $item['active'] ? 'active' : '' ?>">
-                                    <a href="<?= $item['path'] ?>/#main">
-                                        <?= e($item['label']) ?>
-                                    </a>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endif; ?>
-
-                </li>
-            <?php endforeach; ?>
-
-        </ul>
-    </nav>
-
-    <!-- ================= MAIN ================= -->
-    <main id="main" class="main">
-        <h1>Bó - <?= e($view->title ?: 'Servisní zápisník') ?></h1>
+<header class="header"><!-- Logo a identita uživatele -->
+<?php if (Auth::check()): ?>
+    <a href="<?= Url::to('/{tenant}/tasks') ?>"  class="logo" title="Jít na výpis úkolů pro Vás">博</a>
+    <div class="identity"><!-- Zobrazí název firmy, jméno uživatele a jeho roli -->
+        <div class="identity-company"><?= e(Auth::company()) ?></div>
+        <div class="identity-user"><?= e(Auth::name() ?? 'Uživatel') ?></div>
+        <div class="identity-role"><?= e(Auth::effectiveRole()) ?></div>
+    </div><!-- .identity -->
+<?php else: ?>
+    <a href="<?= Url::to('/login') ?>"  class="logo" title="Jít na přihlašovací formulář">博</a>
+<?php endif; ?>
 
 
-    <?= Flash::display() ?>
+<?php if (Auth::hasGlobalRole(['admin'])): ?>
+<div class="role-switcher"><!-- Umožní adminům přepínat mezi rolemi pro testování oprávnění a zobrazení -->
+    <small class="role-switcher-label">Pohled jako: <strong><?= e(Auth::effectiveRole()) ?></strong></small>
+    <div class="role-switch"><!-- Odkazy pro přepínání rolí, které volají AdminController@switchRole -->   
+<?php foreach (Roles::effective() as $key => $label): ?>
+    <a href="<?= Url::to('/' . Auth::tenantSlug() . '/admin/switch-role/' . $key) ?>" class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"><?= e($label) ?></a>
+<?php endforeach; ?>
+    </div><!-- .role-switch -->
+</div><!-- .role-switcher -->
+<?php endif; ?>
+</header><!-- .header -->
+
+<!-- ================= Svislá NAV ================= -->
+<nav class="nav">
+    <ul class="menu">
+<?php foreach ($view->menu as $section): ?>
 <?php
+$hasSubmenu = !empty($section['items']);
+$classes = [
+    'menu-item',
+    $section['active'] ? 'active' : '',
+    $hasSubmenu ? 'has-submenu' : 'no-submenu',
+];
+?>
+<li class="<?= implode(' ', array_filter($classes)) ?>">
+<?php if ($section['method'] === 'POST'): ?>
+    <form method="post" action="<?= Url::to('/logout') ?>" data-confirm="Opravdu se chcete odhlásit?">
+        <?= Csrf::getField() ?><button type="submit"><?= e($section['label']) ?></button>
+    </form>
+<?php else: ?>
+<a href="<?= $section['path'] ?>/#main"><?= e($section['label']) ?></a>
+<?php endif; ?>
+<?php if ($section['active'] && $hasSubmenu): ?>
+            <ul class="submenu"><?php foreach ($section['items'] as $item): ?><li class="submenu-item <?= $item['active'] ? 'active' : '' ?>"><a href="<?= $item['path'] ?>/#main"><?= e($item['label']) ?></a></li><?php endforeach; ?></ul>
+<?php endif; ?>
+</li>
+<?php endforeach; ?>
+    </ul>
+</nav><!-- .nav -->
 
+<!-- ================= MAIN ================= -->
+<main id="main" class="main">
+    <h1>Bó - <?= e($view->title ?: 'Servisní zápisník') ?></h1>
+    <?= Flash::display() ?>
+    
