@@ -755,6 +755,26 @@ return [
 
 ],
 
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/contacts/{id:\d+}/edit',
+    'action' => [ContactsController::class, 'editContact'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr'],
+    'section'=> 'contacts',
+    'title'  => 'Zákazníci: Upravit zákazníka',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/contacts/{id:\d+}/edit',
+    'action' => [ContactsController::class, 'updateContact'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr'],
+    'section'=> 'contacts',
+    'title'  => 'Zákazníci: Upravit zákazníka',
+],
+
 
 
 /*-------------------------------------

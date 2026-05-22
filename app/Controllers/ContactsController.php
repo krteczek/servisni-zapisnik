@@ -57,6 +57,49 @@ class ContactsController extends Controller
         Url::redirect('/{tenant}/contacts/index');
     }
 
+    private function getContactOrRedirect(int $id): array
+    {
+        $contact = $this->model->find($id);
+        if (!$contact) {
+            Flash::error('Zákazník nenalezen');
+            Url::redirect('/{tenant}/contacts/index');
+        }
+        return $contact;
+    }
+    public function editContact(int $id): string
+    {
+
+        $contact = $this->getContactOrRedirect($id);
+
+        $this->view->data = $contact;
+        return $this->render('contacts/create');
+    }
+
+    public function updateContact(int $id): string
+    {
+        $this->checkCsrf();
+        $contact = $this->getContactOrRedirect($id);
+
+        $data = $this->validateContacts($_POST);
+        
+        if ($this->hasErrors()) {
+            $this->view->data = array_merge($contact, $data);
+            return $this->render('contacts/create');
+        }
+
+        $ok = $this->model->update($id, $data);
+        if(!$ok)
+        {
+                $this->addError('global', 'Litujeme, zákazníka se nepodařilo uložit do systému. Zkuste to,  prosím, později.');
+                $this->view->data = array_merge($contact, $data);
+                return $this->render('contacts/create');
+            }
+
+        Flash::success('Zákazník uložen');
+        Url::redirect('/{tenant}/contacts/index');
+    }
+
+
 private function validateContacts(array $post): array
 {
     $data = [
@@ -88,4 +131,7 @@ private function validateContacts(array $post): array
     $this->maxLength('phone', $data['phone'], 50, 'Telefon');
 
     return $data;
-}}
+}
+
+
+}
