@@ -7,7 +7,7 @@ declare(strict_types=1);
 use App\Core\Url;
 
 $data = $view->data;
-var_dump($data['myReadyToDoneOrders']);
+//var_dump($data['myReadyToDoneOrders']);
 
 $myTeams = [];
 foreach ($data['myTeams'] as $team) {

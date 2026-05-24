@@ -332,12 +332,15 @@ public function detailOrder(int $orderId): string
         // příznak pro zobrazení odkazu na dokončení zakázky, pokud jsou všechny 
     // úkoly hotové nebo zrušené, nebo pokud nejsou žádné úkoly
     $order['ready_for_done'] = false;
-    if(((int)$order['total_tasks_count'] === 0) ||     
+
+    if(((int)$order['total_tasks_count'] > 0) &&     
             (((int)$order['done_tasks_count'] + (int)$order['cancelled_tasks_count']) === (int)$order['total_tasks_count'])) 
     {
                 //odkaz na uzavření zakázky, pokud jsou všechny úkoly hotové nebo zrušené 
                 //nebo pokud nejsou žádné úkoly
-                $order['ready_for_done'] = true;
+                if($order['status'] <> 'done') {
+                    $order['ready_for_done'] = true;
+                }
     }
 
     $order['ready_for_cancel'] = false;

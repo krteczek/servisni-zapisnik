@@ -41,6 +41,12 @@ $workOrders = $view->orders;
                     </div>
                     <!-- Sem můžeš přidat další metadata, až budou -->
                     <div class="meta-item">
+                        <span class="meta-label">Termín dokončení: </span>
+                        <?php [$deadlineClass, $deadlineText] = deadlineDateHelper($wo['wo_due_date'] ?? ''); ?>
+
+                        <span class="meta-value <?= $deadlineClass ?>"><?= e($deadlineText) ?></span>
+                    </div>
+                    <div class="meta-item">
                        <span class="meta-label">Celkem úkolů: </span>
                         <span class="meta-value"><?= e($wo['tasks_total']) ?></span>
                     </div>

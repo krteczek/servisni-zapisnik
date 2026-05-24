@@ -18,10 +18,9 @@ use App\Models\Team;
 $order = $view->order;
 $tasks = $view->tasks;
 //$teams = $view->teams;
-
+$errors = $view->errors;
 
 $err = $view->errors; 
-/* * / ?><pre><?php var_dump($tasks, $order); ?></pre> /* */
 
 ?>
 
@@ -32,6 +31,9 @@ $err = $view->errors;
 -->
 <div class="create-container"><!-- HLAVNÍ SLOUPEC – DETAIL ZAKÁZKY -->
 	<div class="card"><!-- karta zakázky -->
+        		<!-- Zobrazení chyb (stejné jako v report šabloně) -->
+		<?php require __DIR__ . '/../layout/formsErrors.php'; ?>		
+
 		<div class="card-body">
 			<!-- HEADER -->
 			<div class="card-header">
@@ -78,6 +80,10 @@ $err = $view->errors;
 				</div>
 			</div>
 		</div>
+        <div class="meta-item">
+            <span class="meta-label">Termín dokončení:</span>
+            <span class="meta-value"><?= e(formatCzDate($order['wo_due_date'] ?? '')) ?></span>
+        </div>
 
         <div class="meta-item">
             <span class="meta-label">Úkoly (všechny):</span>

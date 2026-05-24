@@ -126,5 +126,5 @@ $classes = [
 <!-- ================= MAIN ================= -->
 <main id="main" class="main">
     <h1>Bó - <?= e($view->title ?: 'Servisní zápisník') ?></h1>
-    <?= Flash::display() ?>
+    <?php Flash::display();
     
