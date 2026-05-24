@@ -94,6 +94,9 @@ public function index(): string
                 $orderId = $WONS->generateAndCreate($toDb, $pdo);
 
                 // vytvoříme první úkol, pokud je to požadováno
+                /* změna plánu, vytvoření nového tasku bude tsk, že se do formuláře úkolu vkopírují data ze zakázky 
+                * a uživatel rozhodne, jakým způsobem bude pokračovat (třeba vytvořením opakovaného úkolu)
+                * * /
                 if ($data['create_first_task'] === true) {
                     $taskModel = new TaskModel();
                     $taskModel->setConnection($pdo);
@@ -111,7 +114,8 @@ public function index(): string
                     $this->model->update($orderId, [
                                     'status' => 'in_progress',
                     ]);
-               }
+                    
+               }*/
 
                $pdo->commit();
 		} catch (\Throwable $e) {
@@ -137,7 +141,9 @@ public function index(): string
             return $this->render('work_orders/create');
 		}
         Flash::success('Zakázka byla úspěšně vytvořena.');
-
+        if ($data['create_first_task'] === true) {
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/tasks/createTaskFromOrderGet/');
+        }
         Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
     }
 

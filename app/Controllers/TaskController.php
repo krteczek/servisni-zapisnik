@@ -117,6 +117,7 @@ private function saveTask(array $data, int $workOrderId): string
                 'work_order_id'      => $workOrderId,
                 'created_by_user_id' => Auth::id(),
                 'is_recurring'       => $post['is_recurring'],
+                'due_date'           => $post['due_date'],
             ]);
 
             if (!$taskId) {
@@ -200,7 +201,35 @@ private function saveTask(array $data, int $workOrderId): string
     	 return $this->saveTask($_POST, $orderId);
 
     }
+   
     
+    public function createTaskFromOrderGet(int $orderId):string
+    {
+        $order = $this->getOrderOrRedirect($orderId);
+        if ($order['status'] !== 'new') {
+            Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
+            Url::to('/{tenant}/work-orders/' . $orderId . '/detail/#main');
+        }
+        $post['title'] = $order['title'];
+        $post['description'] = $order['description'];
+        $post['due_date'] = $order['wo_due_date'];
+        $this->view->post = $post;
+        $this->view->order = $order;
+        return $this->render('tasks/create');
+
+
+    }
+    public function createTaskFromOrderPost(int $orderId):string
+    {
+        $order = $this->getOrderOrRedirect($orderId);
+        if ($order['status'] !== 'new') {
+            Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
+            Url::to('/{tenant}/work-orders/' . $orderId . '/detail/#main');
+        }
+
+        return $this->saveTask($_POST, $orderId);
+
+    }
 	// ověří existenci tasku, pokud existuje, vrátí jeho hodnoty, jinak redirect
 	private function getTaskOrRedirect(int $taskId): array
 	{
@@ -327,10 +356,6 @@ private function saveTask(array $data, int $workOrderId): string
         
 		$post = $this->validateTask($post);
 
-        $title 			= $post['title'];
-        $description 	= $post['description'];
-        $team_id 		= $post['team_id'];
-
 		$this->checkCsrf();
 
 	  if ($this->hasErrors())
@@ -343,9 +368,10 @@ private function saveTask(array $data, int $workOrderId): string
 	  }
 
        $row = (new TaskModel())->update($taskId, [
-            'title'              => $title,
-            'description'        => $description,
-            'team_id'            => $team_id,  
+            'title'              => $post['title'],
+            'description'        => $post['description'],
+            'team_id'            => $post['team_id'],
+            'due_date'           => $post['due_date'], 
         ]);
         
         if(!$row)
@@ -446,10 +472,12 @@ private function saveTask(array $data, int $workOrderId): string
     }
 
 private function validateDate(?string $date): ?string
-{
+{   
+    print_r($date);
     $date = trim($date ?? '');
 
     if ($date === '') {
+        
         return null;
     }
 
@@ -458,7 +486,6 @@ private function validateDate(?string $date): ?string
     $isValid =
         $dt !== false
         && $dt->format('Y-m-d') === $date;
-
     if (!$isValid) {
         return null;
     }
