@@ -60,25 +60,8 @@ $tasks = $view->data;
                         </div>
                     <?php endif; ?>
                             <?php
-                            $deadlineClass = 'deadline-none';
-                            $deadlineText  = 'Neuvedeno';
-
-                            if ($task['due_date']) {
-
-                                $today = date('Y-m-d');
-                                $due   = date('Y-m-d', strtotime($task['due_date']));
-
-                                $deadlineText = date('d.m.Y', strtotime($task['due_date']));
-
-                                if ($due < $today) {
-                                    $deadlineClass = 'deadline-late';
-                                } elseif ($due === $today) {
-                                    $deadlineClass = 'deadline-today';
-                                } else {
-                                    $deadlineClass = 'deadline-future';
-                                }
-                            }
-                            ?>
+                            [$deadlineClass, $deadlineText] = deadlineDateHelper($task['due_date']); 
+                             ?>
 
                             <div class="meta-item">
                                 <span class="meta-label">Termín:</span>

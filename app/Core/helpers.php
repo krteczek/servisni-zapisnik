@@ -103,11 +103,11 @@ function formatCzDate(string $datetime): string
     $year  = $dt->format('Y');
 
     return sprintf(
-        '%d. %s %s %s',
+        '%d. %s %s',
         $day,
         $months[$month],
         $year,
-        $dt->format('H:i')
+        //$dt->format('H:i')
     );
 }
 
@@ -238,4 +238,34 @@ function tx(?string $text): string
 function checked($value): string
 {
     return $value ? 'checked' : '';
+}
+
+/**
+ * @param string|null $dueDate datum ve formátu date
+ * @return array([$deadlineClass, $deadlineText])
+ * @return array{0:string,1:string}
+ */
+function deadlineDateHelper(?string $dueDate): array
+{
+    $deadlineClass = 'deadline-none';
+    $deadlineText  = 'Neuvedeno';
+
+    if ($dueDate) {
+        $timestamp = strtotime($dueDate);
+        $today = date('Y-m-d');
+        $due   = date('Y-m-d', $timestamp);
+
+        $deadlineText = date('d.m.Y', $timestamp);
+
+        if ($due < $today) {
+            $deadlineClass = 'deadline-late';
+        } elseif ($due === $today) {
+            $deadlineClass = 'deadline-today';
+        } else {
+            $deadlineClass = 'deadline-future';
+        }
+        
+    }
+    return [$deadlineClass, $deadlineText];
+
 }

@@ -29,7 +29,7 @@ class WorkbenchModel extends BaseModel
             'otherReadyToDoneTasks'     => $this->otherReadyToDoneTasks($teamIds),
 
             'myOrdersInProgress'        => $this->myOrdersInProgress(),
-            //'otherOrdersInProgress'     => $this->otherOrdersInProgress(),
+            'otherOrdersInProgress'     => $this->otherOrdersInProgress(),
 
             'myReadyToCancelTasks'      => $this->myReadyToCancelTasks($teamIds),
             //'otherReadyToCancelTasks'   => $this->otherReadyToCancelTasks($teamIds),
@@ -452,6 +452,26 @@ private function myOrdersInProgress(): array
             Auth::id(),
         ]
     );
+}
+
+private function otherOrdersInProgress(): array
+{
+     return $this->fetchAll(
+        "
+        SELECT *
+        FROM work_orders
+        WHERE company_id = ?
+          AND created_by_user_id <> ?
+          AND status IN ('in_progress', 'new')
+        ORDER BY created_at ASC
+        ",
+        [
+            Auth::companyId(),
+            Auth::id(),
+        ]
+    );
+   
+
 }
 
     public function getTasksForOrders(array $orderIds): array

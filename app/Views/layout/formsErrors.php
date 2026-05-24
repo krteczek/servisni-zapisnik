@@ -1,3 +1,10 @@
+<?php
+declare(strict_types=1); 
+
+/** @var \App\Core\ViewContext $view */
+$errors = $view->errors;
+//var_dump($errors);
+?>
 <?php if (!empty($errors)): ?>
     <div class="ui-alert ui-alert-danger">
         <ul style="margin:0;">

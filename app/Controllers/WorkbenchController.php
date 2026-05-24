@@ -34,6 +34,8 @@ class WorkbenchController extends Controller
 	{
         $data = $this->model->forIndex();
         [$data['myReadyToDoneOrders'], $data['myReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['myOrdersInProgress']);
+        [$data['otherReadyToDoneOrders'], $data['otherReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['otherOrdersInProgress']);
+      
         $this->view->data = $data;
         return $this->render('workbench/index');
 

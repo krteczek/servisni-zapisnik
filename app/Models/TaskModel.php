@@ -406,21 +406,34 @@ public function forWorkOrderWithStats(int $orderId): array
             $params[$key] = (int) $id;
         }
 
-        $sql = "
-            SELECT
-                ta.task_id,
-                COUNT(DISTINCT ta.id)              AS assignments_count,
-                COALESCE(SUM(ta.kilometers), 0)    AS total_km,
-                COALESCE(SUM(ta.minutes_spent), 0) AS total_minutes,
-                COUNT(DISTINCT tap.user_id)        AS workers_count
-            FROM task_assignments ta
-            LEFT JOIN task_assignment_participants tap
-                ON tap.assignment_id = ta.id
-            AND tap.company_id = ta.company_id
-            WHERE ta.task_id IN (" . implode(',', $placeholders) . ")
-            AND ta.company_id = :company_id
-            GROUP BY ta.task_id
-        ";
+$sql = "
+    SELECT
+        ta.task_id,
+
+        COUNT(DISTINCT ta.id) AS assignments_count,
+
+        COALESCE(SUM(ta.kilometers), 0) AS total_km,
+
+        COALESCE(SUM(ta.minutes_spent), 0) AS total_minutes,
+
+        (
+            SELECT COUNT(DISTINCT tap.user_id)
+            FROM task_assignment_participants tap
+
+            INNER JOIN task_assignments ta2
+                ON ta2.id = tap.assignment_id
+
+            WHERE ta2.task_id = ta.task_id
+              AND tap.company_id = ta.company_id
+        ) AS workers_count
+
+    FROM task_assignments ta
+
+    WHERE ta.task_id IN (" . implode(',', $placeholders) . ")
+      AND ta.company_id = :company_id
+
+    GROUP BY ta.task_id
+";       
 
         $rows = $this->fetchAll($sql, $params);
 
