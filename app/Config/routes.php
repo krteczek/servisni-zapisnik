@@ -292,6 +292,25 @@ return [
 	'title'   => 'Úkoly: Přidat úkol',
 ],
 
+
+// vytvoření tasku ze zakázky
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/work-orders/{orderId:\d+}/tasks/createFromOrder',
+    'action' => [TaskController::class, 'createTaskFromOrderGet'],
+    'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Přidat úkol',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/work-orders/{orderId:\d+}/tasks/createFromOrder',
+    'action' => [TaskController::class, 'createTaskFromOrderPost'],
+    'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Přidat úkol',
+],
 //úprava tasku:
 [
     'method' => 'GET',
