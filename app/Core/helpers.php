@@ -269,3 +269,18 @@ function deadlineDateHelper(?string $dueDate): array
     return [$deadlineClass, $deadlineText];
 
 }
+
+
+function dd(mixed ...$vars): never
+{
+    echo '<pre style="background:#111;color:#0f0;padding:15px;">';
+
+    foreach ($vars as $var) {
+        var_dump($var);
+        echo "\n";
+    }
+
+    echo '</pre>';
+
+    die(1);
+}

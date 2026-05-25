@@ -31,7 +31,7 @@ require __DIR__ . '/_filters.php';
                     //continue;
                 }
             ?>
-            <div class="card task-card">
+            <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
 
                 <!-- HEADER -->
                 <div class="card-header">

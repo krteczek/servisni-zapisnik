@@ -514,19 +514,30 @@ $sql = "
 
         $sql .= " ORDER BY t.id DESC";
 
-        return $this->fetchAll($sql, $params);
+        $out = $this->fetchAll($sql, $params);
+
+        return $out;
     }
 
     public function filterArchive(array $filters): array
     {
-        $sql = "
-            SELECT t.*, w.title AS work_order_title, w.status AS work_order_status
+        $sql = 
+            "SELECT t.*, 
+                w.title AS work_order_title, 
+                w.status AS work_order_status,
+                tm.name AS team_name,
+                tm.color AS team_color
+
             FROM {$this->tableName} t
+
+            LEFT JOIN teams tm 
+                ON tm.id = t.team_id
+                AND tm.company_id = t.company_id
+
             INNER JOIN work_orders w 
                 ON w.id = t.work_order_id
                 AND w.company_id = t.company_id
         ";
-
         $sql .= " WHERE t.company_id = ?";
         $params = [$this->tenantId()];
 

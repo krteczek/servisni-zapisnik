@@ -354,7 +354,7 @@ return [
 [
     'method' => 'GET',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/recurring',
-    'action' => [TaskController::class, 'recurringGet'],
+    'action' => [TaskRecurringController::class, 'recurringGet'],
     'auth'   => true,
 	'roles'   => ['admin', 'mistr'],
 	'title'   => 'Úkoly: Vytvořit šablonu opakujícího se úkolu',
@@ -363,7 +363,7 @@ return [
 [
     'method' => 'POST',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/recurring',
-    'action' => [TaskController::class, 'recurringPost'],
+    'action' => [TaskRecurringController::class, 'recurringPost'],
     'auth'   => true,
     'roles'   => ['admin', 'mistr'],
 	'title'   => 'Úkoly: Vytvořit šablonu opakujícího se úkolu',
@@ -371,19 +371,19 @@ return [
 [
     'method' => 'GET',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/recurringEdit',
-    'action' => [TaskController::class, 'recurringGet'],
+    'action' => [TaskRecurringController::class, 'recurringGet'],
     'auth'   => true,
 	'roles'   => ['admin', 'mistr'],
-	'title'   => 'Úkoly: Vytvořit šablonu opakujícího se úkolu',
+	'title'   => 'Úkoly: Upravit šablonu opakujícího se úkolu',
 ],
 
 [
     'method' => 'POST',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/recurringEdit',
-    'action' => [TaskController::class, 'recurringPost'],
+    'action' => [TaskRecurringController::class, 'recurringPost'],
     'auth'   => true,
     'roles'   => ['admin', 'mistr'],
-	'title'   => 'Úkoly: Vytvořit šablonu opakujícího se úkolu',
+	'title'   => 'Úkoly: Upravit šablonu opakujícího se úkolu',
 ],
 
 
@@ -398,7 +398,7 @@ return [
 [
     'method' => 'POST',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/recurring-done',
-    'action' => [TaskController::class, 'doneRecurring'],
+    'action' => [TaskRecurringController::class, 'doneRecurring'],
     'roles'   => ['admin', 'mistr'],
     'auth'   => true,
 ],

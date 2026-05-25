@@ -31,7 +31,7 @@ $err = $view->errors;
 -->
 <div class="create-container"><!-- HLAVNÍ SLOUPEC – DETAIL ZAKÁZKY -->
 	<div class="card"><!-- karta zakázky -->
-        		<!-- Zobrazení chyb (stejné jako v report šabloně) -->
+        <!-- Zobrazení chyb (stejné jako v report šabloně) -->
 		<?php require __DIR__ . '/../layout/formsErrors.php'; ?>		
 
 		<div class="card-body">
@@ -181,7 +181,7 @@ $err = $view->errors;
                     <li><span class="badge badge-status-<?= e('cancelled') ?>"><?= te('cancelled') ?></span> – Zakázka byla stornována</li>
                 </ul>
 
-                <h4>Druhy úkolů</h4>
+                <h4>Typy úkolů</h4>
                 <p>Úkoly mohou být tří typů:</p>
                 <ul style="padding-left:1.2rem;">
                     <li>běžný úkol</li>

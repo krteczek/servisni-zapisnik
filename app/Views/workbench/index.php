@@ -52,6 +52,7 @@ $data = $view->data;
                 <button class="sub-tab-button" data-target="my-tasks" title="úkoly týmů, kterých jsem členem">Otevřené úkoly (mé) [<?= count($data['myTeamTasks']) ?>]</button>
                 <button class="sub-tab-button" data-target="my-prepare-to-done" title="moje úkoly a zakázky, které lze uzavřít">K uzavření (mé) [<?= (count($data['myReadyToDoneTasks']) + count($data['myReadyToDoneOrders'])) ?>]</button>
                 <button class="sub-tab-button" data-target="my-prepare-to-cancel" title="moje úkoly a zakázky, které lze stornovat">Ke stornování (mé) [<?= (count($data['myReadyToCancelTasks']) + count($data['myReadyToCancelOrders'])) ?>]</button>
+
                 <button class="sub-tab-button" data-target="my-prepare-to-cancel" title="úkoly, které lze stornovat">Ke stornování (mé) []</button>
                 <button class="sub-tab-button" data-target="my-billing" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (mé)</button>
         </div>
@@ -59,7 +60,8 @@ $data = $view->data;
         <div id="otherTabsButtons"  class="main-tab-content" hidden>
             <button class="sub-tab-button" data-target="other-tasks" title="úkoly týmů, kterých nejsem členem">Otevřené úkoly (ostatní) [<?= count($data['otherTeamTasks']) ?>]</button>
             <button class="sub-tab-button" data-target="other-prepare-to-done" title="ostatní úkoly a zakázky, které lze uzavřít">K uzavření (ostatní) [<?= count($data['otherReadyToDoneTasks'] ?? 0) ?>]</button>
-            <button class="sub-tab-button" data-target="other-prepare-to-done-orders" title="ostatní zakázky, které lze uzavřít">Zakázky k uzavření (ostatní) [0]</button>
+            <button class="sub-tab-button" data-target="other-prepare-to-cancel" title="Úkoly a zakázky ostatních týmů, které lze stornovat">Zakázky ke stornování (ostatní) [0]</button>
+
             <button class="sub-tab-button" data-target="other-prepare-to-cancel" title="úkoly, které lze stornovat">Ke stornování (ostatní)</button>
             <button class="sub-tab-button" data-target="other-billing" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (ostatní)</button>
         </div>
