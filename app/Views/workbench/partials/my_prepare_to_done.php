@@ -56,8 +56,8 @@ $myTeams[$team['id']]['color'] = $team['color'];
         <thead>
             <tr>
                 <th>Název</th>                
-                <th>Tým</th>
-                <th>Počet úkolů u zakázky</th>
+                <th>Popis</th>
+                <th>Stav</th>
                 <th>K uzavření</th>
                 <th>Ke stornování</th>
             </tr>

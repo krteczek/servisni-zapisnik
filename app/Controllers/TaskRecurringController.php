@@ -4,57 +4,194 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Core\Config;
 use App\Core\Flash;
+use App\Core\LoggerHolder;
 use App\Core\Url;
 use App\Core\Controller;
+use App\Core\ViewContext;
 use App\Models\TaskModel;
 use App\Models\RecurringTaskModel;
 
+use Throwable;
+
+use Override;
 
 final class TaskRecurringController extends Controller
 {
-    public function show(int $taskId): string
-    {
-    	  $post = [];
-        $taskModel = new TaskModel();
-        $task = $taskModel->findById($taskId);
+    private RecurringTaskModel $model;
 
-        if (!$task) {
-        	   Flash::error('/kol neexistujke.');
-            Url::redirect('/{tenant}/tasks/#main');
+    public function __construct(ViewContext $view)
+    {        
+        parent::__construct($view);
+        $this->model = new RecurringTaskModel();
+    }
+	private function getTaskOrRedirect(int $taskId): array
+	{
+		$task = (new TaskModel())->find((int) $taskId);
+		if(!$task) {
+            Flash::error('Úkol neexistuje');
+            Url::redirect('/{tenant}/tasks');			
+		}
+		return $task;	
+	}
+
+    private function getTaskRecurringOrRedirect(int $taskId): array
+	{
+        // možná ušetříme dotaz
+        if ($taskId < 1) {
+            Flash::error('Úkol neexistuje');
+            Url::redirect('/{tenant}/tasks');	        
         }
 
-        // TODO: načíst recurring pokud existuje
-        $this->view->task = $task;
-        $this->view->post = $post;
+		$task = (new TaskModel())->find((int) $taskId);
+		if(!$task) {
+            // takový úkol prostě neexistuje
+            Flash::error('Úkol neexistuje');
+            Url::redirect('/{tenant}/tasks');			
+		}
+        if (!$task['is_recurring'] || ((int) $task['is_recurring'] < 1)) {
+            // úkol existuje ale není opakovaný
+            Flash::error('Tento úkol není nastaven jako opakovaný.');
+            Url::back();// ('/{tenant}/tasks');
+        }
+		return $task;	
+	}
 
+    public function recurringGet(int $taskId): string
+    {
+        $task = $this->getTaskRecurringOrRedirect($taskId);
+        //var_dump($task);
+        $recurring = [];
+
+        try {
+            
+            if (!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
+                
+                $recurring = ($this->model->find($task['recurring_task_id']) ?? []);
+                //var_dump($recurring);
+            }
+
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error('TaskRecurringController.recurringGet FAILED', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            // 👤 USER MESSAGE
+            Flash::error('Nepodařilo se načíst úkol, omlouváme se. Zkuste to prosím znovu později.');
+            Url::back();
+        }
+
+        $this->view->task = $task;
+        $this->view->data = $recurring;
 
         return $this->render('tasks/recurring');
     }
 
-    public function store(int $taskId): void
+
+    public function recurringPost(int $taskId): string
     {
-        $taskModel = new TaskModel();
-        $task = $taskModel->findById($taskId);
+        $this->checkCsrf();
 
-        if (!$task) {
-        	   Flash::error('/kol neexistuje.');
-            Url::redirect('/{tenant}/tasks/#main');
-        }
+        $task = $this->getTaskRecurringOrRedirect($taskId);
 
-        $data = [
-            'task_id'            => $taskId,
-            'company_id'         => Auth::companyId(),
-            'created_by_user_id' => Auth::id(),
-            'frequency'          => $_POST['frequency'],
-            'interval'           => (int)$_POST['interval'],
-            'next_run_at'        => $_POST['next_run_at'],
-            'active'             => isset($_POST['active']) ? 1 : 0,
+        $recurring = [];
+        if (!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
+           
+            $recurring = ($this->model->find($task['recurring_task_id']) ?? []);
+            //var_dump($recurring);
+        } 
+ 
+        //validace
+        $data = $this->validateRecurring($_POST, Config::get('recurring'));
+        //uložení do db
+        $toDb = [
+            'frequency_type'       => $data['frequency_type'],
+            'frequency_value'      => (int)$data['frequency_value'],
+            'next_due_date'        => $data['next_due_date'],
+            'warning_days_before'  => (int)$data['warning_days_before'],
+            'active'               => $data['active'],
         ];
+        try
+        {
+            if (empty($recurring)) {
+                //var_dump($toDb);
+                $toDb = array_merge($toDb, [
+                    'task_id' => $task['id'],
+                    'team_id' => $task['team_id'],
 
-        $model = new RecurringTaskModel();
-        $model->create($data);
+                ]);
+                $row = $this->model->create($toDb);
+            } else {
+                $row = $this->model->update($task['recurring_task_id'],$toDb);
+            }
 
-        Url::redirect("/tasks/$taskId");
+            
+            Flash::success('Opakování bylo uloženo');
+
+            Url::redirect('/{tenant}/tasks/' . $task['id'] . '/edit/#main');
+        }
+        catch (Throwable $e)
+        {
+            LoggerHolder::get()->error('TaskRecurringController.recurringPost: FAILED', [
+                        'message'   => $e->getMessage(),
+                        'file'      => $e->getFile(),
+                        'line'      => $e->getLine(),
+                        'trace'     => $e->getTraceAsString(),
+                        
+            ]);
+            $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
+
+        }
+        $this->view->task = $task;
+        $this->view->data = $data;
+
+        return $this->render('tasks/recurring');
+
     }
-}
+
+
+    private function validateRecurring(array $data, array $defaults): array
+    {
+        return [
+            'frequency_type' =>
+            array_key_exists(($data['frequency_type'] ?? ''), $defaults['frequencies']) 
+            //array_key_exists($data['frequency_type'], $defaults['frequencies'])
+                ? $data['frequency_type']
+                : $defaults['default']['frequency_type'],
+
+            'frequency_value' => self::isBetween(
+                (int) $defaults['limits']['min_frequency_value'],
+                (int) $defaults['limits']['max_frequency_value'],
+                (int)$data['frequency_value']
+            ) ? (int)$data['frequency_value'] : $defaults['default']['frequency_value'],
+
+            'warning_days_before' => self::isBetween(
+                $defaults['limits']['min_warning_days'],
+                $defaults['limits']['max_warning_days'],
+                (int)$data['warning_days_before']
+            ) ? (int)$data['warning_days_before'] : $defaults['default']['warning_days_before'],
+
+            'next_due_date' => !empty($data['next_due_date'])
+                ? $data['next_due_date']
+                : $defaults['default']['next_due_date'],
+
+            'active' => isset($data['active']) ? 1 : 0,
+        ];
+    }
+
+    private static function isBetween(int $num1, int $num2, int $num3): bool
+    {
+            $numbers = [$num1, $num2];
+
+            if ($num3 >= min($numbers) && $num3 <= max($numbers)) {
+                return true;
+            } else {
+                return false;
+            }
+    }
+
+ }
