@@ -17,6 +17,7 @@ use App\Controllers\ContactsController;
 use App\Controllers\ExportsController;
 use App\Controllers\ArchiveController;
 use App\Controllers\WorkbenchController;
+use App\Controllers\SettingsController;
 
 return [
 
@@ -925,6 +926,34 @@ Přepínaní rolí u admina
     'roles'  => ['admin'],
     'menu'   => 'Administrace',
     'submenu'=> 'Audit log',
+    'section'=> 'admin',
+    'auth'   => true,
+],
+
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN / Settings
+|--------------------------------------------------------------------------
+*/
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/settings',
+    'action' => [SettingsController::class, 'index'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Nastavení',
+    'section'=> 'admin',
+    'auth'   => true,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing',
+    'action' => [SettingsController::class, 'saveBilling'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Nastavení',
     'section'=> 'admin',
     'auth'   => true,
 ],

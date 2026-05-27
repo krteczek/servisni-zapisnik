@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Services\Settings\BillingMode;
+//use App\Services\Settings\BillingMode;
+//use \LogicException;
+
+
 class SettingsModel extends BaseModel
 {
     protected string $table = 'settings';
@@ -18,6 +23,11 @@ class SettingsModel extends BaseModel
             'number_length' => 5,
             'next_number' => 1,
         ],
+
+        'billing' => [
+            'billing_mode' => BillingMode::INTERNAL, //'internal', //external
+        ],
+        
     ];
 
     public function getWorkOrderSettings(): array
@@ -43,7 +53,7 @@ class SettingsModel extends BaseModel
 
         $default = $default ?? $this->defaults[$key];
 
-        $row = $this->firstWhere('key', $key);
+        $row = $this->firstWhere('setting_key', $key);
 
         if (!$row) {
             return $this->cache[$key] = $default;
@@ -54,18 +64,31 @@ class SettingsModel extends BaseModel
         return $this->cache[$key] = is_array($data) ? $data : $default;
     }
 
-public function set(string $key, $value): void
-{
-    $sql = "INSERT INTO {$this->tableName} (`key`, `value`, {$this->tenantColumn})
-            VALUES (:key, :value, :tenant)
-            ON DUPLICATE KEY UPDATE `value` = :value";
+    public function set(string $key, array $value): void
+    {
+         $sql = "INSERT INTO {$this->tableName}
+                    (`setting_key`, `value`, {$this->tenantColumn})
+                VALUES (:key, :value_insert, :tenant)
+                ON DUPLICATE KEY UPDATE `value` = :value_update";
 
-    $valueJson = json_encode($value, JSON_THROW_ON_ERROR);
-    $this->db()->prepare($sql)->execute([
-        'key'    => $key,
-        'value'  => $valueJson,
-        'tenant' => $this->tenantId(),
-    ]);
+        $valueJson = json_encode($value, JSON_THROW_ON_ERROR);
+        $this->db()->prepare($sql)->execute([
+            'key'          => $key,
+            'value_insert' => $valueJson,
+            'value_update' => $valueJson,
+            'tenant'       => $this->tenantId(),
+        ]);
 
-    unset($this->cache[$key]);
-}}
+        unset($this->cache[$key]);
+    }
+
+    public function getBillingSettings(): array
+    {
+        return $this->get('billing');
+    }
+
+    public function updateBillingSettings(array $data): void
+    {
+        $this->set('billing', $data);
+    }
+}
