@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 use App\Core\Url;
 use App\Core\Csrf;
-
+use App\Services\Settings\BillingMode;
 $data = $view->data;
 // var_dump($data['myReadyToDoneOrders']);
 
@@ -24,30 +24,21 @@ $data = $view->data;
             <?= Csrf::getField() ?>
 
             <div class="form-group">
-
                 <label for="billing_mode">
                     Režim fakturace
                 </label>
-
-                <select name="billing_mode"
-                        id="billing_mode">
-
-                    <option value="internal"
-                        <?= ($data['billing']['billing_mode'] ?? '') === 'internal'
-                            ? 'selected'
-                            : '' ?>>
-                        Interní jednoduché faktury
-                    </option>
-
-                    <option value="external_accountant"
-                        <?= ($data['billing']['billing_mode'] ?? '') === 'external_accountant'
-                            ? 'selected'
-                            : '' ?>>
-                        Exporty pro účetní
-                    </option>
-
-                </select>
-
+<select name="billing_mode" id="billing_mode">
+<?php 
+if ($data['billing']['billing_mode'] === BillingMode::EXTERNAL_ACCOUNTANT) {
+    $current =  BillingMode::EXTERNAL_ACCOUNTANT;
+} else {
+    $current = BillingMode::INTERNAL;
+}
+?>
+<?php foreach (BillingMode::labels() as $value => $label): ?>
+    <option value="<?= e($value) ?>" <?= ($current === $value) ? 'selected' : '' ?>><?= e($label) ?></option>
+<?php endforeach; ?>
+</select>
             </div>
 
             <button type="submit"
