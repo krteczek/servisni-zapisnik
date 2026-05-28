@@ -572,7 +572,8 @@ WHERE t.company_id = ?
   AND t.status = 'done'
   AND t.billing_export_id IS NULL
   AND (t.is_recurring IS NULL OR t.is_recurring = 0)
-  AND t.team_id IN (?, ?, ?)
+
+  AND t.team_id IN ($placeholders)
 
 ORDER BY t.done_at ASC";
 
