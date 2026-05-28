@@ -3,32 +3,54 @@ declare(strict_types=1);
 
 /** @var \App\Core\ViewContext $view */
 
-require __DIR__ . '/../layout/header.php';
-
 use App\Core\Url;
 
 $data = $view->data;
 //var_dump($data);
 ?>
 
-<h2>Otevřené úkoly pro mé týmy</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Název úkolu</th>
-            <th>Tým</th>
-            <th>Zakázka</th>        
-            <th>Akce</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($data['myBillingTasks'] as $task): ?>
-        <tr>
-            <td><?= e($task['title']) ?></td>
-            <td><?= e($task['team_name']) ?></td>
-            <td> <?= e($task['work_order_title']) ?></td>
-            <td></td>
-        </tr>
-        <?php endforeach; ?>
-     </tbody>
-</table>
+<h2>Úkoly a zakázky k fakturaci (mé) [<?=  count($data['myInvoiceToReady']) ?>]</h2>
+<p>Seznam úkolů a zakázek, které splnují podmínky pro fakturaci</p>
+
+<div class="">
+
+
+        <details>
+            <summary>Úkoly a zakázky, které lze fakturovat</summary>
+            <ul>
+                <li>Úkol musí být dokončený</li>
+                <li>Úkol nesmí být již fakturován/exportován</li>
+                <li>Dokončený úkol již nelze upravovat</li>
+            </ul>
+        </details>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Zakázka</th>
+                    <th>Název úkolu</th>
+                    <th>Dokončeno</th>
+                    <th>Hodiny</th>
+                    <th>km</th>
+                    
+                    <th>Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($data['myInvoiceToReady'] as $task): ?>
+                <tr>
+                    <td><a href="<?=  Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main') ?>"><?= e($task['work_order_title'] ?? '-') ?></a></td>
+                    <td><?= e($task['title']) ?></td>
+                    <td><?= formatCzDate($task['done_at']) ?></td>
+                    <td><?= formatMinutes(((int) $task['total_minutes']) ?? 0) ?></td>
+                    <td><?= e($task['total_kilometers']) ?></td>
+                    <td><a href="<?= Url::to('/{tenant}/billing/invoice/create/' . $task['id']) ?>"
+                            title="vytvořit fakturu z tohoto úkolu">Fakturovat</a></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+
+
+</div><!-- .workbench-grid

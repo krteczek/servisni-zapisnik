@@ -18,8 +18,26 @@ final class BillingMode
         ];
     }
 
+    /** @return bool */
     public static function isValid(string $value): bool
     {
         return in_array($value, self::all(), true);
+    }
+
+    /** @return array<string,string> */
+    public static function labels(): array
+    {
+        return [
+            self::INTERNAL =>
+                'Jednoduché interní faktury',
+
+            self::EXTERNAL_ACCOUNTANT =>
+                'Exporty pro účetní',
+        ];
+    }
+
+    public static function label(string $value): string
+    {
+        return self::labels()[$value] ?? $value;
     }
 }

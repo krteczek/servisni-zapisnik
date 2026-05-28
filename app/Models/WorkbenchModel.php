@@ -32,7 +32,10 @@ class WorkbenchModel extends BaseModel
             'otherOrdersInProgress'     => $this->otherOrdersInProgress(),
 
             'myReadyToCancelTasks'      => $this->myReadyToCancelTasks($teamIds),
-            //'otherReadyToCancelTasks'   => $this->otherReadyToCancelTasks($teamIds),
+            //'otherReadyToCancelTasks' => $this->otherReadyToCancelTasks($teamIds),
+
+            'myInvoiceToReady'          => $this->myInvoiceToReady($teamIds),
+            'otherInvoiceToReady'       => $this->otherInvoiceToReady($teamIds),
 
             //'myReadyToDoneOrders'     => $this->myReadyToDoneOrders($teamIds),
             //'otherReadyToDoneOrders'  => $this->otherReadyToDoneOrders($teamIds),
@@ -424,7 +427,7 @@ private function myReadyToDoneOrders(): array
         Auth::id(),
     ]);
 }
-
+/*
     private function otherReadyToDoneOrders(array $teamIds): array
     {
         if ($teamIds === []) {
@@ -434,7 +437,7 @@ private function myReadyToDoneOrders(): array
         $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
 
     }
-
+*/
 
 private function myOrdersInProgress(): array
 {
@@ -495,4 +498,117 @@ private function otherOrdersInProgress(): array
             array_merge([Auth::companyId()], $orderIds)
         );
     }
+
+private function myInvoiceToReady(array $teamIds): array
+{
+    if (!$teamIds) {
+        return [];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+    $sql = 
+        "SELECT *
+        FROM tasks
+        WHERE company_id = ?
+          AND status = 'done'
+          AND team_id IN ($placeholders)
+          AND billing_export_id IS NULL
+        ORDER BY done_at ASC
+    ";
+
+    $sql = 
+        "SELECT
+    t.id,
+    t.title,
+    t.done_at,
+
+    wo.id AS work_order_id,
+    wo.title AS work_order_title,
+
+    tm.name AS team_name,
+
+    COALESCE(mp.total_minutes, 0) AS total_minutes,
+    COALESCE(km.total_kilometers, 0) AS total_kilometers
+
+FROM tasks t
+
+LEFT JOIN work_orders wo
+    ON wo.id = t.work_order_id
+   AND wo.company_id = t.company_id
+
+LEFT JOIN teams tm
+    ON tm.id = t.team_id
+   AND tm.company_id = t.company_id
+
+LEFT JOIN (
+    SELECT
+        ta.task_id,
+        ta.company_id,
+        SUM(tap.minutes_spent) AS total_minutes
+    FROM task_assignments ta
+
+    JOIN task_assignment_participants tap
+        ON tap.assignment_id = ta.id
+       AND tap.company_id = ta.company_id
+
+    GROUP BY ta.task_id, ta.company_id
+) mp
+    ON mp.task_id = t.id
+   AND mp.company_id = t.company_id
+
+LEFT JOIN (
+    SELECT
+        task_id,
+        company_id,
+        SUM(kilometers) AS total_kilometers
+    FROM task_assignments
+    GROUP BY task_id, company_id
+) km
+    ON km.task_id = t.id
+   AND km.company_id = t.company_id
+
+WHERE t.company_id = ?
+  AND t.status = 'done'
+  AND t.billing_export_id IS NULL
+  AND (t.is_recurring IS NULL OR t.is_recurring = 0)
+  AND t.team_id IN (?, ?, ?)
+
+ORDER BY t.done_at ASC";
+
+    return $this->fetchAll(
+        $sql,
+        array_merge(
+            [Auth::companyId()],
+            $teamIds
+        )
+    );
+}
+
+private function otherInvoiceToReady(array $teamIds): array
+{
+    if (!$teamIds) {
+        return [];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+    $sql = 
+        "SELECT *
+        FROM tasks
+        WHERE company_id = ?
+          AND status = 'done'
+          AND team_id NOT IN ($placeholders)
+          AND billing_export_id IS NULL
+        ORDER BY done_at ASC
+    ";
+
+    return $this->fetchAll(
+        $sql,
+        array_merge(
+            [Auth::companyId()],
+            $teamIds
+        )
+    );
+}
 }
