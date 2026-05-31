@@ -44,7 +44,7 @@ $data = $view->data;
                     <td><?= formatCzDate($task['done_at']) ?></td>
                     <td><?= formatMinutes(((int) $task['total_minutes']) ?? 0) ?></td>
                     <td><?= e($task['total_kilometers']) ?></td>
-                    <td><a href="<?= Url::to('/{tenant}/billing/invoice/create/' . $task['id']) ?>"
+                    <td><a href="<?= Url::to('/{tenant}/billing/invoice/create/task/' . $task['id']) ?>"
                             title="vytvořit fakturu z tohoto úkolu">Fakturovat</a></td>
                 </tr>
                 <?php endforeach; ?>
