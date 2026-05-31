@@ -18,6 +18,7 @@ use App\Controllers\ExportsController;
 use App\Controllers\ArchiveController;
 use App\Controllers\WorkbenchController;
 use App\Controllers\SettingsController;
+use App\Controllers\InvoiceController;
 
 return [
 
@@ -795,7 +796,139 @@ return [
     'title'  => 'Zákazníci: Upravit zákazníka',
 ],
 
+/*----------------------------------------
+|   Nová fakturace
+-----------------------------------------*/
+//routy:
+//GET  /billing/invoice/index
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/index',
+    'action'  => [InvoiceController ::class, 'index'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'   => 'Faktury',
+    'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Výpis faktur',
+],
 
+//GET  /billing/invoice/create/task/123
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/create/task/{id:\d+}',
+    'action'  => [InvoiceController ::class, 'createTask'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    //'section' => 'billing',
+    //'menu'   => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Vytvoření faktury z úkolu',
+],
+//POST billing/invoice/create/task/123
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/create/task/{id:\d+}',
+    'action'  => [InvoiceController ::class, 'storeTask'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    //'section' => 'billing',
+    //'menu'   => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Vytvoření faktury z úkolu',
+],
+
+//GET  /billing/invoice/create/work-order/123
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/create/work-order/{id:\d+}',
+    'action'  => [InvoiceController ::class, 'createWO'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    //'section' => 'billing',
+    //'menu'   => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Vytvoření faktury ze zakázky',
+],
+//POST /billing/invoice/create/work-order/123
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/create/work-order/{id:\d+}',
+    'action'  => [InvoiceController ::class, 'storeWO'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    //'section' => 'billing',
+    //'menu'   => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Vytvoření faktury ze zakázky',
+],
+
+//GET  /billing/invoice/create/export/123
+// export pro účetní, typicky pro plátce DPH
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/create/export/{id:\d+}',
+    'action'  => [InvoiceController ::class, 'createExport'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    //'section' => 'billing',
+    //'menu'   => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Vytvoření exportu pro účetní',
+],
+//POST /billing/invoice/create/export/123
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/create/export/{id:\d+}',
+    'action'  => [InvoiceController ::class, 'storeExport'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    //'section' => 'billing',
+    //'menu'   => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Vytvoření faktury ze zakázky',
+],
+
+//GET  /billing/invoice/{id}/detail
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/{id:\d+}/detail',
+    'action'  => [InvoiceController ::class, 'detail'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Detail faktury',
+],
+
+//GET  /billing/invoice/{id}/pdf
+
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/{id:\d+}/pdf',
+    'action'  => [InvoiceController ::class, 'pdf'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Stažení faktury v PDF formátu',
+],
+
+//POST /billing/invoice/{id}/cancel
+//stornování faktury
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/{id:\d+}/cancel',
+    'action'  => [InvoiceController ::class, 'cancel'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Stornování faktury',
+],
 
 /*-------------------------------------
    Fakturace
