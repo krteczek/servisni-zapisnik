@@ -2,6 +2,9 @@
 declare(strict_types=1);
 
 namespace App\Services\Invoice;
+use App\Models\WorkOrderModel;
+use App\Models\ContactsModel;
+use App\Models\TaskModel;
 
 final class InvoiceService
 {
@@ -16,9 +19,24 @@ final class InvoiceService
     public function buildDraftFromTask(array $task,): array
     {
         $data = [];
+        $taskStats = (new TaskModel())->statsForTasks([$task['id']]);
+        $workOrder = (new WorkOrderModel())->find($task['work_order_id']);
+        $customer  = (new ContactsModel())->find($workOrder['contact_id'] ?? 0);
+        return [
+            'task'      => array_merge($task, ['stats' => $taskStats[$task['id']] ?? []]),
+            'workOrder' => $workOrder,
+            'customer'  => $customer,
+
+            'invoice' => [
+                'issued_at' => date('Y-m-d'),
+                'due_date'  => date('Y-m-d', strtotime('+14 days')),
+            ],
+    ];
+
 
         return $data;
     }
+
     /**
      * Vytvoří fakturu z celé zakázky.
      */

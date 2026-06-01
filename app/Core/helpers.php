@@ -71,15 +71,25 @@ function formatMinutes(int $minutes): string
  * Vrací ve formátu "1. ledna 2023 14:30".
  *
  * TODO: [I18N] Přidat podporu pro další jazyky (anglické, německé měsíce)
- * TODO: [PERFORMANCE] Zvážit cachování DateTime objektů pro opakované volání
  * TODO: [FEATURE] Přidat volbu zahrnutí/vyloučení času
  *
  * @param string $datetime DateTime string (musí být parsovatelný PHP DateTime)
- * @return string Formátované české datum s časem
- * @throws \Exception Pokud vstupní string není validní datetime
+ * @param bool $withTime Zda má vrátit i čas
+ * @return string Formátované české datum (s časem, pokud je $withTime true)
  */
-function formatCzDate(string $datetime): string
+function formatCzDate(?string $datetime, bool $withTime = false): string
 {
+    // pokud je prázdno, null...
+    if (empty($datetime)) {
+        return 'neuvedeno';
+    }
+
+    // pokud není validní datum:
+    try {
+        $dt = new DateTime($datetime);
+    } catch (Throwable) {
+        return '<span title="Neplatné datum">neuvedeno</span>';
+    }
     // TODO: [MAINTENANCE] Přesunout měsíce do konfigurace nebo separátní třídy
     $months = [
         1 => 'ledna',
@@ -96,18 +106,18 @@ function formatCzDate(string $datetime): string
         12 => 'prosince',
     ];
 
-    $dt = new DateTime($datetime);
-
     $day   = (int) $dt->format('j');
     $month = (int) $dt->format('n');
     $year  = $dt->format('Y');
 
     return sprintf(
-        '%d. %s %s',
+        ($withTime
+        ?    '%d. %s %s %s'
+        :    '%d. %s %s'),
         $day,
         $months[$month],
         $year,
-        //$dt->format('H:i')
+        ($withTime ? $dt->format('H:i') : '')
     );
 }
 

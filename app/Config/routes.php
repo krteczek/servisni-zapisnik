@@ -217,7 +217,7 @@ return [
 */
 [ 
     'method' => 'GET', 
-    'path' => '/workbench', 
+    'path' => '/{tenant}/workbench', 
     'action' => [WorkbenchController::class, 'index'], 
     'auth' => true, 
     'roles' => ['admin', 'mistr'], 

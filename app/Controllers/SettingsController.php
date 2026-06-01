@@ -9,6 +9,9 @@ use App\Core\ViewContext;
 use App\Services\Settings\BillingMode;
 use App\Core\Flash;
 use App\Core\Url;
+use App\Services\Settings\SettingsService;
+use Throwable;
+use App\Core\LoggerHolder;
 
 /*
 use App\Models\TaskModel;
@@ -29,6 +32,7 @@ use Throwable;
 class SettingsController extends Controller
 {
     private SettingsModel $model;
+    
 
     public function __construct(ViewContext $view)
     {
@@ -51,8 +55,6 @@ class SettingsController extends Controller
     {
         $this->checkCsrf();
 
-        $allowed = BillingMode::all();
-
         $mode = $_POST['billing_mode'] ?? BillingMode::INTERNAL;
 
         if (!BillingMode::isValid($mode)) {
@@ -60,14 +62,32 @@ class SettingsController extends Controller
             Url::redirect('/{tenant}/system/settings#settings-billing');
         }
 
-        $settings = new SettingsModel();
+        $default = (new SettingsService())->getInvoiceDueDays();
+        $dueDays = (int)($_POST['invoice_due_days'] ?? $default);
+        if ($dueDays < 1 || $dueDays >365) {
+            $dueDays = $default;
+        }
+        try {
+            
+            $this->model->updateBillingSettings([
+                'billing_mode' => $mode,
+                'invoice_due_days' => $dueDays,
+            ]);
 
-        $settings->updateBillingSettings([
-            'billing_mode' => $mode,
+            Flash::success('Nastavení fakturace bylo uloženo.');
+            Url::redirect('/{tenant}/system/settings#settings-billing');
+
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error('SettingsController.saveBilling FAILED', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
         ]);
 
-        Flash::success('Nastavení bylo uloženo.');
+            Flash::error('Nastavení fakturace se nepodařilo uložit.');
+            Url::redirect('/{tenant}/system/settings#settings-billing');
 
-        Url::redirect('/{tenant}/system/settings#settings-billing');
-    }
+        }
+     }
 }

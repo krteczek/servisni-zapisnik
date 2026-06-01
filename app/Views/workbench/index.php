@@ -11,11 +11,11 @@ $data = $view->data;
 //var_dump($data);
 ?>
 
-<div class="workbench-container" id="main">
-    <div class="workbench-grid">
+<div class="workbench-container">
+    <div class="workbench-teams-grid">
         <div class="card card-wb-teams">
-            <div class="card-header">Moje týmy</div>
-            <div class="card-body">
+            <details>
+                <summary>Moje týmy</summary>
                 <?php if (empty($data['myTeams'])): ?>
                     <p>Nejste členem žádného týmu.</p>
                 <?php else: ?>
@@ -24,12 +24,13 @@ $data = $view->data;
                             <li><span class="team-dot" style="background: <?= e($team['color']) ?>"></span><?= e($team['name']) ?></li>
                         <?php endforeach; ?>
                     </ul>
-                <?php endif; ?>
-            </div><!-- .card-body -->
+                <?php endif; ?>               
+            </details>
+            
         </div><!-- .card-wb-teams -->
         <div class="card card-wb-teams">
-            <div class="card-header">Ostatní týmy</div>
-            <div class="card-body">
+            <details>
+                <summary>Ostatní týmy</summary>
                 <?php if (empty($data['otherTeams'])): ?>
                     <p>Neexistují žádné další týmy.</p> 
                 <?php else: ?>
@@ -38,10 +39,12 @@ $data = $view->data;
                             <li><span class="team-dot" style="background: <?= e($team['color']) ?>"></span><?= e($team['name']) ?></li>
                         <?php endforeach; ?>
                     </ul>
-                <?php endif; ?>
-            </div><!-- .card-body -->
+                <?php endif; ?>               
+            </details>
+            
         </div><!-- .card-wb-teams -->
-    </div><!-- .workbench-grid -->
+
+    </div><!-- .workbench-teams-grid -->
     <h2>Důležité akce</h2>
     <div>
         <button class="main-tab-button" data-target="myTabsButtons" title="Akce pro týmy, kterých jsem účastníkem">Moje Týmy</button>
@@ -59,7 +62,7 @@ $data = $view->data;
             <button class="sub-tab-button" data-target="other-tasks" title="úkoly týmů, kterých nejsem členem">Otevřené úkoly (ostatní) [<?= count($data['otherTeamTasks']) ?>]</button>
             <button class="sub-tab-button" data-target="other-prepare-to-done" title="ostatní úkoly a zakázky, které lze uzavřít">K uzavření (ostatní) [<?= count($data['otherReadyToDoneTasks'] ?? 0) ?>]</button>
             <button class="sub-tab-button" data-target="other-prepare-to-cancel" title="Úkoly a zakázky ostatních týmů, které lze stornovat">Zakázky ke stornování (ostatní) [0]</button>
-            <button class="sub-tab-button" data-target="other-invoice-ready" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (ostatní) [<?=  count($data['myInvoiceToReady']) ?>]</button>
+            <button class="sub-tab-button" data-target="other-invoice-ready" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (ostatní) [<?=  count($data['otherInvoiceToReady']) ?>]</button>
         </div>
     </div>
 

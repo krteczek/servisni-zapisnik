@@ -136,6 +136,12 @@ h4.card-header, h5.card-header {
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
 }
+.settings-grid {
+     display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+   
+}
 .card-workbench {
     border: 1px solid #e5e7eb;
     background: #f9fafb;
@@ -145,10 +151,21 @@ h4.card-header, h5.card-header {
     /* width:48%; */
 }
 
-.card-wb-teams {
-    flex: 0 0 300px;
+.workbench-teams-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+.card-wb-teams details {
+    padding: 1rem;
 }
 
-.card-help {
-    
+.card-wb-teams summary {
+    margin: -1rem -1rem 1rem -1rem;
+    padding: 1rem;
+
+    border-bottom: 1px solid #cfd6de;
+
+    font-weight: 600;
+    cursor: pointer;
 }

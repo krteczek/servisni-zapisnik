@@ -93,7 +93,9 @@ class InvoiceController extends Controller
     }
 
     private function requireExportForInvoice(int $id): array
-    {}
+    {
+        return [];
+    }
 
     /**
      * /billing/invoice/create/task/123
@@ -101,17 +103,9 @@ class InvoiceController extends Controller
     public function createTask(int $id): string
     {
         $task      = $this->requireTaskForInvoice($id);
-        $workOrder = (new WorkOrderModel())->find($task['work_order_id']);
-        $customer  = (new ContactsModel())->find($workOrder['contact_id']);
-        $invoice   = $this->invoice->buildDraftFromTask($task);
-        //$errors    = $view->errors ?? [];
+        $this->view->data = $this->invoice->buildDraftFromTask($task);
 
-        $data = $this->requireTaskForInvoice($id);
-
-        $this->view->data['task'] = $data;
-        $this->view->data['workOrder'] = $workOrder;
-        $this->view->data['customer'] = $customer;
-         return $this->render('invoices/create-task');
+        return $this->render('invoices/create-task');
     }
 
     /**
