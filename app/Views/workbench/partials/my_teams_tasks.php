@@ -26,9 +26,7 @@ $data = $view->data;
             <tbody>
                 <?php foreach ($data['myTeamTasks'] as $task): ?>
                     <tr>
-                        <td><span class="badge badge-priority-<?= e($task['work_order_priority']) ?>">
-                                <?= te($task['work_order_priority']) ?>
-                            </span></td>
+                        <td><span class="badge badge-priority-<?= e($task['work_order_priority']) ?>" title="Důležitost úkolu neboli priorita"><?= te($task['work_order_priority']) ?></span></td>
                         <td><a href="<?= Url::to('/{tenant}/tasks/' .  $task['id'] . '/report/#main') ?>" 
                                     title="Jít na detail úkolu a zkontrolovat nebo přidat reporty."
                                     >
@@ -41,7 +39,7 @@ $data = $view->data;
                                     class="open-new-tab"
                                     aria-label="Otevřít detail úkolu v novém panelu"> ( ↗ ) </a>
                         </td>
-                        <td><span class="team-dot" style="background: <?= e($task['team_color']) ?>"></span> <?= e($task['team_name']) ?></td>
+                        <td><span class="team-dot" style="background: <?= e($task['team_color']) ?>"></span> <span title="Jméno týmu, kterému byl úkol přidělen"><?= e($task['team_name']) ?></span></td>
                         <td><a href="<?= Url::to('/{tenant}/work-orders/' .  $task['work_order_id'] . '/detail/#main') ?>" 
                                     title="Jít na detail této zakázky" 
                                 >
@@ -55,7 +53,7 @@ $data = $view->data;
                                     aria-label="Otevřít detail zakázky v novém panelu"> ( ↗ ) </a>
                         </td>
                         
-                        <td><?= e($task['due_date'] ?? 'Neuveden') ?></td>
+                        <td><?= formatCzDate($task['due_date'], true) ?></td>
                         <td>                        
                             <?php if ($task['is_recurring_master']): ?>
                                 <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurringEdit/#main') ?>" 

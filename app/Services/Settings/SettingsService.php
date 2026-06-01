@@ -10,6 +10,7 @@ class SettingsService
 {
     public const BILLING_INTERNAL = BillingMode::INTERNAL; // 'internal';
     public const BILLING_EXTERNAL = BillingMode::EXTERNAL_ACCOUNTANT; // 'external_accountant';
+    public const INVOICE_DUE_DAYS = 14;
 
     private SettingsModel $model;
 
@@ -33,5 +34,18 @@ class SettingsService
     public function isExternalAccounting(): bool
     {
         return $this->billingMode() === self::BILLING_EXTERNAL;
+    }
+
+    /**
+     * @return int Splatnost faktur ve dnech
+     */
+    public function getInvoiceDueDays(): int
+    {
+        $settings = $this->model->getBillingSettings();
+
+        return (int) (
+            $settings['invoice_due_days']
+            ?? self::INVOICE_DUE_DAYS
+        );
     }
 }

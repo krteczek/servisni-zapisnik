@@ -152,8 +152,14 @@ public function login(): string
 
     Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
     );
-    $url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : '/tasks/#main' );
-    Url::redirect($url);
+    //$url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : (in_array($user['global_role'],['mistr', 'admin']) ? '/workbench/#main' : '/tasks/#main') );
+	$url = match ($user['global_role']) {
+		'root'  => '/' . Auth::tenantSlug() . '/system',
+		'admin',
+		'mistr' => '/' . Auth::tenantSlug() . '/workbench/#main',
+		default => '/' . Auth::tenantSlug() . '/tasks/#main',
+	};
+	Url::redirect($url);
 
 }
 

@@ -45,12 +45,12 @@ $errors    = $view->errors ?? [];
 
                 <p>
                     <strong>Odpracováno:</strong>
-                    <?= formatMinutes($task['total_minutes'] ?? 0) ?>
+                    <?= formatMinutes($task['stats']['total_minutes'] ?? 0) ?>
                 </p>
 
                 <p>
                     <strong>Kilometry:</strong>
-                    <?= (int) ($task['total_kilometers'] ?? 0) ?>
+                    <?= (int) ($task['stats']['total_km'] ?? 0) ?>
                 </p>
             </div>
 

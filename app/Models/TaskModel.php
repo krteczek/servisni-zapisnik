@@ -406,8 +406,8 @@ public function forWorkOrderWithStats(int $orderId): array
             $params[$key] = (int) $id;
         }
 
-$sql = "
-    SELECT
+$sql = 
+    "SELECT
         ta.task_id,
 
         COUNT(DISTINCT ta.id) AS assignments_count,

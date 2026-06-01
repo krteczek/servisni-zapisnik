@@ -10,8 +10,6 @@ $data = $view->data ?? [];
 
 <div class="settings-container" id="main">
 
-    <h1>Nastavení</h1>
-
     <!-- MAIN TABS -->
     <div class="settings-tabs">
 
