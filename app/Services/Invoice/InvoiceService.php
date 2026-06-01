@@ -5,35 +5,79 @@ namespace App\Services\Invoice;
 use App\Models\WorkOrderModel;
 use App\Models\ContactsModel;
 use App\Models\TaskModel;
+use App\Services\Settings\SettingsService;
 
 final class InvoiceService
 {
-    /**
-     * Vytvoří fakturu z jednoho úkolu.
-     */
-    public function createFromTask(
-        array $data
-    ): int {
-    }
-
-    public function buildDraftFromTask(array $task,): array
+ 
+    public function buildDraftFromTask(array $task): array
     {
-        $data = [];
         $taskStats = (new TaskModel())->statsForTasks([$task['id']]);
-        $workOrder = (new WorkOrderModel())->find($task['work_order_id']);
-        $customer  = (new ContactsModel())->find($workOrder['contact_id'] ?? 0);
-        return [
-            'task'      => array_merge($task, ['stats' => $taskStats[$task['id']] ?? []]),
-            'workOrder' => $workOrder,
-            'customer'  => $customer,
+
+        $workOrder = (new WorkOrderModel())
+            ->find($task['work_order_id']);
+
+        $customer = (new ContactsModel())
+            ->find($workOrder['contact_id'] ?? 0);
+
+        $dueDays = (new SettingsService())->getInvoiceDueDays();
+        $customerData = [
+            'company_name' => '',
+            'ico'          => '',
+            'dic'          => '',
+            'street'       => '',
+            'city'         => '',
+            'zip'          => '',
+            'country'      => '',
+            'email'        => '',
+            'phone'        => '',
+        ];
+
+        if ($customer) {
+            $customerData = array_merge(
+                $customerData,
+                $customer
+            );
+        }
+
+        $data =  [
 
             'invoice' => [
+                'title'     => $workOrder['title'],
                 'issued_at' => date('Y-m-d'),
-                'due_date'  => date('Y-m-d', strtotime('+14 days')),
+                'due_date'  => date('Y-m-d', strtotime('+' . $dueDays . ' days')),
+                'note'      => '',
             ],
-    ];
 
+            'customer' => $customerData,
 
+            'workOrder' => [
+                'id'            => $workOrder['id'],
+                'title'         => $workOrder['title'],
+                'description'   => $workOrder['description'] ?? '',
+            ],
+
+            'items' => [
+                [
+                    'task_id' => $task['id'],
+                    'title'   => $task['title'],
+
+                    'minutes' => (int) (
+                        $taskStats[$task['id']]['total_minutes']
+                        ?? 0
+                    ),
+
+                    'kilometers' => (float) (
+                        $taskStats[$task['id']]['total_km']
+                        ?? 0
+                    ),
+
+                    'visible_title' => true,
+                    'visible_time'  => true,
+                    'visible_km'    => true,
+                ],
+            ],
+        ];
         return $data;
     }
 

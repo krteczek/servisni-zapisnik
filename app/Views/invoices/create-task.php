@@ -5,12 +5,15 @@ declare(strict_types=1);
 
 use App\Core\Csrf;
 use App\Core\Url;
+
 require __DIR__ . '/../layout/header.php';
-$task      = $view->data['task'] ?? [];
+
+$invoice   = $view->data['invoice'] ?? [];
 $workOrder = $view->data['workOrder'] ?? [];
 $customer  = $view->data['customer'] ?? [];
-$invoice   = $view->data['invoiceDraft'] ?? [];
+$items     = $view->data['items'] ?? [];
 $errors    = $view->errors ?? [];
+
 ?>
 
 <div class="create-container">
@@ -23,7 +26,10 @@ $errors    = $view->errors ?? [];
 
         <div class="card-body">
 
+            <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
+
             <div class="card-section">
+
                 <div class="section-label">
                     Zdroj fakturace
                 </div>
@@ -33,107 +39,186 @@ $errors    = $view->errors ?? [];
                     <?= e($workOrder['title'] ?? '') ?>
                 </p>
 
-                <p>
-                    <strong>Úkol:</strong>
-                    <?= e($task['title'] ?? '') ?>
-                </p>
-
-                <p>
-                    <strong>Dokončeno:</strong>
-                    <?= formatCzDate($task['done_at'] ?? '') ?>
-                </p>
-
-                <p>
-                    <strong>Odpracováno:</strong>
-                    <?= formatMinutes($task['stats']['total_minutes'] ?? 0) ?>
-                </p>
-
-                <p>
-                    <strong>Kilometry:</strong>
-                    <?= (int) ($task['stats']['total_km'] ?? 0) ?>
-                </p>
             </div>
 
             <form method="post">
 
                 <?= Csrf::getField() ?>
 
-                <h3>Odběratel</h3>
+                <h3>Faktura</h3>
 
                 <div class="form-group">
-                    <label>Název odběratele</label>
+                    <label>Název faktury</label>
                     <input
                         type="text"
-                        name="customer_name"
-                        value="<?= e($invoice['customer_name'] ?? '') ?>"
+                        name="title"
+                        value="<?= e($invoice['title'] ?? '') ?>"
                         required
                     >
                 </div>
 
                 <div class="form-group">
-                    <label>Adresa</label>
+                    <label>Datum vystavení</label>
+                    <input
+                        type="date"
+                        name="issued_at"
+                        value="<?= e($invoice['issued_at'] ?? '') ?>"
+                        required
+                    >
+                </div>
 
-                    <textarea
-                        name="customer_address"
-                        rows="4"
-                    ><?= e($invoice['customer_address'] ?? '') ?></textarea>
+                <div class="form-group">
+                    <label>Datum splatnosti</label>
+                    <input
+                        type="date"
+                        name="due_date"
+                        value="<?= e($invoice['due_date'] ?? '') ?>"
+                        required
+                    >
+                </div>
+
+                <h3>Odběratel</h3>
+
+                <div class="form-group">
+                    <label>Název firmy</label>
+                    <input
+                        type="text"
+                        name="customer[company_name]"
+                        value="<?= e($customer['company_name'] ?? '') ?>"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>IČO</label>
+                    <input
+                        type="text"
+                        name="customer[ico]"
+                        value="<?= e($customer['ico'] ?? '') ?>"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>DIČ</label>
+                    <input
+                        type="text"
+                        name="customer[dic]"
+                        value="<?= e($customer['dic'] ?? '') ?>"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>Ulice</label>
+                    <input
+                        type="text"
+                        name="customer[street]"
+                        value="<?= e($customer['street'] ?? '') ?>"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>Město</label>
+                    <input
+                        type="text"
+                        name="customer[city]"
+                        value="<?= e($customer['city'] ?? '') ?>"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>PSČ</label>
+                    <input
+                        type="text"
+                        name="customer[zip]"
+                        value="<?= e($customer['zip'] ?? '') ?>"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>Země</label>
+                    <input
+                        type="text"
+                        name="customer[country]"
+                        value="<?= e($customer['country'] ?? '') ?>"
+                    >
                 </div>
 
                 <h3>Položky faktury</h3>
 
-                <table>
+                <table class="table">
+
                     <thead>
                         <tr>
-                            <th>Položka</th>
-                            <th>Množství</th>
-                            <th>Jednotka</th>
-                            <th>Cena</th>
+                            <th>Úkol</th>
+                            <th>Čas</th>
+                            <th>Km</th>
                         </tr>
                     </thead>
 
                     <tbody>
 
-                        <?php foreach ($invoice['items'] as $i => $item): ?>
+                    <?php foreach ($items as $i => $item): ?>
+                        <input
+                            type="hidden"
+                            name="items[<?= $i ?>][task_id]"
+                            value="<?= (int)$item['task_id'] ?>"
+                        >
                         <tr>
 
                             <td>
                                 <input
-                                    type="text"
-                                    name="items[<?= $i ?>][label]"
-                                    value="<?= e($item['label']) ?>"
+                                    type="hidden"
+                                    name="items[<?= $i ?>][task_id]"
+                                    value="<?= (int)$item['task_id'] ?>"
                                 >
+                               <textarea
+                                    name="items[<?= $i ?>][title]"
+                                    rows="4"
+                                ><?= e($item['title'] ?? '') ?></textarea>
+                                <br>
                             </td>
 
                             <td>
                                 <input
                                     type="number"
-                                    step="0.01"
-                                    name="items[<?= $i ?>][qty]"
-                                    value="<?= e($item['qty']) ?>"
-                                >
-                            </td>
+                                    name="items[<?= $i ?>][minutes]"
+                                    value="<?= (int)($item['minutes'] ?? 0) ?>"
+                                > minut<br>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        name="items[<?= $i ?>][visible_time]"
+                                        value="1"
+                                        <?= !empty($item['visible_time']) ? 'checked' : '' ?>
+                                    >
+                                    Zobrazit čas na faktuře
+                                </label>
 
-                            <td>
-                                <input
-                                    type="text"
-                                    name="items[<?= $i ?>][unit]"
-                                    value="<?= e($item['unit']) ?>"
-                                >
                             </td>
 
                             <td>
                                 <input
                                     type="number"
-                                    step="0.01"
-                                    name="items[<?= $i ?>][price]"
-                                    value="<?= e($item['price']) ?>"
-                                >
+                                    name="items[<?= $i ?>][kilometers]"
+                                    value="<?= e((int) $item['kilometers'] ?? 0) ?>"
+                                ><br>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        name="items[<?= $i ?>][visible_km]"
+                                        value="1"
+                                        <?= !empty($item['visible_km']) ? 'checked' : '' ?>
+                                    >
+                                    Zobrazit km na faktuře
+                                </label>
+
                             </td>
 
                         </tr>
-                        <?php endforeach; ?>
+
+                    <?php endforeach; ?>
 
                     </tbody>
+
                 </table>
 
                 <div class="form-group">
@@ -169,4 +254,4 @@ $errors    = $view->errors ?? [];
 
 </div>
 
-<?php require __DIR__ . '/../layout/footer.php';
+<?php require __DIR__ . '/../layout/footer.php'; ?>
