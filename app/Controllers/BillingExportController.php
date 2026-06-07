@@ -12,6 +12,7 @@ use App\Core\Url;
 use App\Core\TenantContext;
 use App\Services\Billing\BillingExportService;
 use Throwable;
+use LogicException;
 //use App\Core\ViewContext;
 
 final class BillingExportController extends Controller
@@ -21,6 +22,9 @@ final class BillingExportController extends Controller
 
     public function __construct(ViewContext $view)
     {
+        throw new LogicException(
+            'Deprecated service used'
+        );
     	  parent::__construct($view); // 🔥 KLÍČOVÉ
         $this->service = new BillingExportService();
     }

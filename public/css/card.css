@@ -104,6 +104,13 @@ h4.card-header, h5.card-header {
     margin-bottom: 16px;
 }
 
+.card-section p{
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
 .card-section--wo {
     border: 1px solid #e5e7eb;
     background: #f9fafb;

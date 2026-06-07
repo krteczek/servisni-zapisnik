@@ -12,6 +12,8 @@ use App\Models\ContactsModel;
 use App\Models\TaskModel;
 use App\Models\WorkOrderModel;
 use App\Services\Invoice\InvoiceService;
+use throwable;
+use App\Core\LoggerHolder;
 
 class InvoiceController extends Controller
 {
@@ -117,7 +119,8 @@ class InvoiceController extends Controller
         $ok = $this->invoice->createFromTask($task);
         return $this->render('invoices/create-work-order');
     }
-
+        
+    
     /**
      * /billing/invoice/create/export/789
      */
@@ -129,9 +132,54 @@ class InvoiceController extends Controller
     /**
      * POST
      */
-    public function store(): void
-    {
+public function storeTask(int $id): string
+{
+    if (empty($_POST)) {
+        Flash::error('Neplatná žádost.');
+        Url::back();
     }
+
+    $this->checkCsrf();
+
+    try {
+
+        $result = $this->invoice->invoiceFromTask(
+            $id,
+            $_POST
+        );
+
+        if (!$result['success']) {
+
+            $this->view->errors = $result['errors'];
+            $this->view->data   = $result['data'];
+
+            return $this->render('invoices/create-task');
+        }
+
+        Flash::success('Faktura byla vytvořena.');
+
+        Url::redirect(
+            '/{tenant}/billing/invoice/' . $result['invoice_id']
+        );
+
+    } catch (Throwable $e) {
+
+        LoggerHolder::get()->error(
+            'InvoiceController.storeTask FAILED',
+            [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]
+        );
+
+        Flash::error(
+            'Fakturu se nepodařilo vytvořit.'
+        );
+
+        Url::back();
+    }
+}
 
     /**
      * seznam faktur

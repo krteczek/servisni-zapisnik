@@ -1,0 +1,173 @@
+<?php
+declare(strict_types=1);
+// app/views/tasks/report.php
+
+/** @var \App\Core\ViewContext $view */
+
+use App\Core\Csrf;
+use App\Core\Url;
+use App\Helpers\RecurringHelper;
+
+require __DIR__ . '/../layout/header.php';
+
+$task = $view->task;
+$data = $view->data ?? [];
+$team = $view->team ?? [];
+$order = $view->order ?? [];
+$errors = $view->errors; // chyby validace
+
+//dd($task, $data);
+?>
+<div class="create-container">
+<!-- DETAIL ŠABLONY -->
+<div class="card task-card"  style="--task-color: <?= e($team['color'] ?? '#ccc') ?>;">
+
+    <div class="card-header">
+        <h2>Detail nastavení šablony</h2>
+    </div>
+
+    <div class="card-body">
+        <div class="card-section">
+            <span class="section-label">Stav šablony: </span>
+            <?php if ($data['active']): ?>
+                <span class="badge badge-status-open">Aktivní</span>
+            <?php else: ?>
+                <span class="badge badge-status-cancelled">Neaktivní</span>
+            <?php endif; ?>
+            <br>
+            <span class="section-label">Text názvu generovaných úkolů: </span>
+            <p><?= e($task['title']) ?></p>
+        </div>
+
+        <div class="card-section">
+            <span class="section-label">Text popisu generovaných úkolů: </span>
+            <?= tx($task['description'] ?? 'Neuvedeno') ?>
+        </div>
+
+        <div class="card-section">
+            <span class="section-label">Tým, který má tyto úkoly na starosti: </span>
+            <?= tx($team['name'] ?? 'Neuvedeno') ?>
+        </div>
+
+        <div class="card-section">
+            <span class="section-label">Jak často se úkoly vytvářejí: </span>
+            <p><?= RecurringHelper::describe($data) ?></p>
+            
+           
+        </div>
+
+        <div class="card-section">
+            <span class="section-label">Další vytvoření</span>
+            <p><?= RecurringHelper::nextDueDate($data) ?></p>
+        </div>
+
+        <div class="card-section">
+            <span class="section-label">Vytvořit předem</span>
+            <p>
+                <?= RecurringHelper::warningText($data) ?>
+                
+            </p>
+        </div>
+    </div>
+
+<!-- ZDROJOVÁ ZAKÁZKA -->
+    <div class="card-header">
+        <h3>Zdrojová zakázka</h3>
+    </div>
+
+    <div class="card-body">
+
+        <p>
+            #<?= (int)$task['work_order_id'] ?>
+            : <?= e($order['title'] ?? '') ?>
+            <span class="badge badge-status-<?= e($order['status']) ?>">
+                <?= te($order['status']) ?>
+            </span>
+        </p>
+        
+
+        <a
+            href="<?= Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail') ?>"
+            class="btn btn-secondary"
+        >
+            Otevřít zakázku
+        </a>
+
+    </div>
+
+
+
+<!-- AKCE -->
+
+
+    <div class="card-header">
+        <h3>Akce</h3>
+    </div>
+
+    <div class="card-body">
+
+        <div class="form-actions">
+
+            <a
+                href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring') ?>"
+                class="btn btn-primary"
+            >
+                Upravit nastavení
+            </a>
+
+            <a
+                href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/detail') ?>"
+                class="btn btn-secondary"
+            >
+                Otevřít master úkol
+            </a>
+
+            <?php if ($data['active'] ?? false): ?>
+
+                <a
+                    href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring') ?>"
+                    class="btn btn-warning"
+                >
+                    Deaktivovat
+                </a>
+
+            <?php else: ?>
+
+                <a
+                    href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring') ?>"
+                    class="btn btn-success"
+                >
+                    Aktivovat
+                </a>
+
+            <?php endif; ?>
+
+            <?php if (!$data['active']): ?>
+
+                <form
+                    method="post"
+                    action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring-done') ?>"
+                    data-confirm="Opravdu chcete ukončit tuto šablonu?"
+                >
+                    <?= \App\Core\Csrf::getField() ?>
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                    >
+                        Ukončit šablonu
+                    </button>
+                </form>
+
+            <?php endif; ?>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+<?php require __DIR__ . '/../layout/footer.php'; ?>

@@ -12,7 +12,7 @@ use App\Controllers\SystemController;
 use App\Controllers\TaskController;
 use App\Controllers\PageController;
 use App\Controllers\TaskRecurringController;
-use App\Controllers\BillingExportController;
+// use App\Controllers\BillingExportController;
 use App\Controllers\ContactsController;
 use App\Controllers\ExportsController;
 use App\Controllers\ArchiveController;
@@ -413,6 +413,16 @@ return [
     'auth'   => true,
 ],
 
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/recurringDetail',
+    'action' => [TaskRecurringController::class, 'recurringDetail'],
+    'auth'   => true,
+	'roles'   => ['admin', 'mistr'],
+	'title'   => 'Úkoly: Detail nastavení šablony opakujícího se úkolu',
+],
+
+
 /*
 |--------------------------------------------------------------------------
 | ZAKÁZKY, index (výpis zakázek)
@@ -800,10 +810,10 @@ return [
 |   Nová fakturace
 -----------------------------------------*/
 //routy:
-//GET  /billing/invoice/index
+//GET  /billing/invoice/
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/index',
+    'path'    => '/{tenant}/billing/invoice/',
     'action'  => [InvoiceController ::class, 'index'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -829,7 +839,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/billing/invoice/create/task/{id:\d+}',
-    'action'  => [InvoiceController ::class, 'storeTask'],
+    'action'  => [InvoiceController ::class, 'store'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',
@@ -931,8 +941,8 @@ return [
 ],
 
 /*-------------------------------------
-   Fakturace
--------------------------------------**/
+   Fakturace DEPRECATED NEPOUŽÍVAT
+-------------------------------------** /
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/exports/billing/index',
@@ -953,7 +963,7 @@ return [
     'roles'   => ['admin', 'mistr'],
     'section' => 'exports',
     'menu'   => 'Exporty',
-    'submenu'=> 'Výpis fakturačních exportů',
+    'submenu'=> 'Vytvořit fakturační export',
     'title'   => 'Exporty: Vytvořit fakturační export',
 ],
 
@@ -965,7 +975,7 @@ return [
     'roles'   => ['admin', 'mistr'],
     'section' => 'exports',
     'menu'   => 'Exporty',
-    'submenu'=> 'Výpis fakturačních exportů',
+    'submenu'=> 'Vytvořit fakturační export',
     'title'   => 'Exporty: Vytvořit fakturační export',
 ],
 
@@ -990,6 +1000,7 @@ return [
     'section' => 'exports',
     'title'   => 'Exporty: Export do PDF',
 ],
+*/
 
 /*-------------------------------------
    Exporty

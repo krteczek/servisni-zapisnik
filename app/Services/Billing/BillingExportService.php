@@ -8,6 +8,9 @@ use \Throwable;
 //use App\Core\Auth;
 use PDO;
 
+use LogicException;
+
+
 final class BillingExportService
 {
 	 
@@ -17,6 +20,10 @@ final class BillingExportService
     {
         //zrušeno protože se přešlo na model jedné databáze pro uživatele i práci.
         //Database::useWorkDatabase('work');
+
+        throw new LogicException(
+                'Deprecated service used'
+            );
     }
 
     public function getExports(int $companyId): array

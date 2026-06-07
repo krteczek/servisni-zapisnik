@@ -12,6 +12,7 @@ use App\Core\Controller;
 use App\Core\ViewContext;
 use App\Models\TaskModel;
 use App\Models\RecurringTaskModel;
+use App\Models\TeamModel;
 
 use Throwable;
 
@@ -53,8 +54,15 @@ final class TaskRecurringController extends Controller
         if (!$task['is_recurring'] || ((int) $task['is_recurring'] < 1)) {
             // úkol existuje ale není opakovaný
             Flash::error('Tento úkol není nastaven jako opakovaný.');
-            Url::back();// ('/{tenant}/tasks');
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');;
         }
+        if (
+            empty($task['recurring_task_id'])
+            || (int)$task['recurring_task_id'] < 1
+        ) {
+            Flash::error('Opakovací šablona neexistuje.');
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
+        }        
 		return $task;	
 	}
 
@@ -63,15 +71,17 @@ final class TaskRecurringController extends Controller
         $task = $this->getTaskRecurringOrRedirect($taskId);
         //var_dump($task);
         $recurring = [];
-
         try {
             
-            if (!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
-                
-                $recurring = ($this->model->find($task['recurring_task_id']) ?? []);
-                //var_dump($recurring);
+            $recurring = ($this->model->find($task['recurring_task_id']) ?? []);
+            //var_dump($recurring);
+ 
+            if (!$recurring) {
+                Flash::error(
+                    'Opakovací šablona nebyla nalezena.'
+                );
+                Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
             }
-
         } catch (Throwable $e) {
             LoggerHolder::get()->error('TaskRecurringController.recurringGet FAILED', [
                 'message' => $e->getMessage(),
@@ -82,7 +92,7 @@ final class TaskRecurringController extends Controller
 
             // 👤 USER MESSAGE
             Flash::error('Nepodařilo se načíst úkol, omlouváme se. Zkuste to prosím znovu později.');
-            Url::back();
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
         }
 
         $this->view->task = $task;
@@ -98,13 +108,6 @@ final class TaskRecurringController extends Controller
 
         $task = $this->getTaskRecurringOrRedirect($taskId);
 
-        $recurring = [];
-        if (!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
-           
-            $recurring = ($this->model->find($task['recurring_task_id']) ?? []);
-            //var_dump($recurring);
-        } 
- 
         //validace
         $data = $this->validateRecurring($_POST, Config::get('recurring'));
         //uložení do db
@@ -117,22 +120,13 @@ final class TaskRecurringController extends Controller
         ];
         try
         {
-            if (empty($recurring)) {
-                //var_dump($toDb);
-                $toDb = array_merge($toDb, [
-                    'task_id' => $task['id'],
-                    'team_id' => $task['team_id'],
-
-                ]);
-                $row = $this->model->create($toDb);
-            } else {
-                $row = $this->model->update($task['recurring_task_id'],$toDb);
-            }
-
+            $row = $this->model->update($task['recurring_task_id'],$toDb);
             
             Flash::success('Opakování bylo uloženo');
 
-            Url::redirect('/{tenant}/tasks/' . $task['id'] . '/edit/#main');
+            //Url::redirect('/{tenant}/tasks/' . $task['id'] . '/edit/#main');
+            Url::redirect('/{tenant}/tasks/' . $task['id'] . '/recurringDetail/#main');
+
         }
         catch (Throwable $e)
         {
@@ -192,6 +186,45 @@ final class TaskRecurringController extends Controller
             } else {
                 return false;
             }
+    }
+
+
+    public function recurringDetail(int $taskId): string
+    {
+
+        $task = $this->getTaskRecurringOrRedirect($taskId);
+        //var_dump($task);
+        $recurring = [];
+        try {
+            
+            $recurring = ($this->model->find($task['recurring_task_id']) ?? []);
+            //var_dump($recurring);
+ 
+            if (!$recurring) {
+                Flash::error(
+                    'Opakovací šablona nebyla nalezena.'
+                );
+                Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
+            }
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error('TaskRecurringController.recurringGet FAILED', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            // 👤 USER MESSAGE
+            Flash::error('Nepodařilo se načíst úkol, omlouváme se. Zkuste to prosím znovu později.');
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
+        }
+
+        $this->view->task = $task;
+        $this->view->data = $recurring;
+        $this->view->team = (new TeamModel())->find($task['team_id']);
+        $this->view->order = (new \App\Models\WorkOrderModel())->find($task['work_order_id']);
+
+        return $this->render('tasks/recurringDetail');
     }
 
  }

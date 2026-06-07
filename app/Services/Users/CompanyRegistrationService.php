@@ -116,6 +116,7 @@ final class CompanyRegistrationService
                 'domain_admin' => 1,
                 'active' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
+                'session_version' => 1,
             ]);
 
             $teamId = $this->teams->createWithTenant($companyId, [
@@ -137,6 +138,7 @@ final class CompanyRegistrationService
                     'global_role'  => 'admin',
                     'db_name'      => $dbName,
                     'team_id'      => $teamId,
+                    'session_version' => 1,
                 ],
             ];
 

@@ -9,8 +9,26 @@ use App\Core\Roles;
 
 final class TaskModel extends BaseModel
 {
+    /**
+     * Název tabulky bez prefixu.
+     *
+     * @var string
+     */
     protected string $table = 'tasks';
-    protected string $connection = 'work';
+
+    /**
+     * Připojení k admin databázi (centrální registr tenantů).
+     *
+     * @var string
+     */
+    protected string $connection = 'admin';
+
+    /**
+     * Model NENÍ tenant-aware – společnosti definují tenanty, nepatří pod ně.
+     *
+     * @var bool
+     */
+    
     protected bool $tenantAware = true;
 
     /**
