@@ -289,23 +289,6 @@ private function saveTask(array $data, int $workOrderId): string
         }        
     }
 
-    public function ensureRecurringTaskClosable(array $task): void
-    {
-        if (empty($task['recurring_task_id']) || $task['is_recurring'] != 1) {
-            Flash::info('Tato funkce je určena pouze pro opakující se úkoly.');
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
-        }
-
-        if ($task['status'] === 'done') {
-            Flash::info("Tento úkol nelze uzavřít, protože je již uzavřený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
-        }
-
-        if ($task['status'] === 'cancelled') {
-            Flash::error("Tento úkol nelze uzavřít, protože je již zrušený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
-        }
-    }
 
 
 	public function editTaskGet(int $taskId): string 
@@ -523,32 +506,6 @@ private function validateDate(?string $date): ?string
         }
     }
 
-    public function doneRecurring(int $taskId): void
-    {
-        $task = $this->getTaskOrRedirect($taskId);
-        $this->ensureRecurringTaskClosable($task);
-
-        try {
-            $ok = (new TaskModel())->closeRecurringTask($taskId, 'done');
-
-            Flash::success('Úkol byl uzavřen.');
-            Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#taskId_' . $taskId);
-            
-        } catch (Throwable $e) {
-
-                // 🔥 TECHNICKÝ LOG
-                LoggerHolder::get()->error('TaskController.doneRecurring FAILED', [
-                    'message' => $e->getMessage(),
-                    'file'    => $e->getFile(),
-                    'line'    => $e->getLine(),
-                    'trace'   => $e->getTraceAsString(),
-                    'input'   => serialize($task),
-                ]);
-
-                Flash::error('Nepodařilo se uzavřít úkol.');
-                Url::back();
-        }
-    }
     public function cancel(int $taskId): void
     {
         $task = $this->getTaskOrRedirect($taskId);
