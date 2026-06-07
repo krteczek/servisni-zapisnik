@@ -294,3 +294,16 @@ function dd(mixed ...$vars): never
 
     die(1);
 }
+
+function dc(mixed ...$vars): void
+{
+    echo '<pre style="background:#111;color:#0f0;padding:15px;">';
+
+    foreach ($vars as $var) {
+        var_dump($var);
+        echo "\n";
+    }
+
+    echo '</pre>';
+
+}

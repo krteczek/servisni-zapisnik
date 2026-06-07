@@ -78,7 +78,11 @@ $errors    = $view->errors ?? [];
                 </div>
 
                 <h3>Odběratel</h3>
-
+                <input 
+                    type="hidden"
+                    name="contact_id"
+                    value="<?= (int)($customer['id'] ?? 0) ?>"
+                >
                 <div class="form-group">
                     <label>Název firmy</label>
                     <input
@@ -157,12 +161,7 @@ $errors    = $view->errors ?? [];
                     <tbody>
 
                     <?php foreach ($items as $i => $item): ?>
-                        <input
-                            type="hidden"
-                            name="items[<?= $i ?>][task_id]"
-                            value="<?= (int)$item['task_id'] ?>"
-                        >
-                        <tr>
+                         <tr>
 
                             <td>
                                 <input
@@ -199,7 +198,7 @@ $errors    = $view->errors ?? [];
                                 <input
                                     type="number"
                                     name="items[<?= $i ?>][kilometers]"
-                                    value="<?= e((int) $item['kilometers'] ?? 0) ?>"
+                                    value="<?= (int) ($item['kilometers'] ?? 0) ?>"
                                 ><br>
                                 <label>
                                     <input

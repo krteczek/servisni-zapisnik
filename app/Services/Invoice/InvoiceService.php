@@ -6,6 +6,7 @@ use App\Models\WorkOrderModel;
 use App\Models\ContactsModel;
 use App\Models\TaskModel;
 use App\Services\Settings\SettingsService;
+use App\Core\Csrf;
 
 final class InvoiceService
 {
@@ -99,6 +100,114 @@ final class InvoiceService
         int $exportId,
         array $data
     ): int {
+    }
+
+public function invoiceFromTask(
+    int $taskId,
+    array $post
+): array
+{
+    $errors = [];
+
+    $task = (new TaskModel())->findById($taskId);
+
+    if (!$task) {
+        throw new RuntimeException('Task not found');
+    }
+
+    $workOrder = (new WorkOrderModel())->find(
+        (int) $task['work_order_id']
+    );
+
+    if (!$workOrder) {
+        throw new RuntimeException('Work order not found');
+    }
+
+    // =====================
+    // VALIDACE
+    // =====================
+
+    $title = trim((string) ($post['title'] ?? ''));
+
+    if ($title === '') {
+        $errors['title'] =
+            'Název faktury je povinný.';
+    }
+
+    $issuedAt = (string) ($post['issued_at'] ?? '');
+
+    if ($issuedAt === '') {
+        $errors['issued_at'] =
+            'Datum vystavení je povinné.';
+    }
+
+    $dueDate = (string) ($post['due_date'] ?? '');
+
+    if ($dueDate === '') {
+        $errors['due_date'] =
+            'Datum splatnosti je povinné.';
+    }
+
+    if (
+        $issuedAt !== ''
+        && $dueDate !== ''
+        && strtotime($dueDate) < strtotime($issuedAt)
+    ) {
+        $errors['due_date'] =
+            'Datum splatnosti musí být pozdější než datum vystavení.';
+    }
+
+    // =====================
+    // PŘI CHYBĚ
+    // =====================
+
+    if ($errors) {
+
+        $draft = $this->buildDraftFromTask($task);
+
+        $draft['invoice']['title'] =
+            $title;
+
+        $draft['invoice']['issued_at'] =
+            $issuedAt;
+
+        $draft['invoice']['due_date'] =
+            $dueDate;
+
+        $draft['invoice']['note'] =
+            (string) ($post['note'] ?? '');
+
+        $draft['customer'] =
+            $post['customer'] ?? [];
+
+        $draft['items'] =
+            $post['items'] ?? [];
+
+        return [
+            'success' => false,
+            'errors'  => $errors,
+            'data'    => $draft,
+        ];
+    }
+
+    // =====================
+    // ULOŽENÍ
+    // =====================
+
+    $invoiceId = $this->createInvoice(
+        [$task],
+        $workOrder,
+        $post
+    );
+
+    return [
+        'success'    => true,
+        'invoice_id' => $invoiceId,
+    ];
+}
+    private function validateInvoiceData(array $data): array
+    {
+        
     }
 
     /**

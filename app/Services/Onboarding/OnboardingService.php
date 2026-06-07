@@ -121,7 +121,7 @@ class OnboardingService
          * ==========================
          */
         try {
-            [$subject, $html, $text] = BuildMailService::build($adminResult);
+            [$subject, $html, $text] = BuildMailService::build('users.InfoAfterRegistration', $adminResult);
 
             (new MailService())->send(
                 toEmail: $adminResult['data']['email'],
