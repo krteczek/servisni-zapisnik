@@ -326,22 +326,29 @@ public function forWorkOrderWithStats(int $orderId): array
             t.*,
 
             CASE
-                WHEN rt.task_id IS NOT NULL THEN 1
+                WHEN rt_master.task_id IS NOT NULL THEN 1
                 ELSE 0
             END AS is_recurring_master,
 
             CASE
                 WHEN t.recurring_task_id IS NOT NULL THEN 1
                 ELSE 0
-            END AS is_generated_task
+            END AS is_generated_task,
 
-        FROM {$this->tableName} t
+            rt_master.id                  AS recurring_master_id,
+            rt_master.frequency_type      AS recurring_frequency_type,
+            rt_master.frequency_value     AS recurring_frequency_value,
+            rt_master.next_due_date       AS recurring_next_due_date,
+            rt_master.warning_days_before AS recurring_warning_days_before,
+            rt_master.active              AS recurring_active
 
-        LEFT JOIN recurring_tasks rt
-            ON rt.task_id = t.id
-           AND rt.company_id = t.company_id
+        FROM tasks t
 
-        WHERE
+        LEFT JOIN recurring_tasks rt_master
+            ON rt_master.task_id = t.id
+        AND rt_master.company_id = t.company_id
+
+        WHERE 
             t.work_order_id = :order
             AND t.{$this->tenantColumn} = :tenant
 

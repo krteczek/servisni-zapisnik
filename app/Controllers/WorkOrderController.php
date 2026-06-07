@@ -314,6 +314,7 @@ public function detailOrder(int $orderId): string
         {
             $cancelledTaskCount++;
         }
+
     }
     unset($task); // dobrý zvyk po použití reference
 

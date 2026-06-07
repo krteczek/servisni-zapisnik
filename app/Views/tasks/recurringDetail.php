@@ -15,7 +15,17 @@ $data = $view->data ?? [];
 $team = $view->team ?? [];
 $order = $view->order ?? [];
 $errors = $view->errors; // chyby validace
-
+/**
+ * RecurringDetail doplnit o další informace:
+  - historie generování
+  - počet vygenerovaných úkolů
+  - datum posledního vytvoření
+  - datum posledního dokončení
+  - souhrn reportů generovaných úkolů
+  - audit změn nastavení
+  - datum deaktivace / ukončení
+  * to platí i pro šablonu
+ */
 //dd($task, $data);
 ?>
 <div class="create-container">
@@ -51,20 +61,20 @@ $errors = $view->errors; // chyby validace
 
         <div class="card-section">
             <span class="section-label">Jak často se úkoly vytvářejí: </span>
-            <p><?= RecurringHelper::describe($data) ?></p>
+            <p><?= RecurringHelper::describe($data['frequency_type'] ?? '', $data['frequency_value'] ?? 1) ?></p>
             
            
         </div>
 
         <div class="card-section">
             <span class="section-label">Další vytvoření</span>
-            <p><?= RecurringHelper::nextDueDate($data) ?></p>
+            <p><?= RecurringHelper::nextDueDate($data['next_due_date'] ?? '') ?></p>
         </div>
 
         <div class="card-section">
             <span class="section-label">Vytvořit předem</span>
             <p>
-                <?= RecurringHelper::warningText($data) ?>
+                <?= RecurringHelper::warningText($data['warning_days_before'] ?? 0) ?>
                 
             </p>
         </div>
@@ -87,7 +97,7 @@ $errors = $view->errors; // chyby validace
         
 
         <a
-            href="<?= Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail') ?>"
+            href="<?= Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#taskId_' . $task['id']) ?>"
             class="btn btn-secondary"
         >
             Otevřít zakázku

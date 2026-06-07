@@ -5,11 +5,8 @@ namespace App\Helpers;
 
 final class RecurringHelper
 {
-    public static function describe(array $recurring): string
+    public static function describe(string $type, int $value = 1): string
     {
-        $type = $recurring['frequency_type'] ?? '';
-        $value = (int)($recurring['frequency_value'] ?? 1);
-
         return match ($type) {
 
             'daily' => $value === 1
@@ -33,23 +30,21 @@ final class RecurringHelper
     }
 
 
-    public static function warningText(array $recurring): string
+    public static function warningText(int $warningDaysBefore): string
     {
-        $days = (int)($recurring['warning_days_before'] ?? 0);
-
-        return match ($days) {
+        return match ($warningDaysBefore) {
             0 => 'Bez předstihu',
             1 => '1 den předem',
-            default => "{$days} dnů předem",
+            default => "{$warningDaysBefore} dnů předem",
         };
     }
 
-    public static function nextDueDate(array $recurring): string
+    public static function nextDueDate(?string $nextDueDate): string
     {
-        if (empty($recurring['next_due_date'])) {
+        if (empty($nextDueDate)) {
             return '-';
         }
 
-        return date('d.m.Y', strtotime($recurring['next_due_date']));
+        return date('d.m.Y', strtotime($nextDueDate));
     }
 }
