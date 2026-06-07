@@ -252,7 +252,7 @@ function checked($value): string
 
 /**
  * @param string|null $dueDate datum ve formátu date
- * @return array([$deadlineClass, $deadlineText])
+ * return array([$deadlineClass, $deadlineText])
  * @return array{0:string,1:string}
  */
 function deadlineDateHelper(?string $dueDate): array
