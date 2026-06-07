@@ -368,8 +368,15 @@ $err = $view->errors;
                 <?php endif; ?>
 
                 <?php if ($task['can_close'] && $task['status'] !== 'done') : ?>
+                    <?php 
+                    $url = '';
+                        if ($task['is_recurring_master'] === 1) {
+                            $url = '/{tenant}/tasks/' . $task['id'] . '/recurring-done';
+                        } else {
+                            $url = '/{tenant}/tasks/' . $task['id'] . '/done';
+                        }                        ?>
                 <form method="post"
-                    action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/done') ?>"
+                    action="<?= Url::to($url) ?>"
                     data-confirm="Opravdu chcete úkol uzavřít?"
                     >
 
