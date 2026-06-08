@@ -70,6 +70,7 @@ final class TaskRecurringController extends Controller
     {
         $task = $this->getTaskRecurringOrRedirect($taskId);
         //var_dump($task);
+        $this->ensureRecurringEditable($task);
         $recurring = [];
         try {
             
@@ -107,7 +108,7 @@ final class TaskRecurringController extends Controller
         $this->checkCsrf();
 
         $task = $this->getTaskRecurringOrRedirect($taskId);
-
+        $this->ensureRecurringEditable($task);
         //validace
         $data = $this->validateRecurring($_POST, Config::get('recurring'));
         //uložení do db
@@ -304,4 +305,27 @@ final class TaskRecurringController extends Controller
         }        
     }
 
+
+    private function ensureRecurringEditable(array $task): void
+{
+    if ($task['status'] === 'done') {
+        Flash::error(
+            'Tuto šablonu již nelze upravovat, protože byla dokončena.'
+        );
+
+        Url::redirect(
+            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail'
+        );
+    }
+
+    if ($task['status'] === 'cancelled') {
+        Flash::error(
+            'Tuto šablonu již nelze upravovat, protože byla zrušena.'
+        );
+
+        Url::redirect(
+            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail'
+        );
+    }
+}
  }
