@@ -456,7 +456,7 @@ private function saveTask(array $data, int $workOrderId): string
 
 private function validateDate(?string $date): ?string
 {   
-    print_r($date);
+    //print_r($date);
     $date = trim($date ?? '');
 
     if ($date === '') {
@@ -653,6 +653,13 @@ foreach ($participants as $userId => $participantData) {
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks');
         }
+
+        if ($task['status'] !== 'open' && $task['status'] !== 'in_progress') {
+            Flash::error('K tomuto úkolu již nelze přidat report.');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+        }        
+
+
         $task['canUserAddReport'] = self::canUserAddReport($taskId);
         if(
             !$task['canUserAddReport']
