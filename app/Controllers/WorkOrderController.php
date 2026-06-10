@@ -141,22 +141,19 @@ public function index(): string
             return $this->render('work_orders/create');
 		}
         Flash::success('Zakázka byla úspěšně vytvořena.');
-        if ($data['create_first_task'] === true) {
-            Url::redirect('/{tenant}/work-orders/' . $orderId . '/tasks/createTaskFromOrderGet/');
-        }
-        Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+        Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
     }
 
     private function guardEditable(array $order, int $orderId): void
     {
         if ($order['status'] === 'cancelled') {
             Flash::error('Tuto zakázku nelze upravovat, protože je zrušená.');
-            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
         }
 
         if ($order['status'] === 'done') {
             Flash::error('Tuto zakázku nelze upravovat, protože je dokončená.');
-            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
         }
     }
 
@@ -225,7 +222,7 @@ public function index(): string
             
                 
             Flash::success('Zakázka byla úspěšně změněna.');
-            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
         } catch (\Throwable $e) {
             
             LoggerHolder::get()->error('WorkOrderController.editFormUpdate: failed', [
@@ -370,14 +367,14 @@ public function detailOrder(int $orderId): string
 private function getOrderOrRedirect(int $orderId): array
 {
     if ($orderId <= 0) {
-        Url::redirect('/{tenant}/work-orders');
+        Url::redirect('/{tenant}/work-orders/#main');
     }
 
     $order = $this->model->find($orderId);
 
     if (!$order) {
         Flash::error('Zakázka neexistuje');
-        Url::redirect('/{tenant}/work-orders');
+        Url::redirect('/{tenant}/work-orders/#main');
     }
 
     return $order;

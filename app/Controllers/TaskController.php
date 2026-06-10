@@ -54,14 +54,14 @@ private function getOrderOrRedirect(?int $orderId): array
 {
     if (!$orderId || $orderId <= 0) {
         Flash::error('Zakázka neexistuje');
-        Url::redirect('/{tenant}/work-orders');
+        Url::redirect('/{tenant}/work-orders/#main');
     }
 		// máme tu čistý find (na basemodel), musíme ověřit, jestli je zakázka editovatelná.
     $order = (new WorkOrderModel())->find($orderId);
 
     if (!$order) {
         Flash::error('Zakázka neexistuje');
-        Url::redirect('/{tenant}/work-orders');
+        Url::redirect('/{tenant}/work-orders/#main');
     }
 	
 	if($order['status'] === 'new' || $order['status'] === 'in_progress') 
@@ -69,7 +69,7 @@ private function getOrderOrRedirect(?int $orderId): array
 		return $order;
 	}
 	Flash::error('Tato zakázka již byla ukončena a proto k ní nelze přidat nový úkol.');
-	Url::redirect('/{tenant}/work-orders');
+	Url::redirect('/{tenant}/work-orders/#main');
 
 }
 
@@ -236,7 +236,7 @@ private function saveTask(array $data, int $workOrderId): string
 		$task = (new TaskModel())->find((int) $taskId);
 		if(!$task) {
             Flash::error('Úkol neexistuje');
-            Url::redirect('/{tenant}/tasks');			
+            Url::redirect('/{tenant}/tasks/#main');			
 		}
 		return $task;	
 	}
@@ -245,17 +245,17 @@ private function saveTask(array $data, int $workOrderId): string
     {
         if ($task['status'] === 'done') {
             Flash::info('Tento úkol nelze upravovat, protože je dokončený.');
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
         if ($task['status'] === 'cancelled') {
             Flash::error('Tento úkol nelze upravovat, protože je zrušený.');
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
         if (!empty($task['recurring_task_id']) && $task['is_recurring'] != 1) {
             Flash::info('Automaticky vygenerovaný úkol nelze upravovat.');
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
     }
     private function ensureTaskClosable(array $task, string $action = 'done'):void
@@ -266,12 +266,12 @@ private function saveTask(array $data, int $workOrderId): string
 
         if ($task['status'] === 'done') {
             Flash::info("Tento úkol nelze $label, protože je již dokončený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
         if ($task['status'] === 'cancelled') {
             Flash::error("Tento úkol nelze $label, protože je již zrušený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
         
         
@@ -284,7 +284,7 @@ private function saveTask(array $data, int $workOrderId): string
             );
 
             Url::redirect( 
-                '/{tenant}/tasks/' . $task['id'] . '/recurring'
+                '/{tenant}/tasks/' . $task['id'] . '/recurring/#main'
             );
         }        
     }
@@ -302,7 +302,7 @@ private function saveTask(array $data, int $workOrderId): string
 		//print_r($task);
         if (!$order) {
             Flash::error('Zakázka neexistuje');
-            Url::redirect('/{tenant}/work-orders');
+            Url::redirect('/{tenant}/work-orders/#main');
         }
 		
 
@@ -310,7 +310,7 @@ private function saveTask(array $data, int $workOrderId): string
 		$team = (new TeamModel())->find($task['team_id']);
         if (!$team) {
             Flash::error('Tým neexistuje');
-            Url::redirect('/{tenant}/tasks');
+            Url::redirect('/{tenant}/tasks/#main');
         }
 
 		//print_r($team);
@@ -379,12 +379,12 @@ private function saveTask(array $data, int $workOrderId): string
         $order = (new WorkOrderModel())->find($task['work_order_id']);
         if (!$order) {
             Flash::error('Zakázka neexistuje.');
-            Url::redirect('/{tenant}/work-orders');
+            Url::redirect('/{tenant}/work-orders/#main');
         }
 
         if (!in_array($order['status'], ['new', 'in_progress'], true)) {
             Flash::error('Zakázka je uzavřená, nelze klonovat.');
-            Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail/#main');
         }
         $teams = (new TeamModel())->byActive(true);
 
@@ -408,12 +408,12 @@ private function saveTask(array $data, int $workOrderId): string
         $order = (new WorkOrderModel())->find($task['work_order_id']);
         if (!$order) {
             Flash::error('Zakázka neexistuje.');
-            Url::redirect('/{tenant}/work-orders');
+            Url::redirect('/{tenant}/work-orders/#main');
         }
 
         if (!in_array($order['status'], ['new', 'in_progress'], true)) {
             Flash::error('Zakázka je uzavřená, nelze klonovat.');
-            Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail/#main');
         }
     
         return $this->saveTask($_POST, (int) $task['work_order_id']);
@@ -568,11 +568,11 @@ private function validateDate(?string $date): ?string
         
         if (!$task) {
             Flash::error('Úkol neexistuje');
-            Url::redirect('/{tenant}/tasks');
+            Url::redirect('/{tenant}/tasks/#main');
         }
         if ($task['status'] !== 'open' && $task['status'] !== 'in_progress') {
             Flash::error('K tomuto úkolu již nelze přidat report.');
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }        
         // 2. Validace reportu (povinné)
             $report 				= trim($data['report'] ?? '');
@@ -651,12 +651,12 @@ foreach ($participants as $userId => $participantData) {
         
         if (!$task) {
             Flash::error('Úkol neexistuje');
-            Url::redirect('/{tenant}/tasks');
+            Url::redirect('/{tenant}/tasks/#main');
         }
 
         if ($task['status'] !== 'open' && $task['status'] !== 'in_progress') {
             Flash::error('K tomuto úkolu již nelze přidat report.');
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }        
 
 

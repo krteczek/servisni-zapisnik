@@ -32,7 +32,7 @@ final class TaskRecurringController extends Controller
 		$task = (new TaskModel())->find((int) $taskId);
 		if(!$task) {
             Flash::error('Úkol neexistuje');
-            Url::redirect('/{tenant}/tasks');			
+            Url::redirect('/{tenant}/tasks/#main');			
 		}
 		return $task;	
 	}
@@ -42,26 +42,26 @@ final class TaskRecurringController extends Controller
         // možná ušetříme dotaz
         if ($taskId < 1) {
             Flash::error('Úkol neexistuje');
-            Url::redirect('/{tenant}/tasks');	        
+            Url::redirect('/{tenant}/tasks/#main');	        
         }
 
 		$task = (new TaskModel())->find((int) $taskId);
 		if(!$task) {
             // takový úkol prostě neexistuje
             Flash::error('Úkol neexistuje');
-            Url::redirect('/{tenant}/tasks');			
+            Url::redirect('/{tenant}/tasks/#main');			
 		}
         if (!$task['is_recurring'] || ((int) $task['is_recurring'] < 1)) {
             // úkol existuje ale není opakovaný
             Flash::error('Tento úkol není nastaven jako opakovaný.');
-            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');;
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');;
         }
         if (
             empty($task['recurring_task_id'])
             || (int)$task['recurring_task_id'] < 1
         ) {
             Flash::error('Opakovací šablona neexistuje.');
-            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');
         }        
 		return $task;	
 	}
@@ -81,7 +81,7 @@ final class TaskRecurringController extends Controller
                 Flash::error(
                     'Opakovací šablona nebyla nalezena.'
                 );
-                Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
+                Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');
             }
         } catch (Throwable $e) {
             LoggerHolder::get()->error('TaskRecurringController.recurringGet FAILED', [
@@ -93,7 +93,7 @@ final class TaskRecurringController extends Controller
 
             // 👤 USER MESSAGE
             Flash::error('Nepodařilo se načíst úkol, omlouváme se. Zkuste to prosím znovu později.');
-            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');
         }
 
         $this->view->task = $task;
@@ -205,7 +205,7 @@ final class TaskRecurringController extends Controller
                 Flash::error(
                     'Opakovací šablona nebyla nalezena.'
                 );
-                Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
+                Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');
             }
         } catch (Throwable $e) {
             LoggerHolder::get()->error('TaskRecurringController.recurringGet FAILED', [
@@ -217,7 +217,7 @@ final class TaskRecurringController extends Controller
 
             // 👤 USER MESSAGE
             Flash::error('Nepodařilo se načíst úkol, omlouváme se. Zkuste to prosím znovu později.');
-            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit');
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');
         }
 
         $this->view->task = $task;
@@ -233,17 +233,17 @@ final class TaskRecurringController extends Controller
     {
         if (empty($task['recurring_task_id']) || $task['is_recurring'] != 1) {
             Flash::info('Tato funkce je určena pouze pro opakující se úkoly.');
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
         if ($task['status'] === 'done') {
             Flash::info("Tento úkol nelze uzavřít, protože je již uzavřený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
         if ($task['status'] === 'cancelled') {
             Flash::error("Tento úkol nelze uzavřít, protože je již zrušený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
     }
 
@@ -282,12 +282,12 @@ final class TaskRecurringController extends Controller
 
         if ($task['status'] === 'done') {
             Flash::info("Tento úkol nelze $label, protože je již dokončený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
         if ($task['status'] === 'cancelled') {
             Flash::error("Tento úkol nelze $label, protože je již zrušený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
         
         
@@ -300,7 +300,7 @@ final class TaskRecurringController extends Controller
             );
 
             Url::redirect( 
-                '/{tenant}/tasks/' . $task['id'] . '/recurring'
+                '/{tenant}/tasks/' . $task['id'] . '/recurring/#main'
             );
         }        
     }
@@ -314,7 +314,7 @@ final class TaskRecurringController extends Controller
         );
 
         Url::redirect(
-            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail'
+            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
         );
     }
 
@@ -324,7 +324,7 @@ final class TaskRecurringController extends Controller
         );
 
         Url::redirect(
-            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail'
+            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
         );
     }
 }

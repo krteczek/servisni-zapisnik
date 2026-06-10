@@ -143,7 +143,7 @@ final class UserController extends Controller
         $user = $this->users->find($id);
         if (!$user) {
             Flash::error('Uživatel neexistuje.');
-            Url::redirect('/{tenant}/users');
+            Url::redirect('/{tenant}/users/#main');
         }
 
         $this->view->old   = $user;
@@ -157,7 +157,7 @@ final class UserController extends Controller
         $old = $this->users->find($id);
         if (!$old) {
             Flash::error('Uživatel neexistuje.');
-            Url::redirect('/{tenant}/users');
+            Url::redirect('/{tenant}/users/#main');
         }
 
         $data = $_POST;
@@ -209,7 +209,7 @@ final class UserController extends Controller
             Flash::error('Data se nepodařilo změnit.');
         }
 
-        Url::redirect('/{tenant}/users');
+        Url::redirect('/{tenant}/users/#main');
     }
 
     /* =============================
@@ -267,7 +267,7 @@ final class UserController extends Controller
         $user = $this->users->find($id);
         if (!$user) {
             Flash::error('Uživatel neexistuje.');
-            Url::redirect('/{tenant}/users');
+            Url::redirect('/{tenant}/users/#main');
         }
 
 
@@ -293,12 +293,12 @@ final class UserController extends Controller
 //var_dump($user);exit;
         if (!$user) {
             Flash::error('Uživatel neexistuje.');
-            Url::redirect('/{tenant}/users');
+            Url::redirect('/{tenant}/users/#main');
         }
 
         if ($user['password_hash'] !== null) {
             Flash::error('Účet je již aktivní.');
-            Url::redirect('/{tenant}/users/' . $id . '/detail');
+            Url::redirect('/{tenant}/users/' . $id . '/detail/#main');
         }
         
 	    try {

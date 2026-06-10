@@ -54,7 +54,7 @@ class ContactsController extends Controller
         	}
 
         Flash::success('Zákazník uložen');
-        Url::redirect('/{tenant}/contacts/index');
+        Url::redirect('/{tenant}/contacts/index/#main');
     }
 
     private function getContactOrRedirect(int $id): array
@@ -62,7 +62,7 @@ class ContactsController extends Controller
         $contact = $this->model->find($id);
         if (!$contact) {
             Flash::error('Zákazník nenalezen');
-            Url::redirect('/{tenant}/contacts/index');
+            Url::redirect('/{tenant}/contacts/index/#main');
         }
         return $contact;
     }
@@ -96,7 +96,7 @@ class ContactsController extends Controller
             }
 
         Flash::success('Zákazník uložen');
-        Url::redirect('/{tenant}/contacts/index');
+        Url::redirect('/{tenant}/contacts/index/#main');
     }
 
 
