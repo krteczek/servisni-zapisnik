@@ -16,14 +16,24 @@ $data = $view->data;
 
 
         <details>
-            <summary>Úkoly a zakázky, které lze fakturovat</summary>
+            <summary>Úkoly a zakázky, které lze fakturova/exportovat</summary>
             <ul>
+                <li>Musíte mít nastavenou metodu akturace (interní faktury/exporty pro externí účetnictví)</li>
                 <li>Úkol musí být dokončený</li>
                 <li>Úkol nesmí být již fakturován/exportován</li>
                 <li>Dokončený úkol již nelze upravovat</li>
             </ul>
         </details>
-
+<?php 
+/** Ochrana před nenastavením způsobu fakturace */
+if (!$data['isInternalBilling'] && !$data['isExternalAccounting']): ?>
+    <p>
+        Pro zobrazení úkolů a zakázek k fakturaci je potřeba
+        <a href="<?= Url::to('/{tenant}/settings/billing') ?>">
+        nastavit způsob fakturace
+        </a>.
+    </p>
+<?php else: ?>
         <table>
             <thead>
                 <tr>
@@ -44,13 +54,20 @@ $data = $view->data;
                     <td><?= formatCzDate($task['done_at']) ?></td>
                     <td><?= formatMinutes(((int) $task['total_minutes']) ?? 0) ?></td>
                     <td><?= e($task['total_kilometers']) ?></td>
-                    <td><a href="<?= Url::to('/{tenant}/billing/invoice/create/task/' . $task['id']) ?>"
-                            title="vytvořit fakturu z tohoto úkolu">Fakturovat</a></td>
+                    <td>
+                        <?php if ($data['isInternalBilling']): ?>
+                            <a href="<?= Url::to('/{tenant}/billing/invoice/create/task/' . $task['id']) ?>"
+                                title="vytvořit fakturu z tohoto úkolu">Fakturovat</a>
+                        <?php elseif ($data['isExternalAccounting']): ?>
+                            <a href="<?= Url::to('/{tenant}/billing/export/create/task/' . $task['id']) ?>"
+                                title="vytvořit export z tohoto úkolu">Exportovat</a>
+                        <?php endif; ?>
+                    </td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
-
+<?php endif; ?>
 
 
 </div><!-- .workbench-grid -->
