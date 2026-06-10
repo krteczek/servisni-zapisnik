@@ -6,6 +6,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\WorkbenchModel;
 use App\Core\ViewContext;
+use App\Services\Settings\SettingsService;
 /*
 use App\Models\TaskModel;
 use App\Models\TeamModel;
@@ -19,6 +20,7 @@ use App\Core\Roles;
 use App\Core\Config;
 use App\Core\LoggerHolder;
 use App\Core\Transaction;
+
 
 use Throwable;
 */
@@ -36,7 +38,10 @@ class WorkbenchController extends Controller
         [$data['myReadyToDoneOrders'], $data['myReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['myOrdersInProgress']);
         [$data['otherReadyToDoneOrders'], $data['otherReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['otherOrdersInProgress']);
       
+        
         $this->view->data = $data;
+        $this->view->data['isInternalBilling'] = (new SettingsService())->isInternalBilling();
+        $this->view->data['isExternalAccounting'] = (new SettingsService())->isExternalAccounting();
         return $this->render('workbench/index');
 
     }
