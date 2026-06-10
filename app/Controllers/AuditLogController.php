@@ -36,7 +36,7 @@ public function detail(int $id): string
 
     if (!$log) {
         Flash::error('Audit záznam nebyl nalezen');
-        Url::redirect('/admin/audit');
+        Url::redirect('/admin/audit/#main');
     }
 
     $this->view->logs = $log;

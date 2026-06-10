@@ -21,7 +21,7 @@ public function index(): string
     }
 public function root(): void
 {
-    \App\Core\Url::redirect('/dashboard');
+    \App\Core\Url::redirect('/dashboard/#main');
 }
 
 }

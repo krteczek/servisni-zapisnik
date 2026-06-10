@@ -159,7 +159,7 @@ public function storeTask(int $id): string
         Flash::success('Faktura byla vytvořena.');
 
         Url::redirect(
-            '/{tenant}/billing/invoice/' . $result['invoice_id']
+            '/{tenant}/billing/invoice/' . $result['invoice_id'] . '/#main'
         );
 
     } catch (Throwable $e) {

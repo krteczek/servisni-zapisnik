@@ -47,14 +47,14 @@ class AuthController extends Controller
 
     public function root(): string
     {
-    		$url = '/' . Auth::tenantSlug() . (Auth::check() ? '/tasks' : '/login');
+    		$url = '/' . Auth::tenantSlug() . (Auth::check() ? '/tasks/#main' : '/login/#main');
         Url::redirect($url);
     }
 
     public function loginForm(): string
     {
 			if (Auth::check()) {
-				Url::redirect('/' . Auth::tenantSlug() . '/tasks');
+				Url::redirect('/' . Auth::tenantSlug() . '/tasks/#main');
 			} 
 
         $this->view->csrf   = $this->csrfField();
@@ -154,7 +154,7 @@ public function login(): string
     );
     //$url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : (in_array($user['global_role'],['mistr', 'admin']) ? '/workbench/#main' : '/tasks/#main') );
 	$url = match ($user['global_role']) {
-		'root'  => '/' . Auth::tenantSlug() . '/system',
+		'root'  => '/' . Auth::tenantSlug() . '/system/#main',
 		'admin',
 		'mistr' => '/' . Auth::tenantSlug() . '/workbench/#main',
 		default => '/' . Auth::tenantSlug() . '/tasks/#main',
@@ -169,7 +169,7 @@ public function login(): string
         Flash::success('Byl jste odhlášen. Přijďte zas!');
 
         Auth::logout();
-        Url::redirect('/login');
+        Url::redirect('/login/#main');
     }
     
 private static function ensureGuestRedirect(): void
@@ -247,7 +247,7 @@ private function processToken(string $type, string $successMessage): string
         );
         if ($ok['ok'] === true) {
         	 Flash::success($successMessage);
-        	 Url::redirect('/login');
+        	 Url::redirect('/login/#main');
         }
 
      } catch (Throwable $e) {
@@ -303,7 +303,7 @@ public function forgotPasswordPost(): string
         'Pokud účet existuje, odeslali jsme vám pokyny pro změnu hesla.'
     );
 
-    Url::redirect('/login');
+    Url::redirect('/login/#main');
 }
 
     /* =========================
@@ -317,13 +317,13 @@ public function forgotPasswordPost(): string
 
         if (!$token) {
             Flash::error($errMsg);
-            Url::redirect('/login');
+            Url::redirect('/login/#main');
         }
         try {
 	        $row = (new TokenService())->validate($token, $type);
 	        if ($row['ok'] === false) {
 	            Flash::error($errMsg);
-	            Url::redirect('/login');
+	            Url::redirect('/login/#main');
 
 	        }
        
@@ -347,7 +347,7 @@ public function forgotPasswordPost(): string
         	
         	//var_dump($e);exit;
             Flash::error($errMsg);
-            Url::redirect('/login');
+            Url::redirect('/login/#main');
         }
     }
 
@@ -405,7 +405,7 @@ public function forgotPasswordPost(): string
 
 			if($ok) 
 			{
-				Url::redirect('/register/check-email');
+				Url::redirect('/register/check-email/#main');
 			}
 			$this->addError('global', 'Litujeme, nepodařilo se zaregistrovat Váš Email. Zkuste to prosím později. Děkujeme. Bó Team');
 			
@@ -431,7 +431,7 @@ public function forgotPasswordPost(): string
 		if(empty($token))
 		{
          Flash::error($errMsg);
-         Url::redirect('/login');
+         Url::redirect('/login/#main');
 
 		}
 		$data = [];
@@ -440,7 +440,7 @@ public function forgotPasswordPost(): string
 		$ok = (new TokenService())->validate($token,TokenType::COMPANY_CREATE);
      if ($ok['ok'] === false) {
          Flash::error($errMsg);
-         Url::redirect('/login');
+         Url::redirect('/login/#main');
 
      }
 
@@ -453,7 +453,7 @@ public function forgotPasswordPost(): string
 		    if(empty($data['token']) || !hash_equals($token, $data['token']))
 		    {
                 Flash::error($errMsg);
-                Url::redirect('/register');
+                Url::redirect('/register/#main');
 		    }
 		    
 
@@ -563,7 +563,7 @@ public function forgotPasswordPost(): string
 			
 				Flash::success('Vítej v aplikaci, ' . ($d['first_name'] ?? $d['email']) . ' 👋'
 				);
-				$url = '/' . Auth::tenantSlug() . '/tasks';
+				$url = '/' . Auth::tenantSlug() . '/tasks/#main';
 				Url::redirect($url);
 			} 
 			else 
