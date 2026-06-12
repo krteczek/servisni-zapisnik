@@ -29,7 +29,7 @@ $data = $view->data;
 if (!$data['isInternalBilling'] && !$data['isExternalAccounting']): ?>
     <p>
         Pro zobrazení úkolů a zakázek k fakturaci je potřeba
-        <a href="<?= Url::to('/{tenant}/settings/billing') ?>">
+        <a href="<?= Url::to('/{tenant}/settings/billing/#main') ?>">
         nastavit způsob fakturace
         </a>.
     </p>
@@ -56,10 +56,10 @@ if (!$data['isInternalBilling'] && !$data['isExternalAccounting']): ?>
                     <td><?= e($task['total_kilometers']) ?></td>
                     <td>
                         <?php if ($data['isInternalBilling']): ?>
-                            <a href="<?= Url::to('/{tenant}/billing/invoice/create/task/' . $task['id']) ?>"
+                            <a href="<?= Url::to('/{tenant}/billing/invoice/create/task/' . $task['id'] . '/#main') ?>"
                                 title="vytvořit fakturu z tohoto úkolu">Fakturovat</a>
                         <?php elseif ($data['isExternalAccounting']): ?>
-                            <a href="<?= Url::to('/{tenant}/billing/export/create/task/' . $task['id']) ?>"
+                            <a href="<?= Url::to('/{tenant}/billing/export/create/task/' . $task['id'] . '/#main') ?>"
                                 title="vytvořit export z tohoto úkolu">Exportovat</a>
                         <?php endif; ?>
                     </td>

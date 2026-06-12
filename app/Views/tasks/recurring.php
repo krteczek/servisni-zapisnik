@@ -122,7 +122,7 @@ if (!$type || !array_key_exists($type, $frequencies)) {
 				<?php if (((int)($data['active'] ?? 0) === 0) && !in_array($task['status'], ['done', 'cancelled'])): ?>
 
 					<form method="post"
-							action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring-done') ?>"
+							action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring-done/#main') ?>"
 							data-confirm="Opravdu chcete úkol uzavřít? Tato akce je nevratná..."
 					>
 					<?= Csrf::getField() ?>

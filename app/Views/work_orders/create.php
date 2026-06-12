@@ -312,7 +312,7 @@ $teams = $view->teams;
                 Zákazník je osoba nebo organizace, 
                 která požadovala zakázku. 
                 Zákazníky můžete přidávat v sekci 
-                <a href="<?= Url::to('/{tenant}/contacts') ?>" class="link">Kontakty</a>.
+                <a href="<?= Url::to('/{tenant}/contacts/#main') ?>" class="link">Kontakty</a>.
             </p>
             <h4>Cenové sazby</h4>
             <p>

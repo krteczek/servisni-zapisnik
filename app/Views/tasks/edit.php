@@ -106,7 +106,7 @@ $errors = $view->errors;
 										Tento úkol je opakovací. Kliknutím na tlačítko <strong>Nastavit opakování úkolu</strong>
 										se dostanete na stránku, kde můžete nastavit frekvenci opakování úkolu.
 									</label>
-							<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/recurringEdit') ?>" 
+							<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/recurringEdit/#main') ?>" 
 								class="btn btn-secondary">
 								
 								Nastavit opakování úkolu
