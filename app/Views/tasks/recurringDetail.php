@@ -119,23 +119,23 @@ $errors = $view->errors; // chyby validace
         <div class="form-actions">
 
             <a
-                href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring') ?>"
+                href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring/#main') ?>"
                 class="btn btn-primary"
             >
-                Upravit nastavení
+                Upravit generování šablony
             </a>
 
             <a
-                href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/detail') ?>"
+                href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>"
                 class="btn btn-secondary"
             >
-                Otevřít master úkol
+                Upravit podrobnosti úkolu
             </a>
 
             <?php if ($data['active'] ?? false): ?>
 
                 <a
-                    href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring') ?>"
+                    href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring/#main') ?>"
                     class="btn btn-warning"
                 >
                     Deaktivovat
@@ -144,7 +144,7 @@ $errors = $view->errors; // chyby validace
             <?php else: ?>
 
                 <a
-                    href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring') ?>"
+                    href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring/#main') ?>"
                     class="btn btn-success"
                 >
                     Aktivovat
@@ -156,7 +156,7 @@ $errors = $view->errors; // chyby validace
 
                 <form
                     method="post"
-                    action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring-done') ?>"
+                    action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring-done/#main') ?>"
                     data-confirm="Opravdu chcete ukončit tuto šablonu?"
                 >
                     <?= \App\Core\Csrf::getField() ?>

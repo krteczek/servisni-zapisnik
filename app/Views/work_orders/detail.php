@@ -378,7 +378,7 @@ $err = $view->errors;
                     <?php if ($task['is_generated_task'] === 0): ?>
                         
                         <form method="post"
-                            action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel') ?>"
+                            action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel/#main') ?>"
                             data-confirm="Opravdu chcete úkol stornovat?">
 
                             <?= Csrf::getField() ?>
@@ -392,9 +392,9 @@ $err = $view->errors;
                     <?php 
                     $url = '';
                         if ((int)$task['is_recurring_master'] === 1) {
-                            $url = '/{tenant}/tasks/' . $task['id'] . '/recurring-done';
+                            $url = '/{tenant}/tasks/' . $task['id'] . '/recurring-done/#main';
                         } else {
-                            $url = '/{tenant}/tasks/' . $task['id'] . '/done';
+                            $url = '/{tenant}/tasks/' . $task['id'] . '/done/#main';
                         }                        ?>
                 <form method="post"
                     action="<?= Url::to($url) ?>"
@@ -424,7 +424,7 @@ $err = $view->errors;
 <?php endif; ?>
 
 <p>
-    <a href="<?= Url::to('/{tenant}/work-orders') ?>/#main" class="btn btn-secondary">
+    <a href="<?= Url::to('/{tenant}/work-orders/#main') ?>" class="btn btn-secondary">
         ← Zpět na přehled
     </a>
 </p>
