@@ -11,7 +11,7 @@ use App\Services\Settings\BillingMode;
 class SettingsModel extends BaseModel
 {
     protected string $table = 'settings';
-    protected string $connection = 'work';
+    protected string $connection = 'admin';
     protected bool $tenantAware = true;
 
     private array $cache = [];

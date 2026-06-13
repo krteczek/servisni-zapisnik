@@ -6,7 +6,7 @@ namespace App\Models;
 final class RecurringTaskModel extends BaseModel
 {
     protected string $table = 'recurring_tasks';
-    protected string $connection = 'work';
+    protected string $connection = 'admin';
     protected bool $tenantAware = true;
 
 }

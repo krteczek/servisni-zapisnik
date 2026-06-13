@@ -18,7 +18,8 @@ final class AccessLogModel extends BaseModel
      * @var string
      */
     protected string $table = 'access_logs';
-
+    protected string $connection = 'admin';
+    protected bool $tenantAware = false;
     /**
      * Vytvoří nový záznam v access logu.
      * Automaticky doplní tenant ID a timestamp.

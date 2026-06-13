@@ -51,9 +51,9 @@ final class TaskRecurringController extends Controller
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');			
 		}
-        if (!$task['is_recurring'] || ((int) $task['is_recurring'] < 1)) {
+        if (!in_array($task['task_type'], ['recurring_master'])) {
             // úkol existuje ale není opakovaný
-            Flash::error('Tento úkol není nastaven jako opakovaný.');
+            Flash::error('Tento úkol není šablonou pro opakované úkoly.');
             Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');;
         }
         if (
