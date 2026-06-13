@@ -5,7 +5,7 @@ namespace App\Models;
 final class RecurringRunnerModel extends BaseModel
 {
     protected string $table = 'recurring_tasks';
-    protected string $connection = 'work';
+    protected string $connection = 'admin';
     protected bool $tenantAware = true;
 
 public function findDueTasks(int $companyId, int $limit): array

@@ -16,7 +16,7 @@ class Transaction
         $isOuter = false;
 
         try {
-            //$db->beginTransaction();
+            
             if (!$db->inTransaction()) {
                 $db->beginTransaction();
                 $isOuter = true;
@@ -30,18 +30,14 @@ class Transaction
                 throw new \RuntimeException('Transaction callback returned false');
             }
 
-            // $db->commit();
             if ($isOuter) {
                 $db->commit();
             }
-
+            
             return $result;
 
         } catch (Throwable $e) {
-            //if ($db->inTransaction()) {
-            //    $db->rollBack();
-            //}
-            if ($isOuter && $db->inTransaction()) {
+             if ($isOuter && $db->inTransaction()) {
                 $db->rollBack();
             }
 

@@ -96,7 +96,7 @@ $errors = $view->errors;
 
         			<div class="form-group"  class="card-section">
 						
-						<?php if ((int)($post['is_recurring'] ?? 0) !== 1): ?>
+						<?php if ((int)($post['is_recurring_master'] ?? 0) !== 1): ?>
 							<label>Z normálního úkolu nelze dodatečně udělat 
 								opakovaný úkol. 
 								Můžete však klonovat tento úkol a upravit jeho 

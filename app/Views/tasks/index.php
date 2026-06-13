@@ -22,12 +22,9 @@ $tasks = $view->data;
     <?php foreach ($tasks as $task): ?>
         <?php
         $recurringBadge = '';
-        if(!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
+        if(!empty($task['task_type']) && $task['task_type'] === 'recurring_instance') {
             $recurringBadge = '<span class="badge badge-recurring" title="Generovaný opakující se úkol">↻</span>';
-        } elseif (!empty($task['is_recurring']) && (int)$task['is_recurring'] === 1) {
-            $recurringBadge = '<span class="badge badge-recurring" title="Generátor opakujícího se úkolu"> 🔁</span>';
-            continue;
-        }
+        } 
         ?>
         <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
             <!-- HLAVIČKA KARTY -->
@@ -89,7 +86,7 @@ $tasks = $view->data;
             <!-- PATIČKA KARTY -->
             <div class="card-footer">
                 <div class="actions">
-                    <?php if ($task['is_recurring_master'] === 1 || $task['is_generated_task'] === 0): ?>
+                    <?php if ($task['task_type'] <> 'recurring_instance'): ?>
 
                         <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
                         class="btn btn-secondary" 

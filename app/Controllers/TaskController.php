@@ -111,13 +111,14 @@ private function saveTask(array $data, int $workOrderId): string
 
             // 🧱 vytvoření tasku
             $taskId = $taskModel->create([
-                'title'              => $post['title'],
-                'description'        => $post['description'],
-                'team_id'            => $teamId,
-                'work_order_id'      => $workOrderId,
-                'created_by_user_id' => Auth::id(),
-                'is_recurring'       => $post['is_recurring'],
-                'due_date'           => $post['due_date'],
+                'title'               => $post['title'],
+                'description'         => $post['description'],
+                'team_id'             => $teamId,
+                'work_order_id'       => $workOrderId,
+                'created_by_user_id'  => Auth::id(),
+                'is_recurring_master' => $post['is_recurring_master'],
+                'due_date'            => $post['due_date'],
+                'task_type'           => 'normal',
             ]);
 
             if (!$taskId) {
@@ -131,7 +132,7 @@ private function saveTask(array $data, int $workOrderId): string
             ]);
 
             // 🔁 recurring
-            if ((int) $post['is_recurring'] === 1) {
+            if ((int) $post['is_recurring_master'] === 1) {
 
                 $recurringModel = new RecurringTaskModel();
 
@@ -151,7 +152,8 @@ private function saveTask(array $data, int $workOrderId): string
                 }
 
                 $updated = $taskModel->update($taskId, [
-                    'recurring_task_id' => $recurringId
+                    'recurring_task_id' => $recurringId,
+                    'task_type'         => 'recurring_master',
                 ]);
 
                 if (!$updated) {
@@ -253,11 +255,13 @@ private function saveTask(array $data, int $workOrderId): string
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
-        if (!empty($task['recurring_task_id']) && $task['is_recurring'] != 1) {
+        if (!empty($task['recurring_task_id']) && $task['is_recurring_master'] != 1) {
             Flash::info('Automaticky vygenerovaný úkol nelze upravovat.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
     }
+
+
     private function ensureTaskClosable(array $task, string $action = 'done'):void
     {
         $label = $action === 'done' ? 'uzavřít' : 'zrušit';
@@ -276,7 +280,7 @@ private function saveTask(array $data, int $workOrderId): string
         
         
 
-        if (!empty($task['is_recurring']) && $task['is_recurring'] == 1) {
+        if (!empty($task['task_type']) && $task['task_type'] === 'recurring_master') {
 
             Flash::info(
                 'Opakující se master úkol nelze tímto způsobem uzavřít ani zrušit. '
@@ -354,7 +358,8 @@ private function saveTask(array $data, int $workOrderId): string
             'title'              => $post['title'],
             'description'        => $post['description'],
             'team_id'            => $post['team_id'],
-            'due_date'           => $post['due_date'], 
+            'due_date'           => $post['due_date'],
+            'is_recurring_master' => $post['is_recurring_master'], 
         ]);
         
         if(!$row)
@@ -424,7 +429,7 @@ private function saveTask(array $data, int $workOrderId): string
     {
         $title           = trim($data['title'] ?? '');
         $description     = trim($data['description'] ?? '');
-        $is_recurring    = (int) ($data['is_recurring'] ?? 0);
+        $is_recurring_master    = (int) ($data['is_recurring_master'] ?? 0);
         $team_id         = (int) ($data['team_id'] ?? 0);
         $dueDate         = $this->validateDate($data['due_date'] ?? null);
         //print_r($data);
@@ -448,7 +453,7 @@ private function saveTask(array $data, int $workOrderId): string
         return [
             'title' => $title,
             'description' => $description,
-            'is_recurring' => $is_recurring,
+            'is_recurring_master' => $is_recurring_master,
             'team_id' => $team_id,
             'due_date' => $dueDate,
         ];

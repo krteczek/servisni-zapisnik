@@ -9,7 +9,7 @@ use App\Core\Auth;
 class WorkOrderModel extends BaseModel
 {
     protected string $table = 'work_orders';
-    protected string $connection = 'work';
+    protected string $connection = 'admin';
 
     /* ==========================================================
      * TRANSACTIONS

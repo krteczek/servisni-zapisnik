@@ -9,7 +9,7 @@ use App\Core\Auth;
 class WorkOrderSequencesModel extends BaseModel
 {
     protected string $table = 'work_order_sequences';
-    protected string $connection = 'work';
+    protected string $connection = 'admin';
 
  public function next(int $year, int $companyId = 0): int
 {

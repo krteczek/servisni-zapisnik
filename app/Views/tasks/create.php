@@ -81,9 +81,9 @@ $errors    = $view->errors;
         <div class="form-group">
           <label class="checkbox" style="display:flex; align-items:center; gap:8px;">
               <input type="checkbox"
-                     name="is_recurring"
+                     name="is_recurring_master"
                      value="1"
-                     <?= !empty($post['is_recurring']) ? 'checked' : '' ?>
+                     <?= !empty($post['is_recurring_master']) ? 'checked' : '' ?>
                      style="width:auto;">
               <span>Opakující se úkol</span>
           </label>

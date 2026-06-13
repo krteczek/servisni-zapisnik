@@ -257,9 +257,9 @@ $err = $view->errors;
 
             <div class="card-header">
 
-                        <?php if ((int)$task['is_recurring_master'] === 1): ?>
+                        <?php if ($task['task_type'] === 'recurring_master'): ?>
                             <span class="badge badge-recurring" title="opakující se, master">🔁</span>
-                        <?php elseif ((int)$task['is_generated_task'] === 1): ?>
+                        <?php elseif ($task['task_type'] === 'generated'): ?>
                             <span class="badge badge-recurring" title="generovaný úkol">↻</span>
                         <?php endif; ?>
 
@@ -320,7 +320,7 @@ $err = $view->errors;
                     <span class="meta-label">Reporty:</span>
                     <span class="meta-value"><?= (int)($task['stats']['assignments_count'] ?? 0) ?></span>
                 </div>
-                <?php if ((int)$task['is_recurring_master'] === 1): ?>
+                <?php if ($task['task_type'] === 'recurring_master'): ?>
                     <div class="card-section">
                         <span class="section-label">Nastavení generování opakování</span>
 
@@ -359,7 +359,7 @@ $err = $view->errors;
                 <?php endif; ?>
 
                 <?php if ($canEdit) : ?>
-                    <?php if ((int)$task['is_recurring_master'] === 1 || $task['is_generated_task'] === 0): ?>
+                    <?php if ($task['task_type'] <> 'recurring_instance'): ?>
 
                         <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
                         class="btn btn-secondary" 
@@ -391,7 +391,7 @@ $err = $view->errors;
                 <?php if ($task['can_close'] && $task['status'] !== 'done') : ?>
                     <?php 
                     $url = '';
-                        if ((int)$task['is_recurring_master'] === 1) {
+                        if ((int)$task['task_type'] === 'recurring_master') {
                             $url = '/{tenant}/tasks/' . $task['id'] . '/recurring-done/#main';
                         } else {
                             $url = '/{tenant}/tasks/' . $task['id'] . '/done/#main';
@@ -407,7 +407,7 @@ $err = $view->errors;
                 </form>
                 <?php endif; ?>
 
-                <?php if (((int)$task['is_recurring_master'] === 1) 
+                <?php if (((int)$task['task_type'] === 'recurring_master') 
                             && !$canEdit
                             && in_array($task['status'], ['done', 'cancelled'])): ?>
                         <p>Tato šablona pro generování opakovaných úkolů již nemůže 

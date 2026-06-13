@@ -9,7 +9,7 @@ use App\Core\Auth;
 class WorkbenchModel extends BaseModel
 {
     protected string $table = 'tasks';
-    protected string $connection = 'work';
+    protected string $connection = 'admin';
     protected bool $tenantAware = true;
     
     public function forIndex(): array

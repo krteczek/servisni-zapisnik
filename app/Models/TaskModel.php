@@ -161,78 +161,68 @@ public function forIndex(?int $filterUserId = null): array
     ];
 
 
-    $sql = 
-        "SELECT
-            t.*,
+$sql =
+    "SELECT
+        t.*,
 
+        -- zakázka
+        w.title    AS work_order_title,
+        w.status   AS work_order_status,
+        w.priority AS work_order_priority,
+
+        -- tým
+        tm.name  AS team_name,
+        tm.color AS team_color,
+
+        -- statistiky
+        COALESCE(r.reports_count, 0) AS reports_count,
+        COALESCE(r.total_minutes, 0) AS total_minutes,
+        COALESCE(r.total_km, 0)      AS total_km,
+
+        -- oprávnění na report
         CASE
-            WHEN rt.task_id IS NOT NULL THEN 1
+            WHEN t.status = 'open'
+                 AND EXISTS (
+                    SELECT 1
+                    FROM team_memberships tmu2
+                    WHERE tmu2.team_id = t.team_id
+                      AND tmu2.user_id = :current_user_id_perm
+                      AND tmu2.company_id = :company_id_perm
+                      AND (
+                            tmu2.valid_to IS NULL
+                            OR tmu2.valid_to >= CURDATE()
+                          )
+                 )
+            THEN 1
             ELSE 0
-        END AS is_recurring_master,
+        END AS can_add_report
 
-        CASE
-            WHEN t.recurring_task_id IS NOT NULL THEN 1
-            ELSE 0
-        END AS is_generated_task,
+    FROM tasks t
 
-            -- zakázka
-            w.title    AS work_order_title,
-            w.status   AS work_order_status,
-            w.priority AS work_order_priority,
+    LEFT JOIN work_orders w
+        ON w.id = t.work_order_id
+        AND w.company_id = :company_id_w
 
-            -- tým
-            tm.name  AS team_name,
-            tm.color AS team_color,
+    LEFT JOIN teams tm
+        ON tm.id = t.team_id
+        AND tm.company_id = :company_id_tm
 
-            -- statistiky
-            COALESCE(r.reports_count, 0) AS reports_count,
-            COALESCE(r.total_minutes, 0) AS total_minutes,
-            COALESCE(r.total_km, 0)      AS total_km,
+    LEFT JOIN (
+        SELECT
+            ta.task_id,
+            COUNT(*) AS reports_count,
+            COALESCE(SUM(ta.kilometers), 0)    AS total_km,
+            COALESCE(SUM(ta.minutes_spent), 0) AS total_minutes
+        FROM task_assignments ta
+        WHERE ta.company_id = :company_id_ta
+        GROUP BY ta.task_id
+    ) r ON r.task_id = t.id
 
-            -- oprávnění na report
-            CASE
-                WHEN t.status = 'open'
-                     AND EXISTS (
-                        SELECT 1
-                        FROM team_memberships tmu2
-                        WHERE tmu2.team_id = t.team_id
-                          AND tmu2.user_id = :current_user_id_perm
-                          AND tmu2.company_id = :company_id_perm
-                          AND (tmu2.valid_to IS NULL OR tmu2.valid_to >= CURDATE())
-                     )
-                THEN 1
-                ELSE 0
-            END AS can_add_report
-
-        FROM tasks t
-
-        LEFT JOIN recurring_tasks rt
-            ON rt.task_id = t.id
-            AND rt.company_id = t.company_id
-
-        LEFT JOIN work_orders w
-            ON w.id = t.work_order_id
-            AND w.company_id = :company_id_w
-
-        LEFT JOIN teams tm
-            ON tm.id = t.team_id
-            AND tm.company_id = :company_id_tm
-
-        LEFT JOIN (
-            SELECT
-                ta.task_id,
-                COUNT(*) AS reports_count,
-                COALESCE(SUM(ta.kilometers), 0)     AS total_km,
-                COALESCE(SUM(ta.minutes_spent), 0)  AS total_minutes
-            FROM task_assignments ta
-            WHERE ta.company_id = :company_id_ta
-            GROUP BY ta.task_id
-        ) r ON r.task_id = t.id
-
-        WHERE
-            t.company_id = :company_id_t
-            AND t.status = :status
-    ";
+    WHERE
+        t.company_id = :company_id_t
+        AND t.status = :status
+        AND t.task_type <> 'recurring_master'
+";
 
     /*
      * MANAGEMENT filtr (jen filtruje, neuděluje oprávnění)

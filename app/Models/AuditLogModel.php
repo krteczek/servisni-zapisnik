@@ -14,7 +14,7 @@ final class AuditLogModel extends BaseModel
 {
     protected string $table = 'audit_logs';
     protected string $connection = 'admin';
-
+    
     /**
      * ❗ DŮLEŽITÉ
      * Audit log není tenant-aware → jinak by padal mimo Auth kontext

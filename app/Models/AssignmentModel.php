@@ -9,7 +9,7 @@ use App\Core\Transaction;
 final class AssignmentModel extends BaseModel
 {
     protected string $table = 'task_assignments';
-    protected string $connection = 'work';
+    protected string $connection = 'admin';
     protected bool $tenantAware = true;
 
     /**

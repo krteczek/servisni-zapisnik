@@ -536,8 +536,14 @@ protected function diff(array $before, array $after): array
         if ($this->tenantAware) {
             $sql .= " AND {$this->tenantColumn} = :{$this->tenantColumn}";
         }
-
+dc($sql);
         $stmt = $this->db()->prepare($sql);
+dc([
+    'sql' => $sql,
+    'params' => $params,
+    'inTransaction' => $this->db()->inTransaction(),
+    'stmt' => $stmt,
+]);        
         $ok   = $stmt->execute($params);
 
         if ($ok && $this->shouldAudit()) {
