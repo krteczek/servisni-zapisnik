@@ -205,15 +205,6 @@ abstract class BaseModel
         return $where;
     }
 
-    protected function applyTenantOLD(array $where): array
-    {
-        if ($this->tenantAware) {
-            $where[$this->tenantColumn] = $this->tenantId();
-        }
-
-        return $where;
-    }
-
 
 public function begin()
 {
@@ -226,6 +217,10 @@ public function begin()
 public function commit()
 {
     $this->transactionLevel--;
+
+    if ($this->transactionLevel <= 0) {
+        throw new LogicException('No active transaction.');
+    }
 
     if ($this->transactionLevel === 0) {
         $this->db()->commit();
@@ -388,9 +383,8 @@ protected function diff(array $before, array $after): array
         $sql = "SELECT * FROM {$this->tableName}
                 WHERE " . implode(' AND ', $parts) . "
                 LIMIT 1";
-//var_dump($sql);
-			$ok = $this->fetchOne($sql, $where);
-//var_dump($ok);
+
+		$ok = $this->fetchOne($sql, $where);
 			
         return $ok;
     }
@@ -436,30 +430,33 @@ protected function diff(array $before, array $after): array
      */
     protected function insertRaw(array $data): int
     {
-      $lastId = null;
+        $lastId = 0;
+        $sql = null;
 
     	try
     	{
-        $cols   = array_keys($data);
-        $fields = implode(', ', $cols);
-        $values = ':' . implode(', :', $cols);
+            $cols   = array_keys($data);
+            $fields = implode(', ', $cols);
+            $values = ':' . implode(', :', $cols);
 
-        $stmt = $this->db()->prepare(
-            "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})"
-        );
-        //var_dump($stmt);exit;
-        $stmt->execute($data);
 
-        $lastId = (int) $this->db()->lastInsertId();
-      } catch (Throwable $e) {
+            $sql = "INSERT INTO {$this->tableName} ({$fields}) VALUES ({$values})";
+            $stmt = $this->db()->prepare($sql);
+
+            $stmt->execute($data);
+
+            $lastId = (int) $this->db()->lastInsertId();
+        } catch (Throwable $e) {
 		    LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
 		                'message' => $e->getMessage(),
 		                'file'    => $e->getFile(),
 		                'line'    => $e->getLine(),
 		                'trace'   => $e->getTraceAsString(),
 		                'data'    => json_encode($data),
+                        'sql'     => $sql,
 
 		    ]);
+            throw $e; // 🔥 KRITICKÉ
 		}
 
         if ($this->shouldAudit()) {
@@ -474,13 +471,14 @@ protected function diff(array $before, array $after): array
             } catch (Throwable $e) {
                 // TODO: [OBSERVABILITY] Lepší logování selhání auditu
                 //error_log('Audit insert failed: ' . $lastId);
- 		          LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
+ 		          LoggerHolder::get()->error('BaseModel.auditInsertRaw failed', [
 		                'message' => $e->getMessage(),
 		                'file'    => $e->getFile(),
 		                'line'    => $e->getLine(),
 		                'trace'   => $e->getTraceAsString(),
 		                'data'    => json_encode($data),
 
+                        
 		    ]);
            }
         }
@@ -513,39 +511,51 @@ protected function diff(array $before, array $after): array
             return false;
         }
 
-        $set = [];
-        foreach ($data as $key => $val) {
-            $set[] = "{$key} = :{$key}";
+        $ok = null;
+        $sql = null;
+        try {
+            $set = [];
+            foreach ($data as $key => $val) {
+                $set[] = "{$key} = :{$key}";
+            }
+
+            $params = $data;
+            $params['id'] = $id;
+
+            if ($this->tenantAware) {
+                $params[$this->tenantColumn] = $this->tenantId();
+            }
+
+            if (isset($data[$this->tenantColumn])) {
+                throw new LogicException("Cannot modify tenant column.");
+            }
+
+            $sql = "UPDATE {$this->tableName}
+                    SET " . implode(', ', $set) . "
+                    WHERE id = :id";
+
+            if ($this->tenantAware) {
+                $sql .= " AND {$this->tenantColumn} = :{$this->tenantColumn}";
+            }
+
+            $stmt = $this->db()->prepare($sql);
+        
+            $ok   = $stmt->execute($params);
+
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error('BaseModel.update failed', [
+                        'message' => $e->getMessage(),
+                        'file'    => $e->getFile(),
+                        'line'    => $e->getLine(),
+                        'trace'   => $e->getTraceAsString(),
+                        'data'    => json_encode($data),
+                        'id'      => $id,
+                        'sql'     => $sql,
+                        'entity'  => $this->table,
+
+            ]);
+            throw $e; // 🔥 KRITICKÉ
         }
-
-        $params = $data;
-        $params['id'] = $id;
-
-        if ($this->tenantAware) {
-            $params[$this->tenantColumn] = $this->tenantId();
-        }
-
-        if (isset($data[$this->tenantColumn])) {
-            throw new LogicException("Cannot modify tenant column.");
-        }
-
-        $sql = "UPDATE {$this->tableName}
-                SET " . implode(', ', $set) . "
-                WHERE id = :id";
-
-        if ($this->tenantAware) {
-            $sql .= " AND {$this->tenantColumn} = :{$this->tenantColumn}";
-        }
-dc($sql);
-        $stmt = $this->db()->prepare($sql);
-dc([
-    'sql' => $sql,
-    'params' => $params,
-    'inTransaction' => $this->db()->inTransaction(),
-    'stmt' => $stmt,
-]);        
-        $ok   = $stmt->execute($params);
-
         if ($ok && $this->shouldAudit()) {
             try {
                 $diff = $this->diff($before, $data);
@@ -559,13 +569,15 @@ dc([
                     );
                 }
             } catch (Throwable $e) {
-                //error_log('Audit update failed: ' . $id);
- 		          LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
+                
+ 		          LoggerHolder::get()->error('BaseModel.auditUpdate failed', [
 		                'message' => $e->getMessage(),
 		                'file'    => $e->getFile(),
 		                'line'    => $e->getLine(),
 		                'trace'   => $e->getTraceAsString(),
 		                'data'    => json_encode($data),
+                        'entity' => $this->table,
+                        'entity_id' => $id,
 
 		    ]);
             }
@@ -587,8 +599,6 @@ dc([
      */
     protected function fetchAll(string $sql, array $params = []): array
     {
-	//var_dump($sql);
-	//var_dump($params);exit;
 
         $stmt = $this->db()->prepare($sql);
         $stmt->execute($params);
@@ -683,34 +693,97 @@ dc([
             return false;
         }
 
-        $where = $this->applyTenant([$column => $value]);
-
-        $set = [];
-        foreach ($data as $key => $val) {
-            $set[] = "{$key} = :set_{$key}";
+        if (isset($data['id'])) {
+            throw new LogicException('Cannot modify primary key.');
         }
 
-        $params = [];
-        foreach ($data as $key => $val) {
-            $params["set_{$key}"] = $val;
+        if (isset($data[$this->tenantColumn])) {
+            throw new LogicException("Cannot modify tenant column.");
         }
 
-        foreach ($where as $key => $val) {
-            $params[$key] = $val;
+        $sql = null;
+        $ok = null;
+        $before = $this->firstWhere($column, $value);
+
+        if (!$before) {
+            return false;
         }
 
-        $parts = [];
-        foreach ($where as $col => $val) {
-            $parts[] = "{$col} = :{$col}";
+        try {
+
+            $where = $this->applyTenant([$column => $value]);
+
+            $set = [];
+            foreach ($data as $key => $val) {
+                $set[] = "{$key} = :set_{$key}";
+            }
+
+            $params = [];
+            foreach ($data as $key => $val) {
+                $params["set_{$key}"] = $val;
+            }
+
+            foreach ($where as $key => $val) {
+                $params[$key] = $val;
+            }
+
+            $parts = [];
+            foreach ($where as $col => $val) {
+                $parts[] = "{$col} = :{$col}";
+            }
+
+            $sql = "UPDATE {$this->tableName}
+                    SET " . implode(', ', $set) . "
+                    WHERE " . implode(' AND ', $parts);
+
+            $stmt = $this->db()->prepare($sql);
+
+           
+            $ok = $stmt->execute($params);
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error('BaseModel.updateWhere failed', [
+                        'message' => $e->getMessage(),
+                        'file'    => $e->getFile(),
+                        'line'    => $e->getLine(),
+                        'trace'   => $e->getTraceAsString(),
+                        'data'    => json_encode($data),
+                        'value'   => $value,
+                        'column'  => $column,
+                        'sql'     => $sql,
+                        'entity'  => $this->table,
+
+            ]);
+            throw $e;
         }
 
-        $sql = "UPDATE {$this->tableName}
-                SET " . implode(', ', $set) . "
-                WHERE " . implode(' AND ', $parts);
+        if ($ok && $this->shouldAudit()) {
+           try {
+                $diff = $this->diff($before, $data);
 
-        $stmt = $this->db()->prepare($sql);
+                if ($diff !== []) {
+                    AuditLogCore::log(
+                        entity: $this->table,
+                        entityId: (int)$before['id'],
+                        action: 'update',
+                        diff: $diff
+                    );
+                }
+            } catch (Throwable $e) {
+                
+ 		          LoggerHolder::get()->error('BaseModel.auditUpdate failed', [
+		                'message' => $e->getMessage(),
+		                'file'    => $e->getFile(),
+		                'line'    => $e->getLine(),
+		                'trace'   => $e->getTraceAsString(),
+		                'data'    => json_encode($data),
+                        'entity' => $this->table,
+                        
 
-        return $stmt->execute($params);
+		    ]);
+            }
+        }
+        return $ok;
+
     }
 
     protected function isTenantAware(): bool

@@ -130,8 +130,9 @@ private function openTasksForMyTeams(array $teamIds): array
             t.team_id,
             t.work_order_id,
             t.created_at,
-            t.is_recurring,
+            t.is_recurring_master,
             t.recurring_task_id,
+            t.task_type,
 
             EXISTS (
                 SELECT 1
@@ -194,8 +195,9 @@ private function openTasksForOtherTeams(array $teamIds): array
             t.team_id,
             t.work_order_id,
             t.created_at,
-            t.is_recurring,
+            t.is_recurring_master,
             t.recurring_task_id,
+            t.task_type,
 
             EXISTS (
                 SELECT 1
@@ -270,6 +272,9 @@ private function openTasksForOtherTeams(array $teamIds): array
                 t.team_id,
                 t.work_order_id,
                 t.status,
+                t.task_type,
+                t.is_recurring_master,
+                t.recurring_task_id,
 
                 COUNT(ta.id) AS assignments_count
 
@@ -305,6 +310,9 @@ private function openTasksForOtherTeams(array $teamIds): array
                 t.team_id,
                 t.work_order_id,
                 t.status,
+                t.task_type,
+                t.is_recurring_master,
+                t.recurring_task_id,
 
                 COUNT(ta.id) AS assignments_count
 
@@ -352,6 +360,9 @@ private function myReadyToCancelTasks(array $teamIds): array
             t.team_id,
             t.work_order_id,
             t.status,
+            t.task_type,
+            t.is_recurring_master,
+            t.recurring_task_id,
 
             COUNT(ta.id) AS assignments_count
 
@@ -365,8 +376,9 @@ private function myReadyToCancelTasks(array $teamIds): array
             t.company_id = ?
             AND t.status = 'open'
             AND (
-                    t.is_recurring IS NULL
-                    OR t.is_recurring = 0
+                    t.is_recurring_master IS NULL
+                    OR t.is_recurring_master = 0
+                    AND t.task_type <> 'recurring'
                 )
         ";
 
@@ -485,8 +497,8 @@ private function otherOrdersInProgress(): array
 
         $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
 
-        $sql = "
-            SELECT *
+        $sql = 
+            "SELECT *
             FROM tasks
             WHERE company_id = ?
             AND work_order_id IN ($placeholders)
@@ -571,7 +583,7 @@ LEFT JOIN (
 WHERE t.company_id = ?
   AND t.status = 'done'
   AND t.billing_export_id IS NULL
-  AND (t.is_recurring IS NULL OR t.is_recurring = 0)
+  AND (t.is_recurring_master IS NULL OR t.is_recurring_master = 0)
 
   AND t.team_id IN ($placeholders)
 
