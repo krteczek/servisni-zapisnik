@@ -26,7 +26,28 @@ public function findDueTasks(int $companyId, int $limit): array
         'company_id' => $companyId
     ]);
 }
-    public function alreadyGeneratedToday(int $rtId, int $companyId): bool
+
+
+    public function taskAlreadyExistsForDate(
+        int $rtId,
+        int $companyId,
+        string $dueDate
+    ): bool {
+        return (bool) $this->fetchOne("
+            SELECT id
+            FROM tasks
+            WHERE recurring_task_id = :rt_id
+            AND due_date = :due_date
+            AND company_id = :company_id
+            LIMIT 1
+        ", [
+            'rt_id'      => $rtId,
+            'due_date'   => $dueDate,
+            'company_id' => $companyId,
+        ]);
+    }
+
+    public function alreadyGeneratedTodayOLD(int $rtId, int $companyId): bool
     {
         return (bool) $this->fetchOne("
             SELECT id

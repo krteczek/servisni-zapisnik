@@ -27,15 +27,6 @@ final class TaskRecurringController extends Controller
         parent::__construct($view);
         $this->model = new RecurringTaskModel();
     }
-	private function getTaskOrRedirect(int $taskId): array
-	{
-		$task = (new TaskModel())->find((int) $taskId);
-		if(!$task) {
-            Flash::error('Úkol neexistuje');
-            Url::redirect('/{tenant}/tasks/#main');			
-		}
-		return $task;	
-	}
 
     private function getTaskRecurringOrRedirect(int $taskId): array
 	{
