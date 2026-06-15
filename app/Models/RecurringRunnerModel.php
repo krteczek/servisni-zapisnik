@@ -10,8 +10,8 @@ final class RecurringRunnerModel extends BaseModel
 
 public function findDueTasks(int $companyId, int $limit): array
 {
-    return $this->fetchAll("
-        SELECT *
+    return $this->fetchAll(
+        "SELECT *
         FROM {$this->tableName}
         WHERE active = 1
           AND next_due_date <= CURDATE()
@@ -33,35 +33,21 @@ public function findDueTasks(int $companyId, int $limit): array
         int $companyId,
         string $dueDate
     ): bool {
-        return (bool) $this->fetchOne("
-            SELECT id
+        $sql = 
+            "SELECT id
             FROM tasks
             WHERE recurring_task_id = :rt_id
             AND due_date = :due_date
             AND company_id = :company_id
             LIMIT 1
-        ", [
+        ";
+        return (bool) $this->fetchOne($sql, [
             'rt_id'      => $rtId,
             'due_date'   => $dueDate,
             'company_id' => $companyId,
         ]);
     }
 
-    public function alreadyGeneratedTodayOLD(int $rtId, int $companyId): bool
-    {
-        return (bool) $this->fetchOne("
-            SELECT id
-            FROM tasks
-            WHERE recurring_task_id = :rt_id
-              AND created_at >= CURDATE()
-              AND created_at < CURDATE() + INTERVAL 1 DAY
-              AND company_id = :company_id
-            LIMIT 1
-        ", [
-            'rt_id' => $rtId,
-            'company_id' => $companyId
-        ]);
-    }
 
     public function updateNextDueDate(int $id, int $companyId, string $next): void
     {
