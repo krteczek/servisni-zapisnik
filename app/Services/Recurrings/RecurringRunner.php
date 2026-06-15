@@ -114,10 +114,6 @@ final class RecurringRunner
         }
         $pocet = 0;
         foreach ($rows as $company) {
-            LoggerHolder::get()->info('RecurringRunner::run() processing recurring rate: ' . ++$pocet, [
-                'company' => $company['name'],
-                
-            ]);           
             self::processCompany($company);
             $lastCompanyId = (int) $company['id'];
         }
@@ -151,11 +147,10 @@ private static function processCompany(array $company): void
         }
 
         foreach ($recurrings as $rt) {
-            LoggerHolder::get()->info('RecurringRunner: processing recurring', [
-                'rt_id' => $rt['id'],
-                'task_id' => $rt['task_id'],
-                'next_due_date' => $rt['next_due_date'],
-            ]);
+LoggerHolder::get()->info('RT START', [
+    'rt_id' => $rt['id'],
+    'next_due_date' => $rt['next_due_date'],
+]);
             // =========================
             // 1) LOCK
             // =========================
@@ -163,11 +158,6 @@ private static function processCompany(array $company): void
                 (int)$rt['id'],
                 (int)$company['id']
             )) {
-                LoggerHolder::get()->info('RecurringRunner: processing continue', [
-                    'rt_id' => $rt['id'],
-                    'task_id' => $rt['task_id'],
-                    'next_due_date' => $rt['next_due_date'],
-                ]);
                 continue;
             }
 
@@ -177,18 +167,10 @@ private static function processCompany(array $company): void
             // 3) SOURCE TASK
             // =========================
             $source = $taskModel->find((int)$rt['task_id']);
-                LoggerHolder::get()->info('RecurringRunner: source loaded', [
-                    'rt_id' => $rt['id'],
-                    'source_found' => $source ? true : false,
-                ]);
-            if (!$source) {
+             if (!$source) {
                 LoggerHolder::get()->warning('RecurringRunner: missing source task', [
                     'rt_id'   => $rt['id'],
                     'task_id' => $rt['task_id'],
-                ]);
-                LoggerHolder::get()->info('RecurringRunner: clearing processing', [
-                    'rt_id' => $rt['id'],
-                    'company_id' => $company['id'],
                 ]);
                 $recurringModel->clearProcessing((int)$rt['id'], (int)$company['id']);
                 continue;
@@ -204,7 +186,10 @@ private static function processCompany(array $company): void
                 $iterations = 0;
 
                 while ($rt['next_due_date'] <= $date){
-
+LoggerHolder::get()->info('RT LOOP', [
+    'rt_id' => $rt['id'],
+    'due' => $rt['next_due_date'],
+]);
                     $iterations++;
                     if ($iterations > 100) {
                         throw new \RuntimeException(sprintf(
@@ -222,10 +207,6 @@ private static function processCompany(array $company): void
                         (int)$company['id'],
                         $rt['next_due_date']
                     )) {
-LoggerHolder::get()->info('RecurringRunner create task', [
-    'rt_id' => $rt['id'],
-    'due_date' => $rt['next_due_date'],
-]);
                         $taskModel->create([
                             'team_id'            => $source['team_id'],
                             'work_order_id'      => $source['work_order_id'],
@@ -243,7 +224,7 @@ LoggerHolder::get()->info('RecurringRunner create task', [
                         $rt['frequency_type'],
                         (int)$rt['frequency_value']
                     );
-                }
+                } //tohle je podezřele ukončení loopu
 
                 $recurringModel->updateNextDueDate(
                     (int)$rt['id'],
