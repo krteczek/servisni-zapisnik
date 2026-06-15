@@ -259,7 +259,7 @@ $err = $view->errors;
 
                         <?php if ($task['task_type'] === 'recurring_master'): ?>
                             <span class="badge badge-recurring" title="opakující se, master">🔁</span>
-                        <?php elseif ($task['task_type'] === 'generated'): ?>
+                        <?php elseif ($task['task_type'] === 'recurring_instance'): ?>
                             <span class="badge badge-recurring" title="generovaný úkol">↻</span>
                         <?php endif; ?>
 
