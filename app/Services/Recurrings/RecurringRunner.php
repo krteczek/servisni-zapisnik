@@ -133,7 +133,11 @@ private static function processCompany(array $company): void
         }
 
         foreach ($recurrings as $rt) {
-
+LoggerHolder::get()->info('RecurringRunner: processing recurring', [
+    'rt_id' => $rt['id'],
+    'task_id' => $rt['task_id'],
+    'next_due_date' => $rt['next_due_date'],
+]);
             // =========================
             // 1) LOCK
             // =========================
@@ -141,6 +145,11 @@ private static function processCompany(array $company): void
                 (int)$rt['id'],
                 (int)$company['id']
             )) {
+LoggerHolder::get()->info('RecurringRunner: processing continue', [
+    'rt_id' => $rt['id'],
+    'task_id' => $rt['task_id'],
+    'next_due_date' => $rt['next_due_date'],
+]);
                 continue;
             }
 
@@ -166,8 +175,22 @@ private static function processCompany(array $company): void
             $pdo->beginTransaction();
 
             try {
+                $date = date('Y-m-d');
+                $iterations = 0;
 
-                while ($rt['next_due_date'] <= date('Y-m-d')) {
+                while ($rt['next_due_date'] <= $date){
+
+                    $iterations++;
+                    if ($iterations > 100) {
+                        throw new \RuntimeException(sprintf(
+                            'Recurring task %d exceeded 100 iterations. next_due_date=%s, today=%s, frequency=%s/%d',
+                            $rt['id'],
+                            $rt['next_due_date'],
+                            $date,
+                            $rt['frequency_type'],
+                            $rt['frequency_value']
+                        ));
+                    }
 
                     if (!$recurringModel->taskAlreadyExistsForDate(
                         (int)$rt['id'],
