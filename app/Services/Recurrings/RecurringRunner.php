@@ -112,8 +112,12 @@ final class RecurringRunner
 
             return;
         }
-
+        $pocet = 0;
         foreach ($rows as $company) {
+            LoggerHolder::get()->info('RecurringRunner::run() processing recurring rate: ' . ++$pocet, [
+                'company' => $company['name'],
+                
+            ]);           
             self::processCompany($company);
             $lastCompanyId = (int) $company['id'];
         }
@@ -147,11 +151,11 @@ private static function processCompany(array $company): void
         }
 
         foreach ($recurrings as $rt) {
-LoggerHolder::get()->info('RecurringRunner: processing recurring', [
-    'rt_id' => $rt['id'],
-    'task_id' => $rt['task_id'],
-    'next_due_date' => $rt['next_due_date'],
-]);
+            LoggerHolder::get()->info('RecurringRunner: processing recurring', [
+                'rt_id' => $rt['id'],
+                'task_id' => $rt['task_id'],
+                'next_due_date' => $rt['next_due_date'],
+            ]);
             // =========================
             // 1) LOCK
             // =========================
@@ -159,11 +163,11 @@ LoggerHolder::get()->info('RecurringRunner: processing recurring', [
                 (int)$rt['id'],
                 (int)$company['id']
             )) {
-LoggerHolder::get()->info('RecurringRunner: processing continue', [
-    'rt_id' => $rt['id'],
-    'task_id' => $rt['task_id'],
-    'next_due_date' => $rt['next_due_date'],
-]);
+                LoggerHolder::get()->info('RecurringRunner: processing continue', [
+                    'rt_id' => $rt['id'],
+                    'task_id' => $rt['task_id'],
+                    'next_due_date' => $rt['next_due_date'],
+                ]);
                 continue;
             }
 
@@ -173,14 +177,18 @@ LoggerHolder::get()->info('RecurringRunner: processing continue', [
             // 3) SOURCE TASK
             // =========================
             $source = $taskModel->find((int)$rt['task_id']);
-LoggerHolder::get()->info('RecurringRunner: source loaded', [
-    'rt_id' => $rt['id'],
-    'source_found' => $source ? true : false,
-]);
+                LoggerHolder::get()->info('RecurringRunner: source loaded', [
+                    'rt_id' => $rt['id'],
+                    'source_found' => $source ? true : false,
+                ]);
             if (!$source) {
                 LoggerHolder::get()->warning('RecurringRunner: missing source task', [
                     'rt_id'   => $rt['id'],
                     'task_id' => $rt['task_id'],
+                ]);
+                LoggerHolder::get()->info('RecurringRunner: clearing processing', [
+                    'rt_id' => $rt['id'],
+                    'company_id' => $company['id'],
                 ]);
                 $recurringModel->clearProcessing((int)$rt['id'], (int)$company['id']);
                 continue;
