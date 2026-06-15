@@ -20,7 +20,17 @@ final class RecurringRunner
     {
         LoggerHolder::get()->info('RecurringRunner START');
         $pdo = Database::admin();
+        // ověření, že tento úkol v systému existuje a pokud ne, je vytvořen
+        $pdo->prepare("
+            INSERT IGNORE INTO system_jobs
+            (job_key, last_company_id)
+            VALUES
+            (:key, 0)
+        ")->execute([
+            'key' => self::JOB_KEY,
+        ]);
 
+        LoggerHolder::get()->info('RecurringRunner: job initialized');
         $lockSeconds = (int) Config::get('recurring.runner.lock_seconds', 30);
 
         // =========================
