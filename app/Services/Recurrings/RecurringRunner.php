@@ -159,7 +159,10 @@ LoggerHolder::get()->info('RecurringRunner: processing continue', [
             // 3) SOURCE TASK
             // =========================
             $source = $taskModel->find((int)$rt['task_id']);
-
+LoggerHolder::get()->info('RecurringRunner: source loaded', [
+    'rt_id' => $rt['id'],
+    'source_found' => $source ? true : false,
+]);
             if (!$source) {
                 LoggerHolder::get()->warning('RecurringRunner: missing source task', [
                     'rt_id'   => $rt['id'],
