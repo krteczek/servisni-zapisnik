@@ -107,14 +107,30 @@ if (Auth::check() && Session::has('user.company_db_name')) {
 // -------------------------------------------------
 // Routing
 // -------------------------------------------------
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 
-// odstranění base path
-if (str_starts_with($uri, $appBasePath)) {
+$uri = parse_url($requestUri, PHP_URL_PATH);
+
+if (!is_string($uri) || $uri === '') {
+
+    LoggerHolder::get()->warning(
+        'Invalid REQUEST_URI received',
+        [
+            'request_uri' => $requestUri,
+        ]
+    );
+
+    $uri = '/';
+}
+
+if ($appBasePath !== ''
+    && str_starts_with($uri, $appBasePath)
+) {
     $uri = substr($uri, strlen($appBasePath));
 }
 
 $uri = $uri ?: '/';
+
 
 $routes = Config::get('routes');
 
