@@ -18,7 +18,6 @@ final class RecurringRunner
 
     public static function run(): void
     {
-        LoggerHolder::get()->info('RecurringRunner START');
         $pdo = Database::admin();
         // ověření, že tento úkol v systému existuje a pokud ne, je vytvořen
         $pdo->prepare("
@@ -30,13 +29,11 @@ final class RecurringRunner
             'key' => self::JOB_KEY,
         ]);
 
-        LoggerHolder::get()->info('RecurringRunner: job initialized');
         $lockSeconds = (int) Config::get('recurring.runner.lock_seconds', 30);
 
         // =========================
         // 1) ATOMICKÝ LOCK
         // =========================
-        LoggerHolder::get()->info('RecurringRunner ATOMICKÝ LOCK');
         $stmt = $pdo->prepare("
             UPDATE system_jobs
             SET locked_until = DATE_ADD(NOW(), INTERVAL :sec SECOND)
@@ -50,7 +47,6 @@ final class RecurringRunner
         ]);
 
         if ($stmt->rowCount() === 0) {
-            LoggerHolder::get()->info('RecurringRunner rowCount = 0, exiting');
             return;
         }
 
@@ -62,7 +58,6 @@ final class RecurringRunner
             ]);
         }
 
-        LoggerHolder::get()->info('RecurringRunner: UNLOCK');
         // =========================
         // 2) UNLOCK
         // =========================
@@ -147,10 +142,6 @@ private static function processCompany(array $company): void
         }
 
         foreach ($recurrings as $rt) {
-LoggerHolder::get()->info('RT START', [
-    'rt_id' => $rt['id'],
-    'next_due_date' => $rt['next_due_date'],
-]);
             // =========================
             // 1) LOCK
             // =========================
@@ -186,10 +177,6 @@ LoggerHolder::get()->info('RT START', [
                 $iterations = 0;
 
                 while ($rt['next_due_date'] <= $date){
-LoggerHolder::get()->info('RT LOOP', [
-    'rt_id' => $rt['id'],
-    'due' => $rt['next_due_date'],
-]);
                     $iterations++;
                     if ($iterations > 100) {
                         throw new \RuntimeException(sprintf(
@@ -216,6 +203,7 @@ LoggerHolder::get()->info('RT LOOP', [
                             'status'             => 'open',
                             'created_by_user_id' => $source['created_by_user_id'],
                             'due_date'           => $rt['next_due_date'],
+                            'task_type'          => 'recurring_instance',
                         ]);
                     }
 
@@ -224,7 +212,7 @@ LoggerHolder::get()->info('RT LOOP', [
                         $rt['frequency_type'],
                         (int)$rt['frequency_value']
                     );
-                } //tohle je podezřele ukončení loopu
+                }
 
                 $recurringModel->updateNextDueDate(
                     (int)$rt['id'],
