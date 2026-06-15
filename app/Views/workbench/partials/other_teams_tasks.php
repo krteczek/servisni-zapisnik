@@ -56,7 +56,7 @@ $data = $view->data;
                         
                         <td><?= e($task['due_date'] ?? 'Neuveden') ?></td>
                         <td>
-                            <?php if ($task['is_recurring_master']): ?>
+                            <?php if ($task['task_type'] === 'recurring_master'): ?>
                                 <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurringEdit/#main') ?>" 
                                     title="Upravit nastavení tohoto opakujícího se úkolu"
                                     class="btn btn-secondary"
@@ -66,7 +66,7 @@ $data = $view->data;
                                     >
                                     🔁 ↗
                                 </a>
-                            <?php elseif ($task['is_recurring'] !== null): ?>
+                            <?php elseif ($task['task_type'] === 'recurring_instance'): ?>
                                 <span title="Tento úkol byl vygenerován automaticky systémem a nelze ho upravit"
                                     aria-label="Tento úkol byl vygenerován automaticky systémem a nelze ho upravit"
                                 > ↻ </span>
