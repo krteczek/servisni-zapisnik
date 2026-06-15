@@ -214,7 +214,10 @@ LoggerHolder::get()->info('RecurringRunner: source loaded', [
                         (int)$company['id'],
                         $rt['next_due_date']
                     )) {
-
+LoggerHolder::get()->info('RecurringRunner create task', [
+    'rt_id' => $rt['id'],
+    'due_date' => $rt['next_due_date'],
+]);
                         $taskModel->create([
                             'team_id'            => $source['team_id'],
                             'work_order_id'      => $source['work_order_id'],
