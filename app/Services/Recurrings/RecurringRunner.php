@@ -18,6 +18,7 @@ final class RecurringRunner
 
     public static function run(): void
     {
+        LoggerHolder::get()->info('RecurringRunner START');
         $pdo = Database::admin();
 
         $lockSeconds = (int) Config::get('recurring.runner.lock_seconds', 30);
@@ -25,6 +26,7 @@ final class RecurringRunner
         // =========================
         // 1) ATOMICKÝ LOCK
         // =========================
+        LoggerHolder::get()->info('RecurringRunner ATOMICKÝ LOCK');
         $stmt = $pdo->prepare("
             UPDATE system_jobs
             SET locked_until = DATE_ADD(NOW(), INTERVAL :sec SECOND)
@@ -38,6 +40,7 @@ final class RecurringRunner
         ]);
 
         if ($stmt->rowCount() === 0) {
+            LoggerHolder::get()->info('RecurringRunner rowCount = 0, exiting');
             return;
         }
 
@@ -49,6 +52,7 @@ final class RecurringRunner
             ]);
         }
 
+        LoggerHolder::get()->info('RecurringRunner: UNLOCK');
         // =========================
         // 2) UNLOCK
         // =========================
