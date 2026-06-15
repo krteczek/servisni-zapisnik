@@ -62,6 +62,10 @@ class InvoiceController extends Controller
         return $task;
     }
 
+    /** 
+     * /billing/invoice/create/work-order/456
+     * momentálně ještě nepoužito
+     */
     private function requireWorkOrderForInvoice(int $id): array
     {
         if ($id <= 0) {
@@ -94,6 +98,11 @@ class InvoiceController extends Controller
 
     }
 
+
+    /** 
+     * /billing/invoice/create/export/789
+     * momentálně ještě nepoužito
+     */
     private function requireExportForInvoice(int $id): array
     {
         return [];
@@ -116,7 +125,7 @@ class InvoiceController extends Controller
     public function createWorkOrder(int $id): string
     {
         $task = $this->requireTaskForInvoice($id);
-        $ok = $this->invoice->createFromTask($task);
+        //$ok = $this->invoice->createFromTask($task);
         return $this->render('invoices/create-work-order');
     }
         
