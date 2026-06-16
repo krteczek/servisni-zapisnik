@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Core;
 use \App\Core\Session;
 use \App\Core\Auth;
+use \App\Core\LoggerHolder;
 
 /**
  * Služba pro ochranu před Cross-Site Request Forgery (CSRF) útoky.
@@ -85,7 +86,7 @@ class Csrf
         }
         $out = hash_equals($storedToken, $token);
         if (!$out) {
-            Logger::warning('CSRF validation failed', [
+            LoggerHolder::get()->warning('CSRF validation failed', [
                 'uri' => $_SERVER['REQUEST_URI'] ?? '',
                 'user_id' => Auth::id(),
             ]);
