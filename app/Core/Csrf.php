@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 namespace App\Core;
+use \App\Core\Session;
+use \App\Core\Auth;
 
 /**
  * Služba pro ochranu před Cross-Site Request Forgery (CSRF) útoky.
@@ -16,7 +18,7 @@ class Csrf
      */
     private const KEY = '_csrf';
 
-    // TODO: [SECURITY] Přidat per-form tokeny pro vyšší bezpečnost (double submit cookies)
+    // TODO: [UX] Zvážit per-form CSRF tokeny pro podporu více současně otevřených formulářů
     // TODO: [SECURITY] Zvážit implementaci same-site tokenů pro SPA a API
 
     /**
@@ -60,7 +62,7 @@ class Csrf
      * @param string $token Token k ověření (obvykle z $_POST['_token'])
      * @return bool TRUE pokud token je platný, jinak FALSE
      */
-    public static function check(string $token): bool
+    public static function checkOLD(string $token): bool
     {
         Session::start();
         
@@ -72,7 +74,28 @@ class Csrf
 
         return hash_equals($storedToken, $token);
     }
-    
+    public static function check(string $token): bool
+    {
+        Session::start();
+        
+        $storedToken = (string) Session::get(self::KEY);
+        
+        if ($storedToken === '') {
+            return false;
+        }
+        $out = hash_equals($storedToken, $token);
+        if (!$out) {
+            Logger::warning('CSRF validation failed', [
+                'uri' => $_SERVER['REQUEST_URI'] ?? '',
+                'user_id' => Auth::id(),
+            ]);
+        }
+        if ($out === true) {
+            self::regenerate();
+        }
+        return $out;
+    }
+        
     /**
      * Alias pro metodu `check()` pro konzistentní API.
      *
