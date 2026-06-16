@@ -128,7 +128,7 @@ private static function processCompany(array $company): void
     Database::useWorkDatabase($company['db_name']);
     TenantContext::set((int)$company['id']);
 
-    $pdo = Database::work();
+    $pdo = Database::admin();
     $taskLimit = (int) Config::get('recurring.runner.batch_size_tasks', 20);
 
     $recurringModel = new RecurringRunnerModel();

@@ -206,32 +206,7 @@ abstract class BaseModel
     }
 
 
-public function begin()
-{
-    if ($this->transactionLevel === 0) {
-        $this->db()->beginTransaction();
-    }
-    $this->transactionLevel++;
-}
 
-public function commit()
-{
-    $this->transactionLevel--;
-
-    if ($this->transactionLevel <= 0) {
-        throw new LogicException('No active transaction.');
-    }
-
-    if ($this->transactionLevel === 0) {
-        $this->db()->commit();
-    }
-}
-
-public function rollback()
-{
-    $this->transactionLevel = 0;
-    $this->db()->rollBack();
-}
 
 public function setConnection(PDO $pdo): void
 {

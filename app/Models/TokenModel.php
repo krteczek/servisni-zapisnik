@@ -34,51 +34,6 @@ final class TokenModel extends BaseModel
     
     protected bool $tenantAware = false;
 
-    /* ==========================================================
-     * TRANSACTIONS
-     * ========================================================== */
-
-    /**
-     * Zahájí databázovou transakci.
-     * Používá se pro hromadné operace s tokeny (např. invalidace + vytvoření).
-     *
-     * Vedlejší efekty:
-     * - Nastaví DB připojení do transakčního režimu
-     *
-     * TODO: [MAINTENANCE] Přesunout transakční metody do BaseModel
-     *
-     * @return void
-     */
-    public function begin(): void
-    {
-        if (!$this->db()->inTransaction()) {
-            $this->db()->beginTransaction();
-        }
-    }
-
-    /**
-     * Potvrdí probíhající transakci.
-     *
-     * @return void
-     */
-    public function commit(): void
-    {
-        if ($this->db()->inTransaction()) {
-            $this->db()->commit();
-        }
-    }
-
-    /**
-     * Zruší probíhající transakci.
-     *
-     * @return void
-     */
-    public function rollback(): void
-    {
-        if ($this->db()->inTransaction()) {
-            $this->db()->rollBack();
-        }
-    }
 
     /* ==========================================================
      * FIND VALID TOKEN

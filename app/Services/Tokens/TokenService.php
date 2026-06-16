@@ -6,6 +6,7 @@ namespace App\Services\Tokens;
 use App\Models\TokenModel;
 use App\Core\Config;
 use App\Core\Request;
+use App\Core\Transaction;
 
 use DateTimeImmutable;
 use RuntimeException;
@@ -31,25 +32,38 @@ final class TokenService
      * CREATE
      * ========================================================== */
 
-    public function create(
-        string $type,
-        string $email,
-        ?int $userId = null,
+public function create(
+    string $type,
+    string $email,
+    ?int $userId = null,
+): string {
+
+    if (!in_array($type, TokenType::all(), true)) {
+        throw new RuntimeException(
+            'Požadavek na neznámý typ tokenu: ' . $type
+        );
+    }
+
+    return Transaction::run(function () use (
+        $type,
+        $email,
+        $userId
     ): string {
 
-        if (!in_array($type, TokenType::all())) {
-            throw new RuntimeException('Požadavek na neznámý typ tokenu: ' . $type);
-        }
-
-        $expiresMinutes = (int) Config::get('tokenExpires.' . $type);
+        $expiresMinutes = (int) Config::get(
+            'tokenExpires.' . $type
+        );
 
         $ip = Request::ip();
         $ua = Request::ua();
 
         $this->invalidate($email, $type);
 
-        $rawToken = bin2hex(random_bytes(self::TOKEN_BYTES));
-        $hash     = self::hash($rawToken);
+        $rawToken = bin2hex(
+            random_bytes(self::TOKEN_BYTES)
+        );
+
+        $hash = self::hash($rawToken);
 
         $expiresAt = (new DateTimeImmutable())
             ->modify("+{$expiresMinutes} minutes")
@@ -66,8 +80,9 @@ final class TokenService
         ]);
 
         return $rawToken;
-    }
 
+    }, 'admin');
+}
     /* ==========================================================
      * VALIDATE
      * ========================================================== */
@@ -93,70 +108,46 @@ final class TokenService
     /* ==========================================================
      * CONSUME
      * ========================================================== */
+
+
 public function consume(string $rawToken, string $type): array
 {
-    $hash = self::hash($rawToken);
+    return Transaction::run(function () use ($rawToken, $type) {
 
-    $row = $this->model->findValidByHashForUpdate($hash, $type);
+        $hash = self::hash($rawToken);
 
-    if (!$row) {
-        return [
-            'ok' => false,
-            'result' => TokenResult::EXPIRED
-        ];
-    }
+        $row = $this->model->findValidByHashForUpdate(
+            $hash,
+            $type
+        );
 
-    $updated = $this->model->markUsed((int)$row['id']);
-
-    if (!$updated) {
-        return [
-            'ok' => false,
-            'result' => TokenResult::USED
-        ];
-    }
-
-    return [
-        'ok'      => true,
-        'result'  => TokenResult::VALID,
-        'id'      => $row['id'],
-        'email'   => $row['email'],
-        'user_id' => $row['user_id'],
-    ];
-}
-    public function consumeOLD(string $rawToken, string $type): array
-    {
-
-            $hash = self::hash($rawToken);
-
-            $row = $this->model->findValidByHashForUpdate($hash, $type);
-
-            if (!$row) {
-                return [
-                'ok' => false,
-                'result' => TokenResult::EXPIRED
-                ];
-            }
-
-            $updated = $this->model->markUsed((int)$row['id']);
-
-            if (!$updated) {
-                return [
-                'ok' => false,
-                'result' => TokenResult::USED
-                ];
-
-            }
-
+        if (!$row) {
             return [
-                'ok'     => true,
-                'result' => TokenResult::VALID,
-                'data'   => [
-                    'id'      => $row['id'],
-                    'email'   => $row['email'],
-                    'user_id' => $row['user_id'],
-                ]
+                'ok' => false,
+                'result' => TokenResult::EXPIRED,
             ];
-     }
+        }
+
+        $updated = $this->model->markUsed(
+            (int) $row['id']
+        );
+
+        if (!$updated) {
+            return [
+                'ok' => false,
+                'result' => TokenResult::USED,
+            ];
+        }
+
+        return [
+            'ok'      => true,
+            'result'  => TokenResult::VALID,
+            'id'      => $row['id'],
+            'email'   => $row['email'],
+            'user_id' => $row['user_id'],
+        ];
+    }, 'admin');
+}
 
     /* ==========================================================
      * INVALIDATE

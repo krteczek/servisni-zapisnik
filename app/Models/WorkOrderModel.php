@@ -5,57 +5,14 @@ namespace App\Models;
 
 use PDO;
 use App\Core\Auth;
+use App\Core\Transaction;
+
 
 class WorkOrderModel extends BaseModel
 {
     protected string $table = 'work_orders';
     protected string $connection = 'admin';
 
-    /* ==========================================================
-     * TRANSACTIONS
-     * ========================================================== */
-
-    /**
-     * Zahájí databázovou transakci.
-     * Používá se pro hromadné operace s tokeny (např. invalidace + vytvoření).
-     *
-     * Vedlejší efekty:
-     * - Nastaví DB připojení do transakčního režimu
-     *
-     * TODO: [MAINTENANCE] Přesunout transakční metody do BaseModel
-     *
-     * @return void
-     */
-    public function begin(): void
-    {
-        if (!$this->db()->inTransaction()) {
-            $this->db()->beginTransaction();
-        }
-    }
-
-    /**
-     * Potvrdí probíhající transakci.
-     *
-     * @return void
-     */
-    public function commit(): void
-    {
-        if ($this->db()->inTransaction()) {
-            $this->db()->commit();
-        }
-    }
-
-    /**
-     * Zruší probíhající transakci.
-     *
-     * @return void
-     */
-    public function rollback(): void
-    {
-        if ($this->db()->inTransaction()) {
-            $this->db()->rollBack();
-        }
-    }
 
 public function forIndex(): array
 {
@@ -278,7 +235,25 @@ public function getNamesByIds(array $ids): array
     return $result;
 }
 
+
 public function closeAsDone(int $orderId): bool
+{
+    return Transaction::run(function () use ($orderId) {
+
+        $stats = (new TaskModel())->statsForWorkOrder($orderId);
+
+        if ($stats['open'] > 0 || $stats['done'] === 0) {
+            return false;
+        }
+
+        return $this->update($orderId, [
+            'status'    => 'done',
+            'closed_at' => date('Y-m-d H:i:s'),
+        ]);
+    });
+}
+
+public function closeAsDoneOLD(int $orderId): bool
 {
     $this->db()->beginTransaction();
 
