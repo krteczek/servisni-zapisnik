@@ -86,7 +86,7 @@ public function index(): string
             ];
             
             
-			    $pdo = Database::work();
+			    $pdo = Database::admin();
 			    $pdo->beginTransaction();
 
 		

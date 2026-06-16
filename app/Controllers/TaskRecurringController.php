@@ -265,6 +265,14 @@ final class TaskRecurringController extends Controller
                 Url::back();
         }
     }
+
+    /** 
+     * Ověří, zda je úkol uzavřitelný.
+     *
+     * @param array $task Úkol k ověření
+     * @param string $action Akce (done nebo cancelled)
+     * @return void
+     * /
     private function ensureTaskClosable(array $task, string $action = 'done'):void
     {
         $label = $action === 'done' ? 'uzavřít' : 'zrušit';
@@ -295,28 +303,35 @@ final class TaskRecurringController extends Controller
             );
         }        
     }
+*/
 
-
+    /** 
+     * Ověří, zda je opakující se úkol upravitelný.
+     *
+     * @param array $task Úkol k ověření
+     * @return void
+     */
     private function ensureRecurringEditable(array $task): void
-{
-    if ($task['status'] === 'done') {
-        Flash::error(
-            'Tuto šablonu již nelze upravovat, protože byla dokončena.'
-        );
+    {
+        if ($task['status'] === 'done') {
+            Flash::error(
+                'Tuto šablonu již nelze upravovat, protože byla dokončena.'
+            );
 
-        Url::redirect(
-            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
-        );
+            Url::redirect(
+                '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
+            );
+        }
+
+        if ($task['status'] === 'cancelled') {
+            Flash::error(
+                'Tuto šablonu již nelze upravovat, protože byla zrušena.'
+            );
+
+            Url::redirect(
+                '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
+            );
+        }
     }
-
-    if ($task['status'] === 'cancelled') {
-        Flash::error(
-            'Tuto šablonu již nelze upravovat, protože byla zrušena.'
-        );
-
-        Url::redirect(
-            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
-        );
-    }
-}
+        
  }

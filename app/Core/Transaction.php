@@ -6,11 +6,17 @@ namespace App\Core;
 use Throwable;
 use App\Core\Database;
 use App\Core\LoggerHolder;
-
+use RuntimeException;
+use \PDO;
 
 class Transaction
 {
-    public static function run(callable $callback, string $connection = 'work')
+    /**
+     * @template T
+     * @param callable(PDO):T $callback
+     * @return T
+     */
+    public static function run(callable $callback, string $connection = 'admin'): mixed
     {
         $db = Database::connection($connection);
         $isOuter = false;
@@ -27,7 +33,7 @@ class Transaction
             $result = $callback($db); // 🔥 tady změna
 
             if ($result === false) {
-                throw new \RuntimeException('Transaction callback returned false');
+                throw new RuntimeException('Transaction callback returned false');
             }
 
             if ($isOuter) {
@@ -54,4 +60,6 @@ class Transaction
             throw $e; // 🔥 KRITICKÉ
         }
     }
+
+    
 }

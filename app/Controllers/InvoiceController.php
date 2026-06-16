@@ -65,7 +65,7 @@ class InvoiceController extends Controller
     /** 
      * /billing/invoice/create/work-order/456
      * momentálně ještě nepoužito
-     */
+     * /
     private function requireWorkOrderForInvoice(int $id): array
     {
         if ($id <= 0) {
@@ -96,17 +96,18 @@ class InvoiceController extends Controller
 
         return $wo;
 
-    }
+    } */
 
 
     /** 
      * /billing/invoice/create/export/789
      * momentálně ještě nepoužito
-     */
+     * /
     private function requireExportForInvoice(int $id): array
     {
         return [];
     }
+        */
 
     /**
      * /billing/invoice/create/task/123
