@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 use App\Core\Url;
 use App\Core\Csrf;
+use App\Services\Tasks\TaskType;
 
 require __DIR__ . '/../layout/header.php';
 
@@ -19,12 +20,12 @@ require __DIR__ . '/_filters.php';
 
             <?php
                 $recurringBadge = '';
-                if(!empty($task['recurring_task_id']) && (int)$task['recurring_task_id'] > 0) {
+                if(!empty($task['task_type']) && TaskType::isInstance($task['task_type'])) {
                     $recurringBadge = '<span 
                                             class="badge badge-recurring" 
-                                            title="Generovaný opakující se úkol"
+                                            title="Vygenerovaný opakující se úkol"
                                             >↻</span>';
-                } elseif (!empty($task['is_recurring']) && (int)$task['is_recurring'] === 1) {
+                } elseif (!empty($task['task_type']) && TaskType::isMaster($task['task_type'])) {
                     $recurringBadge = '<span class="badge badge-recurring" 
                                             title="Generátor opakujícího se úkolu"
                                             >🔁</span>';
