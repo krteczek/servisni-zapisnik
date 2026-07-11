@@ -10,6 +10,7 @@ use App\Core\ViewContext;
 use App\Core\Url;
 use App\Core\LoggerHolder;
 use App\Core\Database;
+use App\Helpers\DateHelper;
 use App\Models\WorkOrderModel;
 use App\Models\TaskModel;
 use App\Models\TeamModel;
@@ -439,7 +440,7 @@ private function getOrderOrRedirect(int $orderId): array
             $this->addError('price_per_km', 'Kilometrová sazba nemůže být záporná.');
         }
 
-        $data['wo_due_date'] = $this->validateDate($data['wo_due_date']);
+        $data['wo_due_date'] = DateHelper::parseDate($data['wo_due_date']);
         if ($data['wo_due_date'] === null && isset($post['wo_due_date']) && trim($post['wo_due_date']) !== '') {
             $this->addError('wo_due_date', 'Neplatný formát data. Použijte formát RRRR-MM-DD.');
         }
@@ -467,26 +468,6 @@ private function getOrderOrRedirect(int $orderId): array
         return $data;
     }
   
-private function validateDate(?string $date): ?string
-{
-    $date = trim($date ?? '');
-
-    if ($date === '') {
-        return null;
-    }
-
-    $dt = \DateTime::createFromFormat('Y-m-d', $date);
-
-    $isValid =
-        $dt !== false
-        && $dt->format('Y-m-d') === $date;
-
-    if (!$isValid) {
-        return null;
-    }
-
-    return $date;
-}
 
 public function closeOrderCanceled(int $orderId)
 {   

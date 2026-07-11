@@ -839,7 +839,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/billing/invoice/create/task/{id:\d+}',
-    'action'  => [InvoiceController ::class, 'store'],
+    'action'  => [InvoiceController ::class, 'storeTask'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',

@@ -7,12 +7,56 @@ use App\Models\ContactsModel;
 use App\Models\TaskModel;
 use App\Services\Settings\SettingsService;
 use App\Core\Csrf;
-
+use \RuntimeException;
+use \App\Core\Flash;
+use \App\Core\Url;
 final class InvoiceService
 {
- 
-    public function buildDraftFromTask(array $task): array
+
+   private function requireTaskForInvoice(int $id): array
     {
+        if ($id <= 0) {
+            Flash::error('Požadovaný úkol neexistuje');
+            Url::back();
+        }
+
+        $task = (new TaskModel())->findById($id);
+
+        if (!$task) {
+            Flash::error('Požadovaný úkol neexistuje');
+            Url::back();
+        }
+
+        if ($task['status'] !== 'done') {
+            Flash::error(
+                'Fakturovat lze pouze dokončené úkoly.'
+            );
+            Url::back();
+        }
+
+        if (in_array($task['task_type'], ['recurring_master'], true))
+        {
+            Flash::error('Šablonu opakovaného úkolu nelze fakturovat.');
+            Url::back();
+        }
+
+        if ($task['billing_export_id'] !== null) {
+            Flash::error(
+                'Úkol již byl fakturován nebo exportován.'
+            );
+            Url::back();
+        }
+
+        return $task;
+    }
+
+    
+ 
+ 
+    public function buildDraftFromTask(int $taskId): array
+    {
+        $task      = $this->requireTaskForInvoice($taskId);
+
         $taskStats = (new TaskModel())->statsForTasks([$task['id']]);
 
         $workOrder = (new WorkOrderModel())
@@ -82,6 +126,10 @@ final class InvoiceService
         return $data;
     }
 
+    public function buildDraftFromWorkOrder(int $orderId): array
+    {
+        return [];
+    }
     /**
      * Vytvoří fakturu z celé zakázky.
      */
@@ -92,15 +140,6 @@ final class InvoiceService
     ): int {
     }
 
-    /**
-     * Vytvoří fakturu z billing exportu.
-     */
-    public function createFromExport(
-        int $companyId,
-        int $exportId,
-        array $data
-    ): int {
-    }
 
 public function invoiceFromTask(
     int $taskId,
@@ -127,68 +166,31 @@ public function invoiceFromTask(
     // VALIDACE
     // =====================
 
-    $title = trim((string) ($post['title'] ?? ''));
-
-    if ($title === '') {
-        $errors['title'] =
-            'Název faktury je povinný.';
-    }
-
-    $issuedAt = (string) ($post['issued_at'] ?? '');
-
-    if ($issuedAt === '') {
-        $errors['issued_at'] =
-            'Datum vystavení je povinné.';
-    }
-
-    $dueDate = (string) ($post['due_date'] ?? '');
-
-    if ($dueDate === '') {
-        $errors['due_date'] =
-            'Datum splatnosti je povinné.';
-    }
-
-    if (
-        $issuedAt !== ''
-        && $dueDate !== ''
-        && strtotime($dueDate) < strtotime($issuedAt)
-    ) {
-        $errors['due_date'] =
-            'Datum splatnosti musí být pozdější než datum vystavení.';
-    }
-
+    $data = $this->validateInvoiceData($post);
     // =====================
     // PŘI CHYBĚ
     // =====================
 
-    if ($errors) {
 
-        $draft = $this->buildDraftFromTask($task);
+    if ($data['errors']) {
 
-        $draft['invoice']['title'] =
-            $title;
+        $draft = $this->buildDraftFromTask($taskId);
 
-        $draft['invoice']['issued_at'] =
-            $issuedAt;
+        $draft['invoice']['title']     = $data['title'];
+        $draft['invoice']['issued_at'] = $data['issued_at'];
+        $draft['invoice']['due_date']  = $data['due_date'];
+        $draft['invoice']['note']      = $data['note'];
 
-        $draft['invoice']['due_date'] =
-            $dueDate;
-
-        $draft['invoice']['note'] =
-            (string) ($post['note'] ?? '');
-
-        $draft['customer'] =
-            $post['customer'] ?? [];
-
-        $draft['items'] =
-            $post['items'] ?? [];
+        $draft['customer'] = $data['customer'];
+        $draft['items']    = $data['items'];
 
         return [
             'success' => false,
-            'errors'  => $errors,
+            'errors'  => $data['errors'],
             'data'    => $draft,
         ];
     }
+
 
     // =====================
     // ULOŽENÍ
@@ -205,10 +207,90 @@ public function invoiceFromTask(
         'invoice_id' => $invoiceId,
     ];
 }
-    private function validateInvoiceData(array $data): array
-    {
-        
+private function validateInvoiceData(array $post): array
+{
+    $errors = [];
+
+    // ------------------
+    // faktura
+    // ------------------
+
+    $title = trim((string) ($post['title'] ?? ''));
+    $issuedAt = (string) ($post['issued_at'] ?? '');
+    $dueDate = (string) ($post['due_date'] ?? '');
+
+    if ($title === '') {
+        $errors['title'] = 'Název faktury je povinný.';
     }
+
+    if ($issuedAt === '') {
+        $errors['issued_at'] = 'Datum vystavení je povinné.';
+    }
+
+    if ($dueDate === '') {
+        $errors['due_date'] = 'Datum splatnosti je povinné.';
+    }
+
+    // ------------------
+    // zákazník
+    // ------------------
+
+    $customer = $post['customer'] ?? [];
+
+    // později můžeš přidat validace IČO, DIČ atd.
+
+    // ------------------
+    // položky
+    // ------------------
+
+    $items = [];
+
+    foreach (($post['items'] ?? []) as $i => $item) {
+
+        $taskId = (int) ($item['task_id'] ?? 0);
+
+        $title = trim((string) ($item['title'] ?? ''));
+
+        $minutes = max(
+            0,
+            (int) ($item['minutes'] ?? 0)
+        );
+
+        $kilometers = max(
+            0,
+            (float) ($item['kilometers'] ?? 0)
+        );
+
+        if ($title === '') {
+            $errors["items.$i.title"] =
+                'Název položky je povinný.';
+        }
+
+        if ($minutes === 0 && $kilometers === 0) {
+            $errors["items.$i"] =
+                'Položka musí obsahovat čas nebo kilometry.';
+        }
+
+        $items[] = [
+            'task_id'       => $taskId,
+            'title'         => $title,
+            'minutes'       => $minutes,
+            'kilometers'    => $kilometers,
+            'visible_time'  => !empty($item['visible_time']),
+            'visible_km'    => !empty($item['visible_km']),
+        ];
+    }
+
+    return [
+        'title'     => $title,
+        'issued_at' => $issuedAt,
+        'due_date'  => $dueDate,
+        'note'      => (string) ($post['note'] ?? ''),
+        'customer'  => $customer,
+        'items'     => $items,
+        'errors'    => $errors,
+    ];
+}
 
     /**
      * Detail faktury.
