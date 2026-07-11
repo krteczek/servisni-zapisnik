@@ -38,7 +38,9 @@ final class TaskRecurringController extends Controller
             Url::redirect('/{tenant}/tasks/#main');	        
         }
 
-		$task = (new TaskModel())->find((int) $taskId);
+        $model = new TaskModel();
+        
+		$task = $model->find((int) $taskId);
 		if(!$task) {
             // takový úkol prostě neexistuje
             Flash::error('Úkol neexistuje');
@@ -54,7 +56,7 @@ final class TaskRecurringController extends Controller
             Flash::error('Tento úkol není šablonou pro opakované úkoly.');
             Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');;
         }
-        $task['count_instances'] = (new TaskModel())->countRecurringInstances($task['recurring_task_id']); 
+        $task['count_instances'] = $model->countRecurringInstances($task['recurring_task_id']); 
 		return $task;	
 	}
 
@@ -228,7 +230,7 @@ final class TaskRecurringController extends Controller
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
-        if ($task['status'] === 'done') {
+        if (TaskStatus::isDone($task['status'])) {
             Flash::info("Tento úkol nelze uzavřít, protože je již uzavřený.");
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
@@ -246,7 +248,7 @@ final class TaskRecurringController extends Controller
         $this->ensureRecurringTaskClosable($task);
 //dc($task);
         try {
-            $ok = (new TaskModel())->closeRecurringTask($taskId, 'done');
+            $ok = (new TaskModel())->closeRecurringTask($taskId, TaskStatus::DONE);
 
             Flash::success('Úkol byl uzavřen.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#taskId_' . $taskId);
@@ -267,6 +269,49 @@ final class TaskRecurringController extends Controller
         }
     }
 
+    public function cancelledRecurring(int $taskId): void
+    {
+        $task = $this->getTaskRecurringOrRedirect($taskId);
+ 
+        if (TaskStatus::isCancelled($task['status'])) {
+            Flash::info("Tento úkol nelze zrušit, protože je již zrušený.");
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
+        }
+
+        if (TaskStatus::isDone($task['status'])) {
+            Flash::info("Tento úkol nelze zrušit, protože je již ukončený.");
+
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
+        }
+
+        if ($task['count_instances'] > 0) {
+            Flash::info("Tuto šablonu pro generování opakovaných úkolů nemůžete zrušit, protože má již vygenerované úkoly. Můžete ji však uzavřít.");
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
+        }
+
+
+        try {
+            $ok = (new TaskModel())->closeRecurringTask($taskId, TaskStatus::CANCELLED);
+
+            Flash::success('Úkol byl zrušen.');
+            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#taskId_' . $taskId);
+            
+        } catch (Throwable $e) {
+
+                // 🔥 TECHNICKÝ LOG
+                LoggerHolder::get()->error('TaskController.cancelledRecurring FAILED', [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                    'trace'   => $e->getTraceAsString(),
+                    'input'   => serialize($task),
+                ]);
+
+                Flash::error('Nepodařilo se zrušit úkol.');
+                Url::back();
+        }
+    }
+
 
     /** 
      * Ověří, zda je opakující se úkol upravitelný.
@@ -276,7 +321,7 @@ final class TaskRecurringController extends Controller
      */
     private function ensureRecurringEditable(array $task): void
     {
-        if ($task['status'] === 'done') {
+        if (TaskStatus::isDone($task['status'])) {
             Flash::error(
                 'Tuto šablonu již nelze upravovat, protože byla dokončena.'
             );
