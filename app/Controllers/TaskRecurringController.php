@@ -265,44 +265,6 @@ final class TaskRecurringController extends Controller
         }
     }
 
-    /** 
-     * Ověří, zda je úkol uzavřitelný.
-     *
-     * @param array $task Úkol k ověření
-     * @param string $action Akce (done nebo cancelled)
-     * @return void
-     * /
-    private function ensureTaskClosable(array $task, string $action = 'done'):void
-    {
-        $label = $action === 'done' ? 'uzavřít' : 'zrušit';
-
-//print_r($task);exit;
-
-        if ($task['status'] === 'done') {
-            Flash::info("Tento úkol nelze $label, protože je již dokončený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
-        }
-
-        if ($task['status'] === 'cancelled') {
-            Flash::error("Tento úkol nelze $label, protože je již zrušený.");
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
-        }
-        
-        
-
-        if (!empty($task['is_recurring']) && $task['is_recurring'] == 1) {
-
-            Flash::info(
-                'Opakující se master úkol nelze tímto způsobem uzavřít ani zrušit. '
-                . 'Pro ukončení opakování deaktivujte opakování v nastavení opakování úkolu.'
-            );
-
-            Url::redirect( 
-                '/{tenant}/tasks/' . $task['id'] . '/recurring/#main'
-            );
-        }        
-    }
-*/
 
     /** 
      * Ověří, zda je opakující se úkol upravitelný.
