@@ -348,6 +348,23 @@ return [
 	'title'   => 'Úkoly: Vytvořit klon úkolu',
 ],
 
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/done',
+    'action' => [TaskController::class, 'done'],
+    'roles'   => ['admin', 'mistr'],
+    'auth'   => true,
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/cancel',
+    'action' => [TaskController::class, 'cancel'],
+    'roles'   => ['admin', 'mistr'],
+    'auth'   => true,
+],
+
+
 /*
 |--------------------------------------------------------------------------
 | RECURRING Tasks create a edit
@@ -391,14 +408,6 @@ return [
 
 [
     'method' => 'POST',
-    'path'   => '/{tenant}/tasks/{taskId:\d+}/done',
-    'action' => [TaskController::class, 'done'],
-    'roles'   => ['admin', 'mistr'],
-    'auth'   => true,
-],
-
-[
-    'method' => 'POST',
     'path'   => '/{tenant}/tasks/{taskId:\d+}/recurring-done',
     'action' => [TaskRecurringController::class, 'doneRecurring'],
     'roles'   => ['admin', 'mistr'],
@@ -407,11 +416,12 @@ return [
 
 [
     'method' => 'POST',
-    'path'   => '/{tenant}/tasks/{taskId:\d+}/cancel',
-    'action' => [TaskController::class, 'cancel'],
+    'path'   => '/{tenant}/tasks/{taskId:\d+}/recurring-cancelled',
+    'action' => [TaskRecurringController::class, 'cancelledRecurring'],
     'roles'   => ['admin', 'mistr'],
     'auth'   => true,
 ],
+
 
 [
     'method' => 'GET',

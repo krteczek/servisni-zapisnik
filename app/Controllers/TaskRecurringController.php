@@ -14,6 +14,7 @@ use App\Models\TaskModel;
 use App\Models\RecurringTaskModel;
 use App\Models\TeamModel;
 use App\Services\Tasks\TaskType;
+use App\Services\Tasks\TaskStatus;
 
 use Throwable;
 
@@ -232,7 +233,7 @@ final class TaskRecurringController extends Controller
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
-        if ($task['status'] === 'cancelled') {
+        if (TaskStatus::isCancelled($task['status'])) {
             Flash::error("Tento úkol nelze uzavřít, protože je již zrušený.");
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
@@ -285,7 +286,7 @@ final class TaskRecurringController extends Controller
             );
         }
 
-        if ($task['status'] === 'cancelled') {
+        if (TaskStatus::isCancelled($task['status'])) {
             Flash::error(
                 'Tuto šablonu již nelze upravovat, protože byla zrušena.'
             );
