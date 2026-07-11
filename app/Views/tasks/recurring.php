@@ -123,7 +123,7 @@ if (!$type || !array_key_exists($type, $frequencies)) {
 				<?php if (((int)($data['active'] ?? 0) === 0) && TaskStatus::isOpen($task['status'])): ?>
 
 					<?php 
-						$action = $task['count_instances'] > 0 ? 'done' : 'canceled';
+						$action = $task['count_instances'] > 0 ? 'done' : 'cancelled';
 						$actionText = $task['count_instances'] > 0 ? 'Uzavřít' : 'Zrušit';
 					
 					?>
