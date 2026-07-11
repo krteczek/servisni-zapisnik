@@ -6,6 +6,7 @@ namespace App\Models;
 use DateTime;
 use App\Core\Auth;
 use App\Core\Roles;
+use App\Services\Tasks\TaskType;
 
 final class TaskModel extends BaseModel
 {
@@ -579,5 +580,26 @@ $sql =
         $sql .= " ORDER BY t.created_at DESC";
 
         return $this->fetchAll($sql, $params);
+    }
+
+    public function countRecurringInstances(int $recurringTaskId): int
+    {
+        $sql = "
+            SELECT COUNT(*) AS instance_count
+            FROM tasks t
+            WHERE t.recurring_task_id = :recurring_task_id
+            AND t.task_type = :task_type
+            AND t.{$this->tenantColumn} = :company_id
+        ";
+
+        $params = [
+            'recurring_task_id' => $recurringTaskId,
+            'task_type'         => TaskType::RECURRING_INSTANCE,
+            'company_id'        => $this->tenantId(),
+        ];
+
+        $row = $this->fetchOne($sql, $params);
+
+        return (int) ($row['instance_count'] ?? 0);
     }
 }

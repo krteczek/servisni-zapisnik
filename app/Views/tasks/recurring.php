@@ -7,7 +7,8 @@ use App\Core\Url;
 //use App\Core\Roles;
 use App\Core\Csrf;
 use App\Core\Config;
-use App\Models\RecurringTaskModel;
+use App\Services\Tasks\TaskStatus;
+use App\Services\Tasks\TaskType;
 
 require __DIR__ . '/../layout/header.php';
 
@@ -119,16 +120,22 @@ if (!$type || !array_key_exists($type, $frequencies)) {
 			</form>
 			<div class="form-actions alert alert-warning">
 				
-				<?php if (((int)($data['active'] ?? 0) === 0) && !in_array($task['status'], ['done', 'cancelled'])): ?>
+				<?php if (((int)($data['active'] ?? 0) === 0) && TaskStatus::isOpen($task['status'])): ?>
+
+					<?php 
+						$action = $task['count_instances'] > 0 ? 'done' : 'canceled';
+						$actionText = $task['count_instances'] > 0 ? 'Uzavřít' : 'Zrušit';
+					
+					?>
 
 					<form method="post"
-							action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring-done/#main') ?>"
-							data-confirm="Opravdu chcete úkol uzavřít? Tato akce je nevratná..."
+							action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring-' . $action . '/#main') ?>"
+							data-confirm="Opravdu chcete úkol <?= $actionText ?>? Tato akce je nevratná..."
 					>
 					<?= Csrf::getField() ?>
-						<button type="submit" class="btn btn-danger" title="Uzavřít úkol">
+						<button type="submit" class="btn btn-danger" title="<?= $actionText ?> úkol">
 							<span class="btn-icon"></span>
-							Uzavřít opakovací šablonu
+							<?= $actionText ?> opakovací šablonu
 						</button>
 					</form>
 
