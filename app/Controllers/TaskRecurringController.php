@@ -13,6 +13,7 @@ use App\Core\ViewContext;
 use App\Models\TaskModel;
 use App\Models\RecurringTaskModel;
 use App\Models\TeamModel;
+use App\Services\Tasks\TaskType;
 
 use Throwable;
 
@@ -42,18 +43,16 @@ final class TaskRecurringController extends Controller
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');			
 		}
-        if (!in_array($task['task_type'], ['recurring_master'])) {
-            // úkol existuje ale není opakovaný
+        if (TaskType::isNormal($task['task_type'])) {
+            //tohle je normální úkol, ne šablona pro opakování
+            Flash::error('Tento úkol není šablonou pro opakované úkoly.');
+            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');
+        }        
+        if (TaskType::isInstance($task['task_type'])) {
+            // úkol existuje ale není šablonou pro opakování, je to jen instance
             Flash::error('Tento úkol není šablonou pro opakované úkoly.');
             Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');;
         }
-        if (
-            empty($task['recurring_task_id'])
-            || (int)$task['recurring_task_id'] < 1
-        ) {
-            Flash::error('Opakovací šablona neexistuje.');
-            Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');
-        }        
 		return $task;	
 	}
 
@@ -222,7 +221,7 @@ final class TaskRecurringController extends Controller
 
     public function ensureRecurringTaskClosable(array $task): void
     {
-        if (empty($task['recurring_task_id']) || $task['is_recurring'] != 1) {
+        if (empty($task['recurring_task_id']) || TaskType::isNormal($task['task_type'])) {
             Flash::info('Tato funkce je určena pouze pro opakující se úkoly.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
