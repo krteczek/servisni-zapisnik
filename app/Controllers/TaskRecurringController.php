@@ -53,6 +53,7 @@ final class TaskRecurringController extends Controller
             Flash::error('Tento úkol není šablonou pro opakované úkoly.');
             Url::redirect('/{tenant}/tasks/' . $taskId . '/edit/#main');;
         }
+        $task['count_instances'] = (new TaskModel())->countRecurringInstances($task['recurring_task_id']); 
 		return $task;	
 	}
 
