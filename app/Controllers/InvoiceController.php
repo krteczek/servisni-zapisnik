@@ -24,44 +24,7 @@ class InvoiceController extends Controller
         $this->invoice = new InvoiceService();
     }
 
-    private function requireTaskForInvoice(int $id): array
-    {
-        if ($id <= 0) {
-            Flash::error('Požadovaný úkol neexistuje');
-            Url::back();
-        }
-
-        $task = (new TaskModel())->findById($id);
-
-        if (!$task) {
-            Flash::error('Požadovaný úkol neexistuje');
-            Url::back();
-        }
-
-        if ($task['status'] !== 'done') {
-            Flash::error(
-                'Fakturovat lze pouze dokončené úkoly.'
-            );
-            Url::back();
-        }
-
-        if ((int) ($task['is_recurring'] ?? 0) === 1) {
-            Flash::error(
-                'Opakovaný úkol nelze fakturovat přímo.'
-            );
-            Url::back();
-        }
-
-        if ($task['billing_export_id'] !== null) {
-            Flash::error(
-                'Úkol již byl fakturován nebo exportován.'
-            );
-            Url::back();
-        }
-
-        return $task;
-    }
-
+ 
     /** 
      * /billing/invoice/create/work-order/456
      * momentálně ještě nepoužito
@@ -110,26 +73,86 @@ class InvoiceController extends Controller
         */
 
     /**
-     * /billing/invoice/create/task/123
+     * /billing/invoice/create/task/123 GET
      */
     public function createTask(int $id): string
     {
-        $task      = $this->requireTaskForInvoice($id);
-        $this->view->data = $this->invoice->buildDraftFromTask($task);
+        $this->view->data = $this->invoice->buildDraftFromTask($id);
 
         return $this->render('invoices/create-task');
     }
 
+
+        /**
+     * POST
+     */
+    public function storeTask(int $id): string
+    {
+        if (empty($_POST)) {
+            Flash::error('Neplatná žádost.');
+            Url::back();
+        }
+
+        $this->checkCsrf();
+
+        try {
+
+            $result = $this->invoice->invoiceFromTask(
+                $id,
+                $_POST
+            );
+
+            if (!$result['success']) {
+
+                $this->view->errors = $result['errors'];
+                $this->view->data   = $result['data'];
+
+                return $this->render('invoices/create-task');
+            }
+
+            Flash::success('Faktura byla vytvořena.');
+
+            Url::redirect(
+                '/{tenant}/billing/invoice/' . $result['invoice_id'] . '/#main'
+            );
+
+        } catch (Throwable $e) {
+
+            LoggerHolder::get()->error(
+                'InvoiceController.storeTask FAILED',
+                [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                ]
+            );
+
+            Flash::error(
+                'Fakturu se nepodařilo vytvořit.'
+            );
+
+            Url::back();
+        }
+    }
+
+
     /**
      * /billing/invoice/create/work-order/456
-     */
+     * /
     public function createWorkOrder(int $id): string
     {
         $task = $this->requireTaskForInvoice($id);
         //$ok = $this->invoice->createFromTask($task);
         return $this->render('invoices/create-work-order');
     }
-        
+        */
+
+    public function createWorkOrder(int $id): string
+    {
+        $this->view->data = $this->invoice->buildDraftFromWorkOrder($id);
+
+        return $this->render('invoices/create-work-order');
+    }       
     
     /**
      * /billing/invoice/create/export/789
@@ -139,57 +162,7 @@ class InvoiceController extends Controller
         return $this->render('billing/invoice/create-export');
     }
 
-    /**
-     * POST
-     */
-public function storeTask(int $id): string
-{
-    if (empty($_POST)) {
-        Flash::error('Neplatná žádost.');
-        Url::back();
-    }
 
-    $this->checkCsrf();
-
-    try {
-
-        $result = $this->invoice->invoiceFromTask(
-            $id,
-            $_POST
-        );
-
-        if (!$result['success']) {
-
-            $this->view->errors = $result['errors'];
-            $this->view->data   = $result['data'];
-
-            return $this->render('invoices/create-task');
-        }
-
-        Flash::success('Faktura byla vytvořena.');
-
-        Url::redirect(
-            '/{tenant}/billing/invoice/' . $result['invoice_id'] . '/#main'
-        );
-
-    } catch (Throwable $e) {
-
-        LoggerHolder::get()->error(
-            'InvoiceController.storeTask FAILED',
-            [
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
-            ]
-        );
-
-        Flash::error(
-            'Fakturu se nepodařilo vytvořit.'
-        );
-
-        Url::back();
-    }
-}
 
     /**
      * seznam faktur
