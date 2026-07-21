@@ -63,23 +63,23 @@ $err = $view->errors;
 
                 <div class="wo-info-main">
 						<strong>Popis: </strong><br>
-						<?= tx($order['description'] ?? '') ?: 'Nezadán' ?>
+						<?= tx($order['description'] ? $order['description'] : 'Nezadán') ?>
 				</div>
 
 				<div class="wo-info-grid">
 					<div class="wo-info-box">
 						<span class="label">Zdroj: </span>
-						<span class="value"><?= te($order['source'] ?: 'Nezadán') ?></span>
+						<span class="value"><?= te($order['source'] ? $order['source'] : 'Nezadán') ?></span>
 					</div>
 
 					<div class="wo-info-box">
 						<span class="label">Požadavek vznesl: </span>
-						<span class="value"><?= e($order['requested_by'] ?: 'Nezadán') ?></span>
+						<span class="value"><?= e($order['requested_by'] ? $order['requested_by'] : 'Nezadán') ?></span>
 					</div>
 
 					<div class="wo-info-box">
 						<span class="label">Kontakt: </span>
-						<span class="value"><?= e($order['contact_person'] ?: 'Nezadán') ?></span>
+						<span class="value"><?= e($order['contact_person'] ? $order['contact_person'] : 'Nezadán') ?></span>
 					</div>
 				</div>
 			</div>
@@ -129,12 +129,12 @@ $err = $view->errors;
         </div>
 
         <div class="card-footer">
-        <?php if (in_array($order['status'], ['new', 'in_progress'])): ?>
+        <?php if (in_array($order['status'], ['new', 'in_progress'], true)): ?>
             <a href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/edit/#main') ?>" class="btn btn-primary" title="Upravit zakázku">
                 ✏️ Upravit zakázku
             </a>
         <?php endif; ?>
-        <?php if (in_array($order['status'], ['new', 'in_progress'])): ?>
+        <?php if (in_array($order['status'], ['new', 'in_progress'], true)): ?>
             <a class="btn btn-secondary"
                         href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create/#main') ?>">
                         Přidat nový úkol k této zakázce
@@ -311,7 +311,7 @@ $err = $view->errors;
                 </div>
                 <div class="meta-item">
                     <span class="meta-label">Popis:</span>
-                    <span class="meta-value"><?= tx($task['description']) ?: 'Bez popisu' ?></span>
+                    <span class="meta-value"><?= tx($task['description'] ? $task['description'] : 'Bez popisu') ?></span>
                 </div>
 
                 <div class="meta-item">
@@ -321,7 +321,7 @@ $err = $view->errors;
 
                 <div class="meta-item">
                     <span class="meta-label">Reporty:</span>
-                    <span class="meta-value"><?= (int)($task['stats']['assignments_count'] ?? 0) ?></span>
+                    <span class="meta-value"><?= (int)($task['stats']['assignments_count']) ?></span>
                 </div>
                 <?php if ($task['task_type'] === 'recurring_master'): ?>
                     <div class="card-section">
@@ -362,7 +362,7 @@ $err = $view->errors;
                 <?php endif; ?>
 
                 <?php if ($canEdit) : ?>
-                    <?php if ($task['task_type'] <> 'recurring_instance'): ?>
+                    <?php if ($task['task_type'] !== 'recurring_instance'): ?>
 
                         <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
                         class="btn btn-secondary" 
@@ -412,7 +412,7 @@ $err = $view->errors;
 
                 <?php if (TaskType::isMaster($task['task_type']) 
                             && !$canEdit
-                            && in_array($task['status'], ['done', 'cancelled'])): ?>
+                            && in_array($task['status'], ['done', 'cancelled'], true)): ?>
                         <p>Tato šablona pro generování opakovaných úkolů již nemůže 
                             být upravována, protože byla uzavřena.
                         </p>

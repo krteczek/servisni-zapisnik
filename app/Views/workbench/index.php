@@ -16,7 +16,7 @@ $data = $view->data;
         <div class="card card-wb-teams">
             <details>
                 <summary>Moje týmy</summary>
-                <?php if (empty($data['myTeams'])): ?>
+                <?php if ($data['myTeams'] === ''): ?>
                     <p>Nejste členem žádného týmu.</p>
                 <?php else: ?>
                     <ul>
@@ -31,7 +31,7 @@ $data = $view->data;
         <div class="card card-wb-teams">
             <details>
                 <summary>Ostatní týmy</summary>
-                <?php if (empty($data['otherTeams'])): ?>
+                <?php if ($data['otherTeams'] === ''): ?>
                     <p>Neexistují žádné další týmy.</p> 
                 <?php else: ?>
                     <ul>

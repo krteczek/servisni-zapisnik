@@ -14,10 +14,11 @@ $user = $view->user ?? [];
 //print_r($user);
 
 
-if (!empty($user)): ?>
+if ($user !== []): ?>
 
 <?php
 $fullName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+$fullName = $fullName === '' ? 'Bez jména' : $fullName;
 
 $active = active($user);
 ?>
@@ -31,7 +32,7 @@ $active = active($user);
 
             <!-- HLAVIČKA S NÁZVEM A BADGEM -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 style="margin:0;"><?= e($fullName ?: '—') ?></h2>
+                <h2 style="margin:0;"><?= e($fullName) ?></h2>
                 <span class="badge badge-<?= e($active) ?>">
                     <?= te($active) ?>
                 </span>
@@ -64,7 +65,7 @@ $active = active($user);
                     <div style="font-size:1.1rem; font-weight:500;"><?= e($user['created_at']) ?></div>
                 </div>
 
-                <?php if (!empty($user['telefon'])): ?>
+                <?php if ($user['telefon'] !== null): ?>
                 <div>
                     <div style="font-size:0.85rem; color:#4b5563; margin-bottom:4px;">Telefon</div>
                     <div style="font-size:1.1rem; font-weight:500;"><?= e($user['telefon']) ?></div>
