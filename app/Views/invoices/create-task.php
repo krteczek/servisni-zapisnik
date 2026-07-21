@@ -12,7 +12,7 @@ $invoice   = $view->data['invoice'] ?? [];
 $workOrder = $view->data['workOrder'] ?? [];
 $customer  = $view->data['customer'] ?? [];
 $items     = $view->data['items'] ?? [];
-$errors    = $view->errors ?? [];
+$errors    = $view->errors;
 
 ?>
 

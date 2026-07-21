@@ -11,9 +11,9 @@ use App\Helpers\RecurringHelper;
 require __DIR__ . '/../layout/header.php';
 
 $task = $view->task;
-$data = $view->data ?? [];
-$team = $view->team ?? [];
-$order = $view->order ?? [];
+$data = $view->data;
+$team = $view->team;
+$order = $view->order;
 $errors = $view->errors; // chyby validace
 /**
  * RecurringDetail doplnit o další informace:

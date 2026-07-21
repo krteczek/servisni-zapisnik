@@ -132,14 +132,14 @@ final class InvoiceService
     }
     /**
      * Vytvoří fakturu z celé zakázky.
-     */
+     * /
     public function createFromWorkOrder(
         int $companyId,
         int $workOrderId,
         array $data
     ): int {
     }
-
+*/
 
 public function invoiceFromTask(
     int $taskId,
@@ -196,11 +196,7 @@ public function invoiceFromTask(
     // ULOŽENÍ
     // =====================
 
-    $invoiceId = $this->createInvoice(
-        [$task],
-        $workOrder,
-        $post
-    );
+    $invoiceId = $this->createInvoice($data);
 
     return [
         'success'    => true,
@@ -298,7 +294,8 @@ private function validateInvoiceData(array $post): array
     public function getDetail(
         int $companyId,
         int $invoiceId
-    ): ?array {
+    ): array {
+        return [];
     }
 
     /**
@@ -307,6 +304,7 @@ private function validateInvoiceData(array $post): array
     public function getInvoices(
         int $companyId
     ): array {
+         return [];
     }
 
     /**
@@ -327,32 +325,43 @@ private function validateInvoiceData(array $post): array
         int $companyId,
         int $invoiceId
     ): string {
+        return '';
     }
 
-    private function createInvoice(array $invoice): int
+    private function createInvoice(array $invoice): array
     {
+        return [
+            'ok' => true,
+            'invoice_id' => 123,
+        ];
     }
 
+    /*
     private function getTaskSnapshot(
         int $companyId,
         int $taskId
     ): array {
+         return [];
     }
 
     private function getWorkOrderSnapshot(
         int $companyId,
         int $workOrderId
     ): array {
+         return [];
     }
 
     private function getExportSnapshot(
         int $companyId,
         int $exportId
     ): array {
+        return [];
     }
 
     private function renderPdf(
         array $invoice
     ): string {
+        return '';
     }
+        */
 }

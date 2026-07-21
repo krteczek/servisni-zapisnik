@@ -66,12 +66,7 @@ abstract class BaseModel
      */
     protected string $tenantColumn = 'company_id';
 
-    /**
-     * Ochrana proti více souběžným transakcím
-     *
-     * @var int
-     */
-    private int $transactionLevel = 0;
+
     /**
      * Inicializuje model a sestaví finální název tabulky.
      *

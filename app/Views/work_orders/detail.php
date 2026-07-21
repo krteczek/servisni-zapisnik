@@ -12,7 +12,10 @@ use App\Core\Csrf;
 //use App\Core\Access;
 //use App\Models\Team;
 use App\Helpers\RecurringHelper;
+use App\Helpers\DateHelper;
 
+use App\Services\Tasks\TaskType;
+use App\Services\Tasks\TaskStatus;
 
 
 /** @var array[] $tasks */
@@ -245,11 +248,11 @@ $err = $view->errors;
         <?php
         $canCloseDone = $task['can_close'];
         $canCloseCanceled = $task['can_cancel'];
+
         $canEdit = true;
-        if ($task['status'] === 'done' || $task['status'] === 'cancelled') {
+        if(TaskStatus::isClosed($task['status'])) {
             $canEdit = false;
-        } 
-        
+        }
         ?>
         <div class="task-card card status-<?= e($task['status']) ?>" 
                 id="taskId_<?= (int)$task['id'] ?>" 
@@ -391,7 +394,7 @@ $err = $view->errors;
                 <?php if ($task['can_close'] && $task['status'] !== 'done') : ?>
                     <?php 
                     $url = '';
-                        if ((int)$task['task_type'] === 'recurring_master') {
+                        if (TaskType::isMaster($task['task_type'])) {
                             $url = '/{tenant}/tasks/' . $task['id'] . '/recurring-done/#main';
                         } else {
                             $url = '/{tenant}/tasks/' . $task['id'] . '/done/#main';
@@ -407,7 +410,7 @@ $err = $view->errors;
                 </form>
                 <?php endif; ?>
 
-                <?php if (((int)$task['task_type'] === 'recurring_master') 
+                <?php if (TaskType::isMaster($task['task_type']) 
                             && !$canEdit
                             && in_array($task['status'], ['done', 'cancelled'])): ?>
                         <p>Tato šablona pro generování opakovaných úkolů již nemůže 

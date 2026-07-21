@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Texy\\' => array($vendorDir . '/texy/texy/src/Texy'),
+    'PHPStan\\' => array($vendorDir . '/phpstan/phpstan-strict-rules/src', $vendorDir . '/phpstan/phpstan-deprecation-rules/src'),
     'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
     'App\\' => array($baseDir . '/app'),
 );

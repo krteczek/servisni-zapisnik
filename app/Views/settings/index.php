@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../layout/header.php';
 
-$data = $view->data ?? [];
+$data = $view->data;
 ?>
 
 <div class="settings-container" id="main">

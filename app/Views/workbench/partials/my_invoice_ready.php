@@ -52,7 +52,7 @@ if (!$data['isInternalBilling'] && !$data['isExternalAccounting']): ?>
                     <td><a href="<?=  Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main') ?>"><?= e($task['work_order_title'] ?? '-') ?></a></td>
                     <td><?= e($task['title']) ?></td>
                     <td><?= formatCzDate($task['done_at']) ?></td>
-                    <td><?= formatMinutes(((int) $task['total_minutes']) ?? 0) ?></td>
+                    <td><?= formatMinutes(((int) $task['total_minutes'])) ?></td>
                     <td><?= e($task['total_kilometers']) ?></td>
                     <td>
                         <?php if ($data['isInternalBilling']): ?>

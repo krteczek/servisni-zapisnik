@@ -404,7 +404,7 @@ private function myReadyToCancelTasks(array $teamIds): array
     return $this->fetchAll($sql, $params);
 }
 
-
+/*
 private function myReadyToDoneOrders(): array
 {
     $sql = 
@@ -439,6 +439,7 @@ private function myReadyToDoneOrders(): array
         Auth::id(),
     ]);
 }
+    */
 /*
     private function otherReadyToDoneOrders(array $teamIds): array
     {
