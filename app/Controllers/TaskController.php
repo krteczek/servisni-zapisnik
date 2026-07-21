@@ -18,6 +18,7 @@ use App\Core\Config;
 use App\Core\LoggerHolder;
 use App\Core\Transaction;
 use App\Helpers\DateHelper;
+use App\Services\Tasks\TaskType;
 
 use Throwable;
 
@@ -78,7 +79,7 @@ private function getOrderOrRedirect(?int $orderId): array
 private function saveTask(array $data, int $workOrderId): string
 {
     $this->checkCsrf();
-    $result = null;
+    $redirect  = '';
 
     // 1️⃣ Guard na zakázku
     $order = $this->getOrderOrRedirect($workOrderId);
@@ -106,7 +107,7 @@ private function saveTask(array $data, int $workOrderId): string
 
     try {
         // 3️⃣ TRANSACTION
-        $result = Transaction::run(function () use ($post, $teamId, $workOrderId) {
+        $redirect = Transaction::run(function () use ($post, $teamId, $workOrderId) {
 
             $taskModel = new TaskModel();
 
@@ -119,7 +120,7 @@ private function saveTask(array $data, int $workOrderId): string
                 'created_by_user_id'  => Auth::id(),
                 'is_recurring_master' => $post['is_recurring_master'],
                 'due_date'            => $post['due_date'],
-                'task_type'           => 'normal',
+                'task_type'           => TaskType::NORMAL,
             ]);
 
             if (!$taskId) {
@@ -154,22 +155,18 @@ private function saveTask(array $data, int $workOrderId): string
 
                 $updated = $taskModel->update($taskId, [
                     'recurring_task_id' => $recurringId,
-                    'task_type'         => 'recurring_master',
+                    'task_type'         => TaskType::RECURRING_MASTER,
                 ]);
 
                 if (!$updated) {
                     throw new \RuntimeException('Task update with recurring failed');
                 }
 
-                return [
-                    'redirect' => '/{tenant}/tasks/' . $taskId . '/recurring',
-                ];
+                return '/{tenant}/tasks/' . $taskId . '/recurring';
             }
 
             // default redirect
-            return [
-                'redirect' => '/{tenant}/work-orders/' . $workOrderId . '/detail/#taskId_' . $taskId,
-            ];
+            return '/{tenant}/work-orders/' . $workOrderId . '/detail/#taskId_' . $taskId;
         });
 
     } catch (Throwable $e) {
@@ -189,12 +186,8 @@ private function saveTask(array $data, int $workOrderId): string
         return $this->render('tasks/create');
     }
 
-    // 4️⃣ REDIRECT mimo transaction (SPRÁVNĚ)
-    if (!$result || !isset($result['redirect'])) {
-        return $this->render('tasks/create');
-    }
 
-    Url::redirect($result['redirect']);
+    Url::redirect($redirect);
 }
 
  
@@ -281,7 +274,7 @@ private function saveTask(array $data, int $workOrderId): string
         
         
 
-        if (!empty($task['task_type']) && $task['task_type'] === 'recurring_master') {
+        if (!empty($task['task_type']) && TaskType::isMaster($task['task_type'])) {
 
             Flash::info(
                 'Opakující se master úkol nelze tímto způsobem uzavřít ani zrušit. '

@@ -17,6 +17,7 @@ class ComposerStaticInit2185d2f99bcd56787481d9357a5972d3
         ),
         'P' =>
         array (
+            'PHPStan\\' => 8,
             'PHPMailer\\PHPMailer\\' => 20,
         ),
         'A' =>
@@ -29,6 +30,11 @@ class ComposerStaticInit2185d2f99bcd56787481d9357a5972d3
         'Texy\\' =>
         array (
             0 => __DIR__ . '/..' . '/texy/texy/src/Texy',
+        ),
+        'PHPStan\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/phpstan/phpstan-strict-rules/src',
+            1 => __DIR__ . '/..' . '/phpstan/phpstan-deprecation-rules/src',
         ),
         'PHPMailer\\PHPMailer\\' =>
         array (
