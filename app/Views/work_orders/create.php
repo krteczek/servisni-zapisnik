@@ -142,7 +142,7 @@ $teams = $view->teams;
                         <option value="">— bez zákazníka —</option>
                         <?php foreach ($view->contacts ?? [] as $c): ?>
                             <option value="<?= $c['id'] ?>"
-                                <?= (($data['contact_id'] ?? null) == $c['id']) ? 'selected' : '' ?>
+                                <?= (($data['contact_id'] ?? null) === $c['id']) ? 'selected' : '' ?>
                             >
                                 <?= e($c['company_name']) ?>
                             </option>
@@ -196,7 +196,7 @@ $teams = $view->teams;
                             <?php foreach ($teams as $team): ?>
                             <option 
                                 value="<?= $team['id'] ?>"
-                                <?= (($data['team_id'] ?? null) == $team['id']) ? 'selected' : '' ?>
+                                <?= (($data['team_id'] ?? null) === $team['id']) ? 'selected' : '' ?>
                                 >
                                 <?= e($team['name']) ?>
                             </option>

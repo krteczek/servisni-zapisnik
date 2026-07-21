@@ -14,9 +14,8 @@ require __DIR__ . '/../layout/header.php';
 $old    = $view->old;
 $errors = $view->errors;
 
-$fullName = trim(
-    ($old['first_name'] ?? '') . ' ' . ($old['last_name'] ?? '')
-);
+$fullName = trim(($old['first_name'] ?? '') . ' ' . ($old['last_name'] ?? ''));
+$fullName = $fullName === '' ? 'Bez jména' : $fullName;
 ?>
 
 
@@ -39,7 +38,7 @@ $fullName = trim(
             <h2 class="user-edit-title" style="margin-top:0; margin-bottom:1.5rem;">
                 Změna údajů uživatele
                 <span style="display:block; font-size:1.2rem; color:#4A6FA5;">
-                    <?= e($fullName ?: '—') ?>
+                    <?= e($fullName) ?>
                 </span>
             </h2>
 
@@ -139,7 +138,7 @@ $fullName = trim(
                             <label class="checkbox" style="display:flex; align-items:center; gap:8px;">
                                 <input type="checkbox"
                                        name="active"
-                                       <?= !empty($old['active']) ? 'checked' : '' ?>
+                                       <?= $old['active'] !== '' ? 'checked' : '' ?>
                                        style="width:auto;">
                                 <span>Aktivní účet</span>
                             </label>

@@ -13,9 +13,15 @@ $workOrders = $view->orders;
 
 
 <div class="entity-grid">
-    <?php foreach ($workOrders as $wo): ?>
+    <?php
+    if ($workOrders === []) {
+        echo '<p>Žádné zakázky k zobrazení.</p>';
+    } else {
+ 
+    
+    foreach ($workOrders as $wo): ?>
         <?php
-        if (!empty($wo['status']) && in_array($wo['status'], ['done', 'cancelled'])) {
+        if (in_array($wo['status'], ['done', 'cancelled'], true)) {
             continue; // přeskočíme zakázky s těmito statusy
         }
         ?>
@@ -76,11 +82,11 @@ $workOrders = $view->orders;
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Zákazník: </span>
-                        <span class="meta-value"><?= e($wo['customer_name'] ?: 'nezadán') ?></span>
+                        <span class="meta-value"><?= e($wo['customer_name'] ? $wo['customer_name'] : 'nezadán') ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Adresa: </span>
-                        <span class="meta-value"><?= e($wo['customer_address'] ?: 'nezadána') ?></span>
+                        <span class="meta-value"><?= e($wo['customer_address'] ? $wo['customer_address'] : 'nezadána') ?></span>
                     </div>
                </div>
             </div>
@@ -101,7 +107,10 @@ $workOrders = $view->orders;
                 </div>
             </div>
         </div>
-    <?php endforeach; ?>
+    <?php endforeach; 
+    }
+    ?>
+    
 </div>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>
