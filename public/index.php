@@ -21,7 +21,7 @@ use App\Core\Session;
 use App\Core\Config;
 use App\Core\Database;
 use App\Core\Auth;
-use App\Core\Url;
+use App\Core\Roles;
 use App\Services\Guards\BanService;
 
 
@@ -111,9 +111,6 @@ $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 
 $uri = parse_url($requestUri, PHP_URL_PATH);
 
-$uri = '/' . ltrim($uri, '/');
-$uri = rtrim($uri, '/') ?: '/';
-
 if (!is_string($uri) || $uri === '') {
 
     LoggerHolder::get()->warning(
@@ -133,12 +130,7 @@ if ($appBasePath !== ''
 }
 
 $uri = $uri ?: '/';
-var_dump([
-    'SCRIPT_NAME' => $_SERVER['SCRIPT_NAME'] ?? null,
-    'base' => Url::to('/'),
-    'register' => Url::to('/register'),
-]);
-exit;
+
 
 $routes = Config::get('routes');
 
