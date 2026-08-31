@@ -79,7 +79,7 @@ require __DIR__ . '/../../../public/css/deadline.css';
         <div class="identity-role"><?= e(Auth::effectiveRole()) ?></div>
     </div><!-- .identity -->
 <?php else: ?>
-    <a href="<?= Url::to('/login') ?>"  class="logo" title="Jít na přihlašovací formulář">博</a>
+    <a href="<?= Url::to('/') ?>"  class="logo" title="Jít na úvodní stránku">博</a>
 <?php endif; ?>
 
 

@@ -7,6 +7,11 @@ use App\Core\Controller;
 
 final class PageController extends Controller
 {
+	public function homepage(): string
+	{
+	    return $this->render('pages/homepage');
+	}
+
 	public function terms(): string
 	{
 	    return $this->render('pages/terms');

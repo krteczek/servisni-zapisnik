@@ -63,9 +63,19 @@ final class Router
         }
 
         // menu
+ 
+        $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+
+        if (!is_string($requestPath) || $requestPath === '') {
+            $requestPath = '/';
+        }
+
+        $requestPath = '/' . ltrim($requestPath, '/');
+        $requestPath = rtrim($requestPath, '/') ?: '/';
+
         $this->view->menu = Menu::build(
             $routes,
-            rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/'
+            $requestPath
         );
     }
 
@@ -87,7 +97,16 @@ final class Router
      */
     public function dispatch(string $uri, string $method): string
     {
-        $path = rtrim(parse_url($uri, PHP_URL_PATH), '/') ?: '/';
+        //$path = rtrim(parse_url($uri, PHP_URL_PATH), '/') ?: '/';
+
+        $parsedPath = parse_url($uri, PHP_URL_PATH);
+
+        if (!is_string($parsedPath) || $parsedPath === '') {
+            $parsedPath = '/';
+        }
+
+        $path = '/' . ltrim($parsedPath, '/');
+        $path = rtrim($path, '/') ?: '/';
 
         foreach ($this->routes as $route) {
 
