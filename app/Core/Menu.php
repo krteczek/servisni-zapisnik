@@ -50,6 +50,13 @@ final class Menu
                 continue;
             }
 
+            error_log('MENU: ' . json_encode([
+    'path' => $route['path'],
+    'menu' => $route['menu'] ?? null,
+    'section' => $route['section'] ?? null,
+    'url' => Url::to($route['path']),
+], JSON_UNESCAPED_UNICODE));
+
             $routePath = Url::to($route['path']);
             $section   = $route['section'] ?? $route['menu'] ?? $route['path'];
 
