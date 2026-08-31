@@ -113,7 +113,7 @@ $classes = [
         <?= Csrf::getField() ?><button type="submit"><?= e($section['label']) ?></button>
     </form>
 <?php else: ?>
-<a href="<?= $section['path'] ?>/#main"><?= e($section['label']) ?></a>
+<a href="<?= $section['path'] ?>#main"><?= e($section['label']) ?></a>
 <?php endif; ?>
 <?php if ($section['active'] && $hasSubmenu): ?>
             <ul class="submenu"><?php foreach ($section['items'] as $item): ?><li class="submenu-item <?= $item['active'] ? 'active' : '' ?>"><a href="<?= $item['path'] ?>/#main"><?= e($item['label']) ?></a></li><?php endforeach; ?></ul>
