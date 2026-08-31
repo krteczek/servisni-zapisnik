@@ -111,6 +111,9 @@ $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 
 $uri = parse_url($requestUri, PHP_URL_PATH);
 
+$uri = '/' . ltrim($uri, '/');
+$uri = rtrim($uri, '/') ?: '/';
+
 if (!is_string($uri) || $uri === '') {
 
     LoggerHolder::get()->warning(

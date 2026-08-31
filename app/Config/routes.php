@@ -14,7 +14,7 @@ use App\Controllers\PageController;
 use App\Controllers\TaskRecurringController;
 // use App\Controllers\BillingExportController;
 use App\Controllers\ContactsController;
-use App\Controllers\ExportsController;
+// use App\Controllers\ExportsController;
 use App\Controllers\ArchiveController;
 use App\Controllers\WorkbenchController;
 use App\Controllers\SettingsController;
@@ -27,7 +27,15 @@ return [
 | Veřejné stránky (cookies, podmínky použití...
 |--------------------------------------------------------------------------
 */
-
+[
+    'method' => 'GET',
+    'path'   => '/',
+    'action' => [PageController::class, 'homepage'],
+    'auth'   => false,
+    'title'  => 'Úvodní stránka',
+    'menu'    => 'Úvod',
+    'section' => 'homepage',
+],
 [
     'method' => 'GET',
     'path'   => '/pages/terms',
@@ -105,13 +113,14 @@ return [
 |--------------------------------------------------------------------------
 */
 
+/** zrušeno, máme novou homepage 
 [
     'method' => 'GET',
     'path'   => '/',
     'action' => [TaskController::class, 'index'],
     'auth'   => true,
 ],
-
+*/
 [
     'method' => 'GET',
     'path'   => '/login',
