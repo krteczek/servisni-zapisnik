@@ -2,12 +2,7 @@
 declare(strict_types=1);
 
 ob_start();
-var_dump([
-    'SCRIPT_NAME' => $_SERVER['SCRIPT_NAME'] ?? null,
-    'base' => Url::to('/'),
-    'register' => Url::to('/register'),
-]);
-exit;
+
 //define('BASE_PATH', '/servisni-zapisnik/public');
 //echo phpversion();exit;
 require dirname(__DIR__) . '/bootstrap.php';
@@ -138,7 +133,12 @@ if ($appBasePath !== ''
 }
 
 $uri = $uri ?: '/';
-
+var_dump([
+    'SCRIPT_NAME' => $_SERVER['SCRIPT_NAME'] ?? null,
+    'base' => Url::to('/'),
+    'register' => Url::to('/register'),
+]);
+exit;
 
 $routes = Config::get('routes');
 
