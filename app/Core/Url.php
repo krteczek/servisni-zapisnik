@@ -53,7 +53,35 @@ final class Url
      * @param string $path Relativní cesta (může obsahovat '/{tenant}' placeholder)
      * @return string Absolutní URL včetně basePath
      */
+
     public static function to(string $path = ''): string
+{
+    self::init();
+
+    // absolutní URL
+    if (
+        str_starts_with($path, 'http://')
+        || str_starts_with($path, 'https://')
+    ) {
+        return $path;
+    }
+
+    // tenant
+    if (str_starts_with($path, '/{tenant}')) {
+        $tenant = Auth::tenantSlug();
+
+        if ($tenant) {
+            $path = '/' . $tenant . substr($path, 9);
+        }
+    }
+
+    $base = rtrim(self::$basePath, '/');
+    $path = '/' . ltrim($path, '/');
+
+    return $base . $path;
+}
+
+    public static function toOLD(string $path = ''): string
 {
     self::init();
 
