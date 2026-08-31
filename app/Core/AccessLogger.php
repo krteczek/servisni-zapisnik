@@ -55,9 +55,10 @@ final class AccessLogger
         try {
             $model  = new AccessLogModel();
             $userId = Auth::check() ? Auth::id() : null;
-		      $ip     = Request::ip();
-		      //$us     = UserAgent::parse(Request::ua());
-		      $us     = Request::ua();
+		    $ip     = Request::ip();
+		    $us     = Request::ua();
+            $companyId = Auth::check() ? Auth::companyId() : null;
+
             $model->log([
                 'user_id'    => $userId,
                 'ip_address' => $ip,
@@ -65,6 +66,7 @@ final class AccessLogger
                 'path'       => $_SERVER['REQUEST_URI'] ?? '',
                 'method'     => $_SERVER['REQUEST_METHOD'] ?? '',
                 'user_agent' => $us,
+                'company_id' => $companyId,
             ]);
 
             if($type === self::TYPE_403 or $type === self::TYPE_404)
@@ -73,8 +75,7 @@ final class AccessLogger
                self::detectAbuse(
                            model:   $model,
                            type:    $type,
-                           ip:      $ip,
-                           userId:  $userId
+                           ip:      $ip
                            );
             }
 
@@ -104,17 +105,16 @@ final class AccessLogger
     private static function detectAbuse(
         AccessLogModel $model,
         int $type,
-        string $ip,
-        ?int $userId
+        string $ip
     ): void {
 
         $conf = Config::get('rateLimits');
         
         $count = $model->countRecent(
-                     type:    $type,
-                     userId:  $userId,
-                     minutes: $conf['SCANNING_WARNING']['time']
-               );
+            type:    $type,
+            ip:      $ip,
+            minutes: $conf['SCANNING_WARNING']['time']
+        );
 
         if ($count >= $conf['SCANNING_WARNING']['rate']) {
             Flash::error(
@@ -123,10 +123,10 @@ final class AccessLogger
             );
         }
         $count = $model->countRecent(
-                     type:    $type,
-                     userId:  $userId,
-                     minutes: $conf['SCANNING_BAN']['time']
-               );
+            type:    $type,
+            ip:      $ip,
+            minutes: $conf['SCANNING_BAN']['time']
+        );
 			
         if ($count >= $conf['SCANNING_BAN']['rate']) {
 

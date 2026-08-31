@@ -20,12 +20,19 @@ final class AccessLogModel extends BaseModel
     protected string $table = 'access_logs';
     protected string $connection = 'admin';
     protected bool $tenantAware = false;
+
+
     /**
      * Vytvoří nový záznam v access logu.
-     * Automaticky doplní tenant ID a timestamp.
+     *
+     * company_id a user_id mohou být NULL, protože access log
+     * zaznamenává i požadavky nepřihlášených návštěvníků.
+     *
+     * company_id je pouze kontextová informace, nikoliv tenant filtr.
+     *
      *
      * Očekává:
-     * - Pole $data obsahuje klíče: user_id, ip_address, type, path, method, user_agent
+     * - Pole $data obsahuje klíče: company_id, user_id, ip_address, type, path, method, user_agent
      * - user_id může být null (nepřihlášený uživatel)
      *
      * TODO: [PERFORMANCE] Při vysokém provozu zvážit batch insert nebo async logging
@@ -37,6 +44,7 @@ final class AccessLogModel extends BaseModel
     public function log(array $data): void
     {
         $this->create([
+            'company_id' => $data['company_id'] ?? null,
             'user_id'    => $data['user_id'] ?? null,
             'ip_address' => $data['ip_address'],
             'type'       => $data['type'],
@@ -65,6 +73,31 @@ final class AccessLogModel extends BaseModel
      * @return int Počet záznamů
      */
     public function countRecent(
+        int $type,
+        string $ip,
+        int $minutes
+    ): int {
+        $sql = "
+            SELECT COUNT(*)
+            FROM {$this->tableName}
+            WHERE type = :type
+            AND ip_address = :ip
+            AND created_at >= DATE_SUB(NOW(), INTERVAL :min MINUTE)
+        ";
+
+        $stmt = $this->db()->prepare($sql);
+
+        $stmt->bindValue(':type', $type, PDO::PARAM_INT);
+        $stmt->bindValue(':ip', $ip);
+        $stmt->bindValue(':min', $minutes, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+   
+
+    public function countRecentOLD(
         int $type,
         int $userId,
         int $minutes
