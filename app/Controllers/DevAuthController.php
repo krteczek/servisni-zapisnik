@@ -21,29 +21,17 @@ class DevAuthController extends Controller
     public function devLoginSet(string $role): void
     {
         $this->guardDevLogin();
-        $companyId = 27; // Default company ID for development
-        $id = 0;
-        switch ($role) {
-            case 'root':    
-                $email = 'user1@example.com';
-                break;
-            case 'admin':               
-                $email = 'krteczek01@gmail.com';
-                break;
-            case 'mistr':                
-                $email = 'user2@example.com';
-                break;
-            case 'predak':                
-                $email = 'koza@rohata.cz';
-                break;
-            default:                
-                $email = 'stana1983@email.cz';
-        }
 
+        $companyId = (int) Config::get('app.company_id');
+        $email = Config::get('app.dev_users.' . $role);
+
+        // dd([$companyId, $email]);
         $companyModel = new CompanyModel();
         $company = $companyModel->find($companyId);
+
         $userModel = new UserModel();
         $user = $userModel->findByEmailAndCompany($email, (int) $companyId);
+        
         if (!$user || !$company) {
             throw new \Exception('User or company not found for dev login.');
         }
