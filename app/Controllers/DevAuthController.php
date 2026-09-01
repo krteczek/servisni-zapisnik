@@ -14,7 +14,8 @@ use App\Models\UserModel;
 class DevAuthController extends Controller
 {
     public function devLoginIndex(): string
-    {        
+    {  
+        $this->guardDevLogin();      
         return $this->render('auth/dev-login-index');
     }
 
@@ -31,7 +32,7 @@ class DevAuthController extends Controller
 
         $userModel = new UserModel();
         $user = $userModel->findByEmailAndCompany($email, (int) $companyId);
-        
+
         if (!$user || !$company) {
             throw new \Exception('User or company not found for dev login.');
         }
