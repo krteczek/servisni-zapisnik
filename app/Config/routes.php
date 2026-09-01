@@ -19,8 +19,10 @@ use App\Controllers\ArchiveController;
 use App\Controllers\WorkbenchController;
 use App\Controllers\SettingsController;
 use App\Controllers\InvoiceController;
+use App\Controllers\DevAuthController;
 
 return [
+
 
 /*
 |--------------------------------------------------------------------------
@@ -138,8 +140,26 @@ return [
     'auth'   => false,
     'title'  => 'Přihlášení',
 ],
+/*
+|--------------------------------------------------------------------------
+| LOGIN PRO DEV PROSTŘEDÍ
+|--------------------------------------------------------------------------
+*/
+[
+    'method' => 'GET',
+    'path'   => '/dev-login-index',
+    'action' => [DevAuthController::class, 'devLoginIndex'],
+    'auth'   => false,
+    'title'  => 'Přihlášení pro DEV',
+],
 
-
+[
+    'method' => 'GET',
+    'path'   => '/dev-login-set/{role:[a-z]+}',
+    'action' => [DevAuthController::class, 'devLoginSet'],
+    'auth'   => false,
+    'title'  => 'Přihlášení pro DEV',
+],
 /*
 |--------------------------------------------------------------------------
 | TOKEN / AKTIVACE / RESET HESLA / bez Auth!
