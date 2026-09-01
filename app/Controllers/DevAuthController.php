@@ -64,7 +64,7 @@ class DevAuthController extends Controller
     private function guardDevLogin(): void
     {
         if (Config::get('app.auth_bypass', false) !== true) {
-            throw new \RuntimeException('DEV login is disabled.');
+            Url::redirect('/login');
         }
 
     }
