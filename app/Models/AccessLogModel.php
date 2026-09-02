@@ -68,7 +68,6 @@ final class AccessLogModel extends BaseModel
      * TODO: [FEATURE] Přidat variantu pro counting podle user_id
      *
      * @param int $type Typ události (403, 404, atd.)
-     * @param int $userId  id uživatele
      * @param int $minutes Časový interval v minutách
      * @return int Počet záznamů
      */

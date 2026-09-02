@@ -10,12 +10,20 @@ use App\Core\Url;
 
 class AuditLogController extends Controller
 {
+    /**
+     * Zobrazí seznam auditních záznamů podle zadaných filtrů.
+     *
+     * Filtry jsou načítány z GET parametrů:
+     * user_id, action, entity, from, to, ip, user_agent.
+     *
+     * @return string Vyrenderovaná stránka se seznamem auditních záznamů.
+     */
     public function index(): string
     {
         $filters = [
             'user_id'    => $_GET['user_id']    ?? null,
             'action'     => $_GET['action']     ?? null,
-            'entity'      => $_GET['entity']      ?? null,
+            'entity'     => $_GET['entity']     ?? null,
             'from'       => $_GET['from']       ?? null,
             'to'         => $_GET['to']         ?? null,
             'ip'         => $_GET['ip']         ?? null,
@@ -26,21 +34,28 @@ class AuditLogController extends Controller
 
         $this->view->data    = $logs;
         $this->view->filters = $filters;
-//var_dump($logs);
+
         return $this->render('admin/audit/index');
     }
 
-public function detail(int $id): string
-{
-    $log = (new AuditLogModel())->find($id);
+    /**
+     * Zobrazí detail auditního záznamu.
+     *
+     * @param int $id ID auditního záznamu.
+     *
+     * @return string Vyrenderovaná stránka s detailem auditního záznamu.
+     */
+    public function detail(int $id): string
+    {
+        $log = (new AuditLogModel())->find($id);
 
-    if (!$log) {
-        Flash::error('Audit záznam nebyl nalezen');
-        Url::redirect('/admin/audit/#main');
+        if ($log === null) {
+            Flash::error('Audit záznam nebyl nalezen');
+            Url::redirect('/admin/audit/#main');
+        }
+
+        $this->view->logs = $log;
+
+        return $this->render('admin/audit/detail');
     }
-
-    $this->view->logs = $log;
-
-    return $this->render('admin/audit/detail');
-}
 }
