@@ -18,7 +18,7 @@ $isActive = '';
 
 
 
-<?php if (empty($view->teams)): ?>
+<?php if ($view->teams === []): ?>
 
     <div class="ui-alert ui-alert-warning">
         <?php if ($mode === 'inactive'): ?>
@@ -63,7 +63,7 @@ $isActive = '';
                     <div class="meta-item">
                         <span class="meta-label-header">Členové</span>
                         <div class="meta-value">
-                            <?php if (empty($team['members'])): ?>
+                            <?php if ($team['members'] === []): ?>
                                 <span class="team-members-empty">Zatím nikdo</span>
                             <?php else: ?>
                                 <?php foreach ($team['members'] as $m): ?>

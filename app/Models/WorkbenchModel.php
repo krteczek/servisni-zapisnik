@@ -514,7 +514,7 @@ private function otherOrdersInProgress(): array
 
 private function myInvoiceToReady(array $teamIds): array
 {
-    if (!$teamIds) {
+    if ($teamIds ===[]) {
         return [];
     }
 

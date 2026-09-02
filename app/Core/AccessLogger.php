@@ -99,7 +99,6 @@ final class AccessLogger
      * @param AccessLogModel $model Instance modelu pro dotazy na logy
      * @param int $type Typ události
      * @param string $ip IP adresa klienta
-     * @param int|null $userId ID přihlášeného uživatele nebo null
      * @return void
      */
     private static function detectAbuse(
