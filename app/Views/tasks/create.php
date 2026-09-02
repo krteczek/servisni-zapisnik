@@ -71,7 +71,8 @@ $errors    = $view->errors;
             <?php foreach ($teams as $team): ?>
                 <option
                     value="<?= $team['id'] ?>"
-                    <?= (($post['team_id'] ?? null) == $team['id']) ? 'selected' : '' ?>
+					<?php /* přepsáno na dole (($post['team_id'] ?? null) == $team['id']) ? 'selected' : '' */ ?>
+                    <?= (($post['team_id'] ?? null) === $team['id']) ? 'selected' : '' ?>
                 >
                     <?= e($team['name'] ?? '') ?>
                 </option>
@@ -83,7 +84,9 @@ $errors    = $view->errors;
               <input type="checkbox"
                      name="is_recurring_master"
                      value="1"
-                     <?= !empty($post['is_recurring_master']) ? 'checked' : '' ?>
+                     <?php /* přepsáno na dole (!empty($post['is_recurring_master']) ? 'checked' : '') */ ?>
+					 <?= isset($post['is_recurring_master']) && $post['is_recurring_master'] === '1' ? 'checked' : '' ?>
+					 
                      style="width:auto;">
               <span>Opakující se úkol</span>
           </label>

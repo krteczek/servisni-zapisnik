@@ -26,13 +26,13 @@ $errors = $view->errors; // chyby validace
 			<div class="card-body">
 				<!-- START: zadaný úkol ke kterému jdeme přidávat reporty -->
 				<div class="task-detail">
-				    <?php if (!empty($task['title'])): ?>
+				    <?php if ($task['title'] === ''): ?>
 				        <div class="task-description card">
-								<h3><?= e($task['title']) ?></h3>
-				            <div class="card-body">
-				                <?= tx($task['description'] ?? '') ?: 'Nespecifikováno'; ?>
-				                
-				            </div>
+							<h3><?= e($task['title']) ?></h3>
+				            <?php $description = tx($task['description'] ?? ''); ?>
+							<div class="card-body">
+								<?= $description !== '' ? $description : 'Nespecifikováno'; ?>
+							</div>
 				        </div>
 				    <?php endif; ?>
 				</div>
@@ -40,7 +40,7 @@ $errors = $view->errors; // chyby validace
 
 				<!-- START: výpis chyb způsobených při vyplnování formuláře -->
             <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
-<?php if (in_array($task['status'], ['done', 'cancelled'])): ?>
+<?php if (in_array($task['status'], ['done', 'cancelled'], strict: true)): ?>
 
     <p class="ui-alert ui-alert-warning">
         Tento úkol je <?= ($task['status'] === 'done' ? 'uzavřený' : 'stornovaný') ?>, nelze k němu přidávat další reporty.
@@ -65,13 +65,11 @@ $errors = $view->errors; // chyby validace
 					                class="form-control" 
 					                rows="5"
 					            ><?= e($oldData['report'] ?? '') ?></textarea>
-					            <?php if (isset($errors['report'])): ?>
-					                <?php if (!empty($errors['report'])): ?>
-    									<?php foreach ((array)$errors['report'] as $msg): ?>
-        									<span class="error-message"><?= e($msg) ?></span><br>
-    									<?php endforeach; ?>
-									<?php endif; ?>
-					            <?php endif; ?>
+					            <?php if (isset($errors['report']) && is_array($errors['report'])): ?>
+									<?php foreach ($errors['report'] as $msg): ?>
+										<span class="error-message"><?= e($msg) ?></span><br>
+									<?php endforeach; ?>
+								<?php endif; ?>
 					        </div>
 					        
 					        <div class="form-group <?= isset($errors['kilometers']) ? 'has-error' : '' ?>">
@@ -97,13 +95,13 @@ $errors = $view->errors; // chyby validace
         <?php foreach ($teamMembers as $user): 
             $userId = $user['id'];
 
-            $checked = !empty($oldData['participants'][$userId]['selected']);
+            $checked = $oldData['participants'][$userId]['selected'] ?? false;
             $hours   = $oldData['participants'][$userId]['hours'] ?? '';
             $minutes = $oldData['participants'][$userId]['minutes'] ?? '';
 
             $userErrors = $errors['participants'][$userId] ?? [];
         ?>
-            <div class="member-row <?= !empty($userErrors) ? 'has-error' : '' ?>">
+			<div class="member-row <?= $userErrors !== [] ? 'has-error' : '' ?>">
 
                 <div class="member-checkbox">
                     <input 
@@ -148,7 +146,8 @@ $errors = $view->errors; // chyby validace
                 </div>
 
                 <!-- 🔥 chyby -->
-                <?php if (!empty($userErrors)): ?>
+                
+				<?php if ($userErrors !== []): ?>
                     <?php foreach ($userErrors as $msg): ?>
                         <span class="error-message"><?= e($msg) ?></span><br>
                     <?php endforeach; ?>
@@ -224,14 +223,16 @@ Pokud chcete přidat report, musíte se nejprve stát členem týmu, který má 
             			 
 							<?php $hours = 0; ?>
 							<h5 class="meta-label">Účastníci: </h5>
-							<?php if (!empty($report['participants'])): ?>
-                    		<?php foreach ($report['participants'] as $p): ?>
-                    			<span class="meta-value">
-                    				<?= e($p['first_name'] . ' ' . $p['last_name']); ?>:
-										<?= formatMinutes($p['minutes_spent']); ?>
-										<?php $hours += $p['minutes_spent']; ?>
-                    			</span><br>
-                    		<?php endforeach; ?>
+							
+							<?php if ($report['participants'] !== []): ?>
+    						
+								<?php foreach ($report['participants'] as $p): ?>
+									<span class="meta-value">
+										<?= e($p['first_name'] . ' ' . $p['last_name']); ?>:
+											<?= formatMinutes($p['minutes_spent']); ?>
+											<?php $hours += $p['minutes_spent']; ?>
+									</span><br>
+								<?php endforeach; ?>
 							<?php else: ?>
 								<span class="meta-value">Bez účasníků</span>
                    	<?php endif; ?>
