@@ -82,7 +82,7 @@ require __DIR__ . '/../layout/header.php';
                 <div>
                     <h3 class="subsection-title">V týmu</h3>
 
-                    <?php if (empty($view->members)): ?>
+                    <?php if ($view->members === []): ?>
                         <div class="empty-box">
                             V tomhle týmu nikdo není
                         </div>
@@ -136,7 +136,7 @@ require __DIR__ . '/../layout/header.php';
                 <div>
                     <h3 class="subsection-title">K dispozici</h3>
 
-                    <?php if (empty($view->availableUsers)): ?>
+                    <?php if ($view->availableUsers === []): ?>
                         <div class="empty-box">
                             Žádní další uživatelé
                         </div>

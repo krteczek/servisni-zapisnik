@@ -229,9 +229,10 @@ function a(array $user) : string
 
 
 
-function tx(?string $text): string
+function tx(string|int|float|bool|null $text): string
 {
-    if (!$text) {
+    $text = (string) $text;
+    if ($text === '') {
         return '';
     }
     static $texy = null;

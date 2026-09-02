@@ -11,7 +11,7 @@ $tasks = $view->data;
 //var_dump($tasks);
 ?>
 
-<?php if (empty($tasks)): ?>
+<?php if ($tasks === []): ?>
     <div class="ui-alert ui-alert-warning">
         <strong>Nemáte žádné úkoly</strong>
         <p>Zatím zde není žádný úkol. Nové úkoly můžete vytvořit vždy jen u <a href="<?= Url::to('/{tenant}/work-orders/#main') ?>">zakázek</a>.</p>
@@ -22,7 +22,7 @@ $tasks = $view->data;
     <?php foreach ($tasks as $task): ?>
         <?php
         $recurringBadge = '';
-        if(!empty($task['task_type']) && $task['task_type'] === 'recurring_instance') {
+        if ($task['task_type'] === 'recurring_instance') {
             $recurringBadge = '<span class="badge badge-recurring" title="Generovaný opakující se úkol">↻</span>';
         } 
         ?>
@@ -45,7 +45,7 @@ $tasks = $view->data;
             <!-- TĚLO KARTY -->
             <div class="card-body">
                 <div class="meta-list">
-                    <?php if (!empty($task['work_order_id'])): ?>
+                    <?php if ($task['work_order_id'] !== null): ?>
                         <div class="meta-item">
                             <span class="meta-label">Zakázka</span>
                             <span class="meta-value">
@@ -86,7 +86,7 @@ $tasks = $view->data;
             <!-- PATIČKA KARTY -->
             <div class="card-footer">
                 <div class="actions">
-                    <?php if ($task['task_type'] <> 'recurring_instance'): ?>
+                    <?php if ($task['task_type'] !== 'recurring_instance'): ?>
 
                         <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
                         class="btn btn-secondary" 
