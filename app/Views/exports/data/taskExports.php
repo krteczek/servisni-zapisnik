@@ -30,7 +30,7 @@ $tasks = $view->tasks ?? [];
 <!-- zobrazení chyb z validace  end -->
 <div class="grid gap-2">
 
-<?php if (!$tasks): ?>
+<?php if ($tasks === []): ?>
     <div class="p-2">Žádná data</div>
 <?php endif; ?>
 

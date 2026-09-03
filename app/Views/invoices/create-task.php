@@ -187,7 +187,7 @@ $errors    = $view->errors;
                                         type="checkbox"
                                         name="items[<?= $i ?>][visible_time]"
                                         value="1"
-                                        <?= !empty($item['visible_time']) ? 'checked' : '' ?>
+                                        <?= isset($item['visible_time']) ? 'checked' : '' ?>
                                     >
                                     Zobrazit čas na faktuře
                                 </label>
@@ -205,7 +205,7 @@ $errors    = $view->errors;
                                         type="checkbox"
                                         name="items[<?= $i ?>][visible_km]"
                                         value="1"
-                                        <?= !empty($item['visible_km']) ? 'checked' : '' ?>
+                                        <?= isset($item['visible_km']) ? 'checked' : '' ?>
                                     >
                                     Zobrazit km na faktuře
                                 </label>

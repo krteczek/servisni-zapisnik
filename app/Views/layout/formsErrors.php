@@ -5,7 +5,7 @@ declare(strict_types=1);
 $errors = $view->errors;
 //var_dump($errors);
 ?>
-<?php if (!empty($errors)): ?>
+<?php if ($errors !== []): ?>
     <div class="ui-alert ui-alert-danger">
         <ul style="margin:0;">
 
