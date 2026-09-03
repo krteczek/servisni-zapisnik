@@ -34,7 +34,7 @@ require __DIR__ . '/../layout/header.php';
                 <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
 
                 <!-- TENANT -->
-                <div class="form-group <?= !empty($view->errors['tenant']) ? 'has-error' : '' ?>">
+                <div class="form-group <?= isset($view->errors['tenant']) ? 'has-error' : '' ?>">
                     <label for="tenant">IČO Vaší firmy</label>
                     <input
                         class="form-control"
@@ -48,13 +48,13 @@ require __DIR__ . '/../layout/header.php';
                         value="<?= e($view->data['tenant'] ?? '') ?>"
                         required>
 
-                    <?php if (!empty($view->errors['tenant'])): ?>
+                    <?php if (isset($view->errors['tenant'])): ?>
                         <div class="error-message"><?= e($view->errors['tenant'][0]) ?></div>
                     <?php endif; ?>
                 </div>
 
                 <!-- EMAIL -->
-                <div class="form-group <?= !empty($view->errors['email']) ? 'has-error' : '' ?>">
+                <div class="form-group <?= ($view->errors['email'] ?? []) !== [] ? 'has-error' : '' ?>">
                     <label for="email">Email</label>
                     <input
                         class="form-control"
@@ -65,13 +65,13 @@ require __DIR__ . '/../layout/header.php';
                         value="<?= e($view->data['email'] ?? '') ?>"
                         required>
 
-                    <?php if (!empty($view->errors['email'])): ?>
+                    <?php if (($view->errors['email'] ?? []) !== []): ?>
                         <div class="error-message"><?= e($view->errors['email'][0]) ?></div>
                     <?php endif; ?>
                 </div>
 
                 <!-- PASSWORD -->
-                <div class="form-group <?= !empty($view->errors['password']) ? 'has-error' : '' ?>">
+                <div class="form-group <?= ($view->errors['password'] ?? []) !== [] ? 'has-error' : '' ?>">
                     <label for="password">Heslo</label>
                     <input
                         type="password"
@@ -82,7 +82,7 @@ require __DIR__ . '/../layout/header.php';
                         required
                     >
 
-                    <?php if (!empty($view->errors['password'])): ?>
+                    <?php if (($view->errors['password'] ?? []) !== []): ?>
                         <div class="error-message"><?= e($view->errors['password'][0]) ?></div>
                     <?php endif; ?>
                 </div>
