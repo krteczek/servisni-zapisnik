@@ -18,7 +18,7 @@ $errors = $view->errors;
 
 <a href="<?= Url::to('/{tenant}/exports/billing/create') ?>">+ Nový export</a>
 
-<?php if (empty($data)): ?>
+<?php if ($data === []): ?>
     <p>Žádné exporty</p>
 <?php else: ?>
 
