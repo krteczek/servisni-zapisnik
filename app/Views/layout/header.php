@@ -15,7 +15,7 @@ use App\Core\Session;
 <html lang="cs">
 <head>
     <meta charset="utf-8">
-    <title>Bó - <?= e($view->title ?: 'Servisní zápisník') ?></title>
+    <title>Bó - <?= e($view->title !== '' ? $view->title : 'Servisní zápisník') ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="<?= Url::to('/favicon_io/favicon.ico') ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
@@ -100,7 +100,7 @@ require __DIR__ . '/../../../public/css/deadline.css';
     <ul class="menu">
 <?php foreach ($view->menu as $section): ?>
 <?php
-$hasSubmenu = !empty($section['items']);
+$hasSubmenu = isset($section['items']);
 $classes = [
     'menu-item',
     $section['active'] ? 'active' : '',
@@ -125,5 +125,5 @@ $classes = [
 
 <!-- ================= MAIN ================= -->
 <main id="main" class="main">
-    <h1>Bó - <?= e($view->title ?: 'Servisní zápisník') ?></h1>
+    <h1>Bó - <?= e($view->title !== '' ? $view->title : 'Servisní zápisník') ?></h1>
     <?= Flash::display();?>
