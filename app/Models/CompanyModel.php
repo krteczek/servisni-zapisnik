@@ -107,7 +107,7 @@ final class CompanyModel extends BaseModel
     public function findAll(): array
     {
         return $this->fetchAll(
-            "SELECT id, name, slug, created_at
+            "SELECT *
              FROM {$this->tableName}
              ORDER BY name"
         );
@@ -132,5 +132,25 @@ public function existsByIco(string $ico): bool
     return (bool) $stmt->fetchColumn();
 }
 
-
+public function searchCompany(string $search): array
+{
+    $sql = "SELECT *
+            FROM {$this->tableName}
+            WHERE 
+                name LIKE :search 
+            OR 
+                slug LIKE :slug
+            OR 
+                ico LIKE :ico
+            ORDER BY name";
+    
+    $stmt = $this->db()->prepare($sql);
+    $stmt->execute([
+        'search' => '%' . $search . '%',
+        'slug' => '%' . $search . '%',
+        'ico' => '%' . $search . '%'
+    ]);
+    
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
