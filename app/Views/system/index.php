@@ -6,31 +6,50 @@ declare(strict_types=1);
 
 require __DIR__ . '/../layout/header.php';
 $companies = $view->companies;
+//dd($companies);
 ?>
 
-<?php if (empty($companies)): ?>
+<?php if (is_array($companies) && $companies === []): ?>
     <p><em>Zatím nejsou založeny žádné firmy.</em></p>
 <?php else: ?>
     <form method="get">
-        <input type="text" name="search" value="<?= e($view->search ?? '') ?>" placeholder="Hledat firmu...">
+        <input type="text" name="search" value="<?= e($view->search) ?>" placeholder="Hledat firmu...">
         <button type="submit">Hledat</button>
     </form>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Název</th>
                 <th>Slug</th>
+                <th>Jméno firmy</th>
+                <th>Název DataBáze</th>
+                <th>IČO</th>
+                <th>Aktivní?</th>
+                <th>Aktivováno</th>
+                <th>Onboarding start</th>
+                <th>Onboarding finich</th>
+                <th>Onboarding Status</th>
+                <th>Onboarding error</th>
                 <th>Vytvořeno</th>
             </tr>
         </thead>
         <tbody>
+
             <?php foreach ($companies as $company): ?>
                 <tr onclick="window.location='/system/companies/<?= (int)$company['id'] ?>'" style="cursor:pointer;">
-                    <td><?= (int) $company['id'] ?></td>
-                    <td><?= e($company['name']) ?></td>
+                    
+                    <td><?= (int) $company['id'] ?></th>
                     <td><?= e($company['slug']) ?></td>
-                    <td><?= date('d.m.Y H:i', strtotime($company['created_at'])) ?></td>
+                    <td><?= e($company['name']) ?></td>
+                    <td><?= e($company['db_name']) ?></td>
+                    <td><?= e($company['ico']) ?></td>
+                    <td><?= e($company['active']) ?></td>
+                    <td><?= e($company['activated_at']) ?></td>
+                    <td><?= e($company['onboarding_started_at']) ?></td>
+                    <td><?= e($company['onboarding_finished_at']) ?></td>
+                    <td><?= e($company['onboarding_status']) ?></td>
+                    <td><?= e($company['onboarding_error']) ?></td>
+                    <td><?= e($company['created_at']) ?></td>
                 </tr>
             <?php endforeach ?>
         </tbody>

@@ -12,8 +12,13 @@ final class SystemController extends Controller
 {
    public function index(): string
     {
-        $companies = (new CompanyModel())->findAll();
-			$this->view->companies = $companies;
+        if (isset($_GET['search'])) {
+            $this->view->companies = $this->searchCompany($_GET['search']);
+            $this->view->search = (string) $_GET['search'];
+        } else {
+            $this->view->companies = (new CompanyModel())->findAll();
+        }
+        
         return $this->render('system/index');
     }
     
@@ -38,4 +43,13 @@ final class SystemController extends Controller
         return $this->render('system/company/detail');
     }    
     
+    private function searchCompany(string $search): array
+    {
+        if (empty($search)) {
+            return [];
+        }
+
+        $companyModel = new CompanyModel();
+        return $companyModel->searchCompany($search);
+    }
 }

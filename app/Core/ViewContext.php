@@ -173,6 +173,8 @@ class ViewContext
     public string $type = '';
 
     public array $statuses = [];
+
+    public string $search = '';
     // TODO: [MAINTENANCE] Přidat __construct() pro nastavení výchozích hodnot
     // TODO: [TYPING] Zvážit použití typed properties s nullable pro všechny proměnné
 }
