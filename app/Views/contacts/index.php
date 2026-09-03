@@ -19,7 +19,7 @@ $errors = $view->errors;
 ?>
 
 <div class="entity-grid">
-<?php if(empty($data)): ?>
+<?php if($data === []): ?>
     <div class="users-empty">
         <strong>Žádní zákazníci</strong>
         <p>Zatím zde není žádný zákazník.</p>
@@ -42,36 +42,36 @@ $errors = $view->errors;
                 <div class="meta-list">
     						<div class="meta-item">
 								<span class="meta-label">IČO: </span>
-								<span class="meta-value"><?= e($d['ico'] ?: '-') ?></span>
+								<span class="meta-value"><?= e($d['ico'] ? $d['ico'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">DIČ: </span>
-								<span class="meta-value"><?= e($d['dic'] ?: '-') ?></span>
+								<span class="meta-value"><?= e($d['dic'] ? $d['dic'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Ulice: </span>
-								<span class="meta-value"><?= e($d['street']) ?></span>
+								<span class="meta-value"><?= e($d['street'] ? $d['street'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Město: </span>
-								<span class="meta-value"><?= e($d['city']) ?></span>
+								<span class="meta-value"><?= e($d['city'] ? $d['city'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">PSČ: </span>
-								<span class="meta-value"><?= e($d['zip']) ?></span>
+								<span class="meta-value"><?= e($d['zip'] ? $d['zip'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Stát: </span>
-								<span class="meta-value"><?= e($d['country']) ?></span>
+								<span class="meta-value"><?= e($d['country'] ? $d['country'] : '-') ?></span>
 							</div>
                    
                      <div class="meta-item">
                          <span class="meta-label">Email: </span>
-                         <span class="meta-value"><?= e($d['email'] ?: '-') ?></span>
+                         <span class="meta-value"><?= e($d['email'] ? $d['email'] : '-') ?></span>
                      </div>
    						<div class="meta-item">
 								<span class="meta-label">Telefon: </span>
-								<span class="meta-value"><?= e($d['phone'] ?: '-') ?></span>
+								<span class="meta-value"><?= e($d['phone'] ? $d['phone'] : '-') ?></span>
 							</div>
 						</div>
 					</div>

@@ -34,7 +34,7 @@ $errors = $view->errors;
 
 <h2>Položky</h2>
 
-<?php if (empty($data['items'])): ?>
+<?php if ($data['items'] === []): ?>
     <p>Žádné položky</p>
 <?php else: ?>
 

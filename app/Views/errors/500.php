@@ -11,10 +11,10 @@ Omlouváme se, došlo k technické chybě.
 Vývojář byl informován a pravděpodobně už pije kafe s výrazem „aha…“.
 </p>
 
-<?php if (!empty($view->exception)): ?>
+<?php if (isset($view->exception)): ?>
     <hr>
     <h3>Debug informace</h3>
-    <pre><?= e((string) $view->exception) ?></pre>
+    <pre><?= e($view->exception) ?></pre>
 
 <?php endif; ?>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
