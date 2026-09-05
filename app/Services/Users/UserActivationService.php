@@ -31,7 +31,7 @@ final class UserActivationService
 
     ): array {
 
-        if (!$password) {
+        if ($password === '') {
             return [
                 "ok" => false,
                 "result" => "Chybí nové heslo."
@@ -48,7 +48,7 @@ final class UserActivationService
 			                return $tokenData;
 			            }
 
-				        if (!$this->hasUser($tokenData)) {
+				        if ($this->hasUser($tokenData) === false) {
 				            return [
 				                "ok" => false,
 				                "result" => "Token neobsahuje uživatele."
@@ -57,15 +57,18 @@ final class UserActivationService
 				        $userId = (int)$tokenData["user_id"];
 
 				        $user = $this->userModel->findByIdWithoutTenant($userId);
-				        if (!$user) {
+				        if ($user === null) {
 				            return [
 				                "ok" => false,
 				                "result" => "Uživatel neexistuje."
 				            ];
 				        }
-							if (empty($user['company_id'])) {
-							    throw new \LogicException('User has no company_id');
-							}
+                        if (
+                            !isset($user['company_id'])
+                            || (int)$user['company_id'] === 0
+                        ) {
+                            throw new \LogicException('User has no company_id');
+    }
 
 				        TenantContext::set((int)$user['company_id']);
 
@@ -178,6 +181,7 @@ final class UserActivationService
 
     private function hasUser(array $token): bool
     {
-        return !empty($token['user_id']);
+        return $token['user_id'] !== null;
     }
+    
 }

@@ -53,7 +53,7 @@ final class UserPasswordResetService
 
         // 2️⃣ Najít firmu
         $company = $this->companyModel->findBySlug($tenantSlug);
-        if (!$company) {
+        if ($company === null) {
 				$ok = [
 					"ok" => false,
 					'result' => $this->message,
@@ -67,7 +67,7 @@ final class UserPasswordResetService
             (int)$company['id']
         );
 
-        if (!$user || (int)$user['active'] !== 1) {
+        if ($user === null || (int)$user['active'] !== 1) {
 				$ok = [
 					"ok" => false,
 					'result' => $this->message,
@@ -80,16 +80,7 @@ final class UserPasswordResetService
                   type:       TokenType::PASSWORD_RESET,
                   email:      $email,
                   userId:     (int)$user['id']
-        );//var_dump($token);
-        if (!$token)
-        {
-				$ok = [
-					"ok" => false,
-					'result' => $this->message,
-					];
-			    return $ok;
-
-        }
+        );
 
 
 
@@ -110,7 +101,7 @@ final class UserPasswordResetService
         html:     $html,
         text:     $text
         );
-        if (!$mail)
+        if ($mail === false)
         {
 				$ok = [
 					"ok" => false,
