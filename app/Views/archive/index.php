@@ -20,12 +20,12 @@ require __DIR__ . '/_filters.php';
 
             <?php
                 $recurringBadge = '';
-                if(!empty($task['task_type']) && TaskType::isInstance($task['task_type'])) {
+                if(isset($task['task_type']) && TaskType::isInstance($task['task_type'])) {
                     $recurringBadge = '<span 
                                             class="badge badge-recurring" 
                                             title="Vygenerovaný opakující se úkol"
                                             >↻</span>';
-                } elseif (!empty($task['task_type']) && TaskType::isMaster($task['task_type'])) {
+                } elseif (isset($task['task_type']) && TaskType::isMaster($task['task_type'])) {
                     $recurringBadge = '<span class="badge badge-recurring" 
                                             title="Generátor opakujícího se úkolu"
                                             >🔁</span>';
