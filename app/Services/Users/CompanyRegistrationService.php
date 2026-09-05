@@ -205,7 +205,7 @@ K téhle zakázce je systémem vytvořeno několik prvních úkolů pro seznáme
                 'created_by_user_id' => $data['user_id'],
             ]);
 
-            if (!$WOID) {
+            if ($WOID === false) {
                 return ['ok' => false];
             }
 
