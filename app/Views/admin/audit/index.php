@@ -29,15 +29,16 @@ require __DIR__ . '/../../layout/header.php';
 
     <tbody>
     
-    <?php
-    if (!empty($logs)):
+    <?php if ($logs === []): ?>
+        <tr>
+            <td colspan="8" style="text-align:center; padding:20px;">Žádné záznamy nenalezeny</td>
+        </tr>
+    <?php else: ?>
     
-    	foreach ($logs as $log): ?>
-        <?php
+        <?php foreach ($logs as $log): 
+        
             //$diff = json_decode($log['diff'] ?? '', true);
-            $diff = $log['diff']
-    ? json_decode($log['diff'], true)
-    : null;
+            $diff = $log['diff'] ? json_decode($log['diff'], true) : null;
         ?>
         <tr>
             <td><?= e($log['created_at']) ?></td>
@@ -53,7 +54,7 @@ require __DIR__ . '/../../layout/header.php';
             </td>
 
             <td>
-                <?php if (!$diff): ?>
+                <?php if ($diff === null || $diff === []): ?>
                     <em>– beze změn –</em>
                 <?php else: ?>
                     <ul style="margin:0; padding-left:16px">
@@ -83,13 +84,10 @@ require __DIR__ . '/../../layout/header.php';
             </td>
         </tr>
     <?php endforeach;?>
-    <?php else: ?>
-<tr>
-    <td colspan="8" style="text-align:center; padding:20px;">
-        Žádné záznamy nenalezeny
-    </td>
-</tr>
-<?php endif; ?>
+    
+
+
+    <?php endif; ?>
 		
 
     </tbody>

@@ -53,7 +53,7 @@ $diff = $log['diff']
 
 <h3>Změny</h3>
 
-<?php if (empty($diff)): ?>
+<?php if ($diff === null || $diff === []): ?>
     <p><em>Žádné změny</em></p>
 <?php else: ?>
     <table border="1" cellpadding="6" cellspacing="0" style="max-width:1100px">

@@ -29,7 +29,7 @@ $err = $view->errors;
                 <?= Csrf::getField() ?>
 
                 <!-- EMAIL -->
-                <div class="form-group <?= !empty($err['email']) ? 'has-error' : '' ?>">
+                <div class="form-group <?= isset($err['email']) ? 'has-error' : '' ?>">
                     <label>Email</label>
                     <input
                         type="email"
@@ -39,13 +39,13 @@ $err = $view->errors;
                         required
                     >
 
-                    <?php if (!empty($err['email'])): ?>
+                    <?php if (isset($err['email'])): ?>
                         <div class="error-message"><?= e($err['email'][0]) ?></div>
                     <?php endif; ?>
                 </div>
 
                 <!-- TENANT -->
-                <div class="form-group <?= !empty($err['tenant']) ? 'has-error' : '' ?>">
+                <div class="form-group <?= isset($err['tenant']) ? 'has-error' : '' ?>">
                     <label>Pracovní prostor</label>
                     <input
                         type="text"
@@ -56,7 +56,7 @@ $err = $view->errors;
                         required
                     >
 
-                    <?php if (!empty($err['tenant'])): ?>
+                    <?php if (isset($err['tenant'])): ?>
                         <div class="error-message"><?= e($err['tenant'][0]) ?></div>
                     <?php endif; ?>
                 </div>
