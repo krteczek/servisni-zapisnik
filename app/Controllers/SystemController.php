@@ -40,7 +40,7 @@ final class SystemController extends Controller
         $this->view->company = $company;
         $this->view->users   = $users;
 
-        return $this->render('system/company/detail');
+        return $this->render('system/detail');
     }    
     
     private function searchCompany(string $search): array
