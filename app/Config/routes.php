@@ -1089,9 +1089,10 @@ Přepínaní rolí u admina
     'action' => [SystemController::class, 'index'],
     'roles'  => ['root'],
     'menu'   => 'Administrace',
-    'submenu'=> 'Systém',
+    'submenu'=> 'Firemní účty',
     'section'=> 'system',
     'auth'   => true,
+    'title'  => 'Firemní účty: Výpis',
 ],
 
 [
@@ -1099,7 +1100,9 @@ Přepínaní rolí u admina
     'path'   => '/{tenant}/system/companies/{id}',
     'action' => [SystemController::class, 'companyDetail'],
     'roles'  => ['root'],
+    'section'=> 'system',
     'auth'   => true,
+    'title'  => 'Firemní účty: Výpis',
 ],
 
 [
@@ -1135,9 +1138,6 @@ Přepínaní rolí u admina
     'path'   => '/{tenant}/system/settings/billing',
     'action' => [SettingsController::class, 'saveBilling'],
     'roles'  => ['admin'],
-    'menu'   => 'Administrace',
-    'submenu'=> 'Nastavení',
-    'section'=> 'admin',
     'auth'   => true,
 ],
 

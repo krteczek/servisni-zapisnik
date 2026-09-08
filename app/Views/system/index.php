@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use App\Core\Url;
+
 /** @var \App\Core\ViewContext $view */
 
 
@@ -40,7 +42,7 @@ $companies = $view->companies;
                     
                     <td><?= (int) $company['id'] ?></th>
                     <td><?= e($company['slug']) ?></td>
-                    <td><?= e($company['name']) ?></td>
+                    <td><a href="<?= Url::to('/{tenant}/system/companies/' . (int)$company['id']); ?>"><?= e($company['name']) ?></a></td>
                     <td><?= e($company['db_name']) ?></td>
                     <td><?= e($company['ico']) ?></td>
                     <td><?= e($company['active']) ?></td>
