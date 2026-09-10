@@ -33,6 +33,11 @@ class ViewContext
      * @var bool Stav přihlášení uživatele
      */
     public bool $isLogged = false;
+    
+    /**
+     * @var Router Router aktuální aplikace
+     */
+    public Router $router;
 
     /**
      * @var string CSRF token pro formuláře

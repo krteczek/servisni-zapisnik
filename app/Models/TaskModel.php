@@ -7,6 +7,7 @@ use DateTime;
 use App\Core\Auth;
 use App\Core\Roles;
 use App\Services\Tasks\TaskType;
+use App\Services\Tasks\TaskStatus;
 
 final class TaskModel extends BaseModel
 {
@@ -286,7 +287,7 @@ public function canUserAddReport(int $taskId, int $userId): bool
         FROM tasks t
         WHERE t.id = :task_id
           AND t.company_id = :company_id
-          AND t.status = 'open'
+          AND t.status = :taskStatus
           AND EXISTS (
                 SELECT 1
                 FROM team_memberships tmu
@@ -301,6 +302,7 @@ public function canUserAddReport(int $taskId, int $userId): bool
     $params = [
         'task_id'               => $taskId,
         'company_id'            => $companyId,
+        'taskStatus'            => TaskStatus::OPEN,
         'user_id'               => $userId,
         'company_id_membership' => $companyId,
     ];

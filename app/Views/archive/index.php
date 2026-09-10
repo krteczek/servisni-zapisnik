@@ -71,9 +71,9 @@ require __DIR__ . '/_filters.php';
                 <div class="card-footer">
                     <div class="actions">
 
-                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>"
+                        <a href="<?= Url::to('/{tenant}/archive/task/' . (int)$task['id'] . '/reports/#main') ?>"
                         class="btn btn-secondary">
-                            🔍 Detail + reporty
+                            🔍 Archiv (Detail + reporty)
                         </a>
                         <?php if ($task['work_order_status'] === 'new' || $task['work_order_status'] === 'in_progress') : ?>
                             <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/clone/#main') ?>"

@@ -10,6 +10,8 @@ use App\Models\TeamModel;
 use App\Models\WorkOrderModel;
 use App\Models\AssignmentModel;
 use App\Models\RecurringTaskModel;
+use App\Services\Tasks\TaskStatus;
+use App\Services\WorkOrders\WOStatus;
 use App\Core\Url;
 use App\Core\Flash;
 use App\Core\Auth;
@@ -52,6 +54,40 @@ class ArchiveController extends Controller
 
         return $this->render('archive/index');
     }
+
+
+    public function detailTaskAndReports(int $taskId): string
+    {
+        // získáme task
+        $task = (new TaskModel())->find($taskId);
+        if($task === []) {
+            Flash::error('Požadovaný úkol nebyl nalezen. Nejspíše neexistuje.');
+            Url::redirect('/{tenant}/archive/tasks/#main');
+        }
+
+        //získáme reporty
+        $reports = [];
+        $task['allReportsParticipants'] = [];
+        $wo = (new WorkOrderModel())->find($task['work_order_id']);
+        $task['WOStatus'] = $wo['status'];
+        $task['totalKm'] = 0;
+        if(TaskStatus::isDone($task["status"])) {
+            //získáme reporty podle id tasku
+            $model = new AssignmentModel();
+            $reports = $model->findByTask($taskId);
+            $task['allReportsParticipants'] = $model->getTaskParticipants($taskId);
+            $task['totalKm'] = $model->getTaskTotalKilometers($taskId);
+            
+        }
+
+         // přiřadíme proměnnym ve view hodnoty 
+        $this->view->task = $task;
+        $this->view->reports = $reports;
+
+
+        return $this->render('archive/detailTask');
+    }
+
 
     public function workOrders(): string
     {

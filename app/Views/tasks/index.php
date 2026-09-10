@@ -95,7 +95,7 @@ $tasks = $view->data;
                         </a>
                     <?php endif; ?>
                     <?php if($task['can_add_report'] === true): ?>
-                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>" 
+                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/add-report/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Přidat report k tomuto úkolu">
                         📝 Napsat Report

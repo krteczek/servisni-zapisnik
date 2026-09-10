@@ -16,7 +16,7 @@ use App\Helpers\DateHelper;
 
 use App\Services\Tasks\TaskType;
 use App\Services\Tasks\TaskStatus;
-
+use App\Services\WorkOrders\WOStatus;
 
 /** @var array[] $tasks */
 $order = $view->order;
@@ -129,12 +129,12 @@ $err = $view->errors;
         </div>
 
         <div class="card-footer">
-        <?php if (in_array($order['status'], ['new', 'in_progress'], true)): ?>
+        <?php if (WOStatus::isOpen($order['status'])): ?>
             <a href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/edit/#main') ?>" class="btn btn-primary" title="Upravit zakázku">
                 ✏️ Upravit zakázku
             </a>
         <?php endif; ?>
-        <?php if (in_array($order['status'], ['new', 'in_progress'], true)): ?>
+        <?php if (WOStatus::isOpen($order['status'])): ?>
             <a class="btn btn-secondary"
                         href="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/tasks/create/#main') ?>">
                         Přidat nový úkol k této zakázce
@@ -155,7 +155,7 @@ $err = $view->errors;
         <?php endif; ?>
 
 
-        <?php if($order['ready_for_cancel']): ?>
+        <?php if($order['ready_for_cancel'] && WOStatus::isOpen($order['status'])): ?>
             <form method="post"
                 action="<?= Url::to('/{tenant}/work-orders/' . $order['id'] . '/close/canceled') ?>"
                 data-confirm="Opravdu chcete zakázku stornovat?"
@@ -352,12 +352,39 @@ $err = $view->errors;
 
             <div class="card-footer">
                 <?php if (!$task['is_recurring_master']): ?>
+
+                    <?php
+                        // musíme rozlišit, jestli je úkol 
+                        // ukončen/zrušen nebo je živý, podle toho
+                        // zobrazíme odkazy
+                        $url =  "";
+                        $text1 = "";
+                        $text2 = "";
+                        if(TaskStatus::isDone($task['status'])) {
+                            $url =  Url::to('/{tenant}/archive/tasks/' . $task['id'] . '/#main');
+                            $text1 = "do archivu";
+                            $text2 = "Archiv úkolu s reporty";
+
+                        } elseif (TaskStatus::isCancelled($task['status'])) {
+                            $url =  Url::to('/{tenant}/archive/tasks/' . $task['id'] . '/#main');
+                            $text1 = "do archivu";
+                            $text2 = "Archiv zrušeného úkolu bez reportů";
+
+
+                        
+                        } else {
+                            $url =  Url::to('/{tenant}/tasks/' . $task['id'] . '/add-report/#main');
+                            $text1 = "na detail";
+                            $text2 = "Detail + reporty";
+                        }
+
+                    ?>
                     <!-- detail úkolu a reporty jsou přístupné jen 
                     pro úkoly, které nejsou master úkoly pro opakování -->
                 <a class="btn btn-sm btn-secondary"
-                href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>"
-                title="Jít na detail úkolu a reporty">
-                Detail + reporty
+                href="<?= $url ?>"
+                title = "Jít <?= $text1 ?> tohoto úkolu a reporty">
+                <?= $text2 ?>
                 </a>
                 <?php endif; ?>
 

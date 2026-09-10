@@ -308,3 +308,24 @@ function dc(mixed ...$vars): void
     echo '</pre>';
 
 }
+
+function uniqueUsernames(array $participants): array
+{
+    $userNames = [];
+
+    foreach ($participants as $participant) {
+        $userId = (int) ($participant['user_id'] ?? 0);
+
+        if ($userId === 0) {
+            continue;
+        }
+
+        $userNames[$userId] = trim(
+            ($participant['first_name'] ?? '') . ' ' .
+            ($participant['last_name'] ?? '')
+        );
+    }
+
+    return $userNames;
+}
+
