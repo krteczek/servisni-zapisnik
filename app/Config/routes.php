@@ -1088,8 +1088,82 @@ Přepínaní rolí u admina
     'auth'          => true,
 ],
 
+/*
+|--------------------------------------------------------------------------
+| ADMIN / SYSTEM
+|--------------------------------------------------------------------------
+*/
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system',
+    'action' => [SystemController::class, 'index'],
+    'roles'  => ['root'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Firemní účty',
+    'section'=> 'system',
+    'auth'   => true,
+    'title'  => 'Firemní účty: Výpis',
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/companies/{id}',
+    'action' => [SystemController::class, 'companyDetail'],
+    'roles'  => ['root'],
+    'section'=> 'system',
+    'auth'   => true,
+    'title'  => 'Firemní účty: Výpis',
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/admin/audit',
+    'action' => [AuditLogController::class, 'index'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Audit log',
+    'section'=> 'admin',
+    'auth'   => true,
+],
 
 
+/*
+|--------------------------------------------------------------------------
+| ADMIN / Settings
+|--------------------------------------------------------------------------
+*/
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/settings',
+    'action' => [SettingsController::class, 'index'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Nastavení',
+    'section'=> 'admin',
+    'auth'   => true,
+],
 
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing',
+    'action' => [SettingsController::class, 'saveBilling'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+],
+
+/*
+|--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+*/
+
+[
+    'method' => 'POST',
+    'path'   => '/logout',
+    'action' => [AuthController::class, 'logout'],
+    'auth'   => true,
+    'menu'   => 'Odhlásit',
+],
 
 ];

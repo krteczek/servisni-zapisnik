@@ -42,35 +42,43 @@ final class TaskModel extends BaseModel
     }
     /**
      * Obecná validační metoda
+     * Lze uzavřít task? 
+     * 1. jen tehdy, když status je open
+     * 2. jestli má nějaké reporty tak done
+     * 3. pokud nemá report, cancelled
      */
-public function canBeClosed(array $task, string $newStatus): bool
-{
-    if ($task['status'] !== 'open') {
+    public function canBeClosed(array $task, string $newStatus): bool
+    {
+        if (TaskStatus::isClosed($task['status'])) {
+            return false;
+        }
+
+        $statsMap = $this->statsForTasks([(int)$task['id']]);
+        $stats = $statsMap[(int)$task['id']];
+
+        if (TaskStatus::isDone($newStatus)) {
+            return $this->canBeDone($stats);
+        }
+
+        if (TaskStatus::isCancelled($newStatus)) {
+            return $this->canBeCancelled($stats);
+        }
+
         return false;
     }
 
-    $statsMap = $this->statsForTasks([(int)$task['id']]);
-    $stats = $statsMap[(int)$task['id']];
+    private function canBeDone(array $stats): bool
+    {
+        return $stats['assignments_count'] > 0;
+    }
 
-    return match ($newStatus) {
-        'done'      => $this->canBeDone($stats),
-        'cancelled' => $this->canBeCancelled($stats),
-        default     => false,
-    };
-}
-
-private function canBeDone(array $stats): bool
-{
-    return $stats['assignments_count'] > 0;
-}
-
-private function canBeCancelled(array $stats): bool
-{
-    return $stats['assignments_count'] === 0;
-}
+    private function canBeCancelled(array $stats): bool
+    {
+        return $stats['assignments_count'] === 0;
+    }
 
 
-    public function closeRecurringTask(int $taskId, string $newStatus = 'done'): bool
+    public function closeRecurringTask(int $taskId, string $newStatus = TaskStatus::DONE): bool
     {        
         $task = $this->findById($taskId);
 
@@ -82,11 +90,11 @@ private function canBeCancelled(array $stats): bool
             'status' => $newStatus,
         ];
 
-        if ($newStatus === 'done') {
+        if (TaskStatus::isDone($newStatus)) {
             $data['done_at'] = (new DateTime())->format('Y-m-d H:i:s');
         }
 
-        if ($newStatus === 'cancelled') {
+        if (TaskStatus::isCancelled($newStatus)) {
             $data['done_at'] = null;
         }
 
@@ -110,11 +118,11 @@ private function canBeCancelled(array $stats): bool
             'status' => $newStatus,
         ];
 
-        if ($newStatus === 'done') {
+        if (TaskStatus::isDone($newStatus)) {
             $data['done_at'] = (new DateTime())->format('Y-m-d H:i:s');
         }
 
-        if ($newStatus === 'cancelled') {
+        if (TaskStatus::isCancelled($newStatus)) {
             $data['done_at'] = null;
         }
 
@@ -130,11 +138,12 @@ private function canBeCancelled(array $stats): bool
             "SELECT *
              FROM {$this->tableName}
              WHERE team_id = :team_id
-               AND status = 'open'
+               AND status = :taskStatus
                AND company_id = :company_id
              ORDER BY created_at DESC",
             [
                 'team_id' => $teamId,
+                'taskStatus' => TaskStatus::OPEN,
                 'company_id' => $this->tenantId()
             ]
         );
@@ -153,13 +162,15 @@ public function forIndex(?int $filterUserId = null): array
     $isManagement = Roles::isManagement($role);
 
     $params = [
+        'status_open_a'          => TaskStatus::OPEN,
         'company_id_t'         => $companyId,
         'company_id_w'         => $companyId,
         'company_id_tm'        => $companyId,
         'company_id_ta'        => $companyId,
         'company_id_perm'      => $companyId,
         'current_user_id_perm' => $userId,
-        'status'               => 'open',
+        'status_open_b'        => TaskStatus::OPEN,
+        'recurring_master'     => TaskType::RECURRING_MASTER
     ];
 
 
@@ -183,7 +194,7 @@ $sql =
 
         -- oprávnění na report
         CASE
-            WHEN t.status = 'open'
+            WHEN t.status = :status_open_a
                  AND EXISTS (
                     SELECT 1
                     FROM team_memberships tmu2
@@ -222,8 +233,8 @@ $sql =
 
     WHERE
         t.company_id = :company_id_t
-        AND t.status = :status
-        AND t.task_type <> 'recurring_master'
+        AND t.status = :status_open_b
+        AND t.task_type <> :recurring_master
 ";
 
     /*
@@ -346,13 +357,15 @@ public function forWorkOrderWithStats(int $orderId): array
             AND t.{$this->tenantColumn} = :tenant
 
         ORDER BY
-            t.status IN ('done','cancelled'),
+            t.status IN (:taskStatusDone, :taskStatusCancelled),
             t.created_at DESC
     ";
 
     $tasks = $this->fetchAll($sql, [
-        'order'  => $orderId,
-        'tenant' => $this->tenantId(),
+        'order'                 => $orderId,
+        'tenant'                => $this->tenantId(),
+        'taskStatusDone'        => TaskStatus::DONE,
+        'taskStatusCancelled'   => TaskStatus::CANCELLED
     ]);
 
     if ($tasks === []) {
@@ -564,7 +577,10 @@ $sql =
             $sql .= " AND t.status = ?";
             $params[] = $filters['status'];
         } else {
-            $sql .= " AND t.status IN ('done','cancelled')";
+            $sql .= " AND t.status IN (?, ?)";
+            $params[] = TaskStatus::DONE;
+            $params[] = TaskStatus::CANCELLED;
+
         }
 
         // search
