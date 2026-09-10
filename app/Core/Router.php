@@ -53,6 +53,7 @@ final class Router
 
         $this->view->user     = $user;
         $this->view->isLogged = $user !== null;
+        $this->view->router   = $this;//pošleme instanci routeru do view. potřebná pro volání isAllowedRoute()
 
         foreach ($routes as $route) {
             $this->routes[] = [
@@ -125,12 +126,11 @@ final class Router
             }
 
             // roles
-            if (!empty($route['roles']) && !Auth::hasGlobalRole($route['roles'])) {
-            	 AccessLogger::log(AccessLogger::TYPE_404);
+            if (!$this->checkRouteAccess($route)) {
+                AccessLogger::log(AccessLogger::TYPE_404);
                 return (new ErrorController($this->view))->forbidden();
             }
-
-            // params
+                        // params
             $params = [];
             foreach ($matches as $k => $v) {
                 if (is_string($k)) {
@@ -294,4 +294,51 @@ final class Router
             );
         }        
     }
+
+    /**
+     * Určuje, zda má aktuální uživatel přístup k dané routě.
+     *
+     * Vyhledá routu podle URI a následně ověří její požadavky
+     * na autentizaci a uživatelskou roli.
+     *
+     * @param string $uri URI cesty
+     * @return bool TRUE pokud je routa uživateli povolena
+     */
+    public function isAllowedRoute(string $uri): bool
+    {
+        $parsedPath = parse_url($uri, PHP_URL_PATH);
+
+        if (!is_string($parsedPath) || $parsedPath === '') {
+            return false;
+        }
+
+        $path = '/' . ltrim($parsedPath, '/');
+        $path = rtrim($path, '/') ?: '/';
+
+        foreach ($this->routes as $route) {
+            if (!preg_match($route['regex'], $path)) {
+                continue;
+            }
+
+            return $this->checkRouteAccess($route);
+        }
+
+        return false;
+    }
+
+    /**
+     * Ověří autentizaci a role požadované konkrétní routou.
+     *
+     * @param array $route Konfigurace routy
+     * @return bool TRUE pokud je přístup povolen
+     */
+    private function checkRouteAccess(array $route): bool
+    {
+        if (!empty($route['roles']) && !Auth::hasGlobalRole($route['roles'])) {
+            return false;
+        }
+
+        return true;
+    }
+ 
 }

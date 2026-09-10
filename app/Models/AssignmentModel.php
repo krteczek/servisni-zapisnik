@@ -5,6 +5,7 @@ namespace App\Models;
 
 use App\Core\Auth;
 use App\Core\Transaction;
+use App\Models\UserModels;
 
 final class AssignmentModel extends BaseModel
 {
@@ -38,33 +39,60 @@ final class AssignmentModel extends BaseModel
         foreach ($reports as &$report) {
             $report['participants'] = $this->getParticipants($report['id']);
         }
-        
+        unset($report);
         return $reports;
     }
 
     /**
      * Načte účastníky pro konkrétní report
      */
-    private function getParticipants(int $assignmentId): array
+    private function getParticipants(int $assignmentId): array 
     {
         $sql = "
-            SELECT 
+            SELECT *
+            FROM task_assignment_participants
+            WHERE assignment_id = :assignment_id
+            AND company_id = :company_id
+
+            ";
+            return $this->fetchAll($sql, [
+                'assignment_id' => $assignmentId,
+                'company_id' => $this->tenantId()
+            ]);
+    }
+   /**
+     * Načte účastníky všech reportů daného úkolu a spočítá jim čas strávený na úkole
+     */
+
+    public function getTaskParticipants(int $taskId): array
+    {
+        $sql = "
+            SELECT
                 tap.user_id,
-                tap.minutes_spent,
-                u.first_name,
-                u.last_name
+                tap.first_name,
+                tap.last_name,
+                SUM(tap.minutes_spent) AS minutes_spent
             FROM task_assignment_participants tap
-            LEFT JOIN users u ON u.id = tap.user_id
-            WHERE tap.assignment_id = :assignment_id
-                AND tap.company_id = :company_id
-            ORDER BY u.last_name, u.first_name
+            JOIN task_assignments ta
+                ON ta.id = tap.assignment_id
+            AND ta.company_id = tap.company_id
+            WHERE ta.task_id = :task_id
+            AND ta.company_id = :company_id
+            GROUP BY
+                tap.user_id,
+                tap.first_name,
+                tap.last_name
+            ORDER BY
+                tap.last_name,
+                tap.first_name
         ";
-        
+
         return $this->fetchAll($sql, [
-            'assignment_id' => $assignmentId,
+            'task_id' => $taskId,
             'company_id' => $this->tenantId()
         ]);
     }
+
 
     /**
      * Vytvoří nový report i s účastníky
@@ -110,66 +138,54 @@ final class AssignmentModel extends BaseModel
             return $assignmentId;
         });
     }
- 
 
-
-    public function createReportOld(int $taskId, int $workOrderId, array $data): int
-    {
-        // 1. Vytvoříme samotný report
-        $assignmentId = $this->create([
-            'task_id' => $taskId,
-            'work_order_id' => $workOrderId,
-            'user_id' => Auth::id(),  // kdo report vytvořil
-            'minutes_spent' => 0,      // celkový čas se bude počítat z účastníků
-            'kilometers' => (int) ($data['kilometers'] ?? 0),
-            'note' => $data['report'] ?? '',
-            'created_by_user_id' => Auth::id(),
-            'created_at' => date('Y-m-d H:i:s')
-        ]);
-        
-        if (!$assignmentId) {
-            return 0;
-        }
-        
-        // 2. Přidáme účastníky
-        if (!empty($data['participants'])) {
-            foreach ($data['participants'] as $userId => $participantData) {
-                if (!empty($participantData['selected'])) {
-                    $hours = (int) ($participantData['hours'] ?? 0);
-                    $minutes = (int) ($participantData['minutes'] ?? 0);
-                    $totalMinutes = ($hours * 60) + $minutes;
-                    
-                    if ($totalMinutes > 0) {
-                        $this->addParticipant($assignmentId, $userId, $totalMinutes);
-                    }
-                }
-            }
-        }
-        
-        return $assignmentId;
-    }
 
     /**
      * Přidá účastníka k reportu
      */
-    private function addParticipant(int $assignmentId, int $userId, int $minutes): bool
-    {
-        $sql = "
-            INSERT INTO task_assignment_participants 
-                (assignment_id, user_id, minutes_spent, company_id, created_at)
-            VALUES 
-                (:assignment_id, :user_id, :minutes, :company_id, :created_at)
-        ";
-        
-        $stmt = $this->db()->prepare($sql);
-        return $stmt->execute([
-            'assignment_id' => $assignmentId,
-            'user_id' => $userId,
-            'minutes' => $minutes,
-            'company_id' => $this->tenantId(),
-            'created_at' => date('Y-m-d H:i:s')
-        ]);
+private function addParticipant(int $assignmentId, int $userId, int $minutes): bool
+{
+    $user = (new UserModel())->find($userId);
+
+    if (!$user) {
+        return false;
     }
+
+    $sql = "
+        INSERT INTO task_assignment_participants
+            (
+                assignment_id,
+                user_id,
+                first_name,
+                last_name,
+                minutes_spent,
+                company_id,
+                created_at
+            )
+        VALUES
+            (
+                :assignment_id,
+                :user_id,
+                :first_name,
+                :last_name,
+                :minutes,
+                :company_id,
+                :created_at
+            )
+    ";
+
+    $stmt = $this->db()->prepare($sql);
+
+    return $stmt->execute([
+        'assignment_id' => $assignmentId,
+        'user_id' => $userId,
+        'first_name' => $user['first_name'] ?? '',
+        'last_name' => $user['last_name'] ?? '',
+        'minutes' => $minutes,
+        'company_id' => $this->tenantId(),
+        'created_at' => date('Y-m-d H:i:s')
+    ]);
+}
 
     /**
      * Aktualizuje celkový čas v reportu (můžeš použít triggr nebo dopočítat)
@@ -244,5 +260,20 @@ final class AssignmentModel extends BaseModel
         return $result;
     }
 
+public function getTaskTotalKilometers(int $taskId): int
+{
+    $sql = "
+        SELECT COALESCE(SUM(kilometers), 0) AS total_kilometers
+        FROM task_assignments
+        WHERE task_id = :task_id
+          AND company_id = :company_id
+    ";
 
+    $result = $this->fetchAll($sql, [
+        'task_id' => $taskId,
+        'company_id' => $this->tenantId()
+    ]);
+
+    return (int) ($result[0]['total_kilometers'] ?? 0);
+}
 }

@@ -12,7 +12,7 @@ use App\Controllers\SystemController;
 use App\Controllers\TaskController;
 use App\Controllers\PageController;
 use App\Controllers\TaskRecurringController;
-// use App\Controllers\BillingExportController;
+// use App\Controllers\BillingExportController; //nahrazen invoicecontrollerem
 use App\Controllers\ContactsController;
 // use App\Controllers\ExportsController;
 use App\Controllers\ArchiveController;
@@ -285,7 +285,7 @@ return [
 //přidání reportu
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/tasks/{taskId:\d+}/report',
+    'path'    => '/{tenant}/tasks/{taskId:\d+}/add-report',
     'action'  => [TaskController::class, 'addTaskReportGet'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
@@ -295,7 +295,7 @@ return [
 
 [
     'method'  => 'POST',
-    'path'    => '/{tenant}/tasks/{taskId:\d+}/report',
+    'path'    => '/{tenant}/tasks/{taskId:\d+}/add-report',
     'action'  => [TaskController::class, 'addTaskReportPost'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
@@ -599,7 +599,7 @@ return [
     'path'    => '/{tenant}/archive',
     'action'  => [ArchiveController::class, 'index'],
     'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
+    'roles'   => ['admin', 'mistr', "predak", 'monter'],
  
 ],
 
@@ -608,19 +608,32 @@ return [
     'path'    => '/{tenant}/archive/tasks',
     'action'  => [ArchiveController::class, 'tasks'],
     'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
+    'roles'   => ['admin', 'mistr', "predak", 'monter'],
     'menu'    => 'Archiv',
     'submenu' => 'Úkoly',
     'section' => 'archive',
     'title'   => 'Archiv: Úkoly',
 
 ],
+
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/archive/task/{id:\d+}/reports',
+    'action'  => [ArchiveController::class, 'detailTaskAndReports'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr', "predak", 'monter'],
+    'section' => 'archive',
+    'title'   => 'Archiv: Úkoly',
+
+],
+
+
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/archive/work-orders',
     'action'  => [ArchiveController::class, 'workOrders'],
     'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
+    'roles'   => ['admin', 'mistr', "predak"],
     'menu'    => 'Archiv',
     'submenu' => 'Zakázky',
     'section' => 'archive',
@@ -852,7 +865,7 @@ return [
 //GET  /billing/invoice/
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/',
+    'path'    => '/{tenant}/billing/invoice',
     'action'  => [InvoiceController ::class, 'index'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -1077,82 +1090,6 @@ Přepínaní rolí u admina
 
 
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN / SYSTEM
-|--------------------------------------------------------------------------
-*/
 
-[
-    'method' => 'GET',
-    'path'   => '/{tenant}/system',
-    'action' => [SystemController::class, 'index'],
-    'roles'  => ['root'],
-    'menu'   => 'Administrace',
-    'submenu'=> 'Firemní účty',
-    'section'=> 'system',
-    'auth'   => true,
-    'title'  => 'Firemní účty: Výpis',
-],
-
-[
-    'method' => 'GET',
-    'path'   => '/{tenant}/system/companies/{id}',
-    'action' => [SystemController::class, 'companyDetail'],
-    'roles'  => ['root'],
-    'section'=> 'system',
-    'auth'   => true,
-    'title'  => 'Firemní účty: Výpis',
-],
-
-[
-    'method' => 'GET',
-    'path'   => '/{tenant}/admin/audit',
-    'action' => [AuditLogController::class, 'index'],
-    'roles'  => ['admin'],
-    'menu'   => 'Administrace',
-    'submenu'=> 'Audit log',
-    'section'=> 'admin',
-    'auth'   => true,
-],
-
-
-/*
-|--------------------------------------------------------------------------
-| ADMIN / Settings
-|--------------------------------------------------------------------------
-*/
-[
-    'method' => 'GET',
-    'path'   => '/{tenant}/system/settings',
-    'action' => [SettingsController::class, 'index'],
-    'roles'  => ['admin'],
-    'menu'   => 'Administrace',
-    'submenu'=> 'Nastavení',
-    'section'=> 'admin',
-    'auth'   => true,
-],
-
-[
-    'method' => 'POST',
-    'path'   => '/{tenant}/system/settings/billing',
-    'action' => [SettingsController::class, 'saveBilling'],
-    'roles'  => ['admin'],
-    'auth'   => true,
-],
-
-/*
-|--------------------------------------------------------------------------
-| LOGOUT
-|--------------------------------------------------------------------------
-*/
-
-[
-    'method' => 'POST',
-    'path'   => '/logout',
-    'action' => [AuthController::class, 'logout'],
-    'auth'   => true,
-    'menu'   => 'Odhlásit',
-],
 
 ];

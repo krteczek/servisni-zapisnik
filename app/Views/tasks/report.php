@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 use App\Core\Csrf;
 use App\Core\Url;
+use App\Services\Tasks\TaskStatus;
 
 require __DIR__ . '/../layout/header.php';
 
@@ -26,9 +27,9 @@ $errors = $view->errors; // chyby validace
 			<div class="card-body">
 				<!-- START: zadaný úkol ke kterému jdeme přidávat reporty -->
 				<div class="task-detail">
-				    <?php if ($task['title'] === ''): ?>
-				        <div class="task-description card">
-							<h3><?= e($task['title']) ?></h3>
+				    <?php if ($task['title'] !== ''): ?>
+				        <div class="task-description card" style="padding:5px">
+							<h3 style="margin-bottom:0px;padding-bottom:0px;">Úkol: <?= e($task['title']) ?></h3>
 				            <?php $description = tx($task['description'] ?? ''); ?>
 							<div class="card-body">
 								<?= $description !== '' ? $description : 'Nespecifikováno'; ?>
@@ -40,7 +41,7 @@ $errors = $view->errors; // chyby validace
 
 				<!-- START: výpis chyb způsobených při vyplnování formuláře -->
             <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
-<?php if (in_array($task['status'], ['done', 'cancelled'], strict: true)): ?>
+<?php if (TaskStatus::isClosed($task['status'])): ?>
 
     <p class="ui-alert ui-alert-warning">
         Tento úkol je <?= ($task['status'] === 'done' ? 'uzavřený' : 'stornovaný') ?>, nelze k němu přidávat další reporty.
@@ -49,6 +50,7 @@ $errors = $view->errors; // chyby validace
 	
 		<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" class="btn btn-secondary" title="Jít na výpis úkolů">Jít na výpis úkolů</a>
 		<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/detail/#main') ?>" class="btn btn-secondary" title="Jít na detail Zakázky k níž patří tento úkol">Jít na detail Zakázky</a>
+		<a href="<?= Url::to('/{tenant}/archive/tasks/' . (int) $task['id'] . '/reports/#main') ?>" class="btn btn-secondary" title="Jít do Archivu na detail tohoto úkolu a jeho reportů">Jít do Archivu</a>
     </p>
 
 <?php elseif ($task['canUserAddReport'] === true): ?>

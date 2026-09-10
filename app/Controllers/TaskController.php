@@ -19,6 +19,7 @@ use App\Core\LoggerHolder;
 use App\Core\Transaction;
 use App\Helpers\DateHelper;
 use App\Services\Tasks\TaskType;
+use App\Services\Tasks\TaskStatus;
 
 use Throwable;
 
@@ -550,7 +551,7 @@ private function saveTask(array $data, int $workOrderId): string
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');
         }
-        if ($task['status'] !== 'open' && $task['status'] !== 'in_progress') {
+        if(TaskStatus::isClosed($task['status'])) {
             Flash::error('K tomuto úkolu již nelze přidat report.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }        
@@ -633,13 +634,12 @@ foreach ($participants as $userId => $participantData) {
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');
         }
-
-        if ($task['status'] !== 'open' && $task['status'] !== 'in_progress') {
+/* */
+        if(TaskStatus::isClosed($task['status'])) {
             Flash::error('K tomuto úkolu již nelze přidat report.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
-        }        
-
-
+        }
+/* */
         $task['canUserAddReport'] = self::canUserAddReport($taskId);
         if(
             !$task['canUserAddReport']
