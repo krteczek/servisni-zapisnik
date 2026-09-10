@@ -10,6 +10,7 @@ use App\Models\TeamModel;
 use App\Models\WorkOrderModel;
 use App\Models\AssignmentModel;
 use App\Models\RecurringTaskModel;
+use App\Models\TeamMembership;
 use App\Core\Url;
 use App\Core\Flash;
 use App\Core\Auth;
@@ -524,7 +525,151 @@ private function saveTask(array $data, int $workOrderId): string
     /**
      * Uložení nového reportu k úkolu
      */
-    public function addTaskReportPost(int $taskId): string
+
+public function addTaskReportPost(int $taskId): string
+{
+    // ověříme právo na přidání reportu
+    $this->checkCsrf();
+    $data = $_POST;
+
+    $canUserAddReport = self::canUserAddReport($taskId);
+
+    if (
+        !$canUserAddReport
+        && !Roles::isManagement(Auth::role())
+    ) {
+        Flash::error('Nemáte oprávnění. Nejste členem týmu, který má úkol plnit...');
+        Url::redirect('/{tenant}/tasks/#main');
+    }
+
+    $data['canUserAddReport'] = $canUserAddReport;
+
+    // 1. Načti úkol
+    $taskModel = new TaskModel();
+    $task = $taskModel->find($taskId);
+
+    if (!$task) {
+        Flash::error('Úkol neexistuje');
+        Url::redirect('/{tenant}/tasks/#main');
+    }
+
+    if (TaskStatus::isClosed($task['status'])) {
+        Flash::error('K tomuto úkolu již nelze přidat report.');
+        Url::redirect(
+            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
+        );
+    }
+
+    // 2. Data reportu
+    $report       = trim($data['report'] ?? '');
+    $kilometers   = (int) ($data['kilometers'] ?? 0);
+    $participants = $data['participants'] ?? [];
+    $hours        = 0;
+    $minutes      = 0;
+
+    // 3. Validace reportu
+    if (empty($report)) {
+        $this->addError('report', 'Text reportu je povinný');
+    }
+
+    // 4. Validace kilometrů
+    if ($kilometers < -9999 || $kilometers > 9999) {
+        $this->addError(
+            'kilometers',
+            'Kilometry musí být v rozmezí -9999 až 9999'
+        );
+    }
+
+    // 5. Aktuální členové týmu úkolu
+    $teamMembership = new TeamMembership();
+    $teamMembers = $teamMembership->currentMembers(
+        (int) $task['team_id']
+    );
+
+    $allowedUserIds = array_column($teamMembers, 'id');
+
+    // 6. Validace účastníků
+    foreach ($participants as $userId => $participantData) {
+        $userId = (int) $userId;
+
+        // Nezaškrtnutý pracovník nás nezajímá.
+        if (empty($participantData['selected'])) {
+            continue;
+        }
+
+        // Zaškrtnutý pracovník musí být aktuálním členem týmu úkolu.
+        if (!in_array($userId, $allowedUserIds, true)) {
+            $this->addError(
+                "participants.$userId",
+                'Vybraný pracovník není členem týmu tohoto úkolu.'
+            );
+            continue;
+        }
+
+        $hours = trim($participantData['hours'] ?? '');
+        $minutes = trim($participantData['minutes'] ?? '');
+
+        if ($hours === '' && $minutes === '') {
+            $this->addError(
+                "participants.$userId",
+                'Vyplň čas nebo odškrtni pracovníka'
+            );
+            continue;
+        }
+
+        if (
+            $hours !== ''
+            && (!is_numeric($hours) || $hours < -24 || $hours > 24)
+        ) {
+            $this->addError(
+                "participants.$userId",
+                'Hodiny musí být v rozmezí -24 až 24'
+            );
+        }
+
+        if (
+            $minutes !== ''
+            && (!is_numeric($minutes) || $minutes < -59 || $minutes > 59)
+        ) {
+            $this->addError(
+                "participants.$userId",
+                'Minuty musí být v rozmezí -59 až 59'
+            );
+        }
+    }
+
+    // 7. Pokud jsou chyby, vrať se zpět
+    if ($this->hasErrors()) {
+        $this->view->data = $data;
+
+        return $this->addTaskReport($taskId);
+    }
+
+    // 8. Uložení reportu i s účastníky
+    $assignmentModel = new AssignmentModel();
+
+    $assignmentId = $assignmentModel->createReport(
+        $taskId,
+        $task['work_order_id'] ?? 0,
+        $data
+    );
+
+    if ($assignmentId) {
+        Flash::success('Report byl úspěšně uložen');
+    } else {
+        $this->addError('global', 'Nepodařilo se uložit report');
+        $this->view->data = $data;
+
+        return $this->addTaskReport($taskId);
+    }
+
+    // podařilo se uložit, redirect pod formulář
+    Url::redirect('/{tenant}/tasks/' . $taskId . '/add-report/#report_list');
+}
+
+
+
+    public function addTaskReportPostOLD(int $taskId): string
     {
         //ověříme právo na přidání Reportu
 

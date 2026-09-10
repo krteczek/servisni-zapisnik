@@ -266,6 +266,7 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr', 'predak', 'monter'],
     'menu'    => 'Úkoly',
+    'submenu'    => 'Přehled',
     'section' => 'tasks',
 	'title'   => 'Úkoly: Přehled',
 ],
