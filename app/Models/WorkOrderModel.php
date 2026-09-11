@@ -6,6 +6,7 @@ namespace App\Models;
 use PDO;
 use App\Core\Auth;
 use App\Core\Transaction;
+use App\Services\WorkOrders\WOStatus;
 
 
 class WorkOrderModel extends BaseModel
@@ -118,165 +119,146 @@ $params = [
 
     return $orders;
 }
-		//přepínání mezi stavy zakázky
-public function recomputeStatus(int $orderId): void
-{
-    $order = $this->find($orderId);
+	
 
-    if (!$order) {
-        return;
-    }
+    //přepínání mezi stavy zakázky
+    public function recomputeStatus(int $orderId): void
+    {
+        $order = $this->find($orderId);
 
-    // Nechceme přepisovat ručně zrušenou zakázku
-    if ($order['status'] === 'cancelled') {
-        return;
-    }
+        if (!$order) {
+            return;
+        }
 
-    $taskModel = new TaskModel();
-    $stats = $taskModel->statsForWorkOrder($orderId);
+        // Nechceme přepisovat ručně zrušenou zakázku
+        if (WOStatus::isCancelled($order['status'])) {
+            return;
+        }
 
-    // 1️⃣ žádné tasky
-    if ($stats['total'] === 0) {
-        $this->update($orderId, ['status' => 'new']);
-        return;
-    }
+        $taskModel = new TaskModel();
+        $stats = $taskModel->statsForWorkOrder($orderId);
 
-    // 2️⃣ všechny cancelled
-    if ($stats['cancelled'] === $stats['total']) {
+        // 1️⃣ žádné tasky
+        if ($stats['total'] === 0) {
+            $this->update($orderId, ['status' => WOStatus::NEW]);
+            return;
+        }
+
+        // 2️⃣ všechny cancelled
+        if ($stats['cancelled'] === $stats['total']) {
+            $this->update($orderId, [
+                'status'    => WOStatus::CANCELLED,
+                'closed_at' => date('Y-m-d H:i:s'),
+            ]);
+            return;
+        }
+
+        // 3️⃣ všechny done
+        if ($stats['done'] === $stats['total']) {
+            $this->update($orderId, [
+                'status'    => WOStatus::DONE,
+                'closed_at' => date('Y-m-d H:i:s'),
+            ]);
+            return;
+        }
+
+        // 4️⃣ jinak probíhá
         $this->update($orderId, [
-            'status'    => 'cancelled',
-            'closed_at' => date('Y-m-d H:i:s'),
+            'status' => WOStatus::IN_PROGRESS,
+            'closed_at' => null,
         ]);
-        return;
     }
 
-    // 3️⃣ všechny done
-    if ($stats['done'] === $stats['total']) {
-        $this->update($orderId, [
-            'status'    => 'done',
-            'closed_at' => date('Y-m-d H:i:s'),
-        ]);
-        return;
-    }
 
-    // 4️⃣ jinak probíhá
-    $this->update($orderId, [
-        'status' => 'in_progress',
-        'closed_at' => null,
-    ]);
-}
-
-
-
+/*
 public function isClosed(array $order): bool
 {
     return in_array($order['status'], ['done', 'cancelled', 'exported'], true);
 }
-
-public function canAddTask(array $order): bool
-{
-    return !$this->isClosed($order);
-}
-
-public function canBeCancelled(array $order, array $taskStats): bool
-{
-    return
-        ($order['status'] === 'new' || $order['status'] === 'in_progress')
-        && $taskStats['open'] === 0
-        && $taskStats['done'] === 0;
-}
-
-public function canBeDone(array $order, array $taskStats): bool
-{
-    return
-        ($order['status'] === 'new' || $order['status'] === 'in_progress')
-        && $taskStats['open'] === 0
-        && $taskStats['done'] > 0;
-}
-
-
-public function getNamesByIds(array $ids): array
-{
-    if (empty($ids)) {
-        return [];
-    }
-    
-    $companyId = parent::tenantId();
-    $params = [];
-    $placeholders = [];
-
-    foreach ($ids as $i => $id) {
-        $key = "id_$i";
-        $placeholders[] = ":$key";
-        $params[$key] = (int) $id; // Parametry pro ID
+    */
+    public function canAddTask(array $order): bool
+    {
+        // return !$this->isClosed($order);
+        return WOStatus::isOpen($order['status']);
     }
 
-    // Přidáme company_id do parametrů
-    $params['company_id'] = $companyId;
-
-    $sql = "
-        SELECT id, title, priority
-        FROM {$this->tableName}
-        WHERE id IN (" . implode(',', $placeholders) . ")
-        AND company_id = :company_id
-    ";
-    
-    $rows = $this->fetchAll($sql, $params); // Teď posíláme ID i company_id
-
-    $result = [];
-
-    foreach ($rows as $row) {
-        $result[(int) $row['id']] = [
-            'name' => $row['title'], // Opraveno - používáme 'title' místo 'name'
-            'priority' => $row['priority']
-        ];
+    public function canBeCancelled(array $order, array $taskStats): bool
+    {
+        return
+            //($order['status'] === 'new' || $order['status'] === 'in_progress')
+            (WOStatus::isOpen($order['status']))
+            && $taskStats['open'] === 0
+            && $taskStats['done'] === 0;
     }
 
-    return $result;
-}
+    public function canBeDone(array $order, array $taskStats): bool
+    {
+        return
+            // ($order['status'] === 'new' || $order['status'] === 'in_progress')
+            (WOStatus::isOpen($order['status']))
+            && $taskStats['open'] === 0
+            && $taskStats['done'] > 0;
+    }
 
 
-public function closeAsDone(int $orderId): bool
-{
-    return Transaction::run(function () use ($orderId) {
+    public function getNamesByIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+        
+        $companyId = parent::tenantId();
+        $params = [];
+        $placeholders = [];
 
-        $stats = (new TaskModel())->statsForWorkOrder($orderId);
-
-        if ($stats['open'] > 0 || $stats['done'] === 0) {
-            return false;
+        foreach ($ids as $i => $id) {
+            $key = "id_$i";
+            $placeholders[] = ":$key";
+            $params[$key] = (int) $id; // Parametry pro ID
         }
 
-        return $this->update($orderId, [
-            'status'    => 'done',
-            'closed_at' => date('Y-m-d H:i:s'),
-        ]);
-    });
-}
+        // Přidáme company_id do parametrů
+        $params['company_id'] = $companyId;
 
-public function closeAsDoneOLD(int $orderId): bool
-{
-    $this->db()->beginTransaction();
+        $sql = "
+            SELECT id, title, priority
+            FROM {$this->tableName}
+            WHERE id IN (" . implode(',', $placeholders) . ")
+            AND company_id = :company_id
+        ";
+        
+        $rows = $this->fetchAll($sql, $params); // Teď posíláme ID i company_id
 
-    $stats = (new TaskModel())->statsForWorkOrder($orderId);
+        $result = [];
 
-    if ($stats['open'] > 0 || $stats['done'] === 0) {
-        $this->db()->rollBack();
-        return false;
+        foreach ($rows as $row) {
+            $result[(int) $row['id']] = [
+                'name' => $row['title'], // Opraveno - používáme 'title' místo 'name'
+                'priority' => $row['priority']
+            ];
+        }
+
+        return $result;
     }
 
-    $ok = $this->update($orderId, [
-        'status' => 'done',
-        'closed_at' => date('Y-m-d H:i:s'),
-    ]);
 
-    if ($ok) {
-        $this->db()->commit();
-        return true;
+    public function closeAsDone(int $orderId): bool
+    {
+        return Transaction::run(function () use ($orderId) {
+
+            $stats = (new TaskModel())->statsForWorkOrder($orderId);
+
+            if ($stats['open'] > 0 || $stats['done'] === 0) {
+                return false;
+            }
+
+            return $this->update($orderId, [
+                'status'    => WOStatus::DONE,
+                'closed_at' => date('Y-m-d H:i:s'),
+            ]);
+        });
     }
 
-    $this->db()->rollBack();
-    return false;
-}
 
 
     public function createWithSequence(int $tenantId, array $data): int

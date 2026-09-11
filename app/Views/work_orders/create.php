@@ -102,7 +102,7 @@ $teams = $view->teams;
                     <label for="requested_by">Požadoval</label>
                     <input
                         class="form-control"
-                        name="requested_by"
+                        name="requested_by" 
                         id="requested_by"
                         value="<?= e($data['requested_by'] ?? '') ?>"
                     >
