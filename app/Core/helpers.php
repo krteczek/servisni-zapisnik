@@ -58,12 +58,15 @@ function formatMinutes(int $minutes): string
         return '0 h';
     }
 
+    $sign = $minutes < 0 ? '-' : '';
+    $minutes = abs($minutes);
+
     $h = intdiv($minutes, 60);
     $m = $minutes % 60;
 
     return $m === 0
-        ? "{$h} h"
-        : "{$h} h {$m} min";
+        ? "{$sign}{$h} h"
+        : "{$sign}{$h} h {$m} min";
 }
 
 /**

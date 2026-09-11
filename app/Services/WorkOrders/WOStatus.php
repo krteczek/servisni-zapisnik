@@ -6,11 +6,11 @@ namespace App\Services\WorkOrders;
 
 final class WOStatus
 {
-    public const NEW      = 'new';
-    public const IN_PROGRESS      = 'in_progress';
-    public const DONE      = 'done';
-    public const CANCELLED = 'cancelled';
-    public const EXPORTED      = 'exported';
+    public const NEW            = 'new';
+    public const IN_PROGRESS    = 'in_progress';
+    public const DONE           = 'done';
+    public const CANCELLED      = 'cancelled';
+    public const EXPORTED       = 'exported';
 
     public static function all(): array
     {

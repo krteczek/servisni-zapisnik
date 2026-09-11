@@ -5,7 +5,7 @@ namespace App\Models;
 
 use App\Core\Auth;
 use App\Core\Transaction;
-use App\Models\UserModels;
+use App\Models\UserModel;
 
 final class AssignmentModel extends BaseModel
 {
@@ -99,6 +99,7 @@ final class AssignmentModel extends BaseModel
      */
     public function createReport(int $taskId, int $workOrderId, array $data): int
     {
+        //dd($data);
         return Transaction::run(function () use ($taskId, $workOrderId, $data) {
 
             $totalMinutes = 0;
@@ -106,8 +107,8 @@ final class AssignmentModel extends BaseModel
 
             foreach ($data['participants'] as $userId => $pData) {
                 if (!empty($pData['selected'])) {
-                    $minutes = ((int)($pData['hours'] ?? 0) * 60) + (int)($pData['minutes'] ?? 0);
-                    if ($minutes > 0) {
+                    $minutes = (int) $pData['minutes_spent'];
+                    if ($minutes !== 0) {
                         $totalMinutes += $minutes;
                         $participants[$userId] = $minutes;
                     }
@@ -188,7 +189,7 @@ private function addParticipant(int $assignmentId, int $userId, int $minutes): b
 }
 
     /**
-     * Aktualizuje celkový čas v reportu (můžeš použít triggr nebo dopočítat)
+     * Aktualizuje celkový čas reportu podle času jeho účastníků.
      */
     public function updateTotalMinutes(int $assignmentId): bool
     {
@@ -211,54 +212,6 @@ private function addParticipant(int $assignmentId, int $userId, int $minutes): b
         ]);
     }
 
-    /**
-     * Vrátí statistiky pro úkoly
-     */
-    public function statsForTasks(array $taskIds): array
-    {
-        if (empty($taskIds)) {
-            return [];
-        }
-        
-        $placeholders = [];
-        $params = ['company_id' => $this->tenantId()];
-        
-        foreach ($taskIds as $i => $id) {
-            $key = "task_$i";
-            $placeholders[] = ":$key";
-            $params[$key] = (int) $id;
-        }
-        
-        $sql = "
-            SELECT 
-                ta.task_id,
-                COUNT(DISTINCT ta.id) as total_assignments,
-                COALESCE(SUM(tap.minutes_spent), 0) as total_minutes,
-                COALESCE(SUM(ta.kilometers), 0) as total_kilometers,
-                COUNT(DISTINCT tap.user_id) as total_workers
-            FROM {$this->tableName} ta
-            LEFT JOIN task_assignment_participants tap 
-                ON tap.assignment_id = ta.id 
-                AND tap.company_id = ta.company_id
-            WHERE ta.task_id IN (" . implode(',', $placeholders) . ")
-                AND ta.company_id = :company_id
-            GROUP BY ta.task_id
-        ";
-        
-        $stats = $this->fetchAll($sql, $params);
-        
-        $result = [];
-        foreach ($stats as $stat) {
-            $result[(int)$stat['task_id']] = [
-                'total_assignments' => (int)$stat['total_assignments'],
-                'total_minutes' => (int)$stat['total_minutes'],
-                'total_kilometers' => (int)$stat['total_kilometers'],
-                'total_workers' => (int)$stat['total_workers']
-            ];
-        }
-        
-        return $result;
-    }
 
 public function getTaskTotalKilometers(int $taskId): int
 {

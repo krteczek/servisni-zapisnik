@@ -26,7 +26,7 @@ final class TaskModel extends BaseModel
     protected string $connection = 'admin';
 
     /**
-     * Model NENÍ tenant-aware – společnosti definují tenanty, nepatří pod ně.
+     * Model JE tenant-aware
      *
      * @var bool
      */
@@ -328,11 +328,6 @@ public function forWorkOrderWithStats(int $orderId): array
     $sql = 
         "SELECT
             t.*,
-
-            CASE
-                WHEN rt_master.task_id IS NOT NULL THEN 1
-                ELSE 0
-            END AS is_recurring_master,
 
             CASE
                 WHEN t.recurring_task_id IS NOT NULL THEN 1

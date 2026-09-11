@@ -56,28 +56,28 @@ require __DIR__ . '/_filters.php';
                     Tento úkol je <?= (TaskStatus::isDone($task['status']) ? 'uzavřený' : 'stornovaný') ?>, nelze k němu přidávat další reporty.
 
                     </br></br>
-	
-		            <a href="<?= Url::to('/{tenant}/tasks/#main') ?>" class="btn btn-secondary" title="Jít na výpis úkolů v archivu">Archiv (výpis úkolů)</a>
-	                <?= $ahrefWO; ?>
-                    </p>
-                <p>Práci na tomto úkolu vykonávalo celkem: <?= count($task['allReportsParticipants']) ?> pracovníků.</p>
-                <p>Bylo zapsáno celkem <?= count($reports) ?> reportů.</p>
-                <p>Práce vykonávali tito pracovníci: </p>
+					
+		            	<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" class="btn btn-secondary" title="Jít na výpis úkolů v archivu">Archiv (výpis úkolů)</a>
+	                	<?= $ahrefWO; ?>
+                    	</p>
+					<?php if(TaskStatus::isDone($task['status'])) : ?>
+                		<p>Práci na tomto úkolu vykonávalo celkem: <?= count($task['allReportsParticipants']) ?> pracovníků.</p>
+                		<p>Bylo zapsáno celkem <?= count($reports) ?> reportů.</p>
+                		<p>Práce vykonávali tito pracovníci: </p>
                 
-                    <?php 
-                    $ahrefP = '';
-                    //dd($task['allReportsParticipants']);
-                    foreach ($task['allReportsParticipants'] as $participants) {
-                        $min = (int)$participants['minutes_spent'];
-                        $ahrefP .= '<a href="' . Url::to('/{tenant}/users/' . $participants['user_id'] . '/detail/#main') . '" title="jít na kartu pracovníka">' .  $participants['first_name'] . " " . $participants['last_name'] . ' (' . formatMinutes($min) . ')</a> ';
+						<?php 
+						$ahrefP = '';
+						//dd($task['allReportsParticipants']);
+						foreach ($task['allReportsParticipants'] as $participants) {
+							$min = (int)$participants['minutes_spent'];
+							$ahrefP .= '<a href="' . Url::to('/{tenant}/users/' . $participants['user_id'] . '/detail/#main') . '" title="jít na kartu pracovníka">' .  $participants['first_name'] . " " . $participants['last_name'] . ' (' . formatMinutes($min) . ')</a> ';
 
-                    }
-                    ?>
-                <p>
-                    <?= $ahrefP;?>
-                </p>
-                <p>Pracovníci najeli celkem <?= $task['totalKm'] ?> kilometrů</p>
-                <p>Níže jsou vypsané všechny reporty tohoto úkolu.</p>
+						}
+						?>
+						<p><?= $ahrefP;?></p>
+						<p>Pracovníci najeli celkem <?= $task['totalKm'] ?> kilometrů</p>
+						<p>Níže jsou vypsané všechny reporty tohoto úkolu.</p>
+					<?php endif; ?>
 			</div>
 			<!-- END: Tělo karty formuláře -->
 

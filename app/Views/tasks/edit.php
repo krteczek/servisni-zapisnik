@@ -4,8 +4,8 @@ declare(strict_types=1);
 /** @var \App\Core\ViewContext $view */
 
 use App\Core\Url;
-//use App\Core\Roles;
 use App\Core\Csrf;
+use App\Services\Tasks\TaskType;
 
 
 require __DIR__ . '/../layout/header.php';
@@ -94,9 +94,9 @@ $errors = $view->errors;
 
 					</div>
 
-        			<div class="form-group"  class="card-section">
+        			<div class="form-group card-section">
 						
-						<?php if ((int)($post['is_recurring_master'] ?? 0) !== 1): ?>
+						<?php if (!TaskType::isMaster($task['task_type'])): ?>
 							<label>Z normálního úkolu nelze dodatečně udělat 
 								opakovaný úkol. 
 								Můžete však klonovat tento úkol a upravit jeho 
