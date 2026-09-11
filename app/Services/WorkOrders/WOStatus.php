@@ -40,7 +40,7 @@ final class WOStatus
 
     public static function isCancelled(string $status): bool
     {
-        return $status === self::CANCELLED;
+        return $status === self::CANCELLED; 
     }
 
     public static function isExported(string $status): bool

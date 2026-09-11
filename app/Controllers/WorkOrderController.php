@@ -77,7 +77,7 @@ public function index(): string
                 'external_number' 	 => $data['external_number'],
                 'title'           	 => $data['title'],
                 'description'     	 => $data['description'],
-                'source'          	 => $data['source'],
+                'source'          	 => $data['source'], 
                 'requested_by'    	 => $data['requested_by'],
                 'contact_person'     => $data['contact_person'],
                 'priority'        	 => $data['priority'],
