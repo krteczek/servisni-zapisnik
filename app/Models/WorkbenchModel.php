@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use PDO;
 use App\Core\Auth;
+use App\Services\Tasks\TaskType;
 
 class WorkbenchModel extends BaseModel
 {
@@ -130,16 +130,8 @@ private function openTasksForMyTeams(array $teamIds): array
             t.team_id,
             t.work_order_id,
             t.created_at,
-            t.is_recurring_master,
             t.recurring_task_id,
             t.task_type,
-
-            EXISTS (
-                SELECT 1
-                FROM recurring_tasks rt
-                WHERE rt.task_id = t.id
-            ) AS is_recurring_master,
-
             wo.title AS work_order_title,
             wo.priority AS work_order_priority,
 
@@ -195,15 +187,8 @@ private function openTasksForOtherTeams(array $teamIds): array
             t.team_id,
             t.work_order_id,
             t.created_at,
-            t.is_recurring_master,
             t.recurring_task_id,
             t.task_type,
-
-            EXISTS (
-                SELECT 1
-                FROM recurring_tasks rt
-                WHERE rt.task_id = t.id
-            ) AS is_recurring_master,
 
             wo.title AS work_order_title,
             wo.priority AS work_order_priority,
@@ -273,7 +258,6 @@ private function openTasksForOtherTeams(array $teamIds): array
                 t.work_order_id,
                 t.status,
                 t.task_type,
-                t.is_recurring_master,
                 t.recurring_task_id,
 
                 COUNT(ta.id) AS assignments_count
@@ -311,7 +295,6 @@ private function openTasksForOtherTeams(array $teamIds): array
                 t.work_order_id,
                 t.status,
                 t.task_type,
-                t.is_recurring_master,
                 t.recurring_task_id,
 
                 COUNT(ta.id) AS assignments_count
@@ -361,7 +344,6 @@ private function myReadyToCancelTasks(array $teamIds): array
             t.work_order_id,
             t.status,
             t.task_type,
-            t.is_recurring_master,
             t.recurring_task_id,
 
             COUNT(ta.id) AS assignments_count
@@ -375,12 +357,7 @@ private function myReadyToCancelTasks(array $teamIds): array
         WHERE
             t.company_id = ?
             AND t.status = 'open'
-            AND (
-                    t.is_recurring_master IS NULL
-                    OR t.is_recurring_master = 0
-                    AND t.task_type <> 'recurring'
-                )
-        ";
+         ";
 
     $params = [Auth::companyId()];
 
@@ -388,7 +365,7 @@ private function myReadyToCancelTasks(array $teamIds): array
 
         $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
 
-        $sql .= " AND t.team_id NOT IN ($placeholders)";
+        $sql .= " AND t.team_id IN ($placeholders)";
 
         $params = array_merge($params, $teamIds);
     }
@@ -521,14 +498,80 @@ private function myInvoiceToReady(array $teamIds): array
     $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
 
     $sql = 
-        "SELECT *
-        FROM tasks
-        WHERE company_id = ?
-          AND status = 'done'
-          AND team_id IN ($placeholders)
-          AND billing_export_id IS NULL
-        ORDER BY done_at ASC
-    ";
+        "SELECT
+    t.id,
+    t.title,
+    t.done_at,
+
+    wo.id AS work_order_id,
+    wo.title AS work_order_title,
+
+    tm.name AS team_name,
+
+    COALESCE(mp.total_minutes, 0) AS total_minutes,
+    COALESCE(km.total_kilometers, 0) AS total_kilometers
+
+FROM tasks t
+
+LEFT JOIN work_orders wo
+    ON wo.id = t.work_order_id
+   AND wo.company_id = t.company_id
+
+LEFT JOIN teams tm
+    ON tm.id = t.team_id
+   AND tm.company_id = t.company_id
+
+LEFT JOIN (
+    SELECT
+        ta.task_id,
+        ta.company_id,
+        SUM(tap.minutes_spent) AS total_minutes
+    FROM task_assignments ta
+
+    JOIN task_assignment_participants tap
+        ON tap.assignment_id = ta.id
+       AND tap.company_id = ta.company_id
+
+    GROUP BY ta.task_id, ta.company_id
+) mp
+    ON mp.task_id = t.id
+   AND mp.company_id = t.company_id
+
+LEFT JOIN (
+    SELECT
+        task_id,
+        company_id,
+        SUM(kilometers) AS total_kilometers
+    FROM task_assignments
+    GROUP BY task_id, company_id
+) km
+    ON km.task_id = t.id
+   AND km.company_id = t.company_id
+
+WHERE t.company_id = ?
+  AND t.status = 'done'
+  AND t.billing_export_id IS NULL
+  AND t.task_type <> ?
+  AND t.team_id IN ($placeholders)
+
+ORDER BY t.done_at ASC";
+
+    return $this->fetchAll(
+        $sql,
+        array_merge(
+            [Auth::companyId(), TaskType::RECURRING_MASTER],
+            $teamIds
+        )
+    );
+}
+
+private function otherInvoiceToReady(array $teamIds): array
+{
+    if ($teamIds ===[]) {
+        return [];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
 
     $sql = 
         "SELECT
@@ -584,43 +627,15 @@ LEFT JOIN (
 WHERE t.company_id = ?
   AND t.status = 'done'
   AND t.billing_export_id IS NULL
-  AND (t.is_recurring_master IS NULL OR t.is_recurring_master = 0)
-
-  AND t.team_id IN ($placeholders)
+  AND t.task_type <> ?
+  AND t.team_id NOT IN ($placeholders)
 
 ORDER BY t.done_at ASC";
 
     return $this->fetchAll(
         $sql,
         array_merge(
-            [Auth::companyId()],
-            $teamIds
-        )
-    );
-}
-
-private function otherInvoiceToReady(array $teamIds): array
-{
-    if (!$teamIds) {
-        return [];
-    }
-
-    $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
-
-    $sql = 
-        "SELECT *
-        FROM tasks
-        WHERE company_id = ?
-          AND status = 'done'
-          AND team_id NOT IN ($placeholders)
-          AND billing_export_id IS NULL
-        ORDER BY done_at ASC
-    ";
-
-    return $this->fetchAll(
-        $sql,
-        array_merge(
-            [Auth::companyId()],
+            [Auth::companyId(), TaskType::RECURRING_MASTER],
             $teamIds
         )
     );

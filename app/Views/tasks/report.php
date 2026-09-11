@@ -124,12 +124,15 @@ $errors = $view->errors; // chyby validace
 
                 <div class="member-time" id="time-<?= $userId ?>" style="display: <?= $checked ? 'block' : 'none' ?>;">
                     <div class="time-input-group">
-
+						<select name="participants[<?= $userId ?>][sign]" class="time-sign">
+							<option value="+">+</option>
+							<option value="-">−</option>
+						</select>
                         <input type="number" 
                                name="participants[<?= $userId ?>][hours]" 
                                class="time-input" 
                                placeholder="h" 
-                               min="-24"
+                               min="0"
                                max="24"
                                value="<?= e($hours) ?>">
 
@@ -139,7 +142,7 @@ $errors = $view->errors; // chyby validace
                                name="participants[<?= $userId ?>][minutes]" 
                                class="time-input" 
                                placeholder="m" 
-                               min="-59" 
+                               min="0" 
                                max="59"
                                value="<?= e($minutes) ?>">
 

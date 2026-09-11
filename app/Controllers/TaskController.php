@@ -21,7 +21,7 @@ use App\Core\Transaction;
 use App\Helpers\DateHelper;
 use App\Services\Tasks\TaskType;
 use App\Services\Tasks\TaskStatus;
-
+use App\Services\WorkOrders\WOStatus;
 use Throwable;
 
 class TaskController extends Controller
@@ -68,7 +68,8 @@ private function getOrderOrRedirect(?int $orderId): array
         Url::redirect('/{tenant}/work-orders/#main');
     }
 	
-	if($order['status'] === 'new' || $order['status'] === 'in_progress') 
+	//if($order['status'] === 'new' || $order['status'] === 'in_progress') 
+    if(WOStatus::isOpen($order['status']))
 	{
 		return $order;
 	}
@@ -113,6 +114,11 @@ private function saveTask(array $data, int $workOrderId): string
 
             $taskModel = new TaskModel();
 
+            $taskType = TaskType::NORMAL;
+            if ((int) ($post['is_recurring_master'] ?? 0) === 1) {
+                $taskType = TaskType::RECURRING_MASTER;
+            }
+
             // 🧱 vytvoření tasku
             $taskId = $taskModel->create([
                 'title'               => $post['title'],
@@ -120,11 +126,9 @@ private function saveTask(array $data, int $workOrderId): string
                 'team_id'             => $teamId,
                 'work_order_id'       => $workOrderId,
                 'created_by_user_id'  => Auth::id(),
-                'is_recurring_master' => $post['is_recurring_master'],
                 'due_date'            => $post['due_date'],
-                'task_type'           => TaskType::NORMAL,
+                'task_type'           => $taskType 
             ]);
-
             if (!$taskId) {
                 throw new \RuntimeException('Task create failed');
             }
@@ -206,7 +210,7 @@ private function saveTask(array $data, int $workOrderId): string
         $order = $this->getOrderOrRedirect($orderId);
         if ($order['status'] !== 'new') {
             Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
-            Url::to('/{tenant}/work-orders/' . $orderId . '/detail/#main');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
         }
         $post['title'] = $order['title'];
         $post['description'] = $order['description'];
@@ -222,7 +226,7 @@ private function saveTask(array $data, int $workOrderId): string
         $order = $this->getOrderOrRedirect($orderId);
         if ($order['status'] !== 'new') {
             Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
-            Url::to('/{tenant}/work-orders/' . $orderId . '/detail/#main');
+            Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
         }
 
         return $this->saveTask($_POST, $orderId);
@@ -251,7 +255,7 @@ private function saveTask(array $data, int $workOrderId): string
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
-        if (!empty($task['recurring_task_id']) && $task['is_recurring_master'] != 1) {
+        if (!TaskType::isEditable($task['task_type'])) {
             Flash::info('Automaticky vygenerovaný úkol nelze upravovat.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
@@ -276,7 +280,7 @@ private function saveTask(array $data, int $workOrderId): string
         
         
 
-        if (!empty($task['task_type']) && TaskType::isMaster($task['task_type'])) {
+        if (TaskType::isMaster($task['task_type'])) {
 
             Flash::info(
                 'Opakující se master úkol nelze tímto způsobem uzavřít ani zrušit. '
@@ -355,7 +359,6 @@ private function saveTask(array $data, int $workOrderId): string
             'description'        => $post['description'],
             'team_id'            => $post['team_id'],
             'due_date'           => $post['due_date'],
-            'is_recurring_master' => $post['is_recurring_master'], 
         ]);
         
         if(!$row)
@@ -383,7 +386,9 @@ private function saveTask(array $data, int $workOrderId): string
             Url::redirect('/{tenant}/work-orders/#main');
         }
 
-        if (!in_array($order['status'], ['new', 'in_progress'], true)) {
+        //if (!in_array($order['status'], ['new', 'in_progress'], true)) {
+        if(WOStatus::isClosed($order['status'])) {
+
             Flash::error('Zakázka je uzavřená, nelze klonovat.');
             Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail/#main');
         }
@@ -412,7 +417,8 @@ private function saveTask(array $data, int $workOrderId): string
             Url::redirect('/{tenant}/work-orders/#main');
         }
 
-        if (!in_array($order['status'], ['new', 'in_progress'], true)) {
+        //if (!in_array($order['status'], ['new', 'in_progress'], true)) {
+        if(WOStatus::isClosed($order['status'])) {
             Flash::error('Zakázka je uzavřená, nelze klonovat.');
             Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail/#main');
         }
@@ -526,248 +532,172 @@ private function saveTask(array $data, int $workOrderId): string
      * Uložení nového reportu k úkolu
      */
 
-public function addTaskReportPost(int $taskId): string
-{
-    // ověříme právo na přidání reportu
-    $this->checkCsrf();
-    $data = $_POST;
-
-    $canUserAddReport = self::canUserAddReport($taskId);
-
-    if (
-        !$canUserAddReport
-        && !Roles::isManagement(Auth::role())
-    ) {
-        Flash::error('Nemáte oprávnění. Nejste členem týmu, který má úkol plnit...');
-        Url::redirect('/{tenant}/tasks/#main');
-    }
-
-    $data['canUserAddReport'] = $canUserAddReport;
-
-    // 1. Načti úkol
-    $taskModel = new TaskModel();
-    $task = $taskModel->find($taskId);
-
-    if (!$task) {
-        Flash::error('Úkol neexistuje');
-        Url::redirect('/{tenant}/tasks/#main');
-    }
-
-    if (TaskStatus::isClosed($task['status'])) {
-        Flash::error('K tomuto úkolu již nelze přidat report.');
-        Url::redirect(
-            '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
-        );
-    }
-
-    // 2. Data reportu
-    $report       = trim($data['report'] ?? '');
-    $kilometers   = (int) ($data['kilometers'] ?? 0);
-    $participants = $data['participants'] ?? [];
-    $hours        = 0;
-    $minutes      = 0;
-
-    // 3. Validace reportu
-    if (empty($report)) {
-        $this->addError('report', 'Text reportu je povinný');
-    }
-
-    // 4. Validace kilometrů
-    if ($kilometers < -9999 || $kilometers > 9999) {
-        $this->addError(
-            'kilometers',
-            'Kilometry musí být v rozmezí -9999 až 9999'
-        );
-    }
-
-    // 5. Aktuální členové týmu úkolu
-    $teamMembership = new TeamMembership();
-    $teamMembers = $teamMembership->currentMembers(
-        (int) $task['team_id']
-    );
-
-    $allowedUserIds = array_column($teamMembers, 'id');
-
-    // 6. Validace účastníků
-    foreach ($participants as $userId => $participantData) {
-        $userId = (int) $userId;
-
-        // Nezaškrtnutý pracovník nás nezajímá.
-        if (empty($participantData['selected'])) {
-            continue;
-        }
-
-        // Zaškrtnutý pracovník musí být aktuálním členem týmu úkolu.
-        if (!in_array($userId, $allowedUserIds, true)) {
-            $this->addError(
-                "participants.$userId",
-                'Vybraný pracovník není členem týmu tohoto úkolu.'
-            );
-            continue;
-        }
-
-        $hours = trim($participantData['hours'] ?? '');
-        $minutes = trim($participantData['minutes'] ?? '');
-
-        if ($hours === '' && $minutes === '') {
-            $this->addError(
-                "participants.$userId",
-                'Vyplň čas nebo odškrtni pracovníka'
-            );
-            continue;
-        }
-
-        if (
-            $hours !== ''
-            && (!is_numeric($hours) || $hours < -24 || $hours > 24)
-        ) {
-            $this->addError(
-                "participants.$userId",
-                'Hodiny musí být v rozmezí -24 až 24'
-            );
-        }
-
-        if (
-            $minutes !== ''
-            && (!is_numeric($minutes) || $minutes < -59 || $minutes > 59)
-        ) {
-            $this->addError(
-                "participants.$userId",
-                'Minuty musí být v rozmezí -59 až 59'
-            );
-        }
-    }
-
-    // 7. Pokud jsou chyby, vrať se zpět
-    if ($this->hasErrors()) {
-        $this->view->data = $data;
-
-        return $this->addTaskReport($taskId);
-    }
-
-    // 8. Uložení reportu i s účastníky
-    $assignmentModel = new AssignmentModel();
-
-    $assignmentId = $assignmentModel->createReport(
-        $taskId,
-        $task['work_order_id'] ?? 0,
-        $data
-    );
-
-    if ($assignmentId) {
-        Flash::success('Report byl úspěšně uložen');
-    } else {
-        $this->addError('global', 'Nepodařilo se uložit report');
-        $this->view->data = $data;
-
-        return $this->addTaskReport($taskId);
-    }
-
-    // podařilo se uložit, redirect pod formulář
-    Url::redirect('/{tenant}/tasks/' . $taskId . '/add-report/#report_list');
-}
-
-
-
-    public function addTaskReportPostOLD(int $taskId): string
+    public function addTaskReportPost(int $taskId): string
     {
-        //ověříme právo na přidání Reportu
-
-        
-        //má právo, může dát Report
+        // ověříme právo na přidání reportu
         $this->checkCsrf();
         $data = $_POST;
-        
+
         $canUserAddReport = self::canUserAddReport($taskId);
-        if(
+
+        if (
             !$canUserAddReport
-        && !Roles::isManagement(Auth::role())
-        ){
-            //není manager, nemá ani vidět:
+            && !Roles::isManagement(Auth::role())
+        ) {
             Flash::error('Nemáte oprávnění. Nejste členem týmu, který má úkol plnit...');
             Url::redirect('/{tenant}/tasks/#main');
         }
+
         $data['canUserAddReport'] = $canUserAddReport;
+
         // 1. Načti úkol
         $taskModel = new TaskModel();
         $task = $taskModel->find($taskId);
-        
+
         if (!$task) {
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');
         }
-        if(TaskStatus::isClosed($task['status'])) {
+
+        if (TaskStatus::isClosed($task['status'])) {
             Flash::error('K tomuto úkolu již nelze přidat report.');
-            Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
-        }        
-        // 2. Validace reportu (povinné)
-            $report 				= trim($data['report'] ?? '');
+            Url::redirect(
+                '/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'
+            );
+        }
 
-            $kilometers 		= (int) ($data['kilometers'] ?? 0);
-            $participants		= $data['participants'] ?? [];
-            $hours				= 0;
-            $minutes				= 0;
-
+        // 2. Data reportu
+        $report       = trim($data['report'] ?? '');
+        $kilometers   = (int) ($data['kilometers'] ?? 0);
+        $participants = $data['participants'] ?? [];
+    
+        // 3. Validace reportu
         if (empty($report)) {
             $this->addError('report', 'Text reportu je povinný');
         }
-        
-        // 3. Validace kilometrů (nepovinné, ale pokud jsou, musí být číslo)
-        if ((int) $kilometers < -9999 || $kilometers > 9999) {
-            $this->addError('kilometers', 'Kilometry musí být v rozmezí -9999 až 9999');
-        }
-        
-        // 4. Validace účastníků (nepovinné, ale pokud jsou zaškrtnutí, musí mít čas)
-        
-foreach ($participants as $userId => $participantData) {
 
-    if (!empty($participantData['selected'])) {
-
-        $hours   = trim($participantData['hours'] ?? '');
-        $minutes = trim($participantData['minutes'] ?? '');
-
-        if ($hours === '' && $minutes === '') {
-            $this->addError("participants.$userId", 'Vyplň čas nebo odškrtni pracovníka');
-            continue;
+        // 4. Validace kilometrů
+        if ($kilometers < -9999 || $kilometers > 9999) {
+            $this->addError(
+                'kilometers',
+                'Kilometry musí být v rozmezí -9999 až 9999'
+            );
         }
 
-        if ($hours !== '' && (!is_numeric($hours) || $hours < -24 || $hours > 24)) {
-            $this->addError("participants.$userId", 'Hodiny musí být v rozmezí -24 až 24');
-        }
+        // 5. Aktuální členové týmu úkolu
+        $teamMembership = new TeamMembership();
+        $teamMembers = $teamMembership->currentMembers(
+            (int) $task['team_id']
+        );
 
-        if ($minutes !== '' && (!is_numeric($minutes) || $minutes < -59 || $minutes > 59)) {
-            $this->addError("participants.$userId", 'Minuty musí být v rozmezí -59 až 59');
-        }
-    }
-}
-        
-            // 5. Pokud jsou chyby, vrať se zpět (bez reloadu)
-            if ($this->hasErrors()) {
-                $this->view->data = $data;
-                return $this->addTaskReport($taskId);
+        $allowedUserIds = array_column($teamMembers, 'id');
+
+        // 6. Validace účastníků
+        // 6. Validace účastníků
+        foreach ($participants as $userId => &$participantData) {
+            $userId = (int) $userId;
+
+            // Nezaškrtnutý pracovník nás nezajímá.
+            if (empty($participantData['selected'])) {
+                continue;
             }
-        
-        
-        
-        // 6. Uložení reportu
-    // 6. Uložení reportu i s účastníky
-    $assignmentModel = new AssignmentModel();
 
-    $assignmentId = $assignmentModel->createReport($taskId, $task['work_order_id'] ?? 0, $data);
-    //
-        
+            // Zaškrtnutý pracovník musí být aktuálním členem týmu úkolu.
+            if (!in_array($userId, $allowedUserIds, true)) {
+                $this->addError(
+                    "participants.$userId",
+                    'Vybraný pracovník není členem týmu tohoto úkolu.'
+                );
+                continue;
+            }
+
+            $sign = $participantData['sign'] ?? '+';
+            $hours = trim($participantData['hours'] ?? '');
+            $minutes = trim($participantData['minutes'] ?? '');
+            $error  = false;
+
+            if ($hours === '' && $minutes === '') {
+                $this->addError(
+                    "participants.$userId",
+                    'Vyplň čas nebo odškrtni pracovníka'
+                );
+                continue;
+            }
+
+            if ($sign !== '+' && $sign !== '-') {
+                $this->addError(
+                    "participants.$userId",
+                    'Neplatné znaménko času.'
+                );
+                $error  = true;
+            }
+
+            if (
+                $hours !== ''
+                && (!is_numeric($hours) || $hours < 0 || $hours > 24)
+            ) {
+                $this->addError(
+                    "participants.$userId",
+                    'Hodiny musí být v rozmezí 0 až 24'
+                );
+                $error  = true;
+            }
+
+            if (
+                $minutes !== ''
+                && (!is_numeric($minutes) || $minutes < 0 || $minutes > 59)
+            ) {
+                $this->addError(
+                    "participants.$userId",
+                    'Minuty musí být v rozmezí 0 až 59'
+                );
+                $error  = true;
+            }
+
+
+            // jdeme přepočítat na minuty a případně udělat číslo záporné
+            if($error === false) {
+                $totalMinutes = (int) $hours * 60 + (int) $minutes;
+                if ($sign === '-') {
+                    $totalMinutes = $totalMinutes * -1;
+                }
+                $participantData['minutes_spent'] = $totalMinutes;
+            }
+
+        }
+        unset($participantData);
+        $data['participants'] = $participants;
+
+        // 7. Pokud jsou chyby, vrať se zpět
+        if ($this->hasErrors()) {
+            $this->view->data = $data;
+
+            return $this->addTaskReport($taskId);
+        }
+
+        // 8. Uložení reportu i s účastníky
+        $assignmentModel = new AssignmentModel();
+
+        $assignmentId = $assignmentModel->createReport(
+            $taskId,
+            $task['work_order_id'] ?? 0,
+            $data
+        );
+
         if ($assignmentId) {
             Flash::success('Report byl úspěšně uložen');
         } else {
-                $this->addError('global', 'Nepodařilo se uložit report');
-                $this->view->data = $data;
+            $this->addError('global', 'Nepodařilo se uložit report');
+            $this->view->data = $data;
 
-                //můžeme zavolat render pro reporty, doplnit zpátky do proměnných
-                return $this->addTaskReport($taskId);
+            return $this->addTaskReport($taskId);
         }
-        //podařilo se uložit, uděláme redirect pod formulář
-        Url::redirect('/{tenant}/tasks/' . $taskId . '/report/#report_list');
+
+        // podařilo se uložit, redirect pod formulář
+        Url::redirect('/{tenant}/tasks/' . $taskId . '/add-report/#report_list');
     }
+
+
 
     public function addTaskReport(int $taskId): string
     {

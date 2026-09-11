@@ -4,7 +4,6 @@ declare(strict_types=1);
 /** @var \App\Core\ViewContext $view */
 
 use App\Core\Url;
-//use App\Core\Roles;
 use App\Core\Csrf;
 
 
@@ -71,7 +70,7 @@ $errors    = $view->errors;
             <?php foreach ($teams as $team): ?>
                 <option
                     value="<?= $team['id'] ?>"
-					<?php /* přepsáno na dole (($post['team_id'] ?? null) == $team['id']) ? 'selected' : '' */ ?>
+					
                     <?= (($post['team_id'] ?? null) === $team['id']) ? 'selected' : '' ?>
                 >
                     <?= e($team['name'] ?? '') ?>
@@ -84,7 +83,7 @@ $errors    = $view->errors;
               <input type="checkbox"
                      name="is_recurring_master"
                      value="1"
-                     <?php /* přepsáno na dole (!empty($post['is_recurring_master']) ? 'checked' : '') */ ?>
+                     
 					 <?= isset($post['is_recurring_master']) && $post['is_recurring_master'] === '1' ? 'checked' : '' ?>
 					 
                      style="width:auto;">
