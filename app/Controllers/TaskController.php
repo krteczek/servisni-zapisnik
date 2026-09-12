@@ -140,7 +140,7 @@ private function saveTask(array $data, int $workOrderId): string
             ]);
 
             // 🔁 recurring
-            if ((int) $post['is_recurring_master'] === 1) {
+            if (TaskType::isMaster($taskType)) {
 
                 $recurringModel = new RecurringTaskModel();
 
@@ -208,7 +208,7 @@ private function saveTask(array $data, int $workOrderId): string
     public function createTaskFromOrderGet(int $orderId):string
     {
         $order = $this->getOrderOrRedirect($orderId);
-        if ($order['status'] !== 'new') {
+        if (!WOStatus::isNew($order['status'])) {
             Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
             Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
         }
@@ -224,7 +224,7 @@ private function saveTask(array $data, int $workOrderId): string
     public function createTaskFromOrderPost(int $orderId):string
     {
         $order = $this->getOrderOrRedirect($orderId);
-        if ($order['status'] !== 'new') {
+        if (!WOStatus::isNew($order['status'])) {
             Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
             Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
         }
@@ -245,12 +245,12 @@ private function saveTask(array $data, int $workOrderId): string
 
     private function ensureTaskEditable(array $task): void
     {
-        if ($task['status'] === 'done') {
+        if (TaskStatus::isDone($task['status'])) {
             Flash::info('Tento úkol nelze upravovat, protože je dokončený.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
-        if ($task['status'] === 'cancelled') {
+        if (TaskStatus::isCancelled($task['status'])) {
             Flash::error('Tento úkol nelze upravovat, protože je zrušený.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
@@ -268,12 +268,12 @@ private function saveTask(array $data, int $workOrderId): string
 
 //print_r($task);exit;
 
-        if ($task['status'] === 'done') {
+        if (TaskStatus::isDone($task['status'])) {
             Flash::info("Tento úkol nelze $label, protože je již dokončený.");
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
-        if ($task['status'] === 'cancelled') {
+        if (TaskStatus::isCancelled($task['status'])) {
             Flash::error("Tento úkol nelze $label, protože je již zrušený.");
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
@@ -333,6 +333,10 @@ private function saveTask(array $data, int $workOrderId): string
 
 		//potřebujeme vytáhnout zakázku (podle work_order_id)
 		$order = (new WorkOrderModel())->find($task['work_order_id']);
+        if (!$order) {
+            Flash::error('Zakázka neexistuje');
+            Url::redirect('/{tenant}/work-orders/#main');
+        }
 		
 		//zjistíme jméno a barvu týmu
 		$team = (new TeamModel())->find($task['team_id']);
@@ -468,11 +472,16 @@ private function saveTask(array $data, int $workOrderId): string
     public function done(int $taskId): void
     {
         $task = $this->getTaskOrRedirect($taskId);
-        $this->ensureTaskClosable($task, 'done');
+        $this->ensureTaskClosable($task, TaskStatus::DONE);
 
         try {
 
-            $ok = (new TaskModel())->closeTask($taskId, 'done');
+            $ok = (new TaskModel())->closeTask($taskId, TaskStatus::DONE);
+
+            if (!$ok) {
+                Flash::error('Nepodařilo se uzavřít úkol.');
+                Url::back();
+            }
 
             Flash::success('Úkol byl uzavřen.');
             Url::back();
@@ -497,11 +506,15 @@ private function saveTask(array $data, int $workOrderId): string
     public function cancel(int $taskId): void
     {
         $task = $this->getTaskOrRedirect($taskId);
-        $this->ensureTaskClosable($task, 'cancel');
+        $this->ensureTaskClosable($task, TaskStatus::CANCELLED);
 
         try {
-            $ok = (new TaskModel())->closeTask($taskId, 'cancelled');
- 
+            $ok = (new TaskModel())->closeTask($taskId, TaskStatus::CANCELLED);
+            if (!$ok) {
+                Flash::error('Nepodařilo se zrušit úkol.');
+                Url::back();
+            }
+
             Flash::success('Úkol byl zrušen.');
             Url::back();
         } catch (Throwable $e) {
