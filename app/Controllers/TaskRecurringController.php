@@ -223,9 +223,12 @@ final class TaskRecurringController extends Controller
     }
 
 
+    /**
+     * Ověří, zda je šablona opakujícího se úkolu uzavíratelná.
+     */
     public function ensureRecurringTaskClosable(array $task): void
     {
-        if (empty($task['recurring_task_id']) || TaskType::isNormal($task['task_type'])) {
+        if (!TaskType::isMaster($task['task_type'])) {
             Flash::info('Tato funkce je určena pouze pro opakující se úkoly.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
@@ -242,6 +245,10 @@ final class TaskRecurringController extends Controller
     }
 
 
+    /**
+     * Uzavře šablonu opakujícího se úkolu
+     * 
+     */
     public function doneRecurring(int $taskId): void
     {
         $task = $this->getTaskRecurringOrRedirect($taskId);
@@ -250,7 +257,7 @@ final class TaskRecurringController extends Controller
         try {
             $ok = (new TaskModel())->closeRecurringTask($taskId, TaskStatus::DONE);
 
-            Flash::success('Úkol byl uzavřen.');
+            Flash::success('Úkol BLABLA byl uzavřen.');
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#taskId_' . $taskId);
             
         } catch (Throwable $e) {
@@ -285,7 +292,8 @@ final class TaskRecurringController extends Controller
         }
 
         if ($task['count_instances'] > 0) {
-            Flash::info("Tuto šablonu pro generování opakovaných úkolů nemůžete zrušit, protože má již vygenerované úkoly. Můžete ji však uzavřít.");
+            Flash::info("Tuto šablonu pro generování opakovaných úkolů nemůžete zrušit, 
+            protože má již vygenerované úkoly. Můžete ji však uzavřít.");
             Url::redirect('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main');
         }
 
