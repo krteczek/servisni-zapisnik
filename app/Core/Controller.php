@@ -41,7 +41,7 @@ abstract class Controller
         // TODO: [PERFORMANCE] Zvážit cachování databázového připojení na úrovni requestu
         if (Auth::check()) {
             $db = Session::get('user.db_name');
-            if ($db) {
+            if ($db !== null && $db !== '') {
                 Database::useWorkDatabase($db);
             }
         }
@@ -123,8 +123,10 @@ abstract class Controller
      */
     protected function hasErrors(): bool
     {
-        return !empty($this->view->errors);
+        return $this->view->errors !== [];
     }
+
+    
     public function getError($key): bool
     {
         return $this->view->errors[$key] ?? '';

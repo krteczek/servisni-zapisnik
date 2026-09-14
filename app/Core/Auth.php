@@ -130,7 +130,7 @@ public static function check(): bool
             $sessionVersion = (int) Session::get(self::USER_KEY . '.session_version', 0);
 
             if (
-                !$user ||
+                $user === null  ||
                 (int)$user['active'] !== 1 ||
                 (int)$user['session_version'] !== $sessionVersion
             ) {
@@ -156,7 +156,7 @@ public static function check(): bool
     public static function name(): ?string
     {
         $user = self::user();
-        if (!$user) {
+        if ($user === null ) {
              return null;
         }
 
@@ -186,22 +186,27 @@ public static function check(): bool
 
         $parts = [];
 
-        if ($role) {
+        if ($role !== '' ) {
             $parts[] = $role;
         }
 
-        if ($company) {
+        if ($company !== null && $company !== '') {
             $parts[] = $company;
         }
 
-        $suffix = $parts ? ' (' . implode(', ', $parts) . ')' : '';
-
-        if ($name) {
+        $suffix = $parts !== []
+                        ? ' (' . implode(', ', $parts) . ')'
+                        : '';
+        if ($name !== null && $name !== '') {
             return $name . $suffix;
         }
 
-        if (!empty($parts)) {
-            return ucfirst($parts[0]) . ($company ? ' (' . $company . ')' : '');
+        if ($parts !== []) {
+             return ucfirst($parts[0]) . (
+                    $company !== null && $company !== ''
+                        ? ' (' . $company . ')'
+                        : ''
+            );
         }
 
        return null;    
@@ -283,7 +288,7 @@ public static function check(): bool
 {
     $user = self::user();
 
-    if (!$user) {
+    if ($user === null) {
         return 'guest';
     }
 
@@ -312,7 +317,7 @@ public static function check(): bool
     public static function hasGlobalRole(array $roles): bool
     {
         $user = self::user();
-        if (!$user) {
+        if ($user === null) {
             return false;
         }
 

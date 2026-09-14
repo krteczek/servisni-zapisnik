@@ -144,10 +144,9 @@ public static function handleError(
     string $file,
     int $line
 ): bool {
-    if (!(error_reporting() & $severity)) {
+    if ((error_reporting() & $severity) === 0) {
         return false;
     }
-
     throw new \ErrorException($message, 0, $severity, $file, $line);
 }
 

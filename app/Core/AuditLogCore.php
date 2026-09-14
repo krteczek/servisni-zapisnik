@@ -49,7 +49,7 @@ final class AuditLogCore
         }
         $diffJson = null;
 
-        if ($diff) {
+        if ($diff !== []) {
            try {
                    $diffJson = json_encode($diff, JSON_THROW_ON_ERROR);
            } catch (Throwable) {
