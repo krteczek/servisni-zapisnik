@@ -45,8 +45,8 @@ final class Menu
             if (!self::isAllowed($route)) {
                 continue;
             }
-
-            if (empty($route['menu']) && empty($route['submenu'])) {
+            
+            if (($route['menu'] ?? null) === null && ($route['submenu'] ?? null) === null) {
                 continue;
             }
 
@@ -54,7 +54,7 @@ final class Menu
             $section   = $route['section'] ?? $route['menu'] ?? $route['path'];
 
             /* ===== HLAVNÍ MENU ===== */
-            if (!empty($route['menu'])) {
+            if (($route['menu'] ?? null) !== null) {
 
                 if (!isset($menu[$section])) {
                     $menu[$section] = [
@@ -75,11 +75,11 @@ final class Menu
 
             /* ===== SUBMENU ===== */
             if (
-                !empty($route['submenu'])
-                && !empty($route['section'])
+                ($route['submenu'] ?? null) !== null
+                && ($route['section'] ?? null) !== null
                 && isset($menu[$route['section']])
             ) {
-                $active = ($currentPath === $routePath);
+                 $active = ($currentPath === $routePath);
 
                 $menu[$route['section']]['items'][] = [
                     'label'  => $route['submenu'],
@@ -123,7 +123,12 @@ final class Menu
         }
 
         // role check jen pro přihlášené
-        if ($isLogged && !empty($route['roles']) && !Auth::hasRole($route['roles'])) {
+        if (
+            $isLogged
+            && ($route['roles'] ?? []) !== []
+            && !Auth::hasRole($route['roles'])
+        ) 
+        {
             return false;
         }
 

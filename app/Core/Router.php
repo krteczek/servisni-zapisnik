@@ -72,14 +72,29 @@ final class Router
         }
 
         $requestPath = '/' . ltrim($requestPath, '/');
-        $requestPath = rtrim($requestPath, '/') ?: '/';
-
+        $requestPath = rtrim($requestPath, '/');
+        if ($requestPath === '') {
+            $requestPath = '/';
+        }
         $this->view->menu = Menu::build(
             $routes,
             $requestPath
         );
     }
+private function parsepath(string $parsedPath): string
+    {
+        if ($parsedPath === '') {
+            return '/';
+        }
 
+        $path = '/' . ltrim($parsedPath, '/');
+        $path = rtrim($path, '/');
+        if ($path === '') {
+            return '/';
+        }
+
+        return $path;
+    }
     /**
      * Zpracuje HTTP požadavek a vrátí odpověď.
      * Projde všechny routy, ověří shodu, zkontroluje oprávnění a zavolá příslušný controller.
@@ -106,8 +121,7 @@ final class Router
             $parsedPath = '/';
         }
 
-        $path = '/' . ltrim($parsedPath, '/');
-        $path = rtrim($path, '/') ?: '/';
+        $path = $this->parsepath($parsedPath);
 
         foreach ($this->routes as $route) {
 
@@ -115,13 +129,13 @@ final class Router
                 continue;
             }
 
-            if (!preg_match($route['regex'], $path, $matches)) {
+            if (preg_match($route['regex'], $path, $matches) !== 1) {
                 continue;
             }
 
             // auth
-            if (($route['auth'] ?? false) && !Auth::user()) {
-                Flash::info('Byli jste odhlášeni systémem(změna oprávnění nebo neplatná session).');
+            if (($route['auth'] ?? false) && Auth::user() === null) {
+                Flash::info('Byli jste odhlášeni systémem (změna oprávnění nebo neplatná session).');
                 Url::redirect('/login');
             }
 
@@ -140,7 +154,7 @@ final class Router
 
             // TODO: [FEATURE] Při implementaci multi-tenant admina upravit podmínku - admin může přistupovat k různým tenantům
             // tenant guard – dokud tenant existuje
-            if (isset($params['tenant']) && Auth::user()) {
+            if (isset($params['tenant']) && Auth::user() !== null) {
                 $current = Auth::tenantSlug();
 
                 if ($params['tenant'] !== $current) {
@@ -207,7 +221,14 @@ final class Router
             $args[] = ctype_digit($value) ? (int)$value : $value;
         }
 
-        return $controller->$method(...$args);
+        
+        $callable = [$controller, $method];
+
+        if (!is_callable($callable)) {
+            throw new LogicException('Controller action is not callable.');
+        }
+
+        return $callable(...$args);
     }
 
     /**
@@ -312,11 +333,9 @@ final class Router
             return false;
         }
 
-        $path = '/' . ltrim($parsedPath, '/');
-        $path = rtrim($path, '/') ?: '/';
-
+        $path = $this->parsepath($parsedPath);
         foreach ($this->routes as $route) {
-            if (!preg_match($route['regex'], $path)) {
+            if (preg_match($route['regex'], $path) !== 1) {
                 continue;
             }
 
@@ -334,7 +353,7 @@ final class Router
      */
     private function checkRouteAccess(array $route): bool
     {
-        if (!empty($route['roles']) && !Auth::hasGlobalRole($route['roles'])) {
+        if (($route['roles'] ?? []) !== [] && !Auth::hasGlobalRole($route['roles'])) {
             return false;
         }
 

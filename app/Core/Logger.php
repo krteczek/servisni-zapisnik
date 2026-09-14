@@ -182,7 +182,7 @@ public function log(string $level, string $message, array $context = []): void
     );
 
     // 🔥 přidat context vždy, ne jen přes placeholder
-    if (!empty($context)) {
+    if ($context === []) {
         $line .= PHP_EOL . json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 

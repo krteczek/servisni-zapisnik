@@ -41,11 +41,10 @@ class Csrf
         
         $token = Session::get(self::KEY);
         
-        if (empty($token)) {
+        if ($token === null || $token === '') {
             $token = bin2hex(random_bytes(32));
             Session::set(self::KEY, $token);
         }
-
         return $token;
     }
 
@@ -63,18 +62,6 @@ class Csrf
      * @param string $token Token k ověření (obvykle z $_POST['_token'])
      * @return bool TRUE pokud token je platný, jinak FALSE
      */
-    public static function checkOLD(string $token): bool
-    {
-        Session::start();
-        
-        $storedToken = Session::get(self::KEY);
-        
-        if (empty($storedToken)) {
-            return false;
-        }
-
-        return hash_equals($storedToken, $token);
-    }
     public static function check(string $token): bool
     {
         Session::start();
