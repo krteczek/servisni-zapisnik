@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Services\Mail;
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+//use PHPMailer\PHPMailer\Exception;
 use App\Core\Config;
 
 //posílání emailu pomocí phpMailer
