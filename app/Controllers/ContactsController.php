@@ -46,7 +46,7 @@ class ContactsController extends Controller
         }
 
         $ok = $this->model->create($data);
-        if(!$ok)
+        if ($ok <= 0)
         {
         	  $this->addError('global', 'Litujeme, zákazníka se nepodařilo uložit do systému. Zkuste to,  prosím, později.');
         	  $this->view->data = $data;
@@ -60,7 +60,7 @@ class ContactsController extends Controller
     private function getContactOrRedirect(int $id): array
     {
         $contact = $this->model->find($id);
-        if (!$contact) {
+        if ($contact === null) {
             Flash::error('Zákazník nenalezen');
             Url::redirect('/{tenant}/contacts/index/#main');
         }

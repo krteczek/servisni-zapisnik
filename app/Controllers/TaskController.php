@@ -63,7 +63,7 @@ private function getOrderOrRedirect(int $orderId): array
 		// máme tu čistý find (na basemodel), musíme ověřit, jestli je zakázka editovatelná.
     $order = (new WorkOrderModel())->find($orderId);
 
-    if (!$order) {
+    if ($order === null) {
         Flash::error('Zakázka neexistuje');
         Url::redirect('/{tenant}/work-orders/#main');
     }
@@ -95,7 +95,7 @@ private function saveTask(array $data, int $workOrderId): string
     $teams     = $teamModel->byActive(true);
     $team      = $teamModel->find($teamId);
 
-    if (!$team) {
+    if ($team === null) {
         $this->addError('team_id', 'Vybraný tým neexistuje');
     }
 
@@ -129,7 +129,7 @@ private function saveTask(array $data, int $workOrderId): string
                 'due_date'            => $post['due_date'],
                 'task_type'           => $taskType 
             ]);
-            if (!$taskId) {
+            if ($taskId <= 0) {
                 throw new \RuntimeException('Task create failed');
             }
 
@@ -158,7 +158,7 @@ private function saveTask(array $data, int $workOrderId): string
                     'active'              => 1,
                 ]);
 
-                if (!$recurringId) {
+                if ($recurringId <= 0) {
                     throw new \RuntimeException('Recurring create failed');
                 }
 
@@ -215,6 +215,7 @@ private function saveTask(array $data, int $workOrderId): string
             Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
             Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
         }
+        $post = [];
         $post['title'] = $order['title'];
         $post['description'] = $order['description'];
         $post['due_date'] = $order['wo_due_date'];
@@ -238,8 +239,8 @@ private function saveTask(array $data, int $workOrderId): string
 	// ověří existenci tasku, pokud existuje, vrátí jeho hodnoty, jinak redirect
 	private function getTaskOrRedirect(int $taskId): array
 	{
-		$task = (new TaskModel())->find((int) $taskId);
-		if(!$task) {
+		$task = (new TaskModel())->find($taskId);
+		if($task === null) {
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');			
 		}
@@ -307,7 +308,7 @@ private function saveTask(array $data, int $workOrderId): string
 		//potřebujeme vytáhnout zakázku (podle work_order_id)
 		$order = (new WorkOrderModel())->find($task['work_order_id']);
 		//print_r($task);
-        if (!$order) {
+        if ($order === null) {
             Flash::error('Zakázka neexistuje');
             Url::redirect('/{tenant}/work-orders/#main');
         }
@@ -315,7 +316,7 @@ private function saveTask(array $data, int $workOrderId): string
 
 		//zjistíme jméno a barvu týmu
 		$team = (new TeamModel())->find($task['team_id']);
-        if (!$team) {
+        if ($team === null) {
             LoggerHolder::get()->error('Task references non-existent team', [
                 'task_id' => $task['id'],
                 'team_id' => $task['team_id'],
@@ -343,14 +344,14 @@ private function saveTask(array $data, int $workOrderId): string
 
 		//potřebujeme vytáhnout zakázku (podle work_order_id)
 		$order = (new WorkOrderModel())->find($task['work_order_id']);
-        if (!$order) {
+        if ($order === null) {
             Flash::error('Zakázka neexistuje');
             Url::redirect('/{tenant}/work-orders/#main');
         }
 		
 		//zjistíme jméno a barvu týmu
         $team = (new TeamModel())->find($task['team_id']);
-        if (!$team) {
+        if ($team === null) {
             LoggerHolder::get()->error('Task references non-existent team', [
                 'task_id' => $task['id'],
                 'team_id' => $task['team_id'],
@@ -406,7 +407,7 @@ private function saveTask(array $data, int $workOrderId): string
         // $this->ensureTaskEditable($task);
 
         $order = (new WorkOrderModel())->find($task['work_order_id']);
-        if (!$order) {
+        if ($order === null) {
             Flash::error('Zakázka neexistuje.');
             Url::redirect('/{tenant}/work-orders/#main');
         }
@@ -437,7 +438,7 @@ private function saveTask(array $data, int $workOrderId): string
         // $this->ensureTaskEditable($task);
         
         $order = (new WorkOrderModel())->find($task['work_order_id']);
-        if (!$order) {
+        if ($order === null) {
             Flash::error('Zakázka neexistuje.');
             Url::redirect('/{tenant}/work-orders/#main');
         }
@@ -588,7 +589,7 @@ private function saveTask(array $data, int $workOrderId): string
         $taskModel = new TaskModel();
         $task = $taskModel->find($taskId);
 
-        if (!$task) {
+        if ($task === null) {
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');
         }
@@ -736,7 +737,7 @@ private function saveTask(array $data, int $workOrderId): string
             $data
         );
 
-        if ($assignmentId) {
+        if ($assignmentId > 0) {
             Flash::success('Report byl úspěšně uložen');
         } else {
             $this->addError('global', 'Nepodařilo se uložit report');
@@ -757,7 +758,7 @@ private function saveTask(array $data, int $workOrderId): string
         $taskModel = new TaskModel();
         $task = $taskModel->find($taskId);
         
-        if (!$task) {
+        if ($task === null) {
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');
         }
@@ -805,7 +806,7 @@ private function saveTask(array $data, int $workOrderId): string
             $userId = Auth::id();
 
             //zjistíme, jestli má právo přidat report k tomuto úkolu
-            if((new TaskModel())->canUserAddReport((int) $taskId, (int) $userId) === true)
+            if((new TaskModel())->canUserAddReport($taskId, (int) $userId) === true)
             {
                 return true;
             }

@@ -49,7 +49,10 @@ private function dataToView(): void
         $ids = $_POST['ids'] ?? [];
 
         $ids = array_values(array_unique(
-            array_filter(array_map('intval', $ids))
+            array_filter(
+                array_map('intval', $ids),
+                static fn (int $id): bool => $id !== 0
+            )
         ));
 
         if ($ids === []) {
@@ -64,7 +67,7 @@ private function dataToView(): void
         $taskModel = new TaskModel();
         $tasks     = $taskModel->findByIds($ids);
 
-        if (!$tasks) {
+        if ($tasks === []) {
             $this->addError('ids', 'Žádná data nebyla nalezena.');
             return $this->exportTasksGet();
         }

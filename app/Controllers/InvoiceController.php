@@ -12,7 +12,7 @@ use App\Models\ContactsModel;
 use App\Models\TaskModel;
 use App\Models\WorkOrderModel;
 use App\Services\Invoice\InvoiceService;
-use throwable;
+use Throwable;
 use App\Core\LoggerHolder;
 
 class InvoiceController extends Controller
@@ -88,7 +88,7 @@ class InvoiceController extends Controller
      */
     public function storeTask(int $id): string
     {
-        if (empty($_POST)) {
+        if ($_POST === []) {
             Flash::error('Neplatná žádost.');
             Url::back();
         }

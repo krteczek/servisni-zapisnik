@@ -31,9 +31,9 @@ class DevAuthController extends Controller
         $company = $companyModel->find($companyId);
 
         $userModel = new UserModel();
-        $user = $userModel->findByEmailAndCompany($email, (int) $companyId);
+        $user = $userModel->findByEmailAndCompany($email, $companyId);
 
-        if (!$user || !$company) {
+        if ($user === null || $company === null) {
             throw new \Exception('User or company not found for dev login.');
         }
 

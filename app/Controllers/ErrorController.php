@@ -29,7 +29,7 @@ final class ErrorController extends Controller
         http_response_code(500);
         $this->view->title = '500 – Interní chyba serveru';
 
-        if (defined('APP_DEBUG') && APP_DEBUG) {
+        if (Config::get('app.env') === 'dev') {
             $this->view->exception = $e->getTraceAsString();
         }
 
@@ -53,7 +53,7 @@ final class ErrorController extends Controller
 
             default:
                 $this->view->title = '500 – Chyba aplikace';
-                if (Config::get('app.env') === 'dev' && $e) {
+                if (Config::get('app.env') === 'dev' && $e !== null) {
                 	  $txt = '
  code: ' . $code . '
  message: ' . $e->getMessage() . '
