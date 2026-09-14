@@ -8,7 +8,7 @@ use App\Core\Controller;
 use App\Models\TaskModel;
 use App\Models\TeamModel;
 use App\Models\WorkOrderModel;
-use App\Models\AssignmentModel;
+use App\Models\TaskAssignmentModel;
 use App\Models\RecurringTaskModel;
 use App\Services\Tasks\TaskStatus;
 use App\Services\WorkOrders\WOStatus;
@@ -73,7 +73,7 @@ class ArchiveController extends Controller
         $task['totalKm'] = 0;
         if(TaskStatus::isDone($task["status"])) {
             //získáme reporty podle id tasku
-            $model = new AssignmentModel();
+            $model = new TaskAssignmentModel();
             $reports = $model->findByTask($taskId);
             $task['allReportsParticipants'] = $model->getTaskParticipants($taskId);
             $task['totalKm'] = $model->getTaskTotalKilometers($taskId);

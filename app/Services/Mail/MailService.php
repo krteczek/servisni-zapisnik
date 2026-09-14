@@ -30,14 +30,14 @@ class MailService
 			if (Config::get('app.env') === 'dev') {
 			    $this->mailer->SMTPDebug = 2;
 			}
-        if (!empty($config['encryption'])) {
+        if (($config['encryption'] ?? '') !== '') {
             $this->mailer->SMTPSecure = $config['encryption'];
         }
 
-        if (!empty($config['timeout'])) {
+        if (isset($config['timeout'])) {
             $this->mailer->Timeout = $config['timeout'];
         }
-
+        
         $this->mailer->CharSet = 'UTF-8';
 
         $this->config = $config;

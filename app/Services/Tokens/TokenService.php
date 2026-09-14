@@ -10,7 +10,6 @@ use App\Core\Transaction;
 
 use DateTimeImmutable;
 use RuntimeException;
-use Throwable;
 
 final class TokenService
 {
@@ -93,8 +92,7 @@ public function create(
 
         $row = $this->model->findValidByHash($hash, $type);
 
-        if (!$row) {
-            
+        if ($row === null) {
             return [
             'ok' => false,
             'result' => TokenResult::EXPIRED
@@ -112,7 +110,7 @@ public function create(
 
 public function consume(string $rawToken, string $type): array
 {
-    return Transaction::run(function () use ($rawToken, $type) {
+    return Transaction::run(function () use ($rawToken, $type): array {
 
         $hash = self::hash($rawToken);
 
@@ -121,7 +119,7 @@ public function consume(string $rawToken, string $type): array
             $type
         );
 
-        if (!$row) {
+        if ($row === null) {
             return [
                 'ok' => false,
                 'result' => TokenResult::EXPIRED,

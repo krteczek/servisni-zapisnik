@@ -8,7 +8,7 @@ use App\Core\Controller;
 use App\Models\TaskModel;
 use App\Models\TeamModel;
 use App\Models\WorkOrderModel;
-use App\Models\AssignmentModel;
+use App\Models\TaskAssignmentModel;
 use App\Models\RecurringTaskModel;
 use App\Models\TeamMembership;
 use App\Core\Url;
@@ -627,12 +627,11 @@ private function saveTask(array $data, int $workOrderId): string
         $allowedUserIds = array_column($teamMembers, 'id');
 
         // 6. Validace účastníků
-        // 6. Validace účastníků
         foreach ($participants as $userId => &$participantData) {
             $userId = (int) $userId;
 
             // Nezaškrtnutý pracovník nás nezajímá.
-            if (empty($participantData['selected'])) {
+            if (($participantData['selected'] ?? null) !== 'on') {
                 continue;
             }
 
@@ -659,17 +658,20 @@ private function saveTask(array $data, int $workOrderId): string
             }
 
             if ($sign !== '+' && $sign !== '-') {
+                /** zkusíme to udělat blbuvzdorné, to znasmená, dáš blbost, dostaneš + 
+                 *  tím pádem není třeba hlášku
+                */
+                $sign = '+';
+                
+                /* 
                 $this->addError(
                     "participants.$userId",
                     'Neplatné znaménko času.'
                 );
-                $error  = true;
+                $error  = true;*/
             }
 
-            if (
-                $hours !== ''
-                && (!is_numeric($hours) || $hours < 0 || $hours > 24)
-            ) {
+            if ( $hours !== '' && (!ctype_digit($hours) || $hours > 24)) {                
                 $this->addError(
                     "participants.$userId",
                     'Hodiny musí být v rozmezí 0 až 24'
@@ -677,9 +679,7 @@ private function saveTask(array $data, int $workOrderId): string
                 $error  = true;
             }
 
-            if (
-                $minutes !== ''
-                && (!is_numeric($minutes) || $minutes < 0 || $minutes > 59)
+            if ($minutes !== '' && (!ctype_digit($minutes) || $minutes > 59)
             ) {
                 $this->addError(
                     "participants.$userId",
@@ -692,10 +692,28 @@ private function saveTask(array $data, int $workOrderId): string
             // jdeme přepočítat na minuty a případně udělat číslo záporné
             if($error === false) {
                 $totalMinutes = (int) $hours * 60 + (int) $minutes;
-                if ($sign === '-') {
-                    $totalMinutes = $totalMinutes * -1;
+
+                if ($totalMinutes === 0) {
+                    $this->addError(
+                        "participants.$userId",
+                        'Čas nesmí být nulový. Zadejte alespoň 1 minutu.'
+                    );
+                    $error = true;
+
+                } elseif($totalMinutes > 24 * 60) {
+                        $this->addError(
+                            "participants.$userId",
+                            'Čas nesmí být větší než 24 hodin.'
+                        );
+                        $error = true;
+                } else {
+                    if ($sign === '-') {
+                        $totalMinutes *= -1;
+                    }
+
+                    $participantData['minutes_spent'] = $totalMinutes;
                 }
-                $participantData['minutes_spent'] = $totalMinutes;
+
             }
 
         }
@@ -710,7 +728,7 @@ private function saveTask(array $data, int $workOrderId): string
         }
 
         // 8. Uložení reportu i s účastníky
-        $assignmentModel = new AssignmentModel();
+        $assignmentModel = new TaskAssignmentModel();
 
         $assignmentId = $assignmentModel->createReport(
             $taskId,
@@ -766,7 +784,7 @@ private function saveTask(array $data, int $workOrderId): string
         $teamMembers = $teamModel->getActiveMembers($task['team_id']);
         
         // Načti existující reporty
-        $assignmentModel = new AssignmentModel();
+        $assignmentModel = new TaskAssignmentModel();
         $reports = $assignmentModel->findByTask($taskId);
         
         $this->view->task = $task;

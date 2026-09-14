@@ -119,7 +119,7 @@ public function byActive(bool $active): array
      */
     public function getColorsAndNamesByIds(array $teamIds): array
     {
-        if (empty($teamIds)) {
+        if ($teamIds === []) {
             return [];
         }
         

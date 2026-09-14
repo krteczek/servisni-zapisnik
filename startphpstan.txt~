@@ -1,6 +1,0 @@
-cd \xampp\htdocs\servisni-zapisnik
-php.exe vendor\bin\phpstan analyse --error-format=table
-
-linux:
-cd /opt/lampp/htdocs/servisni-zapisnik
-php vendor/bin/phpstan analyse --error-format=table

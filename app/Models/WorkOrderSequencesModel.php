@@ -32,7 +32,7 @@ class WorkOrderSequencesModel extends BaseModel
 
     $row = $stmt->fetch();
 
-    if (!$row) {
+    if ($row === false) {
         $db->prepare("
             INSERT INTO {$this->tableName} (company_id, year, last_number)
             VALUES (:cid, :year, 1)
