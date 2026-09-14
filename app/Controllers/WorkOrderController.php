@@ -16,7 +16,10 @@ use App\Models\TaskModel;
 use App\Models\TeamModel;
 use App\Models\ContactsModel;
 use App\Services\WorkOrders\WorkOrderNumberService;
+use App\Services\WorkOrders\WOStatus;
 use PDO;
+
+
 class WorkOrderController extends Controller
 {
     private WorkOrderModel $model;
@@ -120,9 +123,10 @@ public function index(): string
 
                $pdo->commit();
 		} catch (\Throwable $e) {
-			if ($pdo && $pdo->inTransaction()) {
+			if ($pdo !== null && $pdo->inTransaction()) {
                 $pdo->rollBack();
             }
+
             
 		    LoggerHolder::get()->error('WorkOrderController.createFormStore: failed', [
 		                'message' => $e->getMessage(),
@@ -328,23 +332,23 @@ public function detailOrder(int $orderId): string
     $order['cancelled_tasks_count'] = $cancelledTaskCount;
     $order['company_name']          = $contact['company_name'];
     
-        // příznak pro zobrazení odkazu na dokončení zakázky, pokud jsou všechny 
+    // příznak pro zobrazení odkazu na dokončení zakázky, pokud jsou všechny 
     // úkoly hotové nebo zrušené, nebo pokud nejsou žádné úkoly
     $order['ready_for_done'] = false;
 
-    if(((int)$order['total_tasks_count'] > 0) &&     
-            (((int)$order['done_tasks_count'] + (int)$order['cancelled_tasks_count']) === (int)$order['total_tasks_count'])) 
+    if(($order['total_tasks_count'] > 0) &&     
+            (($order['done_tasks_count'] + $order['cancelled_tasks_count']) === $order['total_tasks_count'])) 
     {
                 //odkaz na uzavření zakázky, pokud jsou všechny úkoly hotové nebo zrušené 
                 //nebo pokud nejsou žádné úkoly
-                if($order['status'] <> 'done') {
+                if(WOStatus::isOpen($order['status'])) {
                     $order['ready_for_done'] = true;
                 }
     }
 
     $order['ready_for_cancel'] = false;
-    if(((int)$order['total_tasks_count'] === 0) ||
-        ((int)$order['total_tasks_count'] === (int)$order['cancelled_tasks_count']))
+    if(($order['total_tasks_count'] === 0) ||
+        ($order['total_tasks_count'] === $order['cancelled_tasks_count']))
     {
         //odkaz na zrušení zakázky, pokud jsou všechny úkoly zrušené
         $order['ready_for_cancel'] = true;
@@ -374,7 +378,7 @@ private function getOrderOrRedirect(int $orderId): array
 
     $order = $this->model->find($orderId);
 
-    if (!$order) {
+    if ($order === null) {
         Flash::error('Zakázka neexistuje');
         Url::redirect('/{tenant}/work-orders/#main');
     }
@@ -387,10 +391,10 @@ private function getOrderOrRedirect(int $orderId): array
         $this->checkCsrf();
         $data = [
 
-            'contact_id'         => (int)($post['contact_id'] ?? 0) ?: null,
+            'contact_id'         => (int)($post['contact_id'] ?? 0),
             'price_per_hour'     => (int)($post['price_per_hour'] ?? 0),
             'price_per_km'       => (int)($post['price_per_km'] ?? 0),
-            'external_number' 	 => trim($post['external_number'] ?? '') ?: null,
+            'external_number' => trim($post['external_number'] ?? '') !== '' ? trim($post['external_number'] ?? '') : null,
             'title'           	 => trim($post['title'] ?? ''),
             'description'     	 => trim($post['description'] ?? ''),
             'source'          	 => $post['source'] ?? 'personal',
@@ -398,7 +402,7 @@ private function getOrderOrRedirect(int $orderId): array
             'contact_person'     => trim($post['contact_person'] ?? ''),
             'priority'        	 => $post['priority'] ?? 'normal',
             'created_by_user_id' => Auth::id(),
-            'create_first_task'  => !empty($post['create_first_task']),
+            'create_first_task'  => ($post['create_first_task'] ?? null) === 'on',
             'team_id'            => isset($post['team_id']) ? (int)$post['team_id'] : 0, 
             'wo_due_date'        => isset($post['wo_due_date']) ? $post['wo_due_date'] : null,
             'estimated_hours'    => isset($post['estimated_hours']) ? (int)$post['estimated_hours'] : null,
@@ -458,7 +462,7 @@ private function getOrderOrRedirect(int $orderId): array
                 // Ověříme, že zadané team_id skutečně existuje
                 $teamModel = new TeamModel();
                 $team = $teamModel->find($data['team_id']);
-                if (!$team) {
+                if ($team === null) {
                     $this->addError('team_id', 'Vybraný tým neexistuje.');
                 } else {
                     $data['team_id'] = (int)$team['id'];

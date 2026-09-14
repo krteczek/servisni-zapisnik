@@ -59,7 +59,108 @@ final class UserController extends Controller
     /**
      * NOVÁ verze (správná)
      */
-	public function store(): string
+    public function store(): string
+    {
+        $data = $_POST;
+        $this->view->data  = $data;
+        $this->view->roles = Roles::effective();
+
+        $this->checkCsrf();
+        $this->validateUserData($data);
+
+        if ($this->hasErrors()) {
+            return $this->render('users/create');
+        }
+
+        try {
+            $userId = $this->users->create([
+                'email'           => strtolower(trim($data['email'])),
+                'employee_number' => trim($data['employee_number']),
+                'telefon'         => trim($data['telefon']),
+                'first_name'      => trim($data['first_name']),
+                'last_name'       => trim($data['last_name']),
+                'global_role'     => $data['global_role'],
+                'active'          => 0,
+                'password_hash'   => null,
+            ]);
+        } catch (\Throwable $e) {
+            LoggerHolder::get()->error('UserController.store: user creation failed', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]);
+
+            $this->addError(
+                'global',
+                'Litujeme, uživatele se nepodařilo vytvořit.'
+            );
+
+            return $this->render('users/create');
+        }
+
+        try {
+            // vytvoříme token
+            $token = (new TokenService())->create(
+                type: TokenType::INVITATION,
+                email: $data['email'],
+                userId: $userId
+            );
+
+            $url = Url::base() . Url::to(
+                '/activate/complete?token=' . $token
+            );
+
+            $to = [
+                'activationUrl' => $url,
+                'companyName'   => Auth::company(),
+            ];
+
+            // vytvoříme emailovou zprávu
+            [$subject, $htmlBody, $textBody] = BuildMailService::build(
+                'users.invitation',
+                $to
+            );
+
+            // pošleme email
+            $ok = (new MailService())->send(
+                toEmail: $data['email'],
+                toName: $data['email'],
+                subject: $subject,
+                html: $htmlBody,
+                text: $textBody
+            );
+
+            if ($ok) {
+                Flash::success(
+                    'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
+                    ' byl úspěšně vytvořen. Aktivační e-mail byl odeslán.'
+                );
+            } else {
+                Flash::error(
+                    'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
+                    ' byl vytvořen, ale aktivační e-mail se nepodařilo odeslat.'
+                );
+            }
+        } catch (\Throwable $e) {
+            LoggerHolder::get()->error(
+                'UserController.store: activation email failed',
+                [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                ]
+            );
+
+            Flash::error(
+                'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
+                ' byl vytvořen, ale aktivační e-mail se nepodařilo odeslat.'
+            );
+        }
+
+        Url::redirect('/{tenant}/users/' . $userId . '/detail/#main');
+    }
+
+public function storeOLD(): string
 	{
 	    $data = $_POST;
 	    $this->view->data  = $data;
@@ -84,10 +185,6 @@ final class UserController extends Controller
 	        'password_hash'   => null,
 	    ]);
 	
-	    if (!$userId || (int)$userId <= 0) {
-	        $this->addError('global', 'Litujeme, uživatele se nepodařilo vytvořit');
-	        return $this->render('users/create');
-	    }
 	
 	    try {
 
@@ -130,7 +227,7 @@ final class UserController extends Controller
 	        );
 	    }
 	
-	    Url::redirect('/{tenant}/users/' . (int)$userId . '/detail/#main');
+	    Url::redirect('/{tenant}/users/' . $userId . '/detail/#main');
 	}
 
 
@@ -141,7 +238,7 @@ final class UserController extends Controller
     public function edit(int $id): string
     {
         $user = $this->users->find($id);
-        if (!$user) {
+        if ($user === null) {
             Flash::error('Uživatel neexistuje.');
             Url::redirect('/{tenant}/users/#main');
         }
@@ -155,7 +252,7 @@ final class UserController extends Controller
     public function update(int $id): string
     {
         $old = $this->users->find($id);
-        if (!$old) {
+        if ($old === null) {
             Flash::error('Uživatel neexistuje.');
             Url::redirect('/{tenant}/users/#main');
         }
@@ -265,7 +362,7 @@ final class UserController extends Controller
     public function userDetail(int $id): string
     {
         $user = $this->users->find($id);
-        if (!$user) {
+        if ($user === null) {
             Flash::error('Uživatel neexistuje.');
             Url::redirect('/{tenant}/users/#main');
         }
@@ -291,7 +388,7 @@ final class UserController extends Controller
     {
         $user = $this->users->find($id);
 //var_dump($user);exit;
-        if (!$user) {
+        if ($user === null) {
             Flash::error('Uživatel neexistuje.');
             Url::redirect('/{tenant}/users/#main');
         }

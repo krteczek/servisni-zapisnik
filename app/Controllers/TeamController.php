@@ -140,7 +140,7 @@ final class TeamController extends Controller
         $userModel       = new UserModel();
 
         $team = $teamModel->find($id);
-        if (!$team) {
+        if ($team === null) {
             Flash::error('Tým neexistuje.');
             Url::redirect('/{tenant}/teams/#main');
         }
@@ -188,7 +188,9 @@ final class TeamController extends Controller
         $membershipModel = new TeamMembership();
         $userModel       = new UserModel();
 
-        if (!$teamModel->find($id)) {
+        $team = $teamModel->find($id);
+
+        if ($team === null) {
             Flash::error('Tým neexistuje.');
             Url::redirect('/{tenant}/teams/#main');
         }
@@ -246,7 +248,7 @@ final class TeamController extends Controller
             $user = $userModel->find($userId);
 
             // root NIKDY
-            if (!$user || $user['global_role'] === 'root') {
+            if ($user === null || $user['global_role'] === 'root') {
             	Flash::error('Uživatele typu root nelze přidávat do týmů');
                 Url::redirect('/{tenant}/teams/' . $id . '/edit/#changelist');
             }
@@ -323,7 +325,7 @@ final class TeamController extends Controller
         $model = new TeamModel();
         $team  = $model->find($id);
 
-        if (!$team) {
+        if ($team === null) {
             Flash::error('Tým nenalezen.');
             Url::redirect('/{tenant}/teams/#main');
         }

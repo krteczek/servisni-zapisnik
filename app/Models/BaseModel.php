@@ -379,7 +379,8 @@ protected function diff(array $before, array $after): array
         }
 
         if ($data === []) {
-        	/* TODO: přepsat tak, aby nebyl exception pro uživatele, ale například false a logger mechat udělat záznam pro roota */
+        	/* TODO: přepsat tak, aby nebyl exception pro uživatele, ale například false 
+            a logger nechat udělat záznam pro roota */
             throw new LogicException('Create: empty data');
         }
 
