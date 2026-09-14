@@ -41,7 +41,7 @@ final class RecurringHelper
 
     public static function nextDueDate(?string $nextDueDate): string
     {
-        if (empty($nextDueDate)) {
+        if ($nextDueDate === "") {
             return '-';
         }
 

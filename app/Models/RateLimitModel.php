@@ -39,7 +39,7 @@ final class RateLimitModel extends BaseModel
         int $fingerprint,
         int $windowMinutes
     ): int {
-    	  $minutes = (int)$windowMinutes;
+    	  $minutes = $windowMinutes;
         $sql = "
             SELECT COUNT(*)
             FROM {$this->table}

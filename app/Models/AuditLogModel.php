@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 /**
- * Model pro práci s auditním logem (admin DB, globální tabulka).
+ * Model pro práci s auditním logem konkrétní firmy v admin DB.
  *
- * ⚠️ NENÍ tenant-aware:
- * - audit log obsahuje data pro všechny tenanty
- * - tenant filtr se aplikuje RUČNĚ přes filtry
+ * Auditní log je uložen v jedné globální tabulce,
+ * ale z pohledu aplikace je tenant-aware.
+ * Každé čtení je omezeno na aktuální tenant.
  */
 final class AuditLogModel extends BaseModel
 {
@@ -17,19 +17,19 @@ final class AuditLogModel extends BaseModel
     
     /**
      * ❗ DŮLEŽITÉ
-     * Audit log není tenant-aware → jinak by padal mimo Auth kontext
+     * Audit log JE tenant-aware!!! slouži adminovi tenantu ke zkoumání, co se dělo v jeho části systému     * 
      */
-    protected bool $tenantAware = false;
+    protected bool $tenantAware = true;
 
     /**
-     * Uloží auditní záznam.
+     * Uloží auditní záznam do log souboru na disku a do DB.
      *
      * @param array $data
      * @return int ID záznamu
      */
     public function insertLog(array $data): int
     {
-    	error_log('AUDIT INSERT: ' . json_encode($data));
+    	// error_log('AUDIT INSERT: ' . json_encode($data));
         return $this->insertRaw($data);
     }
 
@@ -42,6 +42,7 @@ final class AuditLogModel extends BaseModel
      * - action
      * - entity
      * - ip
+     * - user_agent
      * - from (YYYY-MM-DD)
      * - to   (YYYY-MM-DD)
      *
@@ -54,57 +55,48 @@ final class AuditLogModel extends BaseModel
         $where  = [];
         $params = [];
 
-        // 🔒 tenant filtr (RUČNĚ!)
-        if (!empty($filters['company_id'])) {
-            $where['company_id'] = (int)$filters['company_id'];
+        if (($filters['user_id'] ?? '') !== '') {
+            $where['user_id'] = (int) $filters['user_id'];
         }
 
-        if (!empty($filters['user_id'])) {
-            $where['user_id'] = (int)$filters['user_id'];
-        }
-
-        if (!empty($filters['action'])) {
+        if (($filters['action'] ?? '') !== '') {
             $where['action'] = $filters['action'];
         }
 
-        if (!empty($filters['entity'])) {
+        if (($filters['entity'] ?? '') !== '') {
             $where['entity'] = $filters['entity'];
         }
 
-        if (!empty($filters['ip'])) {
+        if (($filters['ip'] ?? '') !== '') {
             $where['ip_address'] = $filters['ip'];
         }
 
-        if (!empty($filters['user_agent'])) {
-           $where['user_agent'] = $filters['user_agent'];
-
+        if (($filters['user_agent'] ?? '') !== '') {
+            $where['user_agent'] = $filters['user_agent'];
         }
+
+        $where['company_id'] = $this->tenantId();
         $sql = "SELECT * FROM {$this->tableName}";
         $clauses = [];
 
-        // WHERE podmínky
         foreach ($where as $col => $val) {
             $clauses[] = "{$col} = :{$col}";
             $params[$col] = $val;
         }
 
-        // datum od
-        if (!empty($filters['from'])) {
+        if (($filters['from'] ?? '') !== '') {
             $clauses[] = 'created_at >= :from';
             $params['from'] = $filters['from'] . ' 00:00:00';
         }
 
-        // datum do
-        if (!empty($filters['to'])) {
+        if (($filters['to'] ?? '') !== '') {
             $clauses[] = 'created_at <= :to';
             $params['to'] = $filters['to'] . ' 23:59:59';
         }
 
-        if ($clauses) {
-            $sql .= ' WHERE ' . implode(' AND ', $clauses);
-        }
+        $sql .= ' WHERE ' . implode(' AND ', $clauses);
 
-        $sql .= ' ORDER BY created_at DESC LIMIT ' . (int)$limit;
+        $sql .= ' ORDER BY created_at DESC LIMIT ' . $limit;
 
         return $this->fetchAll($sql, $params);
     }
@@ -122,12 +114,14 @@ final class AuditLogModel extends BaseModel
         $sql = "
             SELECT *
             FROM {$this->tableName}
-            WHERE entity = :entity
-              AND entity_id = :entity_id
+            WHERE company_id = :company_id
+                AND entity = :entity
+                AND entity_id = :entity_id
             ORDER BY created_at DESC
-            LIMIT " . (int)$limit;
+            LIMIT " . $limit;
 
         return $this->fetchAll($sql, [
+            'company_id' => $this->tenantId(),
             'entity'    => $entity,
             'entity_id' => $entityId,
         ]);
@@ -145,33 +139,15 @@ final class AuditLogModel extends BaseModel
         $sql = "
             SELECT *
             FROM {$this->tableName}
-            WHERE user_id = :user_id
+            WHERE company_id = :company_id
+                AND user_id = :user_id
             ORDER BY created_at DESC
-            LIMIT " . (int)$limit;
+            LIMIT " . $limit;
 
         return $this->fetchAll($sql, [
+            'company_id' => $this->tenantId(),
             'user_id' => $userId,
         ]);
     }
 
-    /**
-     * Najde poslední záznamy pro tenant (company).
-     *
-     * @param int $companyId
-     * @param int $limit
-     * @return array
-     */
-    public function findByCompany(int $companyId, int $limit = 100): array
-    {
-        $sql = "
-            SELECT *
-            FROM {$this->tableName}
-            WHERE company_id = :company_id
-            ORDER BY created_at DESC
-            LIMIT " . (int)$limit;
-
-        return $this->fetchAll($sql, [
-            'company_id' => $companyId,
-        ]);
-    }
-}
+ }

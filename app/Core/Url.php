@@ -70,7 +70,7 @@ final class Url
         if (str_starts_with($path, '/{tenant}')) {
             $tenant = Auth::tenantSlug();
 
-            if ($tenant) {
+            if ($tenant !== null && $tenant !== '') {
                 $path = '/' . $tenant . substr($path, 9);
             }
         }
@@ -81,37 +81,6 @@ final class Url
         return $base . $path;
     }
 
-    public static function toOLD(string $path = ''): string
-{
-    self::init();
-
-    // absolutní URL
-    if (
-        str_starts_with($path, 'http://')
-        || str_starts_with($path, 'https://')
-    ) {
-        return $path;
-    }
-
-    // už obsahuje basePath → nepřidávat znovu
-    if (
-        self::$basePath !== ''
-        && str_starts_with($path, self::$basePath . '/')
-    ) {
-        return $path;
-    }
-
-    if (str_starts_with($path, '/{tenant}')) {
-
-        $tenant = Auth::tenantSlug();
-
-        if ($tenant) {
-            $path = '/' . $tenant . substr($path, 9);
-        }
-    }
-
-    return self::$basePath . '/' . ltrim($path, '/');
-}
 
     /**
      * Vrátí aktuální cestu bez query stringu.
@@ -191,12 +160,12 @@ final class Url
         // 1️⃣ Detekce schématu (https/http)
         $isHttps = false;
 
-        if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        if ($_SERVER['HTTPS'] === 'on') {
             $isHttps = true;
-        } elseif (($_SERVER['SERVER_PORT'] ?? null) == 443) {
+        } elseif (($_SERVER['SERVER_PORT'] ?? null) === 443) {
             $isHttps = true;
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-            $isHttps = $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
+        } elseif (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null) === 'https') {
+            $isHttps = true;
         }
 
         $scheme = $isHttps ? 'https' : 'http';
@@ -211,7 +180,7 @@ final class Url
         $port = $_SERVER['SERVER_PORT'] ?? null;
 
         $portPart = '';
-        if ($port && !in_array((int)$port, [80, 443], true)) {
+        if ($port !== null && !in_array((int)$port, [80, 443], true)) {
             // Pozor: HTTP_HOST už může port obsahovat
             if (!str_contains($host, ':')) {
                 $portPart = ':' . $port;

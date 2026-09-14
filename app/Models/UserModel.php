@@ -135,7 +135,7 @@ public function activateUser(int $id, string $hash): array
 	        'company' => $companyId,
 	    ]);
 	
-	    return $stmt->fetch() ?: null;
+	    return $stmt->fetch() ?? null;
 	}
 
 

@@ -126,7 +126,7 @@ $params = [
     {
         $order = $this->find($orderId);
 
-        if (!$order) {
+        if ($order === null) {
             return;
         }
 
@@ -203,7 +203,7 @@ public function isClosed(array $order): bool
 
     public function getNamesByIds(array $ids): array
     {
-        if (empty($ids)) {
+        if ($ids === []) {
             return [];
         }
         

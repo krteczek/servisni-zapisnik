@@ -19,7 +19,7 @@ function e(mixed $value): string
     }
 
     return htmlspecialchars(
-        (string) $value,
+        $value,
         ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
         'UTF-8'
     );
@@ -83,7 +83,7 @@ function formatMinutes(int $minutes): string
 function formatCzDate(?string $datetime, bool $withTime = false): string
 {
     // pokud je prázdno, null...
-    if (empty($datetime)) {
+    if ($datetime === "") {
         return 'neuvedeno';
     }
 
@@ -264,7 +264,7 @@ function deadlineDateHelper(?string $dueDate): array
     $deadlineClass = 'deadline-none';
     $deadlineText  = 'Neuvedeno';
 
-    if ($dueDate) {
+    if ($dueDate !== null && $dueDate !== '') {
         $timestamp = strtotime($dueDate);
         $today = date('Y-m-d');
         $due   = date('Y-m-d', $timestamp);

@@ -65,7 +65,9 @@ public function byActive(bool $active): array
     public function getColorsByIds(array $teamIds): array
     {
         $teamIds = array_values(array_unique(
-            array_filter(array_map('intval', $teamIds))
+            array_filter(
+                array_map('intval', $teamIds),
+                static fn (int $id): bool => $id !== 0)
         ));
 
         if ($teamIds === []) {

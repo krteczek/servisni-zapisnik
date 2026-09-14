@@ -166,10 +166,9 @@ abstract class BaseModel
 
         $companyId = TenantContext::get() ?? Auth::companyId();
 
-        if (!$companyId) {
-            throw new LogicException('Tenant context missing');
+        if ($companyId === null) {
+          throw new LogicException('Tenant context missing');
         }
-
         return $companyId;
     }
 
@@ -310,7 +309,7 @@ protected function diff(array $before, array $after): array
 
         $sql = "SELECT * FROM {$this->tableName}";
 
-        if ($where) {
+        if ($where !== []) {
             $parts = [];
             foreach ($where as $col => $val) {
                 $parts[] = "{$col} = :{$col}";
@@ -477,10 +476,9 @@ protected function diff(array $before, array $after): array
         }
 
         $before = $this->find($id);
-        if (!$before) {
+        if ($before === null) {
             return false;
         }
-
         $ok = null;
         $sql = null;
         try {
@@ -604,7 +602,7 @@ protected function diff(array $before, array $after): array
     {
         $row = $this->find($id);
 
-        if (!$row) {
+        if ($row === null) {
             throw new LogicException('Record not found');
         }
 
@@ -625,8 +623,7 @@ protected function diff(array $before, array $after): array
             return '';
         }
 
-        $col = $alias ? $alias . '.' . $this->tenantColumn : $this->tenantColumn;
-
+        $col = $alias !== '' ? $alias . '.' . $this->tenantColumn : $this->tenantColumn;
         return " AND {$col} = :" . $this->tenantColumn;
     }
 
@@ -675,7 +672,7 @@ protected function diff(array $before, array $after): array
         $ok = null;
         $before = $this->firstWhere($column, $value);
 
-        if (!$before) {
+        if ($before === null) {
             return false;
         }
 
@@ -768,7 +765,7 @@ protected function diff(array $before, array $after): array
         string $direction = 'DESC'
     ): array
     {
-        if (empty($statuses)) {
+        if ($statuses === []) {
             return [];
         }
 

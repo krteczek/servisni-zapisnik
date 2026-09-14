@@ -108,7 +108,7 @@ final class TaskAssignmentModel extends BaseModel
             $participants = [];
 
             foreach ($data['participants'] as $userId => $pData) {
-                if (!empty($pData['selected'])) {
+                if (($pData['selected'] ?? null) === 'on') {
                     $minutes = (int) $pData['minutes_spent'];
                     if ($minutes !== 0) {
                         $totalMinutes += $minutes;
@@ -128,7 +128,7 @@ final class TaskAssignmentModel extends BaseModel
                 'created_at' => date('Y-m-d H:i:s')
             ]);
 
-            if (!$assignmentId) {
+            if ($assignmentId === 0) {
                 throw new \RuntimeException('Assignment create failed');
             }
 
@@ -150,7 +150,7 @@ private function addParticipant(int $assignmentId, int $userId, int $minutes): b
 {
     $user = (new UserModel())->find($userId);
 
-    if (!$user) {
+    if ($user === null || $user['company_id'] !== $this->tenantId()) {
         return false;
     }
 

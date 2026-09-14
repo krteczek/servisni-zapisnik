@@ -7,7 +7,7 @@ class UserAgent
 {
     public static function parse(?string $ua): array
     {
-        if (!$ua) {
+        if ($ua === null) {
             return [
                 'device'  => 'unknown',
                 'os'      => 'unknown',
