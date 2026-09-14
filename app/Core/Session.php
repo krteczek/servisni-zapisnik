@@ -38,7 +38,7 @@ public static function start(): void
         return;
     }
 
-    $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    $secure = ($_SERVER['HTTPS'] ?? null) === 'on';
 
     session_name($secure ? '__Host-PHPSESSID' : 'PHPSESSID');
 

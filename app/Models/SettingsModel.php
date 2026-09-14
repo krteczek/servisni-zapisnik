@@ -55,7 +55,7 @@ class SettingsModel extends BaseModel
 
         $row = $this->firstWhere('setting_key', $key);
 
-        if (!$row) {
+        if ($row === null) {
             return $this->cache[$key] = $default;
         }
 

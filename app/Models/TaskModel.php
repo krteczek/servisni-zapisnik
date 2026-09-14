@@ -82,7 +82,7 @@ final class TaskModel extends BaseModel
     {        
         $task = $this->findById($taskId);
 
-        if (!$task) {
+        if ($task === null) {
             return false;
         }
      
@@ -107,7 +107,7 @@ final class TaskModel extends BaseModel
     {
         $task = $this->findById($taskId);
 
-        if (!$task) {
+        if ($task === null) {
             return false;
         }
         if (!$this->canBeClosed($task, $newStatus)) {
@@ -420,7 +420,7 @@ public function forWorkOrderWithStats(int $orderId): array
 
     public function statsForTasks(array $taskIds): array
     {
-        if (empty($taskIds)) {
+        if ($taskIds === []) {
             return [];
         }
 
@@ -521,17 +521,17 @@ $sql =
 
         $params = [];
 
-        if (!empty($filters['date'])) {
+        if ($filters['date'] !== '') {
             $sql .= " AND DATE(t.created_at) = :date";
             $params['date'] = $filters['date'];
         }
 
-        if (!empty($filters['team_id'])) {
+        if ($filters['team_id'] !== '') {
             $sql .= " AND t.team_id = :team_id";
             $params['team_id'] = (int)$filters['team_id'];
         }
 
-        if (!empty($filters['status'])) {
+        if ($filters['status'] !== '') {
             $sql .= " AND t.status = :status";
             $params['status'] = $filters['status'];
         }
@@ -586,7 +586,7 @@ $sql =
         }
 
         // team
-        if (!empty($filters['team_id'])) {
+        if (($filters['team_id'] ?? '') !== '') {
             $sql .= " AND t.team_id = ?";
             $params[] = $filters['team_id'];
         }
