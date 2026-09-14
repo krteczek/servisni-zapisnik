@@ -105,7 +105,7 @@ public function login(): string
 
     $user = null;
 //var_dump($company);
-    if ($company) {
+    if ($company !== null) {
         $userModel = new UserModel();
         $user = $userModel->findByEmailAndCompany(
             $email,
@@ -115,7 +115,7 @@ public function login(): string
     }
 
     if (
-        !$user ||
+        $user === null ||
         !password_verify($password, $user['password_hash'])
     ) {
         // 1️⃣ Rate limit
@@ -309,13 +309,19 @@ public function forgotPasswordPost(): string
     /* =========================
      *  PRIVATE HELPERS
      * ========================= */
-
+	/**
+	 * Token musí být vždy string a ne null, protože se používá v $_POST a $_GET
+	 * a tam je vždy string, i když je prázdný.
+	 * @param string $type typ tokenu: INVITATION, PASSWORD_RESET, COMPANY_CREATE, ACTIVATE_USER
+	 * @return string
+	 * @throws \Exception
+	 */
     private function handleTokenGet(string $type): string
     {
-        $token = $_GET['token'] ?? null;
+        $token = $_GET['token'] ?? '';
         $errMsg = self::TOKEN_ERROR;
 
-        if (!$token) {
+        if ($token === '') {
             Flash::error($errMsg);
             Url::redirect('/login/#main');
         }
@@ -326,8 +332,6 @@ public function forgotPasswordPost(): string
 	            Url::redirect('/login/#main');
 
 	        }
-       
-        
         		
             $this->view->data = $row;
 			
@@ -366,7 +370,7 @@ public function forgotPasswordPost(): string
 			);
 			
 			// --- EMAIL ---
-			if (empty($data['email'] ?? '')) 
+			if (($data['email'] ?? '') === '')
 			{
 				$this->addError('email', 'Email je povinný.');
 			} 
@@ -425,10 +429,11 @@ public function forgotPasswordPost(): string
 	public function registrationStepTwo(): string
 	{
 		self::ensureGuestRedirect();
-      $errMsg = 'Odkaz je neplatný nebo expirovaný. Můžete si požádat o nový.';
-		$token = $_GET['token'] ?? null;
+      	$errMsg = 'Odkaz je neplatný nebo expirovaný. Můžete si požádat o nový.';
+		$token = $_GET['token'] ?? '';
+		$token = trim($token);
 
-		if(empty($token))
+		if($token === '')
 		{
          Flash::error($errMsg);
          Url::redirect('/login/#main');
@@ -438,11 +443,11 @@ public function forgotPasswordPost(): string
 		$companies 	= new CompanyModel();
 
 		$ok = (new TokenService())->validate($token,TokenType::COMPANY_CREATE);
-     if ($ok['ok'] === false) {
-         Flash::error($errMsg);
-         Url::redirect('/login/#main');
+     	if ($ok['ok'] === false) {
+        	Flash::error($errMsg);
+        	Url::redirect('/login/#main');
 
-     }
+    	}
 
  		if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 		{
@@ -450,7 +455,7 @@ public function forgotPasswordPost(): string
 					fn($value) => is_string($value) ? trim($value) : $value,
 					$_POST
 					);
-		    if(empty($data['token']) || !hash_equals($token, $data['token']))
+		    if (($data['token'] ?? '') === '' || !hash_equals($token, $data['token']))
 		    {
                 Flash::error($errMsg);
                 Url::redirect('/register/#main');
@@ -463,7 +468,7 @@ public function forgotPasswordPost(): string
 			$data['ico'] = preg_replace('/\s+/', '', $data['ico']);
 
 			// --- NAME ---
-			if (empty(trim($data['name'] ?? ''))) 
+			if (trim($data['name'] ?? '') === '') 
 			{
 				$this->addError('name', 'Název firmy je povinný.');
  			} 
@@ -479,7 +484,7 @@ public function forgotPasswordPost(): string
 			// --- ICO ---
 
 			$data['ico'] = trim($data['ico'] ?? '');
-			if (empty($data['ico'])) 
+			if (trim($data['ico']) === '') 
 			{
 				$this->addError('ico', 'IČO je povinné.');
 			} 
@@ -495,7 +500,7 @@ public function forgotPasswordPost(): string
 			}
 			
 			// --- FIRST NAME ---
-			if (empty(trim($data['first_name'] ?? '')))
+			if (trim($data['first_name'] ?? '') === '')
 			{
 				$this->addError('first_name', 'Jméno je povinné.');
 			}
@@ -505,7 +510,7 @@ public function forgotPasswordPost(): string
 			}
 
 			// --- LAST NAME ---
-			if (empty(trim($data['last_name'] ?? '')))
+			if (trim($data['last_name'] ?? '') === '')
 			{
 				$this->addError('last_name', 'Příjmení je povinné.');
 			}

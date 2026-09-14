@@ -30,7 +30,7 @@ final class SystemController extends Controller
 
         $company = $companyModel->find($id);
 
-        if (!$company) {
+        if ($company === null) {
             throw new \RuntimeException('Firma nenalezena');
         }
 
@@ -45,7 +45,7 @@ final class SystemController extends Controller
     
     private function searchCompany(string $search): array
     {
-        if (empty($search)) {
+        if ($search === '') {
             return [];
         }
 

@@ -86,6 +86,11 @@ public function create(
      * VALIDATE
      * ========================================================== */
 
+    /**
+     * @param string $rawToken
+     * @param string $type
+     * @return array
+     */
     public function validate(string $rawToken, string $type): array
     {
         $hash = self::hash($rawToken);

@@ -40,8 +40,8 @@ final class TaskRecurringController extends Controller
 
         $model = new TaskModel();
         
-		$task = $model->find((int) $taskId);
-		if(!$task) {
+		$task = $model->find($taskId);
+		if($task === null) {
             // takový úkol prostě neexistuje
             Flash::error('Úkol neexistuje');
             Url::redirect('/{tenant}/tasks/#main');			
@@ -71,7 +71,7 @@ final class TaskRecurringController extends Controller
             $recurring = ($this->model->find($task['recurring_task_id']) ?? []);
             //var_dump($recurring);
  
-            if (!$recurring) {
+            if ($recurring === []) {
                 Flash::error(
                     'Opakovací šablona nebyla nalezena.'
                 );
@@ -164,9 +164,9 @@ final class TaskRecurringController extends Controller
                 (int)$data['warning_days_before']
             ) ? (int)$data['warning_days_before'] : $defaults['default']['warning_days_before'],
 
-            'next_due_date' => !empty($data['next_due_date'])
-                ? $data['next_due_date']
-                : $defaults['default']['next_due_date'],
+            'next_due_date' => ($data['next_due_date'] ?? '') !== ''
+                                ? $data['next_due_date']
+                                : $defaults['default']['next_due_date'],
 
             'active' => isset($data['active']) ? 1 : 0,
         ];
@@ -195,7 +195,7 @@ final class TaskRecurringController extends Controller
             $recurring = ($this->model->find($task['recurring_task_id']) ?? []);
             //var_dump($recurring);
  
-            if (!$recurring) {
+            if ($recurring === []) {
                 Flash::error(
                     'Opakovací šablona nebyla nalezena.'
                 );
