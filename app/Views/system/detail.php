@@ -12,7 +12,7 @@ $company = $view->company;
 
 
 
-<?= var_dump($company); ?>
+<?php var_dump($company); ?>
 
 
 

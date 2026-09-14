@@ -83,7 +83,7 @@ final class RecurringRunner
         ");
         $job->execute(['key' => self::JOB_KEY]);
 
-        $lastCompanyId = (int) ($job->fetchColumn() ?: 0);
+        $lastCompanyId = (int) ($job->fetchColumn() ?? 0);
 
         $companies = $pdo->prepare("
             SELECT *
@@ -97,7 +97,7 @@ final class RecurringRunner
         $companies->execute(['last' => $lastCompanyId]);
         $rows = $companies->fetchAll(PDO::FETCH_ASSOC);
 
-        if (!$rows) {
+        if ($rows === []) {
             // restart
             $pdo->prepare("
                 UPDATE system_jobs
@@ -137,7 +137,7 @@ private static function processCompany(array $company): void
     try {
         $recurrings = $recurringModel->findDueTasks((int)$company['id'], $taskLimit);
 
-        if (!$recurrings) {
+        if ($recurrings === []) {
             return;
         }
 
@@ -158,7 +158,7 @@ private static function processCompany(array $company): void
             // 3) SOURCE TASK
             // =========================
             $source = $taskModel->find((int)$rt['task_id']);
-             if (!$source) {
+             if ($source === null) {
                 LoggerHolder::get()->warning('RecurringRunner: missing source task', [
                     'rt_id'   => $rt['id'],
                     'task_id' => $rt['task_id'],

@@ -297,17 +297,18 @@ public function canUserAddReport(int $taskId, int $userId): bool
         SELECT 1
         FROM tasks t
         WHERE t.id = :task_id
-          AND t.company_id = :company_id
-          AND t.status = :taskStatus
-          AND EXISTS (
-                SELECT 1
-                FROM team_memberships tmu
-                WHERE tmu.team_id = t.team_id
-                  AND tmu.user_id = :user_id
-                  AND tmu.company_id = :company_id_membership
-                  AND (tmu.valid_to IS NULL OR tmu.valid_to >= CURDATE())
-          )
-        LIMIT 1
+            AND t.company_id = :company_id
+            AND t.status = :taskStatus
+            AND EXISTS (
+                    SELECT 1
+                    FROM team_memberships tmu
+                    WHERE tmu.team_id = t.team_id
+                    AND tmu.user_id = :user_id
+                    AND tmu.company_id = :company_id_membership
+                    AND tmu.valid_from <= CURDATE()
+                    AND (tmu.valid_to IS NULL OR tmu.valid_to >= CURDATE())
+                )
+            LIMIT 1
     ";
 
     $params = [

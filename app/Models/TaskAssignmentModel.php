@@ -7,7 +7,7 @@ use App\Core\Auth;
 use App\Core\Transaction;
 use App\Models\UserModel;
 
-final class AssignmentModel extends BaseModel
+final class TaskAssignmentModel extends BaseModel
 {
     protected string $table = 'task_assignments';
     protected string $connection = 'admin';
@@ -24,7 +24,9 @@ final class AssignmentModel extends BaseModel
                 u.first_name as created_by_first_name,
                 u.last_name as created_by_last_name
             FROM {$this->tableName} ta
-            LEFT JOIN users u ON u.id = ta.created_by_user_id
+            LEFT JOIN users u 
+                ON u.id = ta.created_by_user_id
+                AND u.company_id = ta.company_id
             WHERE ta.task_id = :task_id 
                 AND ta.company_id = :company_id
             ORDER BY ta.created_at DESC

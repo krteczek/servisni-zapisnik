@@ -204,13 +204,7 @@ K téhle zakázce je systémem vytvořeno několik prvních úkolů pro seznáme
                 'status' => 'in_progress',
                 'created_by_user_id' => $data['user_id'],
             ]);
-
-            if ($WOID === false) {
-                return ['ok' => false];
-            }
-
-
-                    /*
+         /*
          * 2 Vytvoření prvních úkolů k první defaultní zakázce.
          * tyto už bude možno dokončit běžným způsobem
          * company_id, team_id, work_order_id, title, description,

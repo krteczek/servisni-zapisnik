@@ -22,7 +22,7 @@ final class InvoiceService
 
         $task = (new TaskModel())->findById($id);
 
-        if (!$task) {
+        if ($task === null) {
             Flash::error('Požadovaný úkol neexistuje');
             Url::back();
         }
@@ -66,6 +66,7 @@ final class InvoiceService
             ->find($workOrder['contact_id'] ?? 0);
 
         $dueDays = (new SettingsService())->getInvoiceDueDays();
+
         $customerData = [
             'company_name' => '',
             'ico'          => '',
@@ -78,7 +79,7 @@ final class InvoiceService
             'phone'        => '',
         ];
 
-        if ($customer) {
+        if ($customer !== null) {
             $customerData = array_merge(
                 $customerData,
                 $customer
@@ -150,7 +151,7 @@ public function invoiceFromTask(
 
     $task = (new TaskModel())->findById($taskId);
 
-    if (!$task) {
+    if ($task === null) {
         throw new RuntimeException('Task not found');
     }
 
@@ -158,7 +159,7 @@ public function invoiceFromTask(
         (int) $task['work_order_id']
     );
 
-    if (!$workOrder) {
+    if ($workOrder === null) {
         throw new RuntimeException('Work order not found');
     }
 
@@ -272,9 +273,8 @@ private function validateInvoiceData(array $post): array
             'title'         => $title,
             'minutes'       => $minutes,
             'kilometers'    => $kilometers,
-            'visible_time'  => !empty($item['visible_time']),
-            'visible_km'    => !empty($item['visible_km']),
-        ];
+            'visible_time' => ($item['visible_time'] ?? null) === 'on',
+            'visible_km'   => ($item['visible_km'] ?? null) === 'on',        ];
     }
 
     return [
