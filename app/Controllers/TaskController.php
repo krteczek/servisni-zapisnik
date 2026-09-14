@@ -54,9 +54,9 @@ class TaskController extends Controller
     }
 
 
-private function getOrderOrRedirect(?int $orderId): array
+private function getOrderOrRedirect(int $orderId): array
 {
-    if (!$orderId || $orderId <= 0) {
+    if ($orderId <= 0) {
         Flash::error('Zakázka neexistuje');
         Url::redirect('/{tenant}/work-orders/#main');
     }
@@ -135,9 +135,12 @@ private function saveTask(array $data, int $workOrderId): string
 
             // aktualizace stavu zakázky na "in_progress", pokud ještě není
             $WO = new WorkOrderModel();
-            $WO->update($workOrderId, [
-                'status' => 'in_progress',
+            $updated = $WO->update($workOrderId, [
+                'status' => WOStatus::IN_PROGRESS,
             ]);
+           if (!$updated) {
+                throw new \RuntimeException('Work order status update failed');
+            }
 
             // 🔁 recurring
             if (TaskType::isMaster($taskType)) {
@@ -313,7 +316,14 @@ private function saveTask(array $data, int $workOrderId): string
 		//zjistíme jméno a barvu týmu
 		$team = (new TeamModel())->find($task['team_id']);
         if (!$team) {
-            Flash::error('Tým neexistuje');
+            LoggerHolder::get()->error('Task references non-existent team', [
+                'task_id' => $task['id'],
+                'team_id' => $task['team_id'],
+                'inputTask'   => serialize($task),
+                'inputOrder'  => serialize($order),
+            ]);
+
+            Flash::error('Došlo k interní chybě aplikace.');
             Url::redirect('/{tenant}/tasks/#main');
         }
 
@@ -339,8 +349,19 @@ private function saveTask(array $data, int $workOrderId): string
         }
 		
 		//zjistíme jméno a barvu týmu
-		$team = (new TeamModel())->find($task['team_id']);
-		$post = $_POST;
+        $team = (new TeamModel())->find($task['team_id']);
+        if (!$team) {
+            LoggerHolder::get()->error('Task references non-existent team', [
+                'task_id' => $task['id'],
+                'team_id' => $task['team_id'],
+                'inputTask'   => serialize($task),
+                'inputOrder'  => serialize($order),
+            ]);
+
+            Flash::error('Došlo k interní chybě aplikace.');
+            Url::redirect('/{tenant}/tasks/#main');
+        }
+        $post = $_POST;
         //nelze změnit tým, takže pro validaci 
         //musíme nastavit původní team_id
         $post['team_id'] = (int)$task['team_id'];
@@ -372,7 +393,7 @@ private function saveTask(array $data, int $workOrderId): string
             $this->view->task = $task;
             $this->view->post = $post;
 
-            $this->addError('global', 'Litujeme, úkol se nepodařilo vytvořit, zkuste to prosím později znovu.');
+            $this->addError('global', 'Litujeme, úkol se nepodařilo upravit, zkuste to prosím později znovu.');
             return $this->render('tasks/edit');
         }
 
@@ -585,7 +606,7 @@ private function saveTask(array $data, int $workOrderId): string
         $participants = $data['participants'] ?? [];
     
         // 3. Validace reportu
-        if (empty($report)) {
+        if ($report === '') {
             $this->addError('report', 'Text reportu je povinný');
         }
 

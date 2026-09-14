@@ -368,6 +368,7 @@ public function detailOrder(int $orderId): string
 private function getOrderOrRedirect(int $orderId): array
 {
     if ($orderId <= 0) {
+        Flash::error('Zakázka neexistuje');
         Url::redirect('/{tenant}/work-orders/#main');
     }
 
