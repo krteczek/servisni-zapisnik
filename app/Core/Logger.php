@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use \DateTime;
-
+use DateTime;
+use RuntimeException;
+use Stringable;
+use Throwable;
 
 /**
  * Jednoduchá implementace PSR-3 loggeru, který zapisuje do souboru.
@@ -19,7 +21,10 @@ final class Logger implements LoggerInterface
      * @var string Cesta k log souboru
      */
     private string $logFile;
-    
+
+    /**
+     * @var LoggerInterface|null Singleton instance loggeru
+     */
     private static ?LoggerInterface $instance = null;
 
     // TODO: [PERFORMANCE] Přidat bufferování záznamů pro batch zápis
@@ -29,38 +34,44 @@ final class Logger implements LoggerInterface
      * Vytvoří novou instanci loggeru s určeným log souborem.
      *
      * @param string $logFile Absolutní nebo relativní cesta k log souboru
-     * @throws \RuntimeException Pokud adresář log souboru není zapisovatelný
+     * @throws RuntimeException Pokud adresář log souboru není zapisovatelný
      */
     public function __construct(string $logFile)
     {
         $this->logFile = $logFile;
-        
+
         // TODO: [RELIABILITY] Zkontrolovat zapisovatelnost adresáře při vytvoření
         $dir = dirname($logFile);
         if (!is_writable($dir)) {
-            throw new \RuntimeException("Log directory is not writable: {$dir}");
+            throw new RuntimeException("Log directory is not writable: {$dir}");
         }
     }
 
+    /**
+     * Vrátí singleton instanci loggeru.
+     *
+     * Pokud instance ještě neexistuje, vytvoří ji s cestou z konfigurace
+     * (nebo s výchozí cestou do storage/logs/app.log).
+     *
+     * @return LoggerInterface
+     */
+    public static function instance(): LoggerInterface
+    {
+        if (self::$instance === null) {
+            $path = Config::get('app.log_file')
+                ?? __DIR__ . '/../../storage/logs/app.log';
 
+            self::$instance = new self($path);
+        }
 
-	public static function instance(): LoggerInterface
-	{
-	    if (self::$instance === null) {
-	        $path = Config::get('app.log_file')
-	            ?? __DIR__ . '/../../storage/logs/app.log';
-	
-	        self::$instance = new self($path);
-	    }
-	
-	    return self::$instance;
-	}
+        return self::$instance;
+    }
 
     /**
      * Systém je nepoužitelný.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function emergency(string $message, array $context = []): void
@@ -72,7 +83,7 @@ final class Logger implements LoggerInterface
      * Je třeba okamžité akce.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function alert(string $message, array $context = []): void
@@ -84,7 +95,7 @@ final class Logger implements LoggerInterface
      * Kritická situace.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function critical(string $message, array $context = []): void
@@ -96,7 +107,7 @@ final class Logger implements LoggerInterface
      * Chyba runtime.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function error(string $message, array $context = []): void
@@ -108,7 +119,7 @@ final class Logger implements LoggerInterface
      * Výjimečné události, které nejsou chybami.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function warning(string $message, array $context = []): void
@@ -120,7 +131,7 @@ final class Logger implements LoggerInterface
      * Normální, ale významné události.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function notice(string $message, array $context = []): void
@@ -132,7 +143,7 @@ final class Logger implements LoggerInterface
      * Zajímavé události.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function info(string $message, array $context = []): void
@@ -144,7 +155,7 @@ final class Logger implements LoggerInterface
      * Podrobné informace pro debugging.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function debug(string $message, array $context = []): void
@@ -158,71 +169,90 @@ final class Logger implements LoggerInterface
      *
      * Vedlejší efekty:
      * - Zapíše data do souboru na disku
-     * - Používá file_put_contents s FILE_APPEND (možný race condition)
+     * - Používá file_put_contents s LOCK_EX pro bezpečný zápis
      *
-     * TODO: [PERFORMANCE] Použít flock() pro prevenci race condition při paralelních zápisech
      * TODO: [RELIABILITY] Implementovat retry mechanismus při selhání zápisu
      *
      * @param string $level Úroveň logu
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
-public function log(string $level, string $message, array $context = []): void
-{
-    $date = (new DateTime())->format('Y-m-d H:i:s.u');
+    public function log(string $level, string $message, array $context = []): void
+    {
+        $date = (new DateTime())->format('Y-m-d H:i:s.u');
 
-    $msg = $this->interpolate($message, $context);
+        $msg = $this->interpolate($message, $context);
 
-    $line = sprintf(
-        "[%s] %-7s %s",
-        $date,
-        strtoupper($level) . ':',
-        $msg
-    );
+        $line = sprintf(
+            "[%s] %-7s %s",
+            $date,
+            strtoupper($level) . ':',
+            $msg
+        );
 
-    // 🔥 přidat context vždy, ne jen přes placeholder
-    if ($context === []) {
-        $line .= PHP_EOL . json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // Context se připojí vždy, když není prázdný
+        if ($context !== []) {
+            $encoded = json_encode(
+                $context,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            );
+
+            if ($encoded !== false) {
+                $line .= PHP_EOL . $encoded;
+            }
+        }
+
+        $line .= "\n";
+
+        file_put_contents($this->logFile, $line, FILE_APPEND | LOCK_EX);
     }
 
-    $line .= "\n";
-
-    file_put_contents($this->logFile, $line, FILE_APPEND | LOCK_EX);
-}
     /**
      * Nahradí placeholdery {key} v message hodnotami z context.
-     * Podporuje pouze skalární hodnoty (string, int, float, bool).
      *
-     * TODO: [FEATURE] Přidat podporu pro objekty (__toString) a pole (json_encode)
+     * Podporuje:
+     * - skalární hodnoty (string, int, float, bool) a null
+     * - Throwable (použije se pouze getMessage(), ne celý trace)
+     * - objekty implementující Stringable (převedou se na string)
+     * - vše ostatní (json_encode fallback)
+     *
+     * Pořadí podmínek je důležité:
+     * 1. Throwable musí být první — jinak by ho zachytil Stringable check
+     *    a do logu by se dostal celý stack trace místo jen zprávy.
+     * 2. Skaláry a null — přímý převod na string.
+     * 3. Stringable objekty — převod na string.
+     * 4. Vše ostatní — json_encode fallback.
+     *
+     * TODO: [FEATURE] Přidat podporu pro objekty bez __toString (reflection?)
      * TODO: [SECURITY] Escapovat speciální znaky pro prevenci injection do logů
      *
      * @param string $message Zpráva s placeholdery
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return string Interpolovaná zpráva
      */
-private function interpolate(string $message, array $context): string
-{
-    foreach ($context as $key => $value) {
+    private function interpolate(string $message, array $context): string
+    {
+        foreach ($context as $key => $value) {
+            if ($value instanceof Throwable) {
+                // Throwable má přednost — chceme jen getMessage(), ne celý trace
+                $replace = $value->getMessage();
+            } elseif (is_scalar($value) || $value === null) {
+                $replace = (string) $value;
+            } elseif ($value instanceof Stringable) {
+                $replace = (string) $value;
+            } else {
+                $encoded = json_encode(
+                    $value,
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                );
 
-        if (is_scalar($value) || $value === null) {
-            $replace = (string) $value;
+                $replace = $encoded !== false ? $encoded : '[unencodable]';
+            }
 
-        } elseif (is_object($value) && method_exists($value, '__toString')) {
-            $replace = (string) $value;
-
-        } elseif ($value instanceof \Throwable) {
-           $replace = $value->getMessage();
-
-        } else {
-            $replace = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
+            $message = str_replace('{' . $key . '}', $replace, $message);
         }
 
-        $message = str_replace('{' . $key . '}', $replace, $message);
+        return $message;
     }
-
-    return $message;
-}
-
 }

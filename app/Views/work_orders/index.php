@@ -9,6 +9,7 @@ use App\Core\Url;
 
 $workOrders = $view->orders;
 //var_dump($workOrders);
+// debugViewVariables($view);
 ?>
 
 
@@ -54,27 +55,27 @@ $workOrders = $view->orders;
                     </div>
                     <div class="meta-item">
                        <span class="meta-label">Celkem úkolů: </span>
-                        <span class="meta-value"><?= e($wo['tasks_total']) ?></span>
+                        <span class="meta-value"><?= (int)$wo['tasks_total'] ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Otevřených: </span>
-                        <span class="meta-value"><?= e($wo['tasks_open']) ?></span>
+                        <span class="meta-value"><?= (int)$wo['tasks_open'] ?></span>
                      </div>
                     <div class="meta-item">
                        <span class="meta-label">Uzavřených: </span>
-                        <span class="meta-value"><?= e($wo['tasks_done']) ?></span>
+                        <span class="meta-value"><?= (int)$wo['tasks_done'] ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Zrušených: </span>
-                        <span class="meta-value"><?= e($wo['tasks_cancelled']) ?></span>
+                        <span class="meta-value"><?= (int)$wo['tasks_cancelled'] ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Napsáno reportů: </span>
-                        <span class="meta-value"><?= e($wo['reports_count']) ?></span>
+                        <span class="meta-value"><?= (int)$wo['reports_count'] ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Najeto: </span>
-                        <span class="meta-value"><?= e($wo['total_km']) ?></span>
+                        <span class="meta-value"><?= (int)$wo['total_km'] ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Odpracováno: </span>

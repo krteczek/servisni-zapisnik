@@ -31,7 +31,7 @@ class TaskController extends Controller
 	{
 	    $tasks = (new TaskModel())->forIndex();
 	//var_dump($tasks);
-	    $this->view->data = $tasks;
+	    $this->view->tasks = $tasks;
 	    return $this->render('tasks/index');
 	}
 
@@ -723,7 +723,7 @@ private function saveTask(array $data, int $workOrderId): string
 
         // 7. Pokud jsou chyby, vrať se zpět
         if ($this->hasErrors()) {
-            $this->view->data = $data;
+            $this->view->old = $data;
 
             return $this->addTaskReport($taskId);
         }
@@ -769,6 +769,7 @@ private function saveTask(array $data, int $workOrderId): string
         }
 /* */
         $task['canUserAddReport'] = self::canUserAddReport($taskId);
+
         if(
             !$task['canUserAddReport']
         && !Roles::isManagement(Auth::role())
@@ -793,10 +794,9 @@ private function saveTask(array $data, int $workOrderId): string
         $this->view->reports = $reports;
         
         // Pokud máme stará data z POST (při chybě), předáme je do view
-        if (isset($this->view->data)) {
-            $this->view->oldData = $this->view->data;
-        }
-        
+        if ($this->view->old !== []) {
+            $this->view->oldData = $this->view->old;
+        }       
         return $this->render('tasks/report');
     }
 

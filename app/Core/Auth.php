@@ -123,7 +123,7 @@ public static function check(): bool
             return null;
         }
 
-        if (!self::$userLoaded) {
+        if (self::$userLoaded === false) {
             $model = new UserModel();
             $user  = $model->find(self::id());
 

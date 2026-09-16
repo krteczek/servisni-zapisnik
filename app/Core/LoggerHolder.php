@@ -20,7 +20,6 @@ final class LoggerHolder
     private static ?LoggerInterface $logger = null;
 
     // TODO: [MAINTENANCE] Přidat podporu pro více loggerů (např. pro různé kanály)
-    // TODO: [PERFORMANCE] Zvážit lazy initialization loggeru až při prvním použití
 
     /**
      * Nastaví globální logger instance.
@@ -30,7 +29,6 @@ final class LoggerHolder
      * - Mění statický stav třídy
      * - Ovlivňuje všechny následné volání get()
      *
-     * TODO: [CONFIG] Přidat validaci, že logger implementuje PSR-3 LoggerInterface
      * TODO: [SECURITY] Zvážit immutabilitu po nastavení (prevent re-set)
      *
      * @param LoggerInterface $logger Instance loggeru (např. Monolog)
@@ -56,14 +54,68 @@ final class LoggerHolder
             // TODO: [MAINTENANCE] Přesunout NullLogger do samostatné třídy
             // fallback – NullLogger (no-op)
             return new class implements LoggerInterface {
+                /**
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function emergency(string $message, array $context = []): void {}
+
+                /**
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function alert(string $message, array $context = []): void {}
+
+                /**
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function critical(string $message, array $context = []): void {}
+
+                /**
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function error(string $message, array $context = []): void {}
+
+                /**
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function warning(string $message, array $context = []): void {}
+
+                /**
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function notice(string $message, array $context = []): void {}
+
+                /**
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function info(string $message, array $context = []): void {}
+
+                /**
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function debug(string $message, array $context = []): void {}
+
+                /**
+                 * @param string $level
+                 * @param string $message
+                 * @param array<string, mixed> $context
+                 * @return void
+                 */
                 public function log(string $level, string $message, array $context = []): void {}
             };
         }

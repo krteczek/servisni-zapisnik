@@ -18,7 +18,7 @@ interface LoggerInterface
      * Systém je nepoužitelný.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data (např. ['user_id' => 123, 'ip' => '192.168.1.1'])
+     * @param array<string, mixed> $context Kontextová data (např. ['user_id' => 123, 'ip' => '192.168.1.1'])
      * @return void
      */
     public function emergency(string $message, array $context = []): void;
@@ -28,7 +28,7 @@ interface LoggerInterface
      * Např. celý web je offline, databáze nedostupná, atd.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function alert(string $message, array $context = []): void;
@@ -38,7 +38,7 @@ interface LoggerInterface
      * Např. neočekávaná výjimka, neošetřená chyba aplikace.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function critical(string $message, array $context = []): void;
@@ -48,7 +48,7 @@ interface LoggerInterface
      * ale měla by být zaznamenána a monitorována.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function error(string $message, array $context = []): void;
@@ -58,7 +58,7 @@ interface LoggerInterface
      * Např. použití zastaralé API, neoptimální použití, atd.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function warning(string $message, array $context = []): void;
@@ -67,7 +67,7 @@ interface LoggerInterface
      * Normální, ale významné události.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function notice(string $message, array $context = []): void;
@@ -77,7 +77,7 @@ interface LoggerInterface
      * Např. uživatel se přihlásil, SQL logy.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function info(string $message, array $context = []): void;
@@ -86,7 +86,7 @@ interface LoggerInterface
      * Podrobné informace pro debugging.
      *
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      */
     public function debug(string $message, array $context = []): void;
@@ -96,7 +96,7 @@ interface LoggerInterface
      *
      * @param string $level Úroveň logu (emergency, alert, critical, error, warning, notice, info, debug)
      * @param string $message Text zprávy
-     * @param array $context Kontextová data
+     * @param array<string, mixed> $context Kontextová data
      * @return void
      * @throws \InvalidArgumentException
      */

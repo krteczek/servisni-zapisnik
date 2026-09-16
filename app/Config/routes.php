@@ -1085,7 +1085,7 @@ Přepínaní rolí u admina
     'method'        => 'GET',
     'path'          => '/{tenant}/admin/switch-role/{role:admin|mistr|predak|monter}',
     'action'        => [AdminController::class, 'switchRole'],
-    'global_roles'  => ['admin'],
+    'roles'  => ['admin'],
     'auth'          => true,
 ],
 

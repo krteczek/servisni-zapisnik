@@ -3,10 +3,16 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\Types;
+
 /**
  * Dynamický builder pro navigační menu aplikace.
  * Generuje hierarchickou strukturu menu na základě rout a aktuální URL.
  * Automaticky řeší aktivní stav položek a kontrolu oprávnění uživatele.
+ *
+ * @phpstan-import-type MenuRouteRow from Types
+ * @phpstan-import-type MenuSection from Types
+ * @phpstan-import-type MenuItem from Types
  */
 final class Menu
 {
@@ -24,17 +30,9 @@ final class Menu
      * TODO: [MAINTENANCE] Přidat možnost konfigurovat pořadí položek menu (weight/order)
      * TODO: [FEATURE] Přidat podporu pro víceúrovňové menu (hlavní → sekce → submenu → ...)
      *
-     * @param array $routes Pole všech rout z konfigurace
+     * @param array<int, MenuRouteRow> $routes Pole všech rout z konfigurace
      * @param string $currentPath Aktuální URL cesta pro detekci aktivní položky
-     * @return array Hierarchická struktura menu ve formátu:
-     *               [
-     *                 'section' => [
-     *                   'label' => 'Hlavní',
-     *                   'path' => '/url',
-     *                   'active' => true,
-     *                   'items' => [['label' => 'Submenu', 'path' => '/sub', 'active' => false]]
-     *                 ]
-     *               ]
+     * @return array<string, MenuSection> Hierarchická struktura menu
      */
     public static function build(array $routes, string $currentPath): array
     {
@@ -60,7 +58,7 @@ final class Menu
                     $menu[$section] = [
                         'label'  => $route['menu'],
                         'path'   => $routePath,
-                        'method' => $route['method'] ?? 'GET',
+                        'method' => $route['method'],
                         'active' => false,
                         'items'  => [],
                     ];
@@ -79,7 +77,7 @@ final class Menu
                 && ($route['section'] ?? null) !== null
                 && isset($menu[$route['section']])
             ) {
-                 $active = ($currentPath === $routePath);
+                $active = ($currentPath === $routePath);
 
                 $menu[$route['section']]['items'][] = [
                     'label'  => $route['submenu'],
@@ -104,7 +102,7 @@ final class Menu
      * TODO: [SECURITY] Přidat kontrolu na týmové role pro menu položky
      * TODO: [FEATURE] Přidat podporu pro dynamické podmínky (např. 'if' callback)
      *
-     * @param array $route Konfigurace routy z routes.php
+     * @param MenuRouteRow $route Konfigurace routy z routes.php
      * @return bool TRUE pokud má uživatel přístup, jinak FALSE
      */
     private static function isAllowed(array $route): bool
@@ -127,8 +125,7 @@ final class Menu
             $isLogged
             && ($route['roles'] ?? []) !== []
             && !Auth::hasRole($route['roles'])
-        ) 
-        {
+        ) {
             return false;
         }
 
