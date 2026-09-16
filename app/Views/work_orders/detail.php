@@ -24,7 +24,18 @@ $tasks = $view->tasks;
 $errors = $view->errors;
 
 $err = $view->errors;
+echo "Tasks:
+<pre>" . var_export($view, true) . "</pre>";
 
+/*
+echo "Tasks:
+<pre>" . var_export($view->tasks, true) . "</pre>";
+
+echo "Order:
+<pre>" . var_export($view->order, true) . "</pre>";
+echo "Errors: 
+<pre>" . var_export($view->errors, true) . "</pre>";
+*/
 ?>
 
 <!--
@@ -114,42 +125,42 @@ $err = $view->errors;
         <div class="meta-item">
             <span class="meta-label">Úkoly (všechny):</span>
             <span class="meta-value">
-                <?= e($order['total_tasks_count']) ?>
+                <?= (int)$order['total_tasks_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Úkoly (otevřené):</span>
             <span class="meta-value">
-                <?= e($order['open_tasks_count']) ?>
+                <?= (int)$order['open_tasks_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Úkoly (hotové):</span>
             <span class="meta-value">
-                <?= e($order['done_tasks_count']) ?>
+                <?= (int)$order['done_tasks_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Úkoly (zrušené):</span>
             <span class="meta-value">
-                <?= e($order['cancelled_tasks_count']) ?>
+                <?= (int)$order['cancelled_tasks_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Reporty:</span>
             <span class="meta-value">
-                <?= e($order['report_count']) ?>
+                <?= (int)$order['report_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Čas k dokončení: </span>
             <span class="meta-value">
-                <?= e($order['estimated_hours'] ?? '--') ?> hodin
+                <?= (int)($order['estimated_hours'] ?? 0) ?> hodin
             </span>
         </div>
 
@@ -163,7 +174,7 @@ $err = $view->errors;
         <div class="meta-item">
             <span class="meta-label">Km:</span>
             <span class="meta-value">
-                <?= e($order['total_km']) ?>
+                <?= (int)$order['total_km'] ?>
             </span>
         </div>
 

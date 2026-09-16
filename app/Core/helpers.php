@@ -332,3 +332,80 @@ function uniqueUsernames(array $participants): array
     return $userNames;
 }
 
+/**
+ * Debugovací funkce pro zobrazení struktury ViewContext ve view.
+ *
+ * Projde VŠECHNY properties objektu $view a pro každou vypíše:
+ * - název property a její typ
+ * - pokud je to array: počet prvků, jestli je to list, a klíče + typy hodnot
+ *
+ * Pro vnořené array (list s array prvky) vypíše klíče + typy prvního prvku.
+ * Pro asociativní array vypíše klíče + typy všech hodnot.
+ *
+ * Slouží výhradně pro diagnostiku dat ve view. Vypisuje POUZE klíče a typy,
+ * nikdy skutečné hodnoty — je tedy bezpečná i pro citlivá data.
+ *
+ * @param object $view Objekt view (typicky ViewContext)
+ * @param bool $detailed Zda zobrazit detailní rozbor i pro prázdné array
+ * @return void
+ */
+function debugViewVariables(object $view, bool $detailed = false): void
+{
+    echo "<pre style='background:#111;color:#0f0;padding:15px;font-size:12px;'>";
+    echo "=== ALL VIEW PROPERTIES ===\n\n";
+
+    foreach (get_object_vars($view) as $key => $value) {
+        // Přeskočit router (obsahuje cykly)
+        if ($value instanceof \App\Core\Router) {
+            echo "=== $key ===\n";
+            echo "  type: " . get_debug_type($value) . " (skipped, contains cycles)\n\n";
+            continue;
+        }
+
+        echo "=== $key ===\n";
+        echo "  type: " . get_debug_type($value);
+
+        if (is_array($value)) {
+            echo ", count: " . count($value);
+
+            if ($value === []) {
+                echo " (empty)\n\n";
+                continue;
+            }
+
+            echo "\n";
+
+            if (array_is_list($value)) {
+                // List — vezmi první prvek
+                echo "  is_list: YES\n";
+                $first = $value[0];
+
+                if (is_array($first)) {
+                    echo "  first item keys + types:\n";
+                    foreach ($first as $k => $v) {
+                        echo "    $k: " . get_debug_type($v) . "\n";
+                    }
+                } else {
+                    echo "  first item type: " . get_debug_type($first) . "\n";
+                }
+            } else {
+                // Asociativní pole
+                echo "  is_list: NO\n";
+                echo "  keys + types:\n";
+                foreach ($value as $k => $v) {
+                    if (is_array($v)) {
+                        echo "    $k: array (count: " . count($v) . ")\n";
+                    } else {
+                        echo "    $k: " . get_debug_type($v) . "\n";
+                    }
+                }
+            }
+        } else {
+            echo "\n";
+        }
+
+        echo "\n";
+    }
+
+    echo "</pre>";
+}
