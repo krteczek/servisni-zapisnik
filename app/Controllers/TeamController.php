@@ -38,14 +38,14 @@ final class TeamController extends Controller
         $teams = $teamModel->byActive($active);
 
         foreach ($teams as $i => $team) {
-            $members = $membershipModel->currentMembers((int) $team['id']);
+            $members = $membershipModel->currentMembers($team['id']);
             $teams[$i]['members']       = $members;
             $teams[$i]['members_count'] = count($members);
             //$teams[$i]['members_teams_colors'] = 
          }
         $this->view->userTeams      = $membershipModel->activeTeamsByUsers();
 
-        $this->view->teams = $teams;
+        $this->view->teamsWithMembers = $teams;
 
         $this->view->mode = $active === true ? 'active' : 'inactive';
         return $this->render('teams/index');
@@ -333,7 +333,7 @@ final class TeamController extends Controller
         $model->setActive($id, !(bool) $team['active']);
 
         Flash::success(
-          $team['active']
+          $team['active'] === 1
                 ? 'Tým byl deaktivován.'
                 : 'Tým byl aktivován.'
         );
@@ -352,6 +352,9 @@ final class TeamController extends Controller
  		return false;
 	}
 
+    /**
+     * @return string
+     */
    public static function getDefaultColor()
    {
    	return self::DEFAULT_COLOR;

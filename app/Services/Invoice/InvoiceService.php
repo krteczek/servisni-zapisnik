@@ -13,7 +13,11 @@ use \App\Core\Url;
 final class InvoiceService
 {
 
-   private function requireTaskForInvoice(int $id): array
+    /**
+     * @param int $id
+     * @return array<string, mixed>
+     */
+    private function requireTaskForInvoice(int $id): array
     {
         if ($id <= 0) {
             Flash::error('Požadovaný úkol neexistuje');
@@ -52,7 +56,10 @@ final class InvoiceService
 
     
  
- 
+    /**
+     * @param int $taskId
+     * @return array<string, mixed>
+     */
     public function buildDraftFromTask(int $taskId): array
     {
         $task      = $this->requireTaskForInvoice($taskId);
@@ -108,7 +115,7 @@ final class InvoiceService
                     'task_id' => $task['id'],
                     'title'   => $task['title'],
 
-                    'minutes' => (int) (
+                    'minutes' => (
                         $taskStats[$task['id']]['total_minutes']
                         ?? 0
                     ),
@@ -126,7 +133,10 @@ final class InvoiceService
         ];
         return $data;
     }
-
+    /**
+     * @param int $orderId
+     * @return array<string, mixed>
+     */
     public function buildDraftFromWorkOrder(int $orderId): array
     {
         return [];
@@ -142,68 +152,78 @@ final class InvoiceService
     }
 */
 
-public function invoiceFromTask(
-    int $taskId,
-    array $post
-): array
-{
-    $errors = [];
+    /**
+     * @param int $taskId
+     * @param array<string, mixed> $post
+     * @return array<string, mixed>
+     */
+    public function invoiceFromTask(
+        int $taskId,
+        array $post
+    ): array
+    {
+        $errors = [];
 
-    $task = (new TaskModel())->findById($taskId);
+        $task = (new TaskModel())->findById($taskId);
 
-    if ($task === null) {
-        throw new RuntimeException('Task not found');
-    }
+        if ($task === null) {
+            throw new RuntimeException('Task not found');
+        }
 
-    $workOrder = (new WorkOrderModel())->find(
-        (int) $task['work_order_id']
-    );
+        $workOrder = (new WorkOrderModel())->find(
+            (int) $task['work_order_id']
+        );
 
-    if ($workOrder === null) {
-        throw new RuntimeException('Work order not found');
-    }
+        if ($workOrder === null) {
+            throw new RuntimeException('Work order not found');
+        }
 
-    // =====================
-    // VALIDACE
-    // =====================
+        // =====================
+        // VALIDACE
+        // =====================
 
-    $data = $this->validateInvoiceData($post);
-    // =====================
-    // PŘI CHYBĚ
-    // =====================
+        $data = $this->validateInvoiceData($post);
+        // =====================
+        // PŘI CHYBĚ
+        // =====================
 
 
-    if ($data['errors']) {
+        if ($data['errors'] !== []) {
 
-        $draft = $this->buildDraftFromTask($taskId);
+            $draft = $this->buildDraftFromTask($taskId);
 
-        $draft['invoice']['title']     = $data['title'];
-        $draft['invoice']['issued_at'] = $data['issued_at'];
-        $draft['invoice']['due_date']  = $data['due_date'];
-        $draft['invoice']['note']      = $data['note'];
+            $draft['invoice']['title']     = $data['title'];
+            $draft['invoice']['issued_at'] = $data['issued_at'];
+            $draft['invoice']['due_date']  = $data['due_date'];
+            $draft['invoice']['note']      = $data['note'];
 
-        $draft['customer'] = $data['customer'];
-        $draft['items']    = $data['items'];
+            $draft['customer'] = $data['customer'];
+            $draft['items']    = $data['items'];
+
+            return [
+                'success' => false,
+                'errors'  => $data['errors'],
+                'data'    => $draft,
+            ];
+        }
+
+
+        // =====================
+        // ULOŽENÍ
+        // =====================
+
+        $invoiceId = $this->createInvoice($data);
 
         return [
-            'success' => false,
-            'errors'  => $data['errors'],
-            'data'    => $draft,
+            'success'    => true,
+            'invoice_id' => $invoiceId,
         ];
     }
 
-
-    // =====================
-    // ULOŽENÍ
-    // =====================
-
-    $invoiceId = $this->createInvoice($data);
-
-    return [
-        'success'    => true,
-        'invoice_id' => $invoiceId,
-    ];
-}
+/**
+ * @param array<string, mixed> $post
+ * @return array<string, mixed>
+ */
 private function validateInvoiceData(array $post): array
 {
     $errors = [];
@@ -290,6 +310,9 @@ private function validateInvoiceData(array $post): array
 
     /**
      * Detail faktury.
+     * @param int $companyId
+     * @param int $invoiceId
+     * @return array<string, mixed>
      */
     public function getDetail(
         int $companyId,
@@ -300,6 +323,8 @@ private function validateInvoiceData(array $post): array
 
     /**
      * Seznam faktur.
+     * @param int $companyId
+     * @return array<string, mixed>
      */
     public function getInvoices(
         int $companyId
@@ -309,6 +334,11 @@ private function validateInvoiceData(array $post): array
 
     /**
      * Storno.
+     * @param int $companyId
+     * @param int $invoiceId
+     * @param int $userId
+     * @param ?string $reason
+     * @return void
      */
     public function cancel(
         int $companyId,
@@ -320,6 +350,9 @@ private function validateInvoiceData(array $post): array
 
     /**
      * PDF.
+     * @param int $companyId
+     * @param int $invoiceId
+     * @return string
      */
     public function generatePdf(
         int $companyId,
@@ -328,12 +361,14 @@ private function validateInvoiceData(array $post): array
         return '';
     }
 
-    private function createInvoice(array $invoice): array
+    /**
+     * Vytvoří fakturu.
+     * @param array<string, mixed> $invoice
+     * @return int
+     */
+    private function createInvoice(array $invoice): int
     {
-        return [
-            'ok' => true,
-            'invoice_id' => 123,
-        ];
+        return 0;
     }
 
     /*

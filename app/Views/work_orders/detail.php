@@ -19,13 +19,12 @@ use App\Services\Tasks\TaskStatus;
 use App\Services\WorkOrders\WOStatus;
 
 /** @var array[] $tasks */
-$order = $view->order;
-$tasks = $view->tasks;
+$order = $view->orderDetail;
+$tasks = $view->orderTasks;
 $errors = $view->errors;
 
 $err = $view->errors;
-echo "Tasks:
-<pre>" . var_export($view, true) . "</pre>";
+
 
 /*
 echo "Tasks:
@@ -51,7 +50,7 @@ echo "Errors:
         <div class="card-body">
             <!-- HEADER -->
             <div class="card-header">
-                #<?= (int) $order['id'] ?>: <?= e($order['title'] ?? '') ?>
+                #<?= $order['id'] ?>: <?= e($order['title']) ?>
             </div>
 
             <!-- BASIC INFO -->
@@ -87,28 +86,28 @@ echo "Errors:
 
                 <div class="wo-info-main">
                     <strong>Popis: </strong><br>
-                    <?= tx($order['description'] ? $order['description'] : 'Nezadán') ?>
+                    <?= tx($order['description'] !== '' ? $order['description'] : 'Nezadán') ?>
                 </div>
 
                 <div class="wo-info-grid">
                     <div class="wo-info-box">
                         <span class="label">Zdroj: </span>
                         <span class="value">
-                            <?= te($order['source'] ? $order['source'] : 'Nezadán') ?>
+                            <?= te($order['source'] !== '' ? $order['source'] : 'Nezadán') ?>
                         </span>
                     </div>
 
                     <div class="wo-info-box">
                         <span class="label">Požadavek vznesl: </span>
                         <span class="value">
-                            <?= e($order['requested_by'] ? $order['requested_by'] : 'Nezadán') ?>
+                            <?= e($order['requested_by'] !== '' ? $order['requested_by'] : 'Nezadán') ?>
                         </span>
                     </div>
 
                     <div class="wo-info-box">
                         <span class="label">Kontakt: </span>
                         <span class="value">
-                            <?= e($order['contact_person'] ? $order['contact_person'] : 'Nezadán') ?>
+                            <?= e($order['contact_person'] !== '' ? $order['contact_person'] : 'Nezadán') ?>
                         </span>
                     </div>
                 </div>
@@ -125,42 +124,42 @@ echo "Errors:
         <div class="meta-item">
             <span class="meta-label">Úkoly (všechny):</span>
             <span class="meta-value">
-                <?= (int)$order['total_tasks_count'] ?>
+                <?= $order['total_tasks_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Úkoly (otevřené):</span>
             <span class="meta-value">
-                <?= (int)$order['open_tasks_count'] ?>
+                <?= $order['open_tasks_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Úkoly (hotové):</span>
             <span class="meta-value">
-                <?= (int)$order['done_tasks_count'] ?>
+                <?= $order['done_tasks_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Úkoly (zrušené):</span>
             <span class="meta-value">
-                <?= (int)$order['cancelled_tasks_count'] ?>
+                <?= $order['cancelled_tasks_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Reporty:</span>
             <span class="meta-value">
-                <?= (int)$order['report_count'] ?>
+                <?= $order['report_count'] ?>
             </span>
         </div>
 
         <div class="meta-item">
             <span class="meta-label">Čas k dokončení: </span>
             <span class="meta-value">
-                <?= (int)($order['estimated_hours'] ?? 0) ?> hodin
+                <?= ($order['estimated_hours'] !== null ? $order['estimated_hours'] : 0) ?> hodin
             </span>
         </div>
 
@@ -174,7 +173,7 @@ echo "Errors:
         <div class="meta-item">
             <span class="meta-label">Km:</span>
             <span class="meta-value">
-                <?= (int)$order['total_km'] ?>
+                <?= $order['total_km'] ?>
             </span>
         </div>
 
@@ -422,7 +421,7 @@ echo "Errors:
                 $deadlineClass = 'deadline-none';
                 $deadlineText = 'Neuvedeno';
 
-                if ($task['due_date']) {
+                if ($task['due_date'] !== null && $task['due_date'] !== '') {
                     $today = date('Y-m-d');
                     $due = date('Y-m-d', strtotime($task['due_date']));
 
@@ -461,8 +460,7 @@ echo "Errors:
                     <span class="meta-label">Popis:</span>
 
                     <span class="meta-value">
-                        <?= tx($task['description'] ? $task['description'] : 'Bez popisu') ?>
-                    </span>
+                     <?= tx($task['description'] !== null && $task['description'] !== '' ? $task['description'] : 'Bez popisu') ?>                   </span>
                 </div>
 
                 <div class="meta-item">
@@ -520,9 +518,7 @@ echo "Errors:
                         <span class="meta-label">Čas:</span>
 
                         <span class="meta-value">
-                            <?= formatMinutes(
-                                $task['stats']['total_minutes'] ?? 0
-                            ) ?>
+                            <?= formatMinutes($task['stats']['total_minutes']) ?>
                         </span>
                     </div>
 
@@ -530,7 +526,7 @@ echo "Errors:
                         <span class="meta-label">Km:</span>
 
                         <span class="meta-value">
-                            <?= (int)($task['stats']['total_km'] ?? 0) ?>
+                            <?= $task['stats']['total_km'] ?>
                         </span>
                     </div>
 

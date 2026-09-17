@@ -15,7 +15,7 @@ $teamMembers = $view->teamMembers ?? []; // pole lidí z týmu
 $reports = $view->reports ?? [];
 $oldData = $view->oldData ?? []; // stará data z POST při chybě
 $errors = $view->errors; // chyby validace
-
+dc($task);
 //var_dump($task, $teamMembers, $reports, $oldData);
 //var_dump($teamMembers);
 //print_r($errors);

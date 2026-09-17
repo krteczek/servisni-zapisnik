@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 use App\Core\Url;
 
-require __DIR__ . '/../layout/header.php';
+require __DIR__ . '/../layout/header.php'; 
 
 $tasks = $view->tasks ?? [];
 
@@ -28,13 +28,13 @@ $tasks = $view->tasks ?? [];
             $recurringBadge = '<span class="badge badge-recurring" title="Generovaný opakující se úkol">↻</span>';
         } 
         ?>
-        <div class="card task-card" style="--task-color: <?= e($task['team_color'] ?? '#ccc') ?>;">
+        <div class="card task-card" style="--task-color: <?= e($task['team_color']) ?>;">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
                 
                <span class="card-title">
                     <?= $recurringBadge ?>
-                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/report/#main') ?>"
+                    <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>"
                        title="Přidat report k tomuto úkolu">
                     <?= e($task['title']) ?>
                 </a></span>
@@ -47,17 +47,17 @@ $tasks = $view->tasks ?? [];
             <!-- TĚLO KARTY -->
             <div class="card-body">
                 <div class="meta-list">
-                    <?php if ($task['work_order_id'] !== null): ?>
+
                         <div class="meta-item">
                             <span class="meta-label">Zakázka</span>
                             <span class="meta-value">
-                                <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$task['work_order_id'] . '/detail/#main') ?>">
-                                    #<?= (int)$task['work_order_id'] ?>: <?= e($task['work_order_title']) ?>
+                                <a href="<?= Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main') ?>">
+                                    #<?= $task['work_order_id'] ?>: <?= e($task['work_order_title']) ?>
                                 </a>
                             </span>
             
                         </div>
-                    <?php endif; ?>
+
                             <?php
                             [$deadlineClass, $deadlineText] = deadlineDateHelper($task['due_date']); 
                              ?>
@@ -72,7 +72,7 @@ $tasks = $view->tasks ?? [];
                    
 							<div class="meta-item">
 								<span class="meta-label">Počet reportů: </span>
-								<span class="meta-value"><?= (int)$task['reports_count'] ?></span>
+								<span class="meta-value"><?= $task['reports_count'] ?></span>
 							</div>
 							<div class="meta-item">
 								<span class="meta-label">Počet hodin: </span>
@@ -80,7 +80,7 @@ $tasks = $view->tasks ?? [];
 							</div>
 							<div class="meta-item">
 								<span class="meta-label">Počet kilometrů: </span>
-								<span class="meta-value"><?= (int)$task['total_km'] ?></span>
+								<span class="meta-value"><?= $task['total_km'] ?></span>
 							</div>
 						</div>
 					</div>
@@ -90,14 +90,14 @@ $tasks = $view->tasks ?? [];
                 <div class="actions">
                     <?php if ($task['task_type'] !== 'recurring_instance'): ?>
 
-                        <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/edit/#main') ?>" 
+                        <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/edit/#main') ?>" 
                         class="btn btn-secondary" 
                         title="Upravit úkol">
                             ✏️ Upravit úkol
                         </a>
                     <?php endif; ?>
                     <?php if($task['can_add_report'] === true): ?>
-                    <a href="<?= Url::to('/{tenant}/tasks/' . (int)$task['id'] . '/add-report/#main') ?>" 
+                    <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/add-report/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Přidat report k tomuto úkolu">
                         📝 Napsat Report

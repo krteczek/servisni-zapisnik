@@ -12,12 +12,12 @@ use App\Services\WorkOrders\WOStatus;
 
 require __DIR__ . '/../layout/header.php';
 
-$task = $view->task;
+$task = $view->archiveTask;
 $reports = $view->reports;
 $router = $view->router;
 require __DIR__ . '/_filters.php';
 
-//dd($task, $reports );
+dc($task, $reports );
 ?>
 
 <div class="create-container">
@@ -43,10 +43,10 @@ require __DIR__ . '/_filters.php';
                 $ahrefWO = '';
 				
                 if(WOStatus::isClosed($task['WOStatus'])) {
-                    $ahrefWO = '<a href="' . Url::to('/{tenant}/archive/work-orders/' . (int) $task['work_order_id'] . '/detail/#main') . '" class="btn btn-secondary" title="Jít do Archivu na detail Zakázky k níž patří tento úkol">Archiv (detail Zakázky)</a>';
+                    $ahrefWO = '<a href="' . Url::to('/{tenant}/archive/work-orders/' . $task['work_order_id'] . '/detail/#main') . '" class="btn btn-secondary" title="Jít do Archivu na detail Zakázky k níž patří tento úkol">Archiv (detail Zakázky)</a>';
 
                 } else {
-					$url = Url::to('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/detail/#main'); 
+					$url = Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main'); 
 					if($router->isAllowedRoute($url)) {
                     	$ahrefWO = '<a href="' . $url . '" class="btn btn-secondary" title="Jít na detail Zakázky k níž patří tento úkol">Detail Zakázky</a>';
                 	}

@@ -142,6 +142,41 @@ namespace App\Core;
  *     customer_address: string
  * }
  *
+ * @phpstan-type WorkOrderDetailRow array{
+ *  id: int,
+ *  company_id: int,
+ *  parent_id: ?int,
+ *  external_number: ?string,
+ *  title: string,
+ *  description: string,
+ *  wo_due_date: ?string,
+ *  source: string,
+ *  requested_by: string,
+ *  contact_person: string,
+ *  priority: string,
+ *  estimated_hours: ?string,
+ *  status: string,
+ *  is_system: int,
+ *  created_by_user_id: int,
+ *  created_at: string,
+ *  closed_at: ?string,
+ *  internal_number: int,
+ *  contact_id: ?int,
+ *  price_per_hour: int,
+ *  price_per_km: int,
+ *  year: int,
+ *  total_time: string,
+ *  total_km: int,
+ *  report_count: int,
+ *  total_tasks_count: int,
+ *  open_tasks_count: int,
+ *  done_tasks_count: int,
+ *  cancelled_tasks_count: int,
+ *  company_name: string,
+ *  ready_for_done: bool,
+ *  ready_for_cancel: bool
+ * }
+ * 
  * @phpstan-type ContactRow array{
  *     id: int,
  *     company_id: int,
@@ -181,7 +216,26 @@ namespace App\Core;
  *     active: int,
  *     created_at: string
  * }
+ *
+ * @phpstan-type TeamMemberRow array{
+ *  membership_id: int,
+ *  id: int,
+ *  first_name: string,
+ *  last_name: string,
+ *  role_in_team: string
+ * }
  * 
+ * @phpstan-type TeamDetailRow array{
+ *   id: int,
+ *   company_id: int,
+ *   name: string,
+ *   color: string,
+ *   active: int,
+ *   created_at: string,
+ *   members: array<int, TeamMemberRow>,
+ *   members_count: int
+ * }
+ *
  * @phpstan-type SessionUserRow array{
  *     id: int,
  *     email: string,
@@ -194,8 +248,115 @@ namespace App\Core;
  *     db_name: string,
  *     session_version: int
  * }
+ *
+ * @phpstan-type ArchiveTaskRow array{
+ *     id: int,
+ *     company_id: int,
+ *     team_id: int,
+ *     work_order_id: int,
+ *     due_date: ?string,
+ *     task_type: string,
+ *     recurring_task_id: ?int,
+ *     generated_date: ?string,
+ *     title: string,
+ *     description: ?string,
+ *     status: string,
+ *     created_by_user_id: int,
+ *     created_at: string,
+ *     done_at: ?string,
+ *     billing_export_id: ?int,
+ *     allReportsParticipants: array<int, array<string, mixed>>,
+ *     WOStatus: string,
+ *     totalKm: int
+ * }
+ *
+ * @phpstan-type ArchiveOrderRow array{
+ *     id: int,
+ *     company_id: int,
+ *     parent_id: ?int,
+ *     external_number: ?string,
+ *     title: string,
+ *     description: string,
+ *     wo_due_date: ?string,
+ *     source: string,
+ *     requested_by: string,
+ *     contact_person: string,
+ *     priority: string,
+ *     estimated_hours: ?float,
+ *     status: string,
+ *     is_system: int,
+ *     created_by_user_id: int,
+ *     created_at: string,
+ *     closed_at: ?string,
+ *     internal_number: int,
+ *     contact_id: ?int,
+ *     price_per_hour: int,
+ *     price_per_km: int,
+ *     year: int
+ * }
+ *
+ * @phpstan-type ArchiveTaskListRow array{
+ *     id: int,
+ *     company_id: int,
+ *     team_id: int,
+ *     work_order_id: int,
+ *     due_date: ?string,
+ *     task_type: string,
+ *     recurring_task_id: ?int,
+ *     generated_date: ?string,
+ *     title: string,
+ *     description: ?string,
+ *     status: string,
+ *     created_by_user_id: int,
+ *     created_at: string,
+ *     done_at: ?string,
+ *     billing_export_id: ?int,
+ *     work_order_title: string,
+ *     work_order_status: string,
+ *     team_name: string,
+ *     team_color: string
+ * }
+ * 
+ * @phpstan-type WorkbenchInvoiceTaskRow array{
+ *   id: int,
+ *   title: string,
+ *   done_at: ?string,
+ *   work_order_id: int,
+ *   work_order_title: string,
+ *   team_name: string,
+ *   total_minutes: int,
+ *   total_kilometers: int
+ * }
+ * 
+ * @phpstan-type WorkbenchOrderRow array{
+ *   id: int,
+ *   company_id: int,
+ *   parent_id: ?int,
+ *   external_number: ?string,
+ *   title: string,
+ *   description: string,
+ *   wo_due_date: ?string,
+ *   source: string,
+ *   requested_by: string,
+ *   contact_person: string,
+ *   priority: string,
+ *   estimated_hours: ?string,
+ *   status: string,
+ *   is_system: int,
+ *   created_by_user_id: int,
+ *   created_at: string,
+ *   closed_at: ?string,
+ *   internal_number: int,
+ *   contact_id: ?int,
+ *   price_per_hour: int,
+ *   price_per_km: int,
+ *   year: int,
+ *   tasks?: array<int, WorkbenchTaskRow>,
+ *   can_be_done?: bool,
+ *   can_be_cancelled?: bool
+ * }
+ * 
  */
- 
 final class Types
 {
 }

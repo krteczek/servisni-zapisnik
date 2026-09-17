@@ -1,10 +1,9 @@
 /var/www/servisni-zapisnik/app/Controllers/ArchiveController.php:27:Method App\Controllers\ArchiveController::getFiltersFromRequest() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/ArchiveController.php:50:Property App\Core\ViewContext::$data (array<string, mixed>) does not accept array<int, array<string, mixed>>.
-/var/www/servisni-zapisnik/app/Controllers/ArchiveController.php:98:Property App\Core\ViewContext::$data (array<string, mixed>) does not accept array<int, array<string, mixed>>.
 /var/www/servisni-zapisnik/app/Controllers/ContactsController.php:62:Method App\Controllers\ContactsController::getContactOrRedirect() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/ContactsController.php:105:Method App\Controllers\ContactsController::validateContacts() has parameter $post with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/ContactsController.php:105:Method App\Controllers\ContactsController::validateContacts() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/ExportsController.php:87:Method App\Controllers\ExportsController::toCsv() has parameter $rows with no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Controllers/InvoiceController.php:105:Only booleans are allowed in a negated boolean, mixed given.
 /var/www/servisni-zapisnik/app/Controllers/SystemController.php:46:Method App\Controllers\SystemController::searchCompany() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskController.php:57:Method App\Controllers\TaskController::getOrderOrRedirect() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskController.php:82:Method App\Controllers\TaskController::saveTask() has parameter $data with no value type specified in iterable type array.
@@ -20,15 +19,9 @@
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:146:Method App\Controllers\TaskRecurringController::validateRecurring() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:229:Method App\Controllers\TaskRecurringController::ensureRecurringTaskClosable() has parameter $task with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:330:Method App\Controllers\TaskRecurringController::ensureRecurringEditable() has parameter $task with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TeamController.php:46:Property App\Core\ViewContext::$userTeams (array<int, array{id: int, company_id: int, name: string, color: string, active: int, created_at: string}>) does not accept array<int, list<array{id: int, name: string, color: string}>>.
-/var/www/servisni-zapisnik/app/Controllers/TeamController.php:149:Property App\Core\ViewContext::$members (array<int, array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...}>) does not accept array<int, array{membership_id: int, id: int, first_name: string, last_name: string, role_in_team: string}>.
-/var/www/servisni-zapisnik/app/Controllers/TeamController.php:152:Property App\Core\ViewContext::$userTeams (array<int, array{id: int, company_id: int, name: string, color: string, active: int, created_at: string}>) does not accept array<int, list<array{id: int, name: string, color: string}>>.
-/var/www/servisni-zapisnik/app/Controllers/TeamController.php:336:Only booleans are allowed in a ternary operator condition, mixed given.
-/var/www/servisni-zapisnik/app/Controllers/TeamController.php:355:Method App\Controllers\TeamController::getDefaultColor() has no return type specified.
 /var/www/servisni-zapisnik/app/Controllers/UserController.php:316:Method App\Controllers\UserController::validateUserData() has parameter $data with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/UserController.php:316:Method App\Controllers\UserController::validateUserData() has parameter $old with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:152:Method App\Controllers\WorkOrderController::guardEditable() has parameter $order with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:358:Property App\Core\ViewContext::$order (array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}|null) does not accept non-empty-array.
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:372:Method App\Controllers\WorkOrderController::getOrderOrRedirect() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:389:Method App\Controllers\WorkOrderController::validate() has parameter $post with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:389:Method App\Controllers\WorkOrderController::validate() return type has no value type specified in iterable type array.
@@ -36,31 +29,6 @@
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:515:Method App\Controllers\WorkOrderController::closeOrderDone() has no return type specified.
 /var/www/servisni-zapisnik/app/Controllers/WorkbenchController.php:33:Method App\Controllers\WorkbenchController::canOrdersBeDoneOrCancel() has parameter $orders with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/WorkbenchController.php:33:Method App\Controllers\WorkbenchController::canOrdersBeDoneOrCancel() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:39:PHPDoc tag @var above a method has no effect.
-/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:65:PHPDoc tag @var above a method has no effect.
-/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:77:PHPDoc tag @var above a method has no effect.
-/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:103:PHPDoc tag @var above a method has no effect.
-/var/www/servisni-zapisnik/app/Models/RegistrationRequestModel.php:20:PHPDoc tag @return with type int is incompatible with native type void.
-/var/www/servisni-zapisnik/app/Models/RegistrationRequestModel.php:59:PHPDoc tag @param for parameter $id with type App\Models\id is incompatible with native type int.
-/var/www/servisni-zapisnik/app/Models/RegistrationRequestModel.php:59:Parameter $id of method App\Models\RegistrationRequestModel::deleteById() has invalid type App\Models\id.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:143:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:16:Method App\Services\Invoice\InvoiceService::requireTaskForInvoice() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:56:Method App\Services\Invoice\InvoiceService::buildDraftFromTask() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:111:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:130:Method App\Services\Invoice\InvoiceService::buildDraftFromWorkOrder() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:145:Method App\Services\Invoice\InvoiceService::invoiceFromTask() has parameter $post with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:145:Method App\Services\Invoice\InvoiceService::invoiceFromTask() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:207:Method App\Services\Invoice\InvoiceService::validateInvoiceData() has parameter $post with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:207:Method App\Services\Invoice\InvoiceService::validateInvoiceData() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:294:Method App\Services\Invoice\InvoiceService::getDetail() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:304:Method App\Services\Invoice\InvoiceService::getInvoices() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:331:Method App\Services\Invoice\InvoiceService::createInvoice() has parameter $invoice with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:331:Method App\Services\Invoice\InvoiceService::createInvoice() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Mail/MailService.php:14:Property App\Services\Mail\MailService::$config type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Mail/MailView.php:9:Method App\Services\Mail\MailView::render() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Mail/MailView.php:9:Method App\Services\Mail\MailView::render() has parameter $toHtml with no type specified.
-/var/www/servisni-zapisnik/app/Services/Mail/MailView.php:33:Method App\Services\Mail\MailView::renderHtml() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Services/Mail/MailView.php:38:Method App\Services\Mail\MailView::renderText() has parameter $data with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Onboarding/OnboardingService.php:20:Method App\Services\Onboarding\OnboardingService::run() has parameter $load with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Onboarding/OnboardingService.php:20:Method App\Services\Onboarding\OnboardingService::run() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Recurrings/RecurringRunner.php:126:Method App\Services\Recurrings\RecurringRunner::processCompany() has parameter $company with no value type specified in iterable type array.
@@ -80,22 +48,6 @@
 /var/www/servisni-zapisnik/app/Services/WorkOrders/WorkOrderNumberService.php:15:Method App\Services\WorkOrders\WorkOrderNumberService::generateAndCreate() has parameter $data with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Views/admin/audit/detail.php:13:Only booleans are allowed in a ternary operator condition, mixed given.
 /var/www/servisni-zapisnik/app/Views/admin/audit/index.php:41:Only booleans are allowed in a ternary operator condition, mixed given.
-/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:45:Offset 'WOStatus' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:46:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:49:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:64:Offset 'allReportsParticipants' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:71:Offset 'allReportsParticipants' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:78:Offset 'totalKm' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:33:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:44:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:48:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:52:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:56:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:60:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:64:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:69:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:73:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/contacts/index.php:82:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/exports/data/_filters.php:10:PHPDoc tag @var for variable $teams has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Views/exports/data/_filters.php:27:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/exports/data/taskExports.php:7:PHPDoc tag @var for variable $tasks has no value type specified in iterable type array.
@@ -113,14 +65,6 @@
 /var/www/servisni-zapisnik/app/Views/tasks/edit.php:86:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/tasks/edit.php:109:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/tasks/edit.php:129:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/tasks/index.php:31:Offset 'team_color' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? always exists and is not nullable.
-/var/www/servisni-zapisnik/app/Views/tasks/index.php:37:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/tasks/index.php:50:Strict comparison using !== between int and null will always evaluate to true.
-/var/www/servisni-zapisnik/app/Views/tasks/index.php:54:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/tasks/index.php:55:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/tasks/index.php:75:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/tasks/index.php:93:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/tasks/index.php:100:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/tasks/recurring.php:17:PHPDoc tag @var for variable $tasks has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Views/tasks/recurring.php:28:Only booleans are allowed in a negated boolean, mixed given.
 /var/www/servisni-zapisnik/app/Views/tasks/recurring.php:102:Only booleans are allowed in a ternary operator condition, mixed given.
@@ -136,18 +80,9 @@
 /var/www/servisni-zapisnik/app/Views/tasks/report.php:115:Only booleans are allowed in a ternary operator condition, mixed given.
 /var/www/servisni-zapisnik/app/Views/tasks/report.php:125:Only booleans are allowed in a ternary operator condition, mixed given.
 /var/www/servisni-zapisnik/app/Views/tasks/report.php:156:Argument of an invalid type string supplied for foreach, only iterables are supported.
-/var/www/servisni-zapisnik/app/Views/teams/edit.php:100:Offset 'membership_id' does not exist on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...}.
-/var/www/servisni-zapisnik/app/Views/teams/edit.php:106:Offset 'role_in_team' does not exist on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...}.
-/var/www/servisni-zapisnik/app/Views/teams/edit.php:123:Offset 'membership_id' does not exist on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...}.
+/var/www/servisni-zapisnik/app/Views/teams/edit.php:100:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/teams/edit.php:123:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/teams/edit.php:151:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/teams/index.php:49:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/teams/index.php:54:Only booleans are allowed in a ternary operator condition, int given.
-/var/www/servisni-zapisnik/app/Views/teams/index.php:55:Only booleans are allowed in a ternary operator condition, int given.
-/var/www/servisni-zapisnik/app/Views/teams/index.php:66:Offset 'members' does not exist on array{id: int, company_id: int, name: string, color: string, active: int, created_at: string}.
-/var/www/servisni-zapisnik/app/Views/teams/index.php:75:Offset 'name' does not exist on int|string.
-/var/www/servisni-zapisnik/app/Views/teams/index.php:76:Offset 'color' does not exist on int|string.
-/var/www/servisni-zapisnik/app/Views/teams/index.php:103:Only booleans are allowed in a ternary operator condition, int given.
-/var/www/servisni-zapisnik/app/Views/teams/index.php:106:Only booleans are allowed in a ternary operator condition, int given.
 /var/www/servisni-zapisnik/app/Views/users/detail.php:20:Offset 'first_name' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
 /var/www/servisni-zapisnik/app/Views/users/detail.php:20:Offset 'last_name' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
 /var/www/servisni-zapisnik/app/Views/users/detail.php:68:Strict comparison using !== between string and null will always evaluate to true.
@@ -163,44 +98,12 @@
 /var/www/servisni-zapisnik/app/Views/users/index.php:61:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/users/index.php:62:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/work_orders/detail.php:22:PHPDoc tag @var for variable $tasks has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:54:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:64:Offset 'company_name' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:90:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:97:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:104:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:111:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:128:Offset 'total_tasks_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:135:Offset 'open_tasks_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:142:Offset 'done_tasks_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:149:Offset 'cancelled_tasks_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:156:Offset 'report_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:170:Offset 'total_time' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:201:Offset 'ready_for_done' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:376:Offset 'can_close' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:377:Offset 'can_cancel' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:384:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:411:Offset 'title' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? always exists and is not nullable.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:425:Only booleans are allowed in an if condition, string|null given.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:464:Only booleans are allowed in a ternary operator condition, string|null given.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:480:Offset 'stats' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:494:Offset 'recurring_frequency_type' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:495:Offset 'recurring_frequency_value' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:501:Offset 'recurring_next_due_date' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:507:Offset 'recurring_warning_days_before' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:511:Offset 'recurring_active' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:524:Offset 'stats' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? does not exist.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:533:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:533:Offset 'stats' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? does not exist.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:612:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:645:Offset 'can_cancel' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:677:Offset 'can_close' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
-/var/www/servisni-zapisnik/app/Views/work_orders/index.php:32:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/work_orders/index.php:58:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/work_orders/index.php:74:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/work_orders/index.php:86:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/work_orders/index.php:90:Only booleans are allowed in a ternary operator condition, string given.
-/var/www/servisni-zapisnik/app/Views/work_orders/index.php:98:Casting to int something that's already int.
-/var/www/servisni-zapisnik/app/Views/work_orders/index.php:103:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:383:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:410:Offset 'title' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:478:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:509:Only booleans are allowed in a ternary operator condition, int|null given.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:608:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:628:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/workbench/partials/my_invoice_ready.php:29:Only booleans are allowed in a negated boolean, mixed given.
 /var/www/servisni-zapisnik/app/Views/workbench/partials/my_invoice_ready.php:29:Only booleans are allowed in a negated boolean, mixed given.
 /var/www/servisni-zapisnik/app/Views/workbench/partials/my_invoice_ready.php:58:Only booleans are allowed in an if condition, mixed given.
@@ -209,5 +112,3 @@
 /var/www/servisni-zapisnik/app/Views/workbench/partials/my_prepare_to_cancel.php:85:Only booleans are allowed in a ternary operator condition, mixed given.
 /var/www/servisni-zapisnik/app/Views/workbench/partials/my_prepare_to_done.php:77:Only booleans are allowed in a ternary operator condition, mixed given.
 /var/www/servisni-zapisnik/app/Views/workbench/partials/my_prepare_to_done.php:78:Only booleans are allowed in a ternary operator condition, mixed given.
-/var/www/servisni-zapisnik/app/Views/workbench/partials/other_prepare_to_done.php:78:Only booleans are allowed in a ternary operator condition, mixed given.
-/var/www/servisni-zapisnik/app/Views/workbench/partials/other_prepare_to_done.php:79:Only booleans are allowed in a ternary operator condition, mixed given.

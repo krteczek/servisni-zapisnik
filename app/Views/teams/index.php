@@ -18,7 +18,7 @@ $isActive = '';
 
 
 
-<?php if ($view->teams === []): ?>
+<?php if ($view->teamsWithMembers === []): ?>
 
     <div class="ui-alert ui-alert-warning">
         <?php if ($mode === 'inactive'): ?>
@@ -39,20 +39,20 @@ $isActive = '';
 </div>
 
 <div class="entity-grid">
-    <?php foreach ($view->teams as $team): ?>
+    <?php foreach ($view->teamsWithMembers as $team): ?>
     <? $isActive = active($team); ?>
         <div class="card team-card <?= e($isActive) ?>" 
              style="--team-color: <?= e($team['color']) ?>;">
 
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
-                <span class="card-title"><a href="<?= Url::to('/{tenant}/teams/' . (int)$team['id'] . '/edit/#main') ?>" 
+                <span class="card-title"><a href="<?= Url::to('/{tenant}/teams/' . $team['id'] . '/edit/#main') ?>" 
                    class="card-title"
                    title="Upravit tým">
                     <?= e($team['name']) ?>
                 </a></span>
-                <span class="badge <?= $team['active'] ? 'badge-active' : 'badge-inactive' ?>">
-                    <?= $team['active'] ? 'Aktivní' : 'Neaktivní' ?>
+                <span class="badge <?= $team['active'] !==0 ? 'badge-active' : 'badge-inactive' ?>">
+                    <?= $team['active'] !==0 ? 'Aktivní' : 'Neaktivní' ?>
                 </span>
             </div> 
 
@@ -91,7 +91,7 @@ $isActive = '';
                 <div class="actions">
                     <?php if ($mode === 'active' && Access::can('teams.edit')): ?>
                         <a class="btn btn-secondary"
-                           href="<?= Url::to('/{tenant}/teams/' . (int)$team['id'] . '/edit/#main') ?>"
+                           href="<?= Url::to('/{tenant}/teams/' . $team['id'] . '/edit/#main') ?>"
                            title="Upravit tým">
                             ✏️ Upravit
                         </a>
@@ -99,11 +99,11 @@ $isActive = '';
                     
                     <?php if (Access::can('teams.edit')): ?>
                         <a class="btn btn-secondary"
-                           href="<?= Url::to('/{tenant}/teams/toggle/' . (int)$team['id']) ?>"
-                           title="<?= e($team['active'] ? 'Deaktivovat tým' : 'Aktivovat tým') ?>"
+                           href="<?= Url::to('/{tenant}/teams/toggle/' . $team['id']) ?>"
+                           title="<?= e($team['active'] !==0 ? 'Deaktivovat tým' : 'Aktivovat tým') ?>"
                            data-confirm="Opravdu chcete změnit stav týmu?"
                            >
-                            <?= e($team['active'] ? '🔒 Deaktivovat' : '🔓 Aktivovat') ?>
+                            <?= e($team['active'] !==0 ? '🔒 Deaktivovat' : '🔓 Aktivovat') ?>
                         </a>
                     <?php endif ?>
                 </div>

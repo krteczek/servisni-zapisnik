@@ -75,8 +75,8 @@ $otherTeams[$team['id']]['color'] = $team['color'];
                     <?= te($orders['status']) ?>
                 </span></td>
                 <td><?= count($orders['tasks'] ?? []) ?></td>
-                <td><?= e($orders['can_be_done'] ? 'Ano' : 'Ne') ?></td>
-                <td><?= e($orders['can_be_cancelled'] ? 'Ano' : 'Ne') ?></td>
+                <td><?= e($orders['can_be_done'] !== 0 ? 'Ano' : 'Ne') ?></td>
+                <td><?= e($orders['can_be_cancelled'] !== 0 ? 'Ano' : 'Ne') ?></td>
             </tr>
         <?php endforeach; ?>
     </tbody>

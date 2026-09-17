@@ -40,19 +40,21 @@ class ArchiveController extends Controller
             // 'date_from' => ...
         ];
     }
+
+
     public function tasks(): string
     {
 
         $filters = $this->getFiltersFromRequest();
         
-        $data = (new TaskModel())->filterArchive($filters);
+        $tasks = (new TaskModel())->filterArchive($filters);
 
-        $this->view->data = $data;
-        $this->view->title .= ' (' . count($data) . ')';
+        $this->view->archiveTasks = $tasks;
+        $this->view->title .= ' (' . count($tasks) . ')';
         $this->view->filters = $filters;
-        $this->view->type = 'tasks'; // 👈 důležité pro view
-
-        return $this->render('archive/index');
+        //$this->view->type = 'tasks'; // zrušeno, výpis rozdělen na tasky a ordery, samostatné soubory
+        //debugViewVariables($this->view);
+        return $this->render('archive/indexTasks');
     }
 
 
@@ -60,7 +62,7 @@ class ArchiveController extends Controller
     {
         // získáme task
         $task = (new TaskModel())->find($taskId);
-        if($task === []) {
+        if($task === null) {
             Flash::error('Požadovaný úkol nebyl nalezen. Nejspíše neexistuje.');
             Url::redirect('/{tenant}/archive/tasks/#main');
         }
@@ -71,6 +73,7 @@ class ArchiveController extends Controller
         $wo = (new WorkOrderModel())->find($task['work_order_id']);
         $task['WOStatus'] = $wo['status'];
         $task['totalKm'] = 0;
+        $this->view->title .= ' > ' . $task['title'] . ' ';
         if(TaskStatus::isDone($task["status"])) {
             //získáme reporty podle id tasku
             $model = new TaskAssignmentModel();
@@ -81,7 +84,7 @@ class ArchiveController extends Controller
         }
 
          // přiřadíme proměnnym ve view hodnoty 
-        $this->view->task = $task;
+        $this->view->archiveTask = $task;
         $this->view->reports = $reports;
 
 
@@ -95,12 +98,12 @@ class ArchiveController extends Controller
         
         $data = (new WorkOrderModel())->filterArchive($filters);
 
-        $this->view->data = $data;
+        $this->view->archiveOrders = $data;
         $this->view->title .= ' (' . count($data) . ')';
         $this->view->filters = $filters;
         $this->view->type = 'work-orders'; // 👈 důležité pro view
 
-        return $this->render('archive/index');
+        return $this->render('archive/indexOrders');
 
     }
 }

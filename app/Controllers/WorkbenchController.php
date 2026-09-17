@@ -23,9 +23,9 @@ class WorkbenchController extends Controller
         [$data['otherReadyToDoneOrders'], $data['otherReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['otherOrdersInProgress']);
       
         
-        $this->view->data = $data;
-        $this->view->data['isInternalBilling'] = (new SettingsService())->isInternalBilling();
-        $this->view->data['isExternalAccounting'] = (new SettingsService())->isExternalAccounting();
+        $this->view->WBData = $data;
+        $this->view->WBData['isInternalBilling'] = (new SettingsService())->isInternalBilling();
+        $this->view->WBData['isExternalAccounting'] = (new SettingsService())->isExternalAccounting();
         return $this->render('workbench/index');
 
     }
