@@ -38,7 +38,7 @@ final class AccessLogModel extends BaseModel
      * TODO: [PERFORMANCE] Při vysokém provozu zvážit batch insert nebo async logging
      * TODO: [SECURITY] Sanitizace path a user_agent před uložením
      *
-     * @param array $data Data z AccessLogger::log()
+     * @param array<string, mixed> $data Data z AccessLogger::log()
      * @return void
      */
     public function log(array $data): void

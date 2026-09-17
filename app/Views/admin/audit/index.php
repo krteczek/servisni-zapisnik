@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 use App\Core\Url;
 $filters = $view->filters;
-$logs = $view->data;
+$logs = $view->logs ?? [];
 require __DIR__ . '/../../layout/header.php';
 
 ?>

@@ -17,11 +17,13 @@ use App\Core\LoggerHolder;
  * - Přepíná databázový kontext (prostřednictvím Controller konstruktoru)
  * - Loguje chyby do logovacího systému
  * - Nastavuje HTTP redirecty
+ * TODO: [MAINTENANCE] Přesunout logiku přepínání databází do middleware nebo samostatné služby
+ * @phpstan-import-type MenuRouteRow from Types
  */
 final class Router
 {
     /**
-     * @var array Seznam rout s kompilovanými regex patterny
+     * @var array<int, MenuRouteRow> Seznam rout s kompilovanými regex patterny
      */
     private array $routes = [];
     
@@ -41,14 +43,12 @@ final class Router
      * TODO: [PERFORMANCE] Při vysokém počtu rout (>100) zvážit použití trie nebo jiné optimalizované struktury
      * TODO: [MAINTENANCE] Rozdělit konstruktor na menší metody (initRoutes, initView, initMenu)
      *
-     * @param array $routes Konfigurace rout z config/routes.php
+     * @param array<int, MenuRouteRow> $routes Konfigurace rout z config/routes.php
      */
     public function __construct(array $routes)
     {
         // shared view context
         $this->view = new ViewContext();
-        //$this->view->isLogged = Auth::check();
-        //$this->view->user     = Auth::user();
         $user = Auth::user();
 
         $this->view->user     = $user;
@@ -58,7 +58,7 @@ final class Router
         foreach ($routes as $route) {
             $this->routes[] = [
                 ...$route,
-                'method' => strtoupper($route['method'] ?? 'GET'),
+                'method' => strtoupper($route['method']),
                 'regex'  => $this->compilePath($route['path']),
             ];
         }
@@ -81,7 +81,9 @@ final class Router
             $requestPath
         );
     }
-private function parsepath(string $parsedPath): string
+
+
+    private function parsepath(string $parsedPath): string
     {
         if ($parsedPath === '') {
             return '/';
@@ -95,6 +97,7 @@ private function parsepath(string $parsedPath): string
 
         return $path;
     }
+
     /**
      * Zpracuje HTTP požadavek a vrátí odpověď.
      * Projde všechny routy, ověří shodu, zkontroluje oprávnění a zavolá příslušný controller.
@@ -129,10 +132,14 @@ private function parsepath(string $parsedPath): string
                 continue;
             }
 
-            if (preg_match($route['regex'], $path, $matches) !== 1) {
+            $regex = $route['regex'] ?? null;
+            if ($regex === null) {
+               continue;
+            }
+            if (preg_match($regex, $path, $matches) !== 1) {
                 continue;
             }
-
+            
             // auth
             if (($route['auth'] ?? false) && Auth::user() === null) {
                 Flash::info('Byli jste odhlášeni systémem (změna oprávnění nebo neplatná session).');
@@ -207,8 +214,8 @@ private function parsepath(string $parsedPath): string
      * - Controller třída existuje a má požadovanou metodu
      * - Počet parametrů odpovídá aritě metody
      *
-     * @param array $action Pole obsahující [class, method]
-     * @param array $params Parametry extrahované z URL
+     * @param array{0: class-string, 1: string} $action Pole obsahující [class, method]
+     * @param array<string, string> $params Parametry extrahované z URL
      * @return string|null Návratová hodnota controlleru (HTML nebo null pro redirect)
      */
     private function call(array $action, array $params): ?string
@@ -272,7 +279,7 @@ private function parsepath(string $parsedPath): string
      * Vedlejší efekty:
      * - Mění `$this->view->title`
      *
-     * @param array $route Konfigurace aktuální routy
+     * @param MenuRouteRow $route Konfigurace aktuální routy
      * @return void
      */
     private function resolveTitle(array $route): void
@@ -348,7 +355,7 @@ private function parsepath(string $parsedPath): string
     /**
      * Ověří autentizaci a role požadované konkrétní routou.
      *
-     * @param array $route Konfigurace routy
+     * @param MenuRouteRow $route Konfigurace routy
      * @return bool TRUE pokud je přístup povolen
      */
     private function checkRouteAccess(array $route): bool

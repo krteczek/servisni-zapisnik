@@ -121,7 +121,9 @@ public function add(int $userId, int $teamId, string $role): ?int
     /* ==========================================================
      * AKTIVNÍ TÝMY PODLE UŽIVATELŮ
      * ========================================================== */
-
+    /**
+     * @return array<int, list<array{id: int, name: string, color: string}>>
+     */
     public function activeTeamsByUsers(): array
     {
         $stmt = $this->db()->prepare(
@@ -177,27 +179,31 @@ public function add(int $userId, int $teamId, string $role): ?int
             'company_id' => Auth::companyId(),
         ]);
     }
-    
-public function activeTeamIdsForUser(int $userId): array
-{
-    $stmt = $this->db()->prepare(
-        "SELECT team_id
-         FROM {$this->tableName}
-         WHERE user_id = :user
-           AND valid_to IS NULL
-           AND company_id = :company_id"
-    );
 
-    $stmt->execute([
-        'user'       => $userId,
-        'company_id' => Auth::companyId(),
-    ]);
+    /**
+     * @param int $userId
+     * @return array<int, int>
+     */    
+    public function activeTeamIdsForUser(int $userId): array
+    {
+        $stmt = $this->db()->prepare(
+            "SELECT team_id
+            FROM {$this->tableName}
+            WHERE user_id = :user
+            AND valid_to IS NULL
+            AND company_id = :company_id"
+        );
 
-    return array_map(
-        'intval',
-        $stmt->fetchAll(PDO::FETCH_COLUMN)
-    );
-}
+        $stmt->execute([
+            'user'       => $userId,
+            'company_id' => Auth::companyId(),
+        ]);
+
+        return array_map(
+            'intval',
+            $stmt->fetchAll(PDO::FETCH_COLUMN)
+        );
+    }
     
     
     

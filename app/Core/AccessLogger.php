@@ -23,6 +23,9 @@ final class AccessLogger
     public const TYPE_LOGOUT = 999;//logout
 
 
+    /**
+     * @return array<int, int>
+     */
     public static function all(): array
     {
     	return [

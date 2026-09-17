@@ -5,6 +5,11 @@ namespace App\Core;
 
 final class Response
 {
+    /**
+     * @param array<string, mixed> $data
+     * @param int $status
+     * @return void
+     */
     public static function json(array $data, int $status = 200): void
     {
         http_response_code($status);

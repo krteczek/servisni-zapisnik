@@ -5,6 +5,10 @@ namespace App\Core;
 
 class UserAgent
 {
+    /**
+     * @param string|null $ua User-Agent string
+     * @return array<string, mixed>
+     */
     public static function parse(?string $ua): array
     {
         if ($ua === null) {

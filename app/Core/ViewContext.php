@@ -19,6 +19,7 @@ use App\Core\Types;
  * @phpstan-import-type TeamRow from Types
  * @phpstan-import-type MenuSection from Types
  * @phpstan-import-type MenuItem from Types
+ * @phpstan-import-type ContactRow from Types
  */
 class ViewContext
 {
@@ -153,6 +154,9 @@ class ViewContext
      */
     public ?array $logs = [];
 
+    /** @var array<string, mixed>|null Jeden auditní záznam */
+    public ?array $log = null;
+
     /**
      * @var array<string, mixed>|null Filtry pro logy
      */
@@ -193,8 +197,8 @@ class ViewContext
      */
     public ?array $oldData = [];
 
-    /**
-     * @var array<int, array<string, mixed>>|null Kontakty
+    /** 
+     * @var array<int, ContactRow>|null
      */
     public ?array $contacts = [];
 

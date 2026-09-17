@@ -8,7 +8,8 @@ use App\Core\Url;
 
 
 require __DIR__ . '/../../layout/header.php';
-$log = $view->data;
+$log = $view->log ?? [];
+
 $diff = $log['diff']
     ? json_decode($log['diff'], true)
     : null;

@@ -20,14 +20,22 @@ class Request
         return self::userAgent();
     }
 
-    public static function UAParse()
+    /**
+     * @return array<string, mixed>
+     */
+    public static function UAParse(): array
     {
     	return UserAgent::parse(self::userAgent());
 
     }
+    /**
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public static function post(string $key, mixed $default = null): mixed
+    {
+        return $_POST[$key] ?? $default;
+    }
 
-public static function post(string $key, $default = null)
-{
-    return $_POST[$key] ?? $default;
-}
 }

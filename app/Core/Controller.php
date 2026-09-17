@@ -126,11 +126,19 @@ abstract class Controller
         return $this->view->errors !== [];
     }
 
-    
-    public function getError($key): bool
+    /**
+     * Získá chybovou zprávu pro daný klíč.
+     * Pokud chybová zpráva neexistuje, vrátí prázdný string.
+     * TODO: [FEATURE] Přidat možnost získat všechny chyby jako pole
+     *
+     * @param string $key
+     * @return list<string>|string
+     */
+    public function getError($key): mixed
     {
         return $this->view->errors[$key] ?? '';
     }
+    
     /* =========================
        COMMON PAGES
        ========================= */

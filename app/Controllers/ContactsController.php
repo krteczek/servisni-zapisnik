@@ -22,7 +22,9 @@ class ContactsController extends Controller
 
     public function index(): string
     {
-        $this->view->data = $this->model->all();
+        $this->view->contacts = $this->model->all();
+        // debugViewVariables($this->view);
+
         return $this->render('contacts/index');
     }
 

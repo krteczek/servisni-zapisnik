@@ -1,7 +1,9 @@
 /var/www/servisni-zapisnik/app/Controllers/ArchiveController.php:27:Method App\Controllers\ArchiveController::getFiltersFromRequest() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:60:Method App\Controllers\ContactsController::getContactOrRedirect() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:103:Method App\Controllers\ContactsController::validateContacts() has parameter $post with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:103:Method App\Controllers\ContactsController::validateContacts() return type has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Controllers/ArchiveController.php:50:Property App\Core\ViewContext::$data (array<string, mixed>) does not accept array<int, array<string, mixed>>.
+/var/www/servisni-zapisnik/app/Controllers/ArchiveController.php:98:Property App\Core\ViewContext::$data (array<string, mixed>) does not accept array<int, array<string, mixed>>.
+/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:62:Method App\Controllers\ContactsController::getContactOrRedirect() return type has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:105:Method App\Controllers\ContactsController::validateContacts() has parameter $post with no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:105:Method App\Controllers\ContactsController::validateContacts() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/ExportsController.php:87:Method App\Controllers\ExportsController::toCsv() has parameter $rows with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/SystemController.php:46:Method App\Controllers\SystemController::searchCompany() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskController.php:57:Method App\Controllers\TaskController::getOrderOrRedirect() return type has no value type specified in iterable type array.
@@ -18,10 +20,15 @@
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:146:Method App\Controllers\TaskRecurringController::validateRecurring() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:229:Method App\Controllers\TaskRecurringController::ensureRecurringTaskClosable() has parameter $task with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:330:Method App\Controllers\TaskRecurringController::ensureRecurringEditable() has parameter $task with no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Controllers/TeamController.php:46:Property App\Core\ViewContext::$userTeams (array<int, array{id: int, company_id: int, name: string, color: string, active: int, created_at: string}>) does not accept array<int, list<array{id: int, name: string, color: string}>>.
+/var/www/servisni-zapisnik/app/Controllers/TeamController.php:149:Property App\Core\ViewContext::$members (array<int, array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...}>) does not accept array<int, array{membership_id: int, id: int, first_name: string, last_name: string, role_in_team: string}>.
+/var/www/servisni-zapisnik/app/Controllers/TeamController.php:152:Property App\Core\ViewContext::$userTeams (array<int, array{id: int, company_id: int, name: string, color: string, active: int, created_at: string}>) does not accept array<int, list<array{id: int, name: string, color: string}>>.
+/var/www/servisni-zapisnik/app/Controllers/TeamController.php:336:Only booleans are allowed in a ternary operator condition, mixed given.
 /var/www/servisni-zapisnik/app/Controllers/TeamController.php:355:Method App\Controllers\TeamController::getDefaultColor() has no return type specified.
 /var/www/servisni-zapisnik/app/Controllers/UserController.php:316:Method App\Controllers\UserController::validateUserData() has parameter $data with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/UserController.php:316:Method App\Controllers\UserController::validateUserData() has parameter $old with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:152:Method App\Controllers\WorkOrderController::guardEditable() has parameter $order with no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:358:Property App\Core\ViewContext::$order (array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}|null) does not accept non-empty-array.
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:372:Method App\Controllers\WorkOrderController::getOrderOrRedirect() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:389:Method App\Controllers\WorkOrderController::validate() has parameter $post with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:389:Method App\Controllers\WorkOrderController::validate() return type has no value type specified in iterable type array.
@@ -29,225 +36,17 @@
 /var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:515:Method App\Controllers\WorkOrderController::closeOrderDone() has no return type specified.
 /var/www/servisni-zapisnik/app/Controllers/WorkbenchController.php:33:Method App\Controllers\WorkbenchController::canOrdersBeDoneOrCancel() has parameter $orders with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/WorkbenchController.php:33:Method App\Controllers\WorkbenchController::canOrdersBeDoneOrCancel() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/AccessLogger.php:26:Method App\Core\AccessLogger::all() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/AuditLogCore.php:41:Method App\Core\AuditLogCore::log() has parameter $diff with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Auth.php:28:Property App\Core\Auth::$cachedUser type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Auth.php:120:Method App\Core\Auth::user() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Auth.php:224:Method App\Core\Auth::hasRole() has parameter $roles with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Auth.php:246:Method App\Core\Auth::login() has parameter $userData with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Auth.php:317:Method App\Core\Auth::hasGlobalRole() has parameter $roles with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Config.php:20:Property App\Core\Config::$cache type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Config.php:83:Method App\Core\Config::parseKey() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Controller.php:130:Method App\Core\Controller::getError() has parameter $key with no type specified.
-/var/www/servisni-zapisnik/app/Core/Database.php:197:Method App\Core\Database::options() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/DatabaseScope.php:10:Method App\Core\DatabaseScope::work() has no return type specified.
-/var/www/servisni-zapisnik/app/Core/DatabaseScope.php:24:Method App\Core\DatabaseScope::admin() has no return type specified.
-/var/www/servisni-zapisnik/app/Core/Flash.php:71:Method App\Core\Flash::display() has no return type specified.
-/var/www/servisni-zapisnik/app/Core/Logger.php:66:Method App\Core\Logger::emergency() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:78:Method App\Core\Logger::alert() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:90:Method App\Core\Logger::critical() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:102:Method App\Core\Logger::error() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:114:Method App\Core\Logger::warning() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:126:Method App\Core\Logger::notice() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:138:Method App\Core\Logger::info() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:150:Method App\Core\Logger::debug() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:171:Method App\Core\Logger::log() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Logger.php:204:Method App\Core\Logger::interpolate() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:59:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::emergency() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:60:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::alert() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:61:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::critical() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:62:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::error() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:63:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::warning() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:64:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::notice() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:65:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::info() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:66:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::debug() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerHolder.php:67:Method App\Core\LoggerInterface@anonymous/Core/LoggerHolder.php:58::log() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:24:Method App\Core\LoggerInterface::emergency() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:34:Method App\Core\LoggerInterface::alert() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:44:Method App\Core\LoggerInterface::critical() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:54:Method App\Core\LoggerInterface::error() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:64:Method App\Core\LoggerInterface::warning() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:73:Method App\Core\LoggerInterface::notice() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:83:Method App\Core\LoggerInterface::info() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:92:Method App\Core\LoggerInterface::debug() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/LoggerInterface.php:103:Method App\Core\LoggerInterface::log() has parameter $context with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Menu.php:39:Method App\Core\Menu::build() has parameter $routes with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Menu.php:39:Method App\Core\Menu::build() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Menu.php:110:Method App\Core\Menu::isAllowed() has parameter $route with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Request.php:23:Method App\Core\Request::UAParse() has no return type specified.
-/var/www/servisni-zapisnik/app/Core/Request.php:29:Method App\Core\Request::post() has no return type specified.
-/var/www/servisni-zapisnik/app/Core/Request.php:29:Method App\Core\Request::post() has parameter $default with no type specified.
-/var/www/servisni-zapisnik/app/Core/Response.php:8:Method App\Core\Response::json() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Roles.php:21:Property App\Core\Roles::$roles type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Roles.php:23:Method App\Core\Roles::all() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Roles.php:90:Method App\Core\Roles::effective() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Router.php:26:Property App\Core\Router::$routes type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Router.php:46:Method App\Core\Router::__construct() has parameter $routes with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Router.php:214:Method App\Core\Router::call() has parameter $action with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Router.php:214:Method App\Core\Router::call() has parameter $params with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Router.php:278:Method App\Core\Router::resolveTitle() has parameter $route with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Router.php:354:Method App\Core\Router::checkRouteAccess() has parameter $route with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/Session.php:190:Method App\Core\Session::all() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/TeamRoles.php:18:Property App\Core\TeamRoles::$config type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/TeamRoles.php:35:Method App\Core\TeamRoles::config() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/TeamRoles.php:63:Method App\Core\TeamRoles::all() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/UserAgent.php:8:Method App\Core\UserAgent::parse() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/UserGuard.php:29:Method App\Core\UserGuard::isRoot() has parameter $user with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/UserGuard.php:48:Method App\Core\UserGuard::isDomainAdmin() has parameter $user with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/UserGuard.php:63:Method App\Core\UserGuard::isProtected() has parameter $user with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:25:Property App\Core\ViewContext::$user type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:30:Property App\Core\ViewContext::$users type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:50:Property App\Core\ViewContext::$menu type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:55:Property App\Core\ViewContext::$messages type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:60:Property App\Core\ViewContext::$errors type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:65:Property App\Core\ViewContext::$flash type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:70:Property App\Core\ViewContext::$data type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:75:Property App\Core\ViewContext::$old type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:80:Property App\Core\ViewContext::$roles type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:97:Property App\Core\ViewContext::$teams type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:102:Property App\Core\ViewContext::$team type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:107:Property App\Core\ViewContext::$members type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:112:Property App\Core\ViewContext::$availableUsers type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:117:Property App\Core\ViewContext::$rolesInTeam type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:122:Property App\Core\ViewContext::$userTeams type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:129:Property App\Core\ViewContext::$orders type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:134:Property App\Core\ViewContext::$order type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:139:Property App\Core\ViewContext::$post type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:146:Property App\Core\ViewContext::$logs type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:151:Property App\Core\ViewContext::$filters type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:156:Property App\Core\ViewContext::$companies type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:163:Property App\Core\ViewContext::$tasks type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:164:Property App\Core\ViewContext::$task type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:165:Property App\Core\ViewContext::$teamMembers type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:166:Property App\Core\ViewContext::$reports type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:167:Property App\Core\ViewContext::$oldData type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:169:Property App\Core\ViewContext::$contacts type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:171:Property App\Core\ViewContext::$company type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/ViewContext.php:180:Property App\Core\ViewContext::$statuses type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/helpers.php:210:Function active() has parameter $user with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/helpers.php:226:Function a() has parameter $user with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/helpers.php:252:Function checked() has parameter $value with no type specified.
-/var/www/servisni-zapisnik/app/Core/helpers.php:315:Function uniqueUsernames() has parameter $participants with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Core/helpers.php:315:Function uniqueUsernames() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/AccessLogModel.php:44:Method App\Models\AccessLogModel::log() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/AuditLogModel.php:30:Method App\Models\AuditLogModel::insertLog() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/AuditLogModel.php:53:Method App\Models\AuditLogModel::findByFilters() has parameter $filters with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/AuditLogModel.php:53:Method App\Models\AuditLogModel::findByFilters() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/AuditLogModel.php:112:Method App\Models\AuditLogModel::findByEntity() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/AuditLogModel.php:137:Method App\Models\AuditLogModel::findByUser() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BanModel.php:27:Method App\Models\BanModel::createBan() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:182:Method App\Models\BaseModel::applyTenant() has parameter $where with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:182:Method App\Models\BaseModel::applyTenant() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:257:Method App\Models\BaseModel::diff() has parameter $after with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:257:Method App\Models\BaseModel::diff() has parameter $before with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:257:Method App\Models\BaseModel::diff() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:304:Method App\Models\BaseModel::all() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:343:Method App\Models\BaseModel::find() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:375:Method App\Models\BaseModel::create() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:401:Method App\Models\BaseModel::insertRaw() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:473:Method App\Models\BaseModel::update() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:569:Method App\Models\BaseModel::fetchAll() has parameter $params with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:569:Method App\Models\BaseModel::fetchAll() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:585:Method App\Models\BaseModel::fetchOne() has parameter $params with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:585:Method App\Models\BaseModel::fetchOne() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:602:Method App\Models\BaseModel::findOrFail() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:631:Method App\Models\BaseModel::createWithTenant() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:641:Method App\Models\BaseModel::firstWhere() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:658:Method App\Models\BaseModel::updateWhere() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:763:Method App\Models\BaseModel::whereStatus() has parameter $statuses with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:763:Method App\Models\BaseModel::whereStatus() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/BaseModel.php:801:Method App\Models\BaseModel::buildSearchCondition() has parameter $params with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/CompanyModel.php:47:Method App\Models\CompanyModel::existsBySlug() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/CompanyModel.php:83:Method App\Models\CompanyModel::findBySlug() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/CompanyModel.php:107:Method App\Models\CompanyModel::findAll() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/CompanyModel.php:135:Method App\Models\CompanyModel::searchCompany() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:11:Method App\Models\RecurringRunnerModel::findDueTasks() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/RegistrationRequestModel.php:16:Method App\Models\RegistrationRequestModel::upsert() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/RegistrationRequestModel.php:34:Method App\Models\RegistrationRequestModel::findValidByHash() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:17:Property App\Models\SettingsModel::$cache type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:19:Property App\Models\SettingsModel::$defaults type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:33:Method App\Models\SettingsModel::getWorkOrderSettings() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:38:Method App\Models\SettingsModel::updateWorkOrderSettings() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:43:Method App\Models\SettingsModel::get() has parameter $default with no type specified.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:43:Method App\Models\SettingsModel::get() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:67:Method App\Models\SettingsModel::set() has parameter $value with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:85:Method App\Models\SettingsModel::getBillingSettings() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/SettingsModel.php:90:Method App\Models\SettingsModel::updateBillingSettings() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskAssignmentModel.php:19:Method App\Models\TaskAssignmentModel::findByTask() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskAssignmentModel.php:51:Method App\Models\TaskAssignmentModel::getParticipants() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskAssignmentModel.php:69:Method App\Models\TaskAssignmentModel::getTaskParticipants() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskAssignmentModel.php:102:Method App\Models\TaskAssignmentModel::createReport() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:39:Method App\Models\TaskModel::findById() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:50:Method App\Models\TaskModel::canBeClosed() has parameter $task with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:70:Method App\Models\TaskModel::canBeDone() has parameter $stats with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:75:Method App\Models\TaskModel::canBeCancelled() has parameter $stats with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:135:Method App\Models\TaskModel::getOpenTasksByTeam() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:157:Method App\Models\TaskModel::forIndex() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:327:Method App\Models\TaskModel::forWorkOrderWithStats() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:394:Method App\Models\TaskModel::statsForWorkOrder() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:421:Method App\Models\TaskModel::statsForTasks() has parameter $taskIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:421:Method App\Models\TaskModel::statsForTasks() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:492:Method App\Models\TaskModel::findByIds() has parameter $ids with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:492:Method App\Models\TaskModel::findByIds() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:515:Method App\Models\TaskModel::filter() has parameter $filters with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:515:Method App\Models\TaskModel::filter() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:549:Method App\Models\TaskModel::filterArchive() has parameter $filters with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TaskModel.php:549:Method App\Models\TaskModel::filterArchive() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamMembership.php:125:Method App\Models\TeamMembership::activeTeamsByUsers() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamMembership.php:181:Method App\Models\TeamMembership::activeTeamIdsForUser() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:20:Method App\Models\TeamModel::all() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:28:Method App\Models\TeamModel::find() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:46:Method App\Models\TeamModel::byActive() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:65:Method App\Models\TeamModel::getColorsByIds() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:65:Method App\Models\TeamModel::getColorsByIds() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:109:Method App\Models\TeamModel::getActiveMembers() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:122:Method App\Models\TeamModel::getColorsAndNamesByIds() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:122:Method App\Models\TeamModel::getColorsAndNamesByIds() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TeamModel.php:160:Method App\Models\TeamModel::getAllActive() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TokenModel.php:59:Method App\Models\TokenModel::findValidByHash() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TokenModel.php:82:Method App\Models\TokenModel::findValidByHashForUpdate() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/TokenModel.php:233:Method App\Models\TokenModel::createToken() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/UserModel.php:20:Method App\Models\UserModel::findByEmail() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/UserModel.php:83:Method App\Models\UserModel::activateUser() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/UserModel.php:119:Method App\Models\UserModel::findByEmailAndCompany() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/UserModel.php:142:Method App\Models\UserModel::availableForTeam() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/UserModel.php:172:Method App\Models\UserModel::findByIdWithoutTenant() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/UserModel.php:181:Method App\Models\UserModel::findByCompanyIdGlobal() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:18:Method App\Models\WorkOrderModel::forIndex() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:179:Method App\Models\WorkOrderModel::canAddTask() has parameter $order with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:185:Method App\Models\WorkOrderModel::canBeCancelled() has parameter $order with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:185:Method App\Models\WorkOrderModel::canBeCancelled() has parameter $taskStats with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:194:Method App\Models\WorkOrderModel::canBeDone() has parameter $order with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:194:Method App\Models\WorkOrderModel::canBeDone() has parameter $taskStats with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:204:Method App\Models\WorkOrderModel::getNamesByIds() has parameter $ids with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:204:Method App\Models\WorkOrderModel::getNamesByIds() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:264:Method App\Models\WorkOrderModel::createWithSequence() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:276:Method App\Models\WorkOrderModel::filterArchive() has parameter $filters with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkOrderModel.php:276:Method App\Models\WorkOrderModel::filterArchive() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:15:Method App\Models\WorkbenchModel::forIndex() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:49:Method App\Models\WorkbenchModel::myTeams() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:84:Method App\Models\WorkbenchModel::otherTeams() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:84:Method App\Models\WorkbenchModel::otherTeams() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:116:Method App\Models\WorkbenchModel::openTasksForMyTeams() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:116:Method App\Models\WorkbenchModel::openTasksForMyTeams() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:180:Method App\Models\WorkbenchModel::openTasksForOtherTeams() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:180:Method App\Models\WorkbenchModel::openTasksForOtherTeams() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:246:Method App\Models\WorkbenchModel::myReadyToDoneTasks() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:246:Method App\Models\WorkbenchModel::myReadyToDoneTasks() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:285:Method App\Models\WorkbenchModel::otherReadyToDoneTasks() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:285:Method App\Models\WorkbenchModel::otherReadyToDoneTasks() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:337:Method App\Models\WorkbenchModel::myReadyToCancelTasks() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:337:Method App\Models\WorkbenchModel::myReadyToCancelTasks() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:432:Method App\Models\WorkbenchModel::myOrdersInProgress() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:450:Method App\Models\WorkbenchModel::otherOrdersInProgress() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:470:Method App\Models\WorkbenchModel::getTasksForOrders() has parameter $orderIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:470:Method App\Models\WorkbenchModel::getTasksForOrders() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:492:Method App\Models\WorkbenchModel::myInvoiceToReady() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:492:Method App\Models\WorkbenchModel::myInvoiceToReady() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:568:Method App\Models\WorkbenchModel::otherInvoiceToReady() has parameter $teamIds with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Models/WorkbenchModel.php:568:Method App\Models\WorkbenchModel::otherInvoiceToReady() return type has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:39:PHPDoc tag @var above a method has no effect.
+/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:65:PHPDoc tag @var above a method has no effect.
+/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:77:PHPDoc tag @var above a method has no effect.
+/var/www/servisni-zapisnik/app/Models/RecurringRunnerModel.php:103:PHPDoc tag @var above a method has no effect.
+/var/www/servisni-zapisnik/app/Models/RegistrationRequestModel.php:20:PHPDoc tag @return with type int is incompatible with native type void.
+/var/www/servisni-zapisnik/app/Models/RegistrationRequestModel.php:59:PHPDoc tag @param for parameter $id with type App\Models\id is incompatible with native type int.
+/var/www/servisni-zapisnik/app/Models/RegistrationRequestModel.php:59:Parameter $id of method App\Models\RegistrationRequestModel::deleteById() has invalid type App\Models\id.
+/var/www/servisni-zapisnik/app/Models/TeamModel.php:143:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:16:Method App\Services\Invoice\InvoiceService::requireTaskForInvoice() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:56:Method App\Services\Invoice\InvoiceService::buildDraftFromTask() return type has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:111:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:130:Method App\Services\Invoice\InvoiceService::buildDraftFromWorkOrder() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:145:Method App\Services\Invoice\InvoiceService::invoiceFromTask() has parameter $post with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Invoice/InvoiceService.php:145:Method App\Services\Invoice\InvoiceService::invoiceFromTask() return type has no value type specified in iterable type array.
@@ -279,9 +78,136 @@
 /var/www/servisni-zapisnik/app/Services/WorkOrders/WorkOrderNumberFormatter.php:10:Property App\Services\WorkOrders\WorkOrderNumberFormatter::$allowed type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/WorkOrders/WorkOrderNumberFormatter.php:15:Method App\Services\WorkOrders\WorkOrderNumberFormatter::format() has parameter $data with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/WorkOrders/WorkOrderNumberService.php:15:Method App\Services\WorkOrders\WorkOrderNumberService::generateAndCreate() has parameter $data with no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Views/admin/audit/detail.php:13:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/admin/audit/index.php:41:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:45:Offset 'WOStatus' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:46:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:49:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:64:Offset 'allReportsParticipants' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:71:Offset 'allReportsParticipants' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/archive/detailTask.php:78:Offset 'totalKm' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:33:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:44:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:48:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:52:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:56:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:60:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:64:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:69:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:73:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/contacts/index.php:82:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/exports/data/_filters.php:10:PHPDoc tag @var for variable $teams has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Views/exports/data/_filters.php:27:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/exports/data/taskExports.php:7:PHPDoc tag @var for variable $tasks has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Views/exports/data/taskExports.php:44:Offset 'title' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/exports/data/taskExports.php:48:Offset 'team_name' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/exports/data/taskExports.php:50:Offset 'status' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/exports/data/taskExports.php:55:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/layout/header.php:103:Offset 'items' on array{label: string, path: string, method: string, active: bool, items: array<int, array{label: string, path: string, active: bool}>} in isset() always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/layout/header.php:107:Ternary operator condition is always true.
+/var/www/servisni-zapisnik/app/Views/layout/header.php:118:Right side of && is always true.
 /var/www/servisni-zapisnik/app/Views/tasks/create.php:14:PHPDoc tag @var for variable $tasks has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Views/tasks/create.php:76:Offset 'name' on array{id: int, company_id: int, name: string, color: string, active: int, created_at: string} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/tasks/create.php:101:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/tasks/edit.php:15:PHPDoc tag @var for variable $tasks has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Views/tasks/edit.php:86:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/edit.php:109:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/edit.php:129:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/index.php:31:Offset 'team_color' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/tasks/index.php:37:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/index.php:50:Strict comparison using !== between int and null will always evaluate to true.
+/var/www/servisni-zapisnik/app/Views/tasks/index.php:54:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/index.php:55:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/index.php:75:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/index.php:93:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/index.php:100:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/tasks/recurring.php:17:PHPDoc tag @var for variable $tasks has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Views/tasks/recurring.php:28:Only booleans are allowed in a negated boolean, mixed given.
+/var/www/servisni-zapisnik/app/Views/tasks/recurring.php:102:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/tasks/recurring.php:126:Offset 'count_instances' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/tasks/recurringDetail.php:42:Only booleans are allowed in an if condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/tasks/recurringDetail.php:91:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/recurringDetail.php:135:Only booleans are allowed in an if condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/tasks/recurringDetail.php:155:Only booleans are allowed in a negated boolean, mixed given.
+/var/www/servisni-zapisnik/app/Views/tasks/report.php:52:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/report.php:53:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/tasks/report.php:56:Offset 'canUserAddReport' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/tasks/report.php:70:Right side of && is always true.
+/var/www/servisni-zapisnik/app/Views/tasks/report.php:115:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/tasks/report.php:125:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/tasks/report.php:156:Argument of an invalid type string supplied for foreach, only iterables are supported.
+/var/www/servisni-zapisnik/app/Views/teams/edit.php:100:Offset 'membership_id' does not exist on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...}.
+/var/www/servisni-zapisnik/app/Views/teams/edit.php:106:Offset 'role_in_team' does not exist on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...}.
+/var/www/servisni-zapisnik/app/Views/teams/edit.php:123:Offset 'membership_id' does not exist on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...}.
+/var/www/servisni-zapisnik/app/Views/teams/edit.php:151:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/teams/index.php:49:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/teams/index.php:54:Only booleans are allowed in a ternary operator condition, int given.
+/var/www/servisni-zapisnik/app/Views/teams/index.php:55:Only booleans are allowed in a ternary operator condition, int given.
+/var/www/servisni-zapisnik/app/Views/teams/index.php:66:Offset 'members' does not exist on array{id: int, company_id: int, name: string, color: string, active: int, created_at: string}.
+/var/www/servisni-zapisnik/app/Views/teams/index.php:75:Offset 'name' does not exist on int|string.
+/var/www/servisni-zapisnik/app/Views/teams/index.php:76:Offset 'color' does not exist on int|string.
+/var/www/servisni-zapisnik/app/Views/teams/index.php:103:Only booleans are allowed in a ternary operator condition, int given.
+/var/www/servisni-zapisnik/app/Views/teams/index.php:106:Only booleans are allowed in a ternary operator condition, int given.
+/var/www/servisni-zapisnik/app/Views/users/detail.php:20:Offset 'first_name' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/users/detail.php:20:Offset 'last_name' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/users/detail.php:68:Strict comparison using !== between string and null will always evaluate to true.
+/var/www/servisni-zapisnik/app/Views/users/detail.php:79:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/users/detail.php:82:Strict comparison using === between string and null will always evaluate to false.
+/var/www/servisni-zapisnik/app/Views/users/detail.php:91:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/users/index.php:31:Offset 'first_name' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/users/index.php:31:Offset 'last_name' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/users/index.php:38:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/users/index.php:46:Offset 'telefon' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/users/index.php:51:Offset 'employee_number' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/users/index.php:55:Offset 'global_role' on array{id: int, company_id: int, email: string, employee_number: string, telefon: string, password_hash: string, first_name: string, last_name: string, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/users/index.php:61:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/users/index.php:62:Casting to int something that's already int.
 /var/www/servisni-zapisnik/app/Views/work_orders/detail.php:22:PHPDoc tag @var for variable $tasks has no value type specified in iterable type array.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:54:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:64:Offset 'company_name' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:90:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:97:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:104:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:111:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:128:Offset 'total_tasks_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:135:Offset 'open_tasks_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:142:Offset 'done_tasks_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:149:Offset 'cancelled_tasks_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:156:Offset 'report_count' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:170:Offset 'total_time' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:201:Offset 'ready_for_done' does not exist on array{id: int, company_id: int, parent_id: int|null, external_number: string|null, title: string, description: string, wo_due_date: string|null, source: string, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:376:Offset 'can_close' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:377:Offset 'can_cancel' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:384:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:411:Offset 'title' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? always exists and is not nullable.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:425:Only booleans are allowed in an if condition, string|null given.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:464:Only booleans are allowed in a ternary operator condition, string|null given.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:480:Offset 'stats' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:494:Offset 'recurring_frequency_type' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:495:Offset 'recurring_frequency_value' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:501:Offset 'recurring_next_due_date' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:507:Offset 'recurring_warning_days_before' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:511:Offset 'recurring_active' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:524:Offset 'stats' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? does not exist.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:533:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:533:Offset 'stats' on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...} on left side of ?? does not exist.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:612:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:645:Offset 'can_cancel' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/detail.php:677:Offset 'can_close' does not exist on array{id: int, company_id: int, team_id: int, work_order_id: int, due_date: string|null, task_type: string, recurring_task_id: int|null, generated_date: string|null, ...}.
+/var/www/servisni-zapisnik/app/Views/work_orders/index.php:32:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/index.php:58:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/index.php:74:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/index.php:86:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/work_orders/index.php:90:Only booleans are allowed in a ternary operator condition, string given.
+/var/www/servisni-zapisnik/app/Views/work_orders/index.php:98:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/work_orders/index.php:103:Casting to int something that's already int.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/my_invoice_ready.php:29:Only booleans are allowed in a negated boolean, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/my_invoice_ready.php:29:Only booleans are allowed in a negated boolean, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/my_invoice_ready.php:58:Only booleans are allowed in an if condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/my_invoice_ready.php:61:Only booleans are allowed in an elseif condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/my_prepare_to_cancel.php:84:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/my_prepare_to_cancel.php:85:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/my_prepare_to_done.php:77:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/my_prepare_to_done.php:78:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/other_prepare_to_done.php:78:Only booleans are allowed in a ternary operator condition, mixed given.
+/var/www/servisni-zapisnik/app/Views/workbench/partials/other_prepare_to_done.php:79:Only booleans are allowed in a ternary operator condition, mixed given.

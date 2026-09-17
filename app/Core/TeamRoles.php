@@ -9,11 +9,12 @@ namespace App\Core;
  *
  * Třída zajišťuje, že konfigurace rolí je vždy validní a konzistentní.
  * Používá lazy loading konfigurace s jednorázovou validací.
+ * @phpstan-import-type MenuRouteRow from Types
  */
 final class TeamRoles
 {
     /**
-     * @var array|null Cache načtené a validované konfigurace rolí
+     * @var array<string, mixed>|null Cache načtené a validované konfigurace rolí
      */
     private static ?array $config = null;
 
@@ -30,7 +31,7 @@ final class TeamRoles
      * TODO: [FEATURE] Přidat podporu pro hierarchii rolí s validací cyklů
      *
      * @throws \RuntimeException Pokud je konfigurace neplatná
-     * @return array Validovaná konfigurace rolí
+     * @return array<string, mixed> Validovaná konfigurace rolí
      */
     private static function config(): array
     {
@@ -58,7 +59,7 @@ final class TeamRoles
      * TODO: [PERFORMANCE] Zvážit vrácení kopie pole pro prevenci modifikací
      * TODO: [FEATURE] Přidat metodu pro získání rolí seřazených podle priority/úrovně
      *
-     * @return array Asociativní pole rolí [role_key => role_label]
+     * @return array<string, mixed> Asociativní pole rolí [role_key => role_label]
      */
     public static function all(): array
     {

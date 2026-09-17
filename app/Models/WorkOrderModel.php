@@ -14,7 +14,9 @@ class WorkOrderModel extends BaseModel
     protected string $table = 'work_orders';
     protected string $connection = 'admin';
 
-
+/**
+ * @return array<int, array<string, mixed>>
+ */
 public function forIndex(): array
 {
     $companyId = Auth::companyId();
@@ -170,18 +172,21 @@ $params = [
     }
 
 
-/*
-public function isClosed(array $order): bool
-{
-    return in_array($order['status'], ['done', 'cancelled', 'exported'], true);
-}
-    */
+    /**
+     * @param array<string, mixed> $order
+     * @return bool
+     */
     public function canAddTask(array $order): bool
     {
         // return !$this->isClosed($order);
         return WOStatus::isOpen($order['status']);
     }
 
+    /**
+     * @param array<string, mixed> $order
+     * @param array<string, mixed> $taskStats
+     * @return bool
+     */
     public function canBeCancelled(array $order, array $taskStats): bool
     {
         return
@@ -191,6 +196,11 @@ public function isClosed(array $order): bool
             && $taskStats['done'] === 0;
     }
 
+    /**
+     * @param array<string, mixed> $order
+     * @param array<string, mixed> $taskStats
+     * @return bool
+     */
     public function canBeDone(array $order, array $taskStats): bool
     {
         return
@@ -200,7 +210,10 @@ public function isClosed(array $order): bool
             && $taskStats['done'] > 0;
     }
 
-
+    /**
+     * @param array<int, int> $ids
+     * @return array<int, array<string, mixed>>
+     */
     public function getNamesByIds(array $ids): array
     {
         if ($ids === []) {
@@ -214,7 +227,7 @@ public function isClosed(array $order): bool
         foreach ($ids as $i => $id) {
             $key = "id_$i";
             $placeholders[] = ":$key";
-            $params[$key] = (int) $id; // Parametry pro ID
+            $params[$key] = $id; // Parametry pro ID
         }
 
         // Přidáme company_id do parametrů
@@ -241,7 +254,11 @@ public function isClosed(array $order): bool
         return $result;
     }
 
-
+    /**
+     * Uzavře zakázku jako hotovou
+     * @param int $orderId
+     * @return bool
+     */
     public function closeAsDone(int $orderId): bool
     {
         return Transaction::run(function () use ($orderId) {
@@ -259,8 +276,12 @@ public function isClosed(array $order): bool
         });
     }
 
-
-
+    /**
+     * vytvoří zakázku vřetně vygenerování interního čísla a roku
+     * @param int $tenantId
+     * @param array<string, mixed> $data
+     * @return int
+     */
     public function createWithSequence(int $tenantId, array $data): int
     {
         $year = (int) date('Y');
@@ -272,7 +293,11 @@ public function isClosed(array $order): bool
         return $this->createWithTenant($tenantId, $data);
     }
 
-
+    /**
+     * Vrátí seznam zakázek podle filtrů
+     * @param array<string, mixed> $filters
+     * @return array<int, array<string, mixed>>
+     */
     public function filterArchive(array $filters): array
     {
         $sql = "SELECT * FROM {$this->tableName} WHERE company_id = ?";

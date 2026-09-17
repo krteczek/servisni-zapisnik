@@ -4,6 +4,7 @@ namespace App\Core;
 
 use App\Models\UserModel;
 use DomainException;
+use App\Core\Types;
 
 /**
  * Centrální autentizační a autorizační služba.
@@ -11,6 +12,8 @@ use DomainException;
  *
  * Třída je navržena jako statická služba pro snadný přístup k uživatelským datům
  * v celé aplikaci. Implementuje caching uživatelských dat a podporuje role-switching.
+ * @phpstan-import-type UserRow from Types
+ * @phpstan-import-type SessionUserRow from Types
  */
 class Auth
 {
@@ -22,8 +25,7 @@ class Auth
     /** 
      * Cache načteného uživatele z databáze.
      * Zabránění opakovaným dotazům v rámci jednoho requestu.
-     *
-     * @var array|null
+     * @var UserRow|null
      */
     private static ?array $cachedUser = null;
 
@@ -45,17 +47,17 @@ class Auth
      *
      * @return bool TRUE pokud je uživatel přihlášen, jinak FALSE
      */
-public static function check(): bool
-{
-    Session::start();
+    public static function check(): bool
+    {
+        Session::start();
 
-    $id = Session::get(self::USER_KEY . '.id');
-    if (!is_int($id) && !ctype_digit((string)$id)) {
-        return false;
+        $id = Session::get(self::USER_KEY . '.id');
+        if (!is_int($id) && !ctype_digit((string)$id)) {
+            return false;
+        }
+
+        return true;
     }
-
-    return true;
-}
 
 
     /**
@@ -114,9 +116,8 @@ public static function check(): bool
      * TODO: [PERFORMANCE] Přidat cache TTL pro uživatelská data (např. 5 minut)
      * TODO: [SECURITY] Při změně role/oprávnění invalidovat cache
      *
-     * @return array|null Data uživatele nebo null pokud není přihlášen
+     * @return UserRow|null Data uživatele nebo null pokud není přihlášen
      */
-
     public static function user(): ?array
     {
         if (!self::check()) {
@@ -160,7 +161,7 @@ public static function check(): bool
              return null;
         }
 
-        $name = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+        $name = trim($user['first_name'] . ' ' . $user['last_name']);
         return $name !== '' ? $name : null;
     }
 
@@ -218,7 +219,7 @@ public static function check(): bool
      * Ověří, zda má uživatel některou z požadovaných rolí.
      * Bere v úvahu effective role (role-switching pro adminy).
      *
-     * @param array $roles Pole rolí k ověření
+     * @param array<int, string> $roles Pole rolí k ověření
      * @return bool TRUE pokud má uživatel některou z požadovaných rolí
      */
     public static function hasRole(array $roles): bool
@@ -240,7 +241,7 @@ public static function check(): bool
      * TODO: [SECURITY] Přidat logování úspěšných přihlášení
      * TODO: [FEATURE] Přidat možnost "zapamatovat si mě" s dlouhodobou session
      *
-     * @param array $userData Data uživatele z databáze
+     * @param SessionUserRow $userData
      * @return void
      */
     public static function login(array $userData): void
@@ -303,7 +304,7 @@ public static function check(): bool
         }
     }
 
-    return $user['global_role'] ?? 'guest';
+    return $user['global_role'];
 }
 
 
@@ -311,7 +312,7 @@ public static function check(): bool
      * Ověří, zda má uživatel globální roli (bez ohledu na role-switching).
      * Vhodné pro kontrolu skutečných oprávnění.
      *
-     * @param array $roles Pole globálních rolí k ověření
+     * @param array<int, string> $roles Pole globálních rolí k ověření
      * @return bool TRUE pokud má uživatel některou z požadovaných globálních rolí
      */
     public static function hasGlobalRole(array $roles): bool
@@ -402,6 +403,6 @@ public static function check(): bool
             throw new DomainException('Neplatná role');
         }
 
-        Session::set('auth.effective_role', $role);
+        Session::set('auth.effective_role', $role); 
     }
 }

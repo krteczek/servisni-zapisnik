@@ -7,7 +7,7 @@ use Throwable;
 
 class DatabaseScope
 {
-    public static function work(string $dbName, callable $callback)
+    public static function work(string $dbName, callable $callback): mixed
     {
         $previous = Database::getCurrentDatabase();
 
@@ -21,7 +21,7 @@ class DatabaseScope
         }
     }
 
-    public static function admin(callable $callback)
+    public static function admin(callable $callback): mixed
     {
         $previous = Database::getCurrentDatabase();
 

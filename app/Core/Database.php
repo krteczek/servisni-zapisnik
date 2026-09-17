@@ -192,7 +192,7 @@ final class Database
      * TODO: [PERFORMANCE] Přidat PDO::MYSQL_ATTR_USE_BUFFERED_QUERY pro velké výsledky
      * TODO: [RELIABILITY] Přidat PDO::ATTR_TIMEOUT pro prevenci nekonečného čekání
      *
-     * @return array PDO options
+     * @return array<int, mixed>
      */
     private static function options(): array
     {
