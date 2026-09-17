@@ -24,7 +24,7 @@ final class AuditLogModel extends BaseModel
     /**
      * Uloží auditní záznam do log souboru na disku a do DB.
      *
-     * @param array $data
+     * @param array<string, mixed> $data
      * @return int ID záznamu
      */
     public function insertLog(array $data): int
@@ -45,10 +45,10 @@ final class AuditLogModel extends BaseModel
      * - user_agent
      * - from (YYYY-MM-DD)
      * - to   (YYYY-MM-DD)
-     *
-     * @param array $filters
+     * 
+     * @param array<string, mixed> $filters
      * @param int $limit
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function findByFilters(array $filters, int $limit = 100): array
     {
@@ -103,11 +103,11 @@ final class AuditLogModel extends BaseModel
 
     /**
      * Najde poslední záznamy pro konkrétní entitu.
-     *
+     * 
      * @param string $entity
      * @param int|string $entityId
      * @param int $limit
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function findByEntity(string $entity, int|string $entityId, int $limit = 20): array
     {
@@ -132,7 +132,7 @@ final class AuditLogModel extends BaseModel
      *
      * @param int $userId
      * @param int $limit
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function findByUser(int $userId, int $limit = 50): array
     {

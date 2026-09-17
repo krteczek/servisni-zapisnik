@@ -42,27 +42,31 @@ class TeamModel extends BaseModel
 
     /**
      * Vrátí týmy podle aktivního stavu
+     * @param bool $active
+     * @return array<int, array<string, mixed>>
      */
-public function byActive(bool $active): array
-{
-    $sql = "
-        SELECT *
-        FROM {$this->tableName}
-        WHERE active = :active
-          AND {$this->tenantColumn} = :{$this->tenantColumn}
-        ORDER BY name
-    ";
+    public function byActive(bool $active): array
+    {
+        $sql = "
+            SELECT *
+            FROM {$this->tableName}
+            WHERE active = :active
+            AND {$this->tenantColumn} = :{$this->tenantColumn}
+            ORDER BY name
+        ";
 
-    return $this->fetchAll($sql, [
-        'active' => $active ? 1 : 0,
-        $this->tenantColumn => $this->tenantId(),
-    ]);
-}
+        return $this->fetchAll($sql, [
+            'active' => $active ? 1 : 0,
+            $this->tenantColumn => $this->tenantId(),
+        ]);
+    }
 
     /**
      * Vrátí barvy týmů podle ID (tenant-aware!)
+     * @param array<int, int> $teamIds
+     * @return array<int, array<string, mixed>>
      */
-    public function getColorsByIds(array $teamIds): array
+        public function getColorsByIds(array $teamIds): array
     {
         $teamIds = array_values(array_unique(
             array_filter(
@@ -105,6 +109,8 @@ public function byActive(bool $active): array
     
     /**
      * Vrátí aktivní členy týmu (kteří mají platné členství)
+     * @param int $teamId
+     * @return array<int, array<string, mixed>>
      */
     public function getActiveMembers(int $teamId): array
     {
@@ -118,6 +124,9 @@ public function byActive(bool $active): array
 
     /**
      * Vrátí názvy a barvy týmů podle ID
+     * 
+     * @param array<int, int> $teamIds
+     * @return array<int, array<string, mixed>>
      */
     public function getColorsAndNamesByIds(array $teamIds): array
     {
@@ -156,6 +165,7 @@ public function byActive(bool $active): array
     
     /**
      * Vrátí všechny aktivní týmy firmy
+     * @return array<int, array<string, mixed>>
      */
     public function getAllActive(): array
     {
@@ -172,8 +182,7 @@ public function byActive(bool $active): array
         ]);
     }
 
-
-    protected function tenantWhere(string $alias = ''): string
+     protected function tenantWhere(string $alias = ''): string
     {
         throw new LogicException('Nepoužívej tenantWhere(), použij explicitní podmínku.');
     }

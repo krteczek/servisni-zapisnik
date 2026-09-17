@@ -17,9 +17,14 @@ final class Roles
     private const ROLE_MISTR = 'mistr';
     //private const ROLE_PREDAK  = 'predak';
     //private const ROLE_MONTER  = 'monter';
-
+    /**
+     * @var array<string, mixed>|null Cache načtené konfigurace rolí
+     */
     private static ?array $roles = null;
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function all(): array
     {
         if (self::$roles === null) {
@@ -86,12 +91,14 @@ final class Roles
     {
         return self::isManagement($role);
     }
-
+    /**
+     * @return array<string, mixed>
+     */
     public static function effective(): array
-{
-    $roles = self::all();
-    unset($roles[self::ROLE_ROOT]);
+    {
+        $roles = self::all();
+        unset($roles[self::ROLE_ROOT]);
 
-    return $roles;
-}
+        return $roles;
+    }
 }

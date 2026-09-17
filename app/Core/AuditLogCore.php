@@ -35,7 +35,7 @@ final class AuditLogCore
      * @param string $entity Typ entity (např. 'user', 'team', 'order')
      * @param int|string|null $entityId ID entity nebo null pro entitu bez ID
      * @param string $action Provedená akce (např. 'create', 'update', 'delete', 'login', 'logout')
-     * @param array $diff Pole změn ve formátu ['field' => ['old' => '...', 'new' => '...']]
+     * @param array<string, mixed> $diff Pole změn ve formátu ['field' => ['old' => '...', 'new' => '...']]
      * @return void
      */
     public static function log(

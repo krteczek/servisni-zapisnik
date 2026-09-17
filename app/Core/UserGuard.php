@@ -23,7 +23,7 @@ final class UserGuard
      * TODO: [SECURITY] Root by neměl mít přístup k běžným tenant datům pro izolaci
      * TODO: [AUDIT] Přidat logování všech akcí provedených root uživatelem
      *
-     * @param array $user Data uživatele z databáze
+     * @param array<string, mixed> $user Data uživatele z databáze
      * @return bool TRUE pokud je uživatel root administrátor
      */
     public static function isRoot(array $user): bool
@@ -42,7 +42,7 @@ final class UserGuard
      * TODO: [FEATURE] Přidat podporu pro multi-domain admin (více tenantů)
      * TODO: [BUSINESS] Zvážit hierarchii admin -> domain admin -> manager
      *
-     * @param array $user Data uživatele z databáze
+     * @param array<string, mixed> $user Data uživatele z databáze
      * @return bool TRUE pokud je uživatel domain admin
      */
     public static function isDomainAdmin(array $user): bool
@@ -57,7 +57,7 @@ final class UserGuard
      * TODO: [SECURITY] Přidat separátní ochranu pro root a domain admin (různé úrovně)
      * TODO: [AUDIT] Logovat všechny pokusy o změnu chráněných účtů
      *
-     * @param array $user Data uživatele z databáze
+     * @param array<string, mixed> $user Data uživatele z databáze
      * @return bool TRUE pokud je uživatel chráněný (root nebo domain admin)
      */
     public static function isProtected(array $user): bool

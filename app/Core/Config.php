@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use RuntimeException;
+use RuntimeException; 
 
 
 /**
@@ -15,7 +15,7 @@ use RuntimeException;
 final class Config
 {
     /**
-     * @var array Cache načtených konfiguračních souborů [filename => data]
+     * @var array<string, array<string, mixed>> Cache načtených konfiguračních souborů [filename => data]
      */
     private static array $cache = [];
 
@@ -77,8 +77,7 @@ public static function get(string $key, mixed $default = null): mixed
      * TODO: [SECURITY] Přidat sanitizaci názvu souboru pro prevenci path traversal
      * TODO: [MAINTENANCE] Zvážit podporu pro složitější cesty (např. s čísly)
      *
-     * @param string $key Klíč v dot notation
-     * @return array Pole obsahující [název_souboru, pole_cesty]
+     * @return array{0: string, 1: array<int, string>} Klíč v dot notation Pole obsahující [název_souboru, pole_cesty]
      */
     private static function parseKey(string $key): array
     {

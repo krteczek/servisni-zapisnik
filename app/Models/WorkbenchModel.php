@@ -6,16 +6,23 @@ namespace App\Models;
 use App\Core\Auth;
 use App\Services\Tasks\TaskType;
 
+/**
+ * Model pro práci s daty na Workbenchi
+ */
 class WorkbenchModel extends BaseModel
 {
     protected string $table = 'tasks';
     protected string $connection = 'admin';
     protected bool $tenantAware = true;
-    
+ 
+    /**
+     * @return array<string, array<int, array<string, mixed>>>
+     */
     public function forIndex(): array
     {
         $myTeams = $this->myTeams();
-        $teamIds = array_column($myTeams, 'id');
+        //$teamIds = array_column($myTeams, 'id');
+        $teamIds = array_map('intval', array_column($myTeams, 'id'));
         
         return [
             'myTeams'                   => $myTeams,
@@ -45,7 +52,9 @@ class WorkbenchModel extends BaseModel
             //
         ];
     }
-
+/**
+ * @return array<int, array<string, mixed>>
+ */
 private function myTeams(): array
 {
     $sql = "SELECT DISTINCT
@@ -81,6 +90,10 @@ private function myTeams(): array
     ]);
 }
 
+/**
+ * @param array<int, int> $teamIds
+ * @return array<int, array<string, mixed>>
+ */
 private function otherTeams(array $teamIds): array
 {
     $sql = 
@@ -112,7 +125,10 @@ private function otherTeams(array $teamIds): array
     return $this->fetchAll($sql, $params);
 }
 
-
+/**
+ * @param array<int, int> $teamIds
+ * @return array<int, array<string, mixed>>
+ */
 private function openTasksForMyTeams(array $teamIds): array
 {
     if ($teamIds === []) {
@@ -176,7 +192,10 @@ private function openTasksForMyTeams(array $teamIds): array
     );
 }
 
-
+/**
+ * @param array<int, int> $teamIds
+ * @return array<int, array<string, mixed>>
+ */
 private function openTasksForOtherTeams(array $teamIds): array
 {
     $sql = "SELECT
@@ -242,7 +261,10 @@ private function openTasksForOtherTeams(array $teamIds): array
     return $this->fetchAll($sql, $params);
 }
 
-
+    /**
+     * @param array<int, int> $teamIds
+     * @return array<int, array<string, mixed>>
+     */
     private function myReadyToDoneTasks(array $teamIds): array
     {
         if ($teamIds === []) {
@@ -282,6 +304,10 @@ private function openTasksForOtherTeams(array $teamIds): array
             return $this->fetchAll($sql, array_merge([Auth::companyId()], $teamIds));
     }
 
+    /**
+     * @param array<int, int> $teamIds
+     * @return array<int, array<string, mixed>>
+     */
     private function otherReadyToDoneTasks(array $teamIds): array
     {
 
@@ -334,6 +360,10 @@ private function openTasksForOtherTeams(array $teamIds): array
 
     }
 
+    /**
+     * @param array<int, int> $teamIds
+     * @return array<int, array<string, mixed>>
+     */
 private function myReadyToCancelTasks(array $teamIds): array
 {
     $sql =
@@ -429,6 +459,9 @@ private function myReadyToDoneOrders(): array
     }
 */
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
 private function myOrdersInProgress(): array
 {
     return $this->fetchAll(
@@ -447,6 +480,9 @@ private function myOrdersInProgress(): array
     );
 }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
 private function otherOrdersInProgress(): array
 {
      return $this->fetchAll(
@@ -467,6 +503,10 @@ private function otherOrdersInProgress(): array
 
 }
 
+    /**
+     * @param array<int, int> $orderIds
+     * @return array<int, array<string, mixed>>
+     */
     public function getTasksForOrders(array $orderIds): array
     {
         if ($orderIds === []) {
@@ -489,6 +529,10 @@ private function otherOrdersInProgress(): array
         );
     }
 
+/**
+ * @param array<int, int> $teamIds
+ * @return array<int, array<string, mixed>>
+ */
 private function myInvoiceToReady(array $teamIds): array
 {
     if ($teamIds ===[]) {
@@ -565,6 +609,10 @@ ORDER BY t.done_at ASC";
     );
 }
 
+/**
+ * @param array<int, int> $teamIds
+ * @return array<int, array<string, mixed>>
+ */
 private function otherInvoiceToReady(array $teamIds): array
 {
     if ($teamIds ===[]) {

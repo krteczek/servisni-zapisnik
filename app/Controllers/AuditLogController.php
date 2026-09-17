@@ -32,7 +32,7 @@ class AuditLogController extends Controller
 
         $logs = (new AuditLogModel())->findByFilters($filters);
 
-        $this->view->data    = $logs;
+        $this->view->logs    = $logs;
         $this->view->filters = $filters;
 
         return $this->render('admin/audit/index');
@@ -54,7 +54,7 @@ class AuditLogController extends Controller
             Url::redirect('/admin/audit/#main');
         }
 
-        $this->view->logs = $log;
+        $this->view->log = $log;
 
         return $this->render('admin/audit/detail');
     }

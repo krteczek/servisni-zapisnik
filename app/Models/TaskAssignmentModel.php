@@ -15,6 +15,9 @@ final class TaskAssignmentModel extends BaseModel
 
     /**
      * Najde všechny reporty pro task (s účastníky)
+     * 
+     * @param int $taskId
+     * @return array<int, array<string, mixed>>
      */
     public function findByTask(int $taskId): array
     {
@@ -47,6 +50,8 @@ final class TaskAssignmentModel extends BaseModel
 
     /**
      * Načte účastníky pro konkrétní report
+     * @param int $assignmentId
+     * @return array<int, array<string, mixed>>
      */
     private function getParticipants(int $assignmentId): array 
     {
@@ -64,8 +69,10 @@ final class TaskAssignmentModel extends BaseModel
     }
    /**
      * Načte účastníky všech reportů daného úkolu a spočítá jim čas strávený na úkole
+     *
+     * @param int $taskId
+     * @return array<int, array<string, mixed>>
      */
-
     public function getTaskParticipants(int $taskId): array
     {
         $sql = "
@@ -98,6 +105,10 @@ final class TaskAssignmentModel extends BaseModel
 
     /**
      * Vytvoří nový report i s účastníky
+     * @param int $taskId
+     * @param int $workOrderId
+     * @param array<string, mixed> $data
+     * @return int
      */
     public function createReport(int $taskId, int $workOrderId, array $data): int
     {

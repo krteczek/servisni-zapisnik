@@ -16,7 +16,10 @@ class UserModel extends BaseModel
     /* ==========================================================
      * BASIC
      * ========================================================== */
-
+    /**
+     * @param string $email
+     * @return array<string, mixed>|null
+     */
     public function findByEmail(string $email): ?array
     {
         $sql = "SELECT * FROM {$this->tableName}
@@ -79,8 +82,12 @@ class UserModel extends BaseModel
     /* ==========================================================
      * PASSWORD
      * ========================================================== */
-
-public function activateUser(int $id, string $hash): array
+/**
+ * @param int $id
+ * @param string $hash
+ * @return array<string, mixed>|null
+ */
+public function activateUser(int $id, string $hash): ?array
 {
 	     
     $sql = "
@@ -115,7 +122,12 @@ public function activateUser(int $id, string $hash): array
     }
 
 
-    /* tahle metoda je jen pro přihlášení uživatele, proto email i tenantid */
+    /**
+     * tahle metoda je jen pro přihlášení uživatele, proto email i tenantid 
+     * @param string $email
+     * @param int $companyId
+     * @return array<string, mixed>|null
+     */
 	public function findByEmailAndCompany(
 	    string $email,
 	    int $companyId
@@ -138,7 +150,10 @@ public function activateUser(int $id, string $hash): array
 	    return $stmt->fetch() ?? null;
 	}
 
-
+    /**
+     * @param int $teamId
+     * @return array<int, array<string, mixed>>
+     */
     public function availableForTeam(int $teamId): array
     {
         $teamMembershipsTable = str_replace(
@@ -169,6 +184,10 @@ public function activateUser(int $id, string $hash): array
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @param int $id
+     * @return array<string, mixed>|null
+     */
     public function findByIdWithoutTenant(int $id): ?array
     {
         $sql = "SELECT * FROM {$this->tableName}
@@ -178,6 +197,11 @@ public function activateUser(int $id, string $hash): array
         return $this->fetchOne($sql, ['id' => $id]);
     }
 
+    /**
+     * Vrátí všechny uživatele firmy
+     * @param int $companyId
+     * @return array<int, array<string, mixed>>
+     */
     public function findByCompanyIdGlobal(int $companyId): array
     {
         $sql = "

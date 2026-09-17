@@ -13,6 +13,10 @@ final class RegistrationRequestModel extends BaseModel
     protected bool $tenantAware = false;
     protected string $connection = 'admin';
 
+    /**
+     * @param array<string, mixed> $data
+     * @return int
+     */
     public function upsert(array $data): void
     {
         $sql = "
@@ -31,6 +35,10 @@ final class RegistrationRequestModel extends BaseModel
         $stmt->execute($data);
     }
 
+    /**
+     * @param string $hash
+     * @return array<string, mixed>|null
+     */
     public function findValidByHash(string $hash): ?array
     {
         $sql = "
@@ -44,6 +52,10 @@ final class RegistrationRequestModel extends BaseModel
         return $this->fetchOne($sql, ['hash' => $hash]);
     }
 
+    /**
+     * @param id $id
+     * @return void
+     */
     public function deleteById(int $id): void
     {
         $stmt = $this->db()->prepare(

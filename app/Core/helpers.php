@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Core\Types;
 
 /**
  * Bezpečně escapuje text pro výstup do HTML.
@@ -9,7 +10,7 @@ declare(strict_types=1);
  * TODO: [SECURITY] Zvážit použití HTML Purifier pro povolené HTML tagy
  * TODO: [PERFORMANCE] Přidat caching pro často escapované identické texty
  *
- * @param string|null $value Text k escapování
+ * @param mixed $value Text k escapování
  * @return string Escapovaný text (prázdný string pokud vstup je null)
  */
 function e(mixed $value): string
@@ -19,7 +20,7 @@ function e(mixed $value): string
     }
 
     return htmlspecialchars(
-        $value,
+        (string) $value,
         ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
         'UTF-8'
     );
@@ -76,24 +77,22 @@ function formatMinutes(int $minutes): string
  * TODO: [I18N] Přidat podporu pro další jazyky (anglické, německé měsíce)
  * TODO: [FEATURE] Přidat volbu zahrnutí/vyloučení času
  *
- * @param string $datetime DateTime string (musí být parsovatelný PHP DateTime)
+ * @param string|null $datetime DateTime string (musí být parsovatelný PHP DateTime)
  * @param bool $withTime Zda má vrátit i čas
  * @return string Formátované české datum (s časem, pokud je $withTime true)
  */
 function formatCzDate(?string $datetime, bool $withTime = false): string
 {
-    // pokud je prázdno, null...
-    if ($datetime === "") {
+    if ($datetime === null || $datetime === "") {
         return 'neuvedeno';
     }
 
-    // pokud není validní datum:
     try {
         $dt = new DateTime($datetime);
     } catch (Throwable) {
         return '<span title="Neplatné datum">neuvedeno</span>';
     }
-    // TODO: [MAINTENANCE] Přesunout měsíce do konfigurace nebo separátní třídy
+
     $months = [
         1 => 'ledna',
         2 => 'února',
@@ -124,6 +123,10 @@ function formatCzDate(?string $datetime, bool $withTime = false): string
     );
 }
 
+/**
+ * @param mixed $key
+ * @return string
+ */
 function t(mixed $key): string
 {
     if (!is_string($key)) {
@@ -151,26 +154,27 @@ function t(mixed $key): string
         'email'       => 'Email',
         'personal'    => 'Osobně',
         'exported'    => 'Exportováno',
-            ];
+    ];
 
     $key = strtolower(trim($key));
 
     return e($statuses[$key] ?? $key);
 }
+
+/**
+ * @param mixed $key
+ * @return string
+ */
 function te(mixed $key): string
 {
     return e(t($key));
 }
 
-/*
-	zjištění ip adresy
-	Příklad použití
-	
-	$clientIP = getClientIP();
-	echo "IP adresa klienta: " . htmlspecialchars($clientIP);
-
-*/
-
+/**
+ * Zjistí IP adresu klienta.
+ *
+ * @return string
+ */
 function getClientIP(): string
 {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
@@ -180,33 +184,37 @@ function getClientIP(): string
         : '0.0.0.0';
 }
 
+/**
+ * @param string $ip
+ * @return string
+ */
 function ipToBinary(string $ip): string
 {
     $binary = @inet_pton($ip);
 
-    return $binary !== false ? $binary : inet_pton('0.0.0.0');
+    return $binary !== false ? $binary : (string) inet_pton('0.0.0.0');
 }
 
-
-/*
-	zjištění useragenta adresy
-	Příklad použití
-$userAgent = getClientUserAgent();
-echo "User-Agent: " . $userAgent;
-
-
-*/
+/**
+ * Zjistí user agenta klienta.
+ *
+ * @return string
+ */
 function getClientUserAgent(): string
 {
     if (!isset($_SERVER['HTTP_USER_AGENT'])) {
         return 'Unknown';
     }
 
-    // Omezíme délku kvůli DB a bezpečnosti
     return mb_substr($_SERVER['HTTP_USER_AGENT'], 0, 255);
 }
 
-//používá se při výpisu uživatelů, týmů,
+/**
+ * Vrátí stav uživatele (active/inactive/pending) podle jeho dat.
+ *
+ * @param array<string, mixed> $user
+ * @return string
+ */
 function active(array $user): string
 {
     $passwordHash = $user['password_hash'] ?? null;
@@ -223,15 +231,23 @@ function active(array $user): string
     return 'active';
 }
 
-function a(array $user) : string
+/**
+ * Alias pro active().
+ *
+ * @param array<string, mixed> $user
+ * @return string
+ */
+function a(array $user): string
 {
-   return active($user);
+    return active($user);
 }
 
-
-
-
-
+/**
+ * Zpracuje text přes Texy.
+ *
+ * @param string|int|float|bool|null $text
+ * @return string
+ */
 function tx(string|int|float|bool|null $text): string
 {
     $text = (string) $text;
@@ -248,16 +264,22 @@ function tx(string|int|float|bool|null $text): string
     return $texy->process($text);
 }
 
-
-function checked($value): string
+/**
+ * Vrátí 'checked' pokud je hodnota truthy.
+ *
+ * @param mixed $value
+ * @return string
+ */
+function checked(mixed $value): string
 {
-    return $value ? 'checked' : '';
+    return (bool) $value ? 'checked' : '';
 }
 
 /**
- * @param string|null $dueDate datum ve formátu date
- * return array([$deadlineClass, $deadlineText])
- * @return array{0:string,1:string}
+ * Vrátí deadline class a text pro dané datum.
+ *
+ * @param string|null $dueDate Datum ve formátu date
+ * @return array{0: string, 1: string}
  */
 function deadlineDateHelper(?string $dueDate): array
 {
@@ -266,6 +288,11 @@ function deadlineDateHelper(?string $dueDate): array
 
     if ($dueDate !== null && $dueDate !== '') {
         $timestamp = strtotime($dueDate);
+
+        if ($timestamp === false) {
+            return [$deadlineClass, $deadlineText];
+        }
+
         $today = date('Y-m-d');
         $due   = date('Y-m-d', $timestamp);
 
@@ -278,13 +305,17 @@ function deadlineDateHelper(?string $dueDate): array
         } else {
             $deadlineClass = 'deadline-future';
         }
-        
     }
-    return [$deadlineClass, $deadlineText];
 
+    return [$deadlineClass, $deadlineText];
 }
 
-
+/**
+ * Dump and die.
+ *
+ * @param mixed ...$vars
+ * @return never
+ */
 function dd(mixed ...$vars): never
 {
     echo '<pre style="background:#111;color:#0f0;padding:15px;">';
@@ -299,6 +330,12 @@ function dd(mixed ...$vars): never
     die(1);
 }
 
+/**
+ * Dump and continue.
+ *
+ * @param mixed ...$vars
+ * @return void
+ */
 function dc(mixed ...$vars): void
 {
     echo '<pre style="background:#111;color:#0f0;padding:15px;">';
@@ -309,15 +346,20 @@ function dc(mixed ...$vars): void
     }
 
     echo '</pre>';
-
 }
 
+/**
+ * Vrátí unikátní uživatelská jména z participantů.
+ *
+ * @param array<int, array{user_id?: int, first_name?: string, last_name?: string}> $participants
+ * @return array<int, string>
+ */
 function uniqueUsernames(array $participants): array
 {
     $userNames = [];
 
     foreach ($participants as $participant) {
-        $userId = (int) ($participant['user_id'] ?? 0);
+        $userId = $participant['user_id'] ?? 0;
 
         if ($userId === 0) {
             continue;
@@ -335,16 +377,6 @@ function uniqueUsernames(array $participants): array
 /**
  * Debugovací funkce pro zobrazení struktury ViewContext ve view.
  *
- * Projde VŠECHNY properties objektu $view a pro každou vypíše:
- * - název property a její typ
- * - pokud je to array: počet prvků, jestli je to list, a klíče + typy hodnot
- *
- * Pro vnořené array (list s array prvky) vypíše klíče + typy prvního prvku.
- * Pro asociativní array vypíše klíče + typy všech hodnot.
- *
- * Slouží výhradně pro diagnostiku dat ve view. Vypisuje POUZE klíče a typy,
- * nikdy skutečné hodnoty — je tedy bezpečná i pro citlivá data.
- *
  * @param object $view Objekt view (typicky ViewContext)
  * @param bool $detailed Zda zobrazit detailní rozbor i pro prázdné array
  * @return void
@@ -355,7 +387,6 @@ function debugViewVariables(object $view, bool $detailed = false): void
     echo "=== ALL VIEW PROPERTIES ===\n\n";
 
     foreach (get_object_vars($view) as $key => $value) {
-        // Přeskočit router (obsahuje cykly)
         if ($value instanceof \App\Core\Router) {
             echo "=== $key ===\n";
             echo "  type: " . get_debug_type($value) . " (skipped, contains cycles)\n\n";
@@ -376,7 +407,6 @@ function debugViewVariables(object $view, bool $detailed = false): void
             echo "\n";
 
             if (array_is_list($value)) {
-                // List — vezmi první prvek
                 echo "  is_list: YES\n";
                 $first = $value[0];
 
@@ -389,7 +419,6 @@ function debugViewVariables(object $view, bool $detailed = false): void
                     echo "  first item type: " . get_debug_type($first) . "\n";
                 }
             } else {
-                // Asociativní pole
                 echo "  is_list: NO\n";
                 echo "  keys + types:\n";
                 foreach ($value as $k => $v) {

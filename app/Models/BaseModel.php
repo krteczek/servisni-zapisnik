@@ -70,12 +70,7 @@ abstract class BaseModel
     /**
      * Inicializuje model a sestaví finální název tabulky.
      *
-     * Očekává:
-     * - Potomek definuje protected string $table
-     *
-     * TODO: [PERFORMANCE] Zvážit caching názvu tabulky napříč requesty
-     * TODO: [MAINTENANCE] Přidat kontrolu existence tabulky při vývoji
-     *
+     * @param PDO|null $pdo
      * @throws LogicException Pokud $table není definováno
      */
     public function __construct(?PDO $pdo = null)
@@ -132,8 +127,6 @@ abstract class BaseModel
     /**
      * Sestaví finální název tabulky s prefixem z konfigurace.
      *
-     * TODO: [PERFORMANCE] Přidat caching výsledku na úrovni třídy
-     *
      * @return string
      */
     protected function resolveTableName(): string
@@ -149,12 +142,6 @@ abstract class BaseModel
     /**
      * Vrátí ID aktuálního tenanta z přihlášeného uživatele.
      *
-     * Očekává:
-     * - Model je tenant-aware
-     * - Uživatel je přihlášen
-     *
-     * TODO: [SECURITY] Přidat fallback pro CLI prostředí (cron)
-     *
      * @return int
      * @throws LogicException Pokud model není tenant-aware nebo chybí kontext
      */
@@ -167,7 +154,7 @@ abstract class BaseModel
         $companyId = TenantContext::get() ?? Auth::companyId();
 
         if ($companyId === null) {
-          throw new LogicException('Tenant context missing');
+            throw new LogicException('Tenant context missing');
         }
         return $companyId;
     }
@@ -176,8 +163,9 @@ abstract class BaseModel
      * Aplikuje tenant podmínku na WHERE pole.
      * Pokud je model tenant-aware, přidá company_id = aktuální tenant.
      *
-     * @param array $where Vstupní WHERE podmínky
-     * @return array WHERE podmínky s tenantem
+     * @param array<string, mixed> $where Vstupní WHERE podmínky
+     * @return array<string, mixed> WHERE podmínky s tenantem
+     * @throws LogicException Pokud je tenant column nastaven ručně
      */
     protected function applyTenant(array $where): array
     {
@@ -200,12 +188,16 @@ abstract class BaseModel
     }
 
 
-
-
-public function setConnection(PDO $pdo): void
-{
-    $this->db = $pdo;
-}
+    /**
+     * Nastaví PDO připojení (pro testy).
+     *
+     * @param PDO $pdo
+     * @return void
+     */
+    public function setConnection(PDO $pdo): void
+    {
+        $this->db = $pdo;
+    }
 
 
     /* ==========================================================
@@ -214,13 +206,6 @@ public function setConnection(PDO $pdo): void
 
     /**
      * Zjistí, zda má být tato operace auditována.
-     *
-     * Podmínky:
-     * - Připojení musí být 'admin' (audit se ukládá do admin DB)
-     * - Tabulka musí být v konfiguraci 'audit.auditables'
-     * - Tabulka nesmí být v konfiguraci 'audit.ignores'
-     *
-     * TODO: [FEATURE] Přidat možnost auditovat i work databázi (do samostatné tabulky)
      *
      * @return bool
      */
@@ -231,15 +216,11 @@ public function setConnection(PDO $pdo): void
         }
 
         $config = Config::get('audit');
-        //error_log('AUDIT CHECK: ' . $this->table);
-        //error_log('AUDITABLES: ' . json_encode($config['auditables'] ?? []));
+
         if (in_array($this->table, $config['ignores'] ?? [], true)) {
-        	//error_log('AUDIT SKIP IGNORE');
             return false;
         }
         $result = in_array($this->table, $config['auditables'] ?? [], true);
-
-        //error_log('AUDIT RESULT: ' . ($result ? 'YES' : 'NO'));
 
         return $result;
     }
@@ -248,49 +229,48 @@ public function setConnection(PDO $pdo): void
      * Vypočítá rozdíl mezi starým a novým stavem entity.
      * Ignoruje systémové sloupce (id, created_at, updated_at, password).
      *
-     * TODO: [FEATURE] Přidat možnost konfigurovat ignorované sloupce na úrovni modelu
-     *
-     * @param array $before Původní data
-     * @param array $after Nová data
-     * @return array Pole změn ve formátu [field => ['from' => old, 'to' => new]]
+     * @param array<string, mixed> $before Původní data
+     * @param array<string, mixed> $after Nová data
+     * @return array<string, array{from: mixed, to: mixed}> Pole změn
      */
-protected function diff(array $before, array $after): array
-{
-    $diff = [];
+    protected function diff(array $before, array $after): array
+    {
+        $diff = [];
 
-    $ignore = [
-        'id' => true,
-        'created_at' => true,
-        'updated_at' => true,
-        'password' => true,
-        'password_hash' => true,
-    ];
+        $ignore = [
+            'id' => true,
+            'created_at' => true,
+            'updated_at' => true,
+            'password' => true,
+            'password_hash' => true,
+        ];
 
-    foreach ($after as $key => $newValue) {
+        foreach ($after as $key => $newValue) {
 
-        if (isset($ignore[$key])) {
-            continue;
-        }
-
-        $oldValue = $before[$key] ?? null;
-
-        // pole / JSON
-        if (is_array($oldValue) || is_array($newValue)) {
-            if (json_encode($oldValue) === json_encode($newValue)) {
+            if (isset($ignore[$key])) {
                 continue;
+            }
+
+            $oldValue = $before[$key] ?? null;
+
+            // pole / JSON
+            if (is_array($oldValue) || is_array($newValue)) {
+                if (json_encode($oldValue) === json_encode($newValue)) {
+                    continue;
+                }
+            }
+
+            if ($oldValue !== $newValue) {
+                $diff[$key] = [
+                    'from' => $oldValue,
+                    'to'   => $newValue,
+                ];
             }
         }
 
-        if ($oldValue !== $newValue) {
-            $diff[$key] = [
-                'from' => $oldValue,
-                'to'   => $newValue,
-            ];
-        }
+        return $diff;
     }
 
-    return $diff;
-}
     /* ==========================================================
      * SELECT
      * ========================================================== */
@@ -299,46 +279,43 @@ protected function diff(array $before, array $after): array
      * Vrátí všechny záznamy z tabulky s tenant izolací.
      * Řazeno sestupně podle ID.
      *
-     * @return array Seznam záznamů
+     * @return array<int, array<string, mixed>> Seznam záznamů
      */
     public function all(): array
     {
-    	try
-    	{
-        $where = $this->applyTenant([]);
+        try {
+            $where = $this->applyTenant([]);
 
-        $sql = "SELECT * FROM {$this->tableName}";
+            $sql = "SELECT * FROM {$this->tableName}";
 
-        if ($where !== []) {
-            $parts = [];
-            foreach ($where as $col => $val) {
-                $parts[] = "{$col} = :{$col}";
+            if ($where !== []) {
+                $parts = [];
+                foreach ($where as $col => $val) {
+                    $parts[] = "{$col} = :{$col}";
+                }
+
+                $sql .= ' WHERE ' . implode(' AND ', $parts);
             }
 
-            $sql .= ' WHERE ' . implode(' AND ', $parts);
+            $sql .= ' ORDER BY id DESC';
+
+            return $this->fetchAll($sql, $where);
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error('BaseModel.all() failed', [
+                'message'   => $e->getMessage(),
+                'file'      => $e->getFile(),
+                'line'      => $e->getLine(),
+                'trace'     => $e->getTraceAsString(),
+            ]);
+            return [];
         }
-
-        $sql .= ' ORDER BY id DESC';
-
-        return $this->fetchAll($sql, $where);
-     }
-     catch (Throwable $e) {
-	        LoggerHolder::get()->error('BaseModel.all() failed', [
-				    'message'   => $e->getMessage(),
-				    'file'      => $e->getFile(),
-				    'line'      => $e->getLine(),
-				    'trace'     => $e->getTraceAsString(),
-
-				]);
-				return [];
-       }
     }
 
     /**
      * Najde záznam podle ID s tenant izolací.
      *
      * @param int $id ID záznamu
-     * @return array|null Data záznamu nebo null
+     * @return array<string, mixed>|null Data záznamu nebo null
      */
     public function find(int $id): ?array
     {
@@ -353,8 +330,8 @@ protected function diff(array $before, array $after): array
                 WHERE " . implode(' AND ', $parts) . "
                 LIMIT 1";
 
-		$ok = $this->fetchOne($sql, $where);
-			
+        $ok = $this->fetchOne($sql, $where);
+
         return $ok;
     }
 
@@ -366,9 +343,7 @@ protected function diff(array $before, array $after): array
      * Vytvoří nový záznam s automatickým doplněním tenant ID.
      * Auditováno pokud je model auditovatelný.
      *
-     * TODO: [PERFORMANCE] Batch insert pro více záznamů najednou
-     *
-     * @param array $data Data k vložení
+     * @param array<string, mixed> $data Data k vložení
      * @return int ID nově vytvořeného záznamu
      * @throws LogicException Pokud jsou data prázdná
      */
@@ -379,8 +354,6 @@ protected function diff(array $before, array $after): array
         }
 
         if ($data === []) {
-        	/* TODO: přepsat tak, aby nebyl exception pro uživatele, ale například false 
-            a logger nechat udělat záznam pro roota */
             throw new LogicException('Create: empty data');
         }
 
@@ -395,16 +368,16 @@ protected function diff(array $before, array $after): array
      * Nízkoúrovňový INSERT bez tenant logiky.
      * Používá se pro modely, které nejsou tenant-aware nebo pro importy.
      *
-     * @param array $data Kompletní data k vložení
+     * @param array<string, mixed> $data Kompletní data k vložení
      * @return int ID nového záznamu
+     * @throws Throwable Při selhání insertu
      */
     protected function insertRaw(array $data): int
     {
         $lastId = 0;
         $sql = null;
 
-    	try
-    	{
+        try {
             $cols   = array_keys($data);
             $fields = implode(', ', $cols);
             $values = ':' . implode(', :', $cols);
@@ -417,20 +390,18 @@ protected function diff(array $before, array $after): array
 
             $lastId = (int) $this->db()->lastInsertId();
         } catch (Throwable $e) {
-		    LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
-		                'message' => $e->getMessage(),
-		                'file'    => $e->getFile(),
-		                'line'    => $e->getLine(),
-		                'trace'   => $e->getTraceAsString(),
-		                'data'    => json_encode($data),
-                        'sql'     => $sql,
-
-		    ]);
+            LoggerHolder::get()->error('BaseModel.insertRaw: failed', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+                'data'    => json_encode($data),
+                'sql'     => $sql,
+            ]);
             throw $e; // 🔥 KRITICKÉ
-		}
+        }
 
         if ($this->shouldAudit()) {
-        	//error_log('AUDIT CALL: ' . $this->table);
             try {
                 AuditLogCore::log(
                     entity: $this->table,
@@ -439,18 +410,14 @@ protected function diff(array $before, array $after): array
                     diff: $this->diff([], $data)
                 );
             } catch (Throwable $e) {
-                // TODO: [OBSERVABILITY] Lepší logování selhání auditu
-                //error_log('Audit insert failed: ' . $lastId);
- 		          LoggerHolder::get()->error('BaseModel.auditInsertRaw failed', [
-		                'message' => $e->getMessage(),
-		                'file'    => $e->getFile(),
-		                'line'    => $e->getLine(),
-		                'trace'   => $e->getTraceAsString(),
-		                'data'    => json_encode($data),
-
-                        
-		    ]);
-           }
+                LoggerHolder::get()->error('BaseModel.auditInsertRaw failed', [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                    'trace'   => $e->getTraceAsString(),
+                    'data'    => json_encode($data),
+                ]);
+            }
         }
 
         return $lastId;
@@ -464,11 +431,10 @@ protected function diff(array $before, array $after): array
      * Aktualizuje existující záznam.
      * Automaticky aplikuje tenant izolaci a audit.
      *
-     * TODO: [PERFORMANCE] Bulk update pro více záznamů
-     *
      * @param int $id ID záznamu k aktualizaci
-     * @param array $data Data k aktualizaci (pouze změněné sloupce)
+     * @param array<string, mixed> $data Data k aktualizaci
      * @return bool TRUE pokud update proběhl úspěšně
+     * @throws Throwable Při selhání update
      */
     public function update(int $id, array $data): bool
     {
@@ -508,20 +474,19 @@ protected function diff(array $before, array $after): array
             }
 
             $stmt = $this->db()->prepare($sql);
-        
+
             $ok   = $stmt->execute($params);
 
         } catch (Throwable $e) {
             LoggerHolder::get()->error('BaseModel.update failed', [
-                        'message' => $e->getMessage(),
-                        'file'    => $e->getFile(),
-                        'line'    => $e->getLine(),
-                        'trace'   => $e->getTraceAsString(),
-                        'data'    => json_encode($data),
-                        'id'      => $id,
-                        'sql'     => $sql,
-                        'entity'  => $this->table,
-
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+                'data'    => json_encode($data),
+                'id'      => $id,
+                'sql'     => $sql,
+                'entity'  => $this->table,
             ]);
             throw $e; // 🔥 KRITICKÉ
         }
@@ -538,17 +503,15 @@ protected function diff(array $before, array $after): array
                     );
                 }
             } catch (Throwable $e) {
-                
- 		          LoggerHolder::get()->error('BaseModel.auditUpdate failed', [
-		                'message' => $e->getMessage(),
-		                'file'    => $e->getFile(),
-		                'line'    => $e->getLine(),
-		                'trace'   => $e->getTraceAsString(),
-		                'data'    => json_encode($data),
-                        'entity' => $this->table,
-                        'entity_id' => $id,
-
-		    ]);
+                LoggerHolder::get()->error('BaseModel.auditUpdate failed', [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                    'trace'   => $e->getTraceAsString(),
+                    'data'    => json_encode($data),
+                    'entity' => $this->table,
+                    'entity_id' => $id,
+                ]);
             }
         }
 
@@ -562,13 +525,11 @@ protected function diff(array $before, array $after): array
     /**
      * Provede SQL dotaz a vrátí všechny řádky.
      *
-     * @param string $sql SQL dotaz s placeholdery
-     * @param array $params Parametry pro prepared statement
-     * @return array Výsledek dotazu
+     * @param array<int|string, mixed> $params
+     * @return array<int, array<string, mixed>>
      */
     protected function fetchAll(string $sql, array $params = []): array
     {
-
         $stmt = $this->db()->prepare($sql);
         $stmt->execute($params);
 
@@ -579,8 +540,8 @@ protected function diff(array $before, array $after): array
      * Provede SQL dotaz a vrátí první řádek.
      *
      * @param string $sql SQL dotaz s placeholdery
-     * @param array $params Parametry pro prepared statement
-     * @return array|null První řádek nebo null
+     * @param array<int|string, mixed> $params
+     * @return array<string, mixed>|null     
      */
     protected function fetchOne(string $sql, array $params = []): ?array
     {
@@ -596,7 +557,7 @@ protected function diff(array $before, array $after): array
      * Najde záznam podle ID nebo vyhodí výjimku.
      *
      * @param int $id ID záznamu
-     * @return array Data záznamu
+     * @return array<string, mixed> Data záznamu
      * @throws LogicException Pokud záznam neexistuje
      */
     public function findOrFail(int $id): array
@@ -613,10 +574,8 @@ protected function diff(array $before, array $after): array
     /**
      * Vygeneruje SQL podmínku pro tenant izolaci v JOIN dotazech.
      *
-     * TODO: [MAINTENANCE] Přidat podporu pro různé aliasy
-     *
      * @param string $alias Alias tabulky v dotazu
-     * @return string SQL podmínka (např. " AND company_id = :company_id")
+     * @return string SQL podmínka
      */
     protected function tenantWhereOLD(string $alias = ''): string
     {
@@ -628,16 +587,30 @@ protected function diff(array $before, array $after): array
         return " AND {$col} = :" . $this->tenantColumn;
     }
 
-	public function createWithTenant(int $tenantId, array $data): int
-	{
-	    if ($this->tenantAware) {
-	        $data[$this->tenantColumn] = $tenantId;
-	    }
+    /**
+     * Vytvoří nový záznam s explicitním tenant ID.
+     *
+     * @param int $tenantId
+     * @param array<string, mixed> $data
+     * @return int
+     */
+    public function createWithTenant(int $tenantId, array $data): int
+    {
+        if ($this->tenantAware) {
+            $data[$this->tenantColumn] = $tenantId;
+        }
 
-	    return $this->insertRaw($data);
-	}
+        return $this->insertRaw($data);
+    }
 
-	 
+
+    /**
+     * Najde první záznam podle sloupce a hodnoty.
+     *
+     * @param string $column
+     * @param mixed $value
+     * @return array<string, mixed>|null
+     */
     protected function firstWhere(string $column, mixed $value): ?array
     {
         $where = $this->applyTenant([$column => $value]);
@@ -655,6 +628,15 @@ protected function diff(array $before, array $after): array
     }
 
 
+    /**
+     * Aktualizuje první záznam podle sloupce a hodnoty.
+     *
+     * @param string $column
+     * @param mixed $value
+     * @param array<string, mixed> $data
+     * @return bool
+     * @throws Throwable
+     */
     protected function updateWhere(string $column, mixed $value, array $data): bool
     {
         if ($data === []) {
@@ -678,7 +660,6 @@ protected function diff(array $before, array $after): array
         }
 
         try {
-
             $where = $this->applyTenant([$column => $value]);
 
             $set = [];
@@ -706,26 +687,24 @@ protected function diff(array $before, array $after): array
 
             $stmt = $this->db()->prepare($sql);
 
-           
             $ok = $stmt->execute($params);
         } catch (Throwable $e) {
             LoggerHolder::get()->error('BaseModel.updateWhere failed', [
-                        'message' => $e->getMessage(),
-                        'file'    => $e->getFile(),
-                        'line'    => $e->getLine(),
-                        'trace'   => $e->getTraceAsString(),
-                        'data'    => json_encode($data),
-                        'value'   => $value,
-                        'column'  => $column,
-                        'sql'     => $sql,
-                        'entity'  => $this->table,
-
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+                'data'    => json_encode($data),
+                'value'   => $value,
+                'column'  => $column,
+                'sql'     => $sql,
+                'entity'  => $this->table,
             ]);
             throw $e;
         }
 
         if ($ok && $this->shouldAudit()) {
-           try {
+            try {
                 $diff = $this->diff($before, $data);
 
                 if ($diff !== []) {
@@ -737,35 +716,40 @@ protected function diff(array $before, array $after): array
                     );
                 }
             } catch (Throwable $e) {
-                
- 		          LoggerHolder::get()->error('BaseModel.auditUpdate failed', [
-		                'message' => $e->getMessage(),
-		                'file'    => $e->getFile(),
-		                'line'    => $e->getLine(),
-		                'trace'   => $e->getTraceAsString(),
-		                'data'    => json_encode($data),
-                        'entity' => $this->table,
-                        
-
-		    ]);
+                LoggerHolder::get()->error('BaseModel.auditUpdate failed', [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                    'trace'   => $e->getTraceAsString(),
+                    'data'    => json_encode($data),
+                    'entity' => $this->table,
+                ]);
             }
         }
         return $ok;
-
     }
 
+    /**
+     * @return bool
+     */
     protected function isTenantAware(): bool
     {
         return $this->tenantAware;
     }
 
-    // výběr z db podle statusu
+    /**
+     * Výběr z DB podle statusu.
+     *
+     * @param array<int, string> $statuses
+     * @param string $orderBy
+     * @param string $direction
+     * @return array<int, array<string, mixed>>
+     */
     public function whereStatus(
         array $statuses,
         string $orderBy = 'updated_at',
         string $direction = 'DESC'
-    ): array
-    {
+    ): array {
         if ($statuses === []) {
             return [];
         }
@@ -798,6 +782,14 @@ protected function diff(array $before, array $after): array
         return $this->fetchAll($sql, $params);
     }
 
+    /**
+     * Přidá do SQL podmínky vyhledávání podle sloupce.
+     *
+     * @param string $column
+     * @param string $q
+     * @param array<int, mixed> $params
+     * @return string
+     */
     protected function buildSearchCondition(string $column, string $q, array &$params): string
     {
         if ($q === '') {

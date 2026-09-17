@@ -42,7 +42,7 @@ final class CompanyModel extends BaseModel
      * TODO: [PERFORMANCE] Index na sloupci slug je nezbytný
      *
      * @param string $slug Unikátní identifikátor společnosti (z URL)
-     * @return array|null Data společnosti nebo null
+     * @return array<string, mixed>|null Data společnosti nebo null
      */
     public function existsBySlug(string $slug): ?array
     {
@@ -78,7 +78,7 @@ final class CompanyModel extends BaseModel
      * TODO: [BUSINESS] Přidat kontrolu expirace licence
      *
      * @param string $slug Slug společnosti z URL
-     * @return array|null Data společnosti nebo null
+     * @return array<string, mixed>|null Data společnosti nebo null
      */
 		public function findBySlug(string $slug): ?array
 		{
@@ -102,7 +102,7 @@ final class CompanyModel extends BaseModel
      * TODO: [PERFORMANCE] Přidat stránkování při velkém počtu tenantů
      * TODO: [FEATURE] Přidat filtrování (active/inactive, datum vytvoření)
      *
-     * @return array Seznam společností (id, name, slug, created_at)
+     * @return array<int, array<string, mixed>> Seznam společností (id, name, slug, created_at)
      */
     public function findAll(): array
     {
@@ -115,12 +115,12 @@ final class CompanyModel extends BaseModel
     
     
     public function activate(int $companyId): void
-{
-    $this->update($companyId, [
-        'active' => 1,
-        'activated_at' => date('Y-m-d H:i:s'),
-    ]);
-}
+    {
+        $this->update($companyId, [
+            'active' => 1,
+            'activated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
 
 public function existsByIco(string $ico): bool
 {
@@ -132,6 +132,10 @@ public function existsByIco(string $ico): bool
     return (bool) $stmt->fetchColumn();
 }
 
+/**
+ * @param string $search
+ * @return array<int, array<string, mixed>>
+ */
 public function searchCompany(string $search): array
 {
     $sql = "SELECT *

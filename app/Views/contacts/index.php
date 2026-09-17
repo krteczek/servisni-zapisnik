@@ -10,30 +10,29 @@ use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
-
-$data = $view->data;
+$contacts = $view->contacts ?? [];
 $errors = $view->errors; 
-//var_dump($data);
+
 
 
 ?>
 
 <div class="entity-grid">
-<?php if($data === []): ?>
+<?php if($contacts === []): ?>
     <div class="users-empty">
         <strong>Žádní zákazníci</strong>
         <p>Zatím zde není žádný zákazník.</p>
     </div>
 
 <?php else : ?>
-<?php foreach ($data as $d): ?>
+<?php foreach ($contacts as $contact): ?>
        <div class="card">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
                 <span class="card-title">
-                    <a href="<?= Url::to('/{tenant}/contacts/' . (int)$d['id'] . '/detail/#main') ?>"
+                    <a href="<?= Url::to('/{tenant}/contacts/' . (int)$contact['id'] . '/detail/#main') ?>"
                        title="Jít na detail zákazníka">
-                    <?= e($d['company_name']) ?>
+                    <?= e($contact['company_name']) ?>
                 </a></span>                
             </div>
 
@@ -42,36 +41,36 @@ $errors = $view->errors;
                 <div class="meta-list">
     						<div class="meta-item">
 								<span class="meta-label">IČO: </span>
-								<span class="meta-value"><?= e($d['ico'] ? $d['ico'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['ico'] ? $contact['ico'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">DIČ: </span>
-								<span class="meta-value"><?= e($d['dic'] ? $d['dic'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['dic'] ? $contact['dic'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Ulice: </span>
-								<span class="meta-value"><?= e($d['street'] ? $d['street'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['street'] ? $contact['street'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Město: </span>
-								<span class="meta-value"><?= e($d['city'] ? $d['city'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['city'] ? $contact['city'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">PSČ: </span>
-								<span class="meta-value"><?= e($d['zip'] ? $d['zip'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['zip'] ? $contact['zip'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Stát: </span>
-								<span class="meta-value"><?= e($d['country'] ? $d['country'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['country'] ? $contact['country'] : '-') ?></span>
 							</div>
                    
                      <div class="meta-item">
                          <span class="meta-label">Email: </span>
-                         <span class="meta-value"><?= e($d['email'] ? $d['email'] : '-') ?></span>
+                         <span class="meta-value"><?= e($contact['email'] ? $contact['email'] : '-') ?></span>
                      </div>
    						<div class="meta-item">
 								<span class="meta-label">Telefon: </span>
-								<span class="meta-value"><?= e($d['phone'] ? $d['phone'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['phone'] ? $contact['phone'] : '-') ?></span>
 							</div>
 						</div>
 					</div>
@@ -80,7 +79,7 @@ $errors = $view->errors;
             <div class="card-footer">
                 <div class="actions">
 
-						  <a href="<?= Url::to('/{tenant}/contacts/' . (int)$d['id'] . '/edit/#main') ?>" 
+						  <a href="<?= Url::to('/{tenant}/contacts/' . (int)$contact['id'] . '/edit/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Upravit informace o zákazníkovi">
                         ✏️ Upravit

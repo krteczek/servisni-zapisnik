@@ -54,7 +54,7 @@ final class TokenModel extends BaseModel
      *
      * @param string $hash Hashovaná hodnota tokenu (z URL parametru)
      * @param string $type Typ tokenu ('activation', 'password_reset')
-     * @return array|null Data tokenu nebo null pokud není nalezen
+     * @return array<string, mixed>|null Data tokenu nebo null pokud není nalezen
      */
     public function findValidByHash(string $hash, string $type): ?array
     {
@@ -78,36 +78,39 @@ final class TokenModel extends BaseModel
         //var_dump($out);exit;
         return $out;
     }
+    /**
+     * @param string $hash
+     * @return array<string, mixed>|null
+     */
+    public function findValidByHashForUpdate(string $hash, string $type): ?array
+    {
+        if (!$this->db()->inTransaction()) {
+        throw new RuntimeException('Token consume requires transaction');
+        }
+        $sql = "
+            SELECT id, user_id, email
+            FROM {$this->tableName}
+            WHERE token_hash = :hash
+            AND type = :type
+            AND used_at IS NULL
+            AND expires_at > NOW()
+            AND invalidated_at IS NULL
+            LIMIT 1
+            FOR UPDATE
+        ";
 
-public function findValidByHashForUpdate(string $hash, string $type): ?array
-{
-	 if (!$this->db()->inTransaction()) {
-    throw new RuntimeException('Token consume requires transaction');
-	}
-    $sql = "
-        SELECT id, user_id, email
-        FROM {$this->tableName}
-        WHERE token_hash = :hash
-          AND type = :type
-          AND used_at IS NULL
-          AND expires_at > NOW()
-          AND invalidated_at IS NULL
-        LIMIT 1
-        FOR UPDATE
-    ";
-
-     $out = $this->fetchOne($sql, [
-        'hash' => $hash,
-        'type' => $type,
-    ]);
-    //var_dump($out);exit;
-    return $out;
-}
+        $out = $this->fetchOne($sql, [
+            'hash' => $hash,
+            'type' => $type,
+        ]);
+        //var_dump($out);exit;
+        return $out;
+    }
 
 
     /* ==========================================================
-     * INVALIDATE OLD TOKENS
-     * ========================================================== */
+    * INVALIDATE OLD TOKENS
+    * ========================================================== */
 
     /**
      * Zneplatní všechny dosud nepoužité tokeny daného uživatele a typu.
@@ -127,27 +130,27 @@ public function findValidByHashForUpdate(string $hash, string $type): ?array
      * @return int Počet zneplatněných tokenů
      */
 
-     public function invalidateActive(string $email, string $type): int
-{
-    $sql = "
-        UPDATE {$this->tableName}
-        SET invalidated_at = NOW()
-        WHERE email = :email
-          AND type = :type
-          AND used_at IS NULL
-          AND expires_at > NOW()
-          AND invalidated_at IS NULL
-    ";
+    public function invalidateActive(string $email, string $type): int
+    {
+        $sql = "
+            UPDATE {$this->tableName}
+            SET invalidated_at = NOW()
+            WHERE email = :email
+            AND type = :type
+            AND used_at IS NULL
+            AND expires_at > NOW()
+            AND invalidated_at IS NULL
+        ";
 
-    $stmt = $this->db()->prepare($sql);
+        $stmt = $this->db()->prepare($sql);
 
-    $stmt->execute([
-        'email' => $email,
-        'type'  => $type,
-    ]);
+        $stmt->execute([
+            'email' => $email,
+            'type'  => $type,
+        ]);
 
-    return $stmt->rowCount();
-}
+        return $stmt->rowCount();
+    }
 
     /* ==========================================================
      * MARK AS USED
@@ -227,7 +230,7 @@ AND (
      * - $data obsahuje: user_id, token_hash, type, expires_at
      * - tenant_id (company_id) je doplněno automaticky metodou create()
      *
-     * @param array $data Data tokenu
+     * @param array<string, mixed> $data Data tokenu
      * @return int ID nově vytvořeného tokenu
      */
     public function createToken(array $data): int

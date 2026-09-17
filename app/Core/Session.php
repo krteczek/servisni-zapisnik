@@ -185,7 +185,7 @@ public static function start(): void
      * Vrátí celý obsah session jako pole.
      * Pozor: vrací reference na $_SESSION, ne kopii.
      *
-     * @return array Celý obsah session
+     * @return array<string, mixed> Celý obsah session
      */
     public static function all(): array
     {

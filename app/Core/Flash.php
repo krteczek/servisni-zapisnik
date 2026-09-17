@@ -68,7 +68,7 @@ final class Flash
         Session::flash('info', $msg);
     }
 
-    public static function display()
+    public static function display(): string
     {
     	 return Session::renderFlash();
     }

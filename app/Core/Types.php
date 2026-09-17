@@ -21,7 +21,8 @@ namespace App\Core;
  *     menu?: string,
  *     submenu?: string,
  *     section?: string,
- *     roles?: array<int, string>
+ *     roles?: array<int, string>,
+ *     regex?: string
  * }
  *
  * @phpstan-type MenuItem array{
@@ -141,6 +142,21 @@ namespace App\Core;
  *     customer_address: string
  * }
  *
+ * @phpstan-type ContactRow array{
+ *     id: int,
+ *     company_id: int,
+ *     company_name: string,
+ *     ico: string,
+ *     dic: string,
+ *     street: string,
+ *     city: string,
+ *     zip: string,
+ *     country: string,
+ *     email: string,
+ *     phone: string,
+ *     created_at: string
+ * }
+ *
  * @phpstan-type UserRow array{
  *     id: int,
  *     company_id: int,
@@ -165,7 +181,21 @@ namespace App\Core;
  *     active: int,
  *     created_at: string
  * }
+ * 
+ * @phpstan-type SessionUserRow array{
+ *     id: int,
+ *     email: string,
+ *     global_role: string,
+ *     company_id: int,
+ *     company_name: string,
+ *     tenant_slug: string,
+ *     first_name: string,
+ *     last_name: string,
+ *     db_name: string,
+ *     session_version: int
+ * }
  */
+ 
 final class Types
 {
 }

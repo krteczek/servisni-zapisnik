@@ -14,8 +14,14 @@ class SettingsModel extends BaseModel
     protected string $connection = 'admin';
     protected bool $tenantAware = true;
 
+    /**
+     * @var array<string, mixed>
+     */
     private array $cache = [];
 
+    /**
+     * @var array<string, mixed>
+     */
     private array $defaults = [
         'work_order_numbering' => [
             'format' => '{PREFIX}-{NUMBER}',
@@ -30,17 +36,30 @@ class SettingsModel extends BaseModel
         
     ];
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getWorkOrderSettings(): array
     {
         return $this->get('work_order_numbering');
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return void
+     */    
     public function updateWorkOrderSettings(array $data): void
     {
         $this->set('work_order_numbering', $data);
     }
 
-    public function get(string $key, $default = null): array
+    /**
+     * @param string $key
+     * @param mixed $default
+     * @return array<string, mixed>
+     * @throws \LogicException Pokud klíč neexistuje
+     */
+    public function get(string $key, mixed $default = null): array
     {
         if (isset($this->cache[$key])) {
             return $this->cache[$key];
@@ -63,7 +82,12 @@ class SettingsModel extends BaseModel
 
         return $this->cache[$key] = is_array($data) ? $data : $default;
     }
-
+        
+    /**
+     * @param string $key
+     * @param array<string, mixed> $value
+     * @return void
+     */
     public function set(string $key, array $value): void
     {
          $sql = "INSERT INTO {$this->tableName}
@@ -82,11 +106,18 @@ class SettingsModel extends BaseModel
         unset($this->cache[$key]);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getBillingSettings(): array
     {
         return $this->get('billing');
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return void
+     */
     public function updateBillingSettings(array $data): void
     {
         $this->set('billing', $data);
