@@ -4,13 +4,15 @@ declare(strict_types=1);
 namespace App\Services\Mail;
 
 use PHPMailer\PHPMailer\PHPMailer;
-//use PHPMailer\PHPMailer\Exception;
 use App\Core\Config;
 
-//posílání emailu pomocí phpMailer
 class MailService
 {
     private PHPMailer $mailer;
+
+    /**
+     * @var array<string, mixed>
+     */
     private array $config = [];
 
     public function __construct()
@@ -26,10 +28,9 @@ class MailService
         $this->mailer->Username   = $config['username'];
         $this->mailer->Password   = $config['password'];
 
-			// kvuli ladění chyb
-			if (Config::get('app.env') === 'dev') {
-			    $this->mailer->SMTPDebug = 2;
-			}
+        if (Config::get('app.env') === 'dev') {
+            $this->mailer->SMTPDebug = 2;
+        }
         if (($config['encryption'] ?? '') !== '') {
             $this->mailer->SMTPSecure = $config['encryption'];
         }
@@ -37,12 +38,20 @@ class MailService
         if (isset($config['timeout'])) {
             $this->mailer->Timeout = $config['timeout'];
         }
-        
+
         $this->mailer->CharSet = 'UTF-8';
 
         $this->config = $config;
     }
 
+    /**
+     * @param string $toEmail
+     * @param string $toName
+     * @param string $subject
+     * @param string $html
+     * @param string $text
+     * @return bool
+     */
     public function send(
         string $toEmail,
         string $toName,
@@ -50,7 +59,6 @@ class MailService
         string $html,
         string $text
     ): bool {
-
         $config = $this->config;
 
         $this->mailer->clearAllRecipients();

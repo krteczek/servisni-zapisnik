@@ -273,8 +273,8 @@ public function detailOrder(int $orderId): string
     $teamMap = [];
     foreach ($teams as $team) {
         $teamMap[$team['id']] = [
-            'team_name'  => $team['name']   ?? '—',
-            'team_color' => $team['color']  ?? '#cccccc',
+            'team_name'  => $team['name'],
+            'team_color' => $team['color'],
         ];
     }
 
@@ -288,10 +288,10 @@ public function detailOrder(int $orderId): string
 
     // 3. Rozšíření úkolů o tým + výpočet součtů
     foreach ($tasks as &$task) {
-        $teamId = $task['team_id'] ?? null;
+        $teamId = $task['team_id'];
 
         // Přidání týmu (s fallbackem)
-        if ($teamId !== null && isset($teamMap[$teamId])) {
+        if (isset($teamMap[$teamId])) {
             $task['team_name']  = $teamMap[$teamId]['team_name'];
             $task['team_color'] = $teamMap[$teamId]['team_color'];
         } else {
@@ -300,10 +300,10 @@ public function detailOrder(int $orderId): string
         }
 
         // Bezpečné sčítání statistik (ochrana před chybějícími klíči)
-        $stats = $task['stats'] ?? [];
-        $totalMinutes += (int) ($stats['total_minutes'] ?? 0);
-        $totalKm      += (int) ($stats['total_km']      ?? 0);
-        $reportCount  += (int) ($stats['assignments_count'] ?? 0);
+        $stats = $task['stats'];
+        $totalMinutes += ($stats['total_minutes']);
+        $totalKm      += ($stats['total_km']);
+        $reportCount  += ($stats['assignments_count']);
         if ($task['status'] === 'open')
         {
             $openTaskCount++;
@@ -355,8 +355,8 @@ public function detailOrder(int $orderId): string
     }
 
     // 5. Předání do view
-    $this->view->order = $order;
-    $this->view->tasks = $tasks;
+    $this->view->orderDetail = $order;
+    $this->view->orderTasks = $tasks;
     //$this->view->teams = $teamMap;  // nepotřebuješ, pokud ho nepoužíváš ve view
 
     return $this->render('work_orders/detail');

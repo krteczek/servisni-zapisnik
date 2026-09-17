@@ -15,7 +15,7 @@ final class RegistrationRequestModel extends BaseModel
 
     /**
      * @param array<string, mixed> $data
-     * @return int
+     * @return void
      */
     public function upsert(array $data): void
     {
@@ -53,7 +53,7 @@ final class RegistrationRequestModel extends BaseModel
     }
 
     /**
-     * @param id $id
+     * @param int $id
      * @return void
      */
     public function deleteById(int $id): void

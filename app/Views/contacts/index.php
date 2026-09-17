@@ -10,7 +10,7 @@ use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
-$contacts = $view->contacts ?? [];
+$contacts = $view->contacts;
 $errors = $view->errors; 
 
 
@@ -30,7 +30,7 @@ $errors = $view->errors;
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
                 <span class="card-title">
-                    <a href="<?= Url::to('/{tenant}/contacts/' . (int)$contact['id'] . '/detail/#main') ?>"
+                    <a href="<?= Url::to('/{tenant}/contacts/' . $contact['id'] . '/detail/#main') ?>"
                        title="Jít na detail zákazníka">
                     <?= e($contact['company_name']) ?>
                 </a></span>                
@@ -41,36 +41,36 @@ $errors = $view->errors;
                 <div class="meta-list">
     						<div class="meta-item">
 								<span class="meta-label">IČO: </span>
-								<span class="meta-value"><?= e($contact['ico'] ? $contact['ico'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['ico'] !== "" ? $contact['ico'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">DIČ: </span>
-								<span class="meta-value"><?= e($contact['dic'] ? $contact['dic'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['dic'] !== "" ? $contact['dic'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Ulice: </span>
-								<span class="meta-value"><?= e($contact['street'] ? $contact['street'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['street']  !== "" ? $contact['street'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Město: </span>
-								<span class="meta-value"><?= e($contact['city'] ? $contact['city'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['city']  !== "" ? $contact['city'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">PSČ: </span>
-								<span class="meta-value"><?= e($contact['zip'] ? $contact['zip'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['zip'] !== "" ? $contact['zip'] : '-') ?></span>
 							</div>
    						<div class="meta-item">
 								<span class="meta-label">Stát: </span>
-								<span class="meta-value"><?= e($contact['country'] ? $contact['country'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['country']  !== "" ? $contact['country'] : '-') ?></span>
 							</div>
                    
                      <div class="meta-item">
                          <span class="meta-label">Email: </span>
-                         <span class="meta-value"><?= e($contact['email'] ? $contact['email'] : '-') ?></span>
+                         <span class="meta-value"><?= e($contact['email']  !== "" ? $contact['email'] : '-') ?></span>
                      </div>
    						<div class="meta-item">
 								<span class="meta-label">Telefon: </span>
-								<span class="meta-value"><?= e($contact['phone'] ? $contact['phone'] : '-') ?></span>
+								<span class="meta-value"><?= e($contact['phone']  !== "" ? $contact['phone'] : '-') ?></span>
 							</div>
 						</div>
 					</div>
@@ -79,7 +79,7 @@ $errors = $view->errors;
             <div class="card-footer">
                 <div class="actions">
 
-						  <a href="<?= Url::to('/{tenant}/contacts/' . (int)$contact['id'] . '/edit/#main') ?>" 
+						  <a href="<?= Url::to('/{tenant}/contacts/' . $contact['id'] . '/edit/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Upravit informace o zákazníkovi">
                         ✏️ Upravit

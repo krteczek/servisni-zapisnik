@@ -6,6 +6,12 @@ namespace App\Services\Mail;
 class MailView
 {
 
+	/**
+	 * @param string $template
+	 * @param array<string, mixed> $data
+	 * @param bool $toHtml
+	 * @return string
+	 */
     public static function render(string $template, array $data = [], $toHtml = false): string
     {
     	  //var_dump($data);
@@ -30,11 +36,22 @@ class MailView
        return $content;
 
     }
+
+	/**
+	 * @param string $template
+	 * @param array<string, mixed> $data
+	 * @return string
+	 */
 	public static function renderHtml(string $template, array $data = []): string
 	{
 	    return self::render($template, $data, true);
 	}
 
+	/**
+	 * @param string $template
+	 * @param array<string, mixed> $data
+	 * @return string
+	 */
 	public static function renderText(string $template, array $data = []): string
 	{
 	    return self::render($template, $data, false);

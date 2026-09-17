@@ -8,7 +8,12 @@ use App\Core\Auth;
 use App\Core\Roles;
 use App\Services\Tasks\TaskType;
 use App\Services\Tasks\TaskStatus;
+use App\Core\Types;
 
+
+/**
+ * @phpstan-import-type TaskDetailRow from Types
+ */
 final class TaskModel extends BaseModel
 {
     /**
@@ -356,7 +361,7 @@ final class TaskModel extends BaseModel
 
     /**
      * @param int $orderId
-     * @return array<int, array<string, mixed>>
+     * @return array<int, TaskDetailRow>
      */
     public function forWorkOrderWithStats(int $orderId): array
     {

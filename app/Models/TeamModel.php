@@ -5,8 +5,11 @@ namespace App\Models;
 
 use PDO;
 use LogicException;
+use App\Core\Types;
 
-
+/**
+ * @phpstan-import-type TeamRow from Types
+ */
 class TeamModel extends BaseModel
 {
     protected string $table = 'teams';
@@ -43,8 +46,7 @@ class TeamModel extends BaseModel
     /**
      * Vrátí týmy podle aktivního stavu
      * @param bool $active
-     * @return array<int, array<string, mixed>>
-     */
+     * @return array<int, TeamRow>     */
     public function byActive(bool $active): array
     {
         $sql = "
@@ -140,7 +142,7 @@ class TeamModel extends BaseModel
         foreach ($teamIds as $i => $id) {
             $key = "id_$i";
             $placeholders[] = ":$key";
-            $params[$key] = (int) $id;
+            $params[$key] = $id;
         }
         
         $sql = "

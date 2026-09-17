@@ -9,6 +9,8 @@ final class RecurringRunnerModel extends BaseModel
     protected bool $tenantAware = true;
 
     /**
+     * @param int $companyId
+     * @param int $limit
      * @return array<int, array<string, mixed>>
      */
     public function findDueTasks(int $companyId, int $limit): array
@@ -31,9 +33,9 @@ final class RecurringRunnerModel extends BaseModel
     }
 
     /**
-     * @var int $rtId
-     * @var int $companyId
-     * @var string $dueDate
+     * @param int $rtId
+     * @param int $companyId
+     * @param string $dueDate
      * @return bool
      */
     public function taskAlreadyExistsForDate(
@@ -57,9 +59,9 @@ final class RecurringRunnerModel extends BaseModel
     }
 
     /**
-     * @var int $id
-     * @var int $companyId
-     * @var string $next
+     * @param int $id
+     * @param int $companyId
+     * @param string $next
      * @return void
      */
     public function updateNextDueDate(int $id, int $companyId, string $next): void
@@ -70,8 +72,8 @@ final class RecurringRunnerModel extends BaseModel
     }
 
     /**
-     * @var int $id
-     * @var int $companyId
+     * @param int $id
+     * @param int $companyId
      * @return bool
      */
     public function lockTask(int $id, int $companyId): bool
@@ -96,8 +98,8 @@ final class RecurringRunnerModel extends BaseModel
     }
 
     /**
-     * @var int $id
-     * @var int $companyId
+     * @param int $id
+     * @param int $companyId
      * @return void
      */
     public function clearProcessing(int $id, int $companyId): void

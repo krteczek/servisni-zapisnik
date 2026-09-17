@@ -20,6 +20,13 @@ use App\Core\Types;
  * @phpstan-import-type MenuSection from Types
  * @phpstan-import-type MenuItem from Types
  * @phpstan-import-type ContactRow from Types
+ * @phpstan-import-type ArchiveTaskRow from Types
+ * @phpstan-import-type ArchiveOrderRow from Types
+ * @phpstan-import-type ArchiveTaskListRow from Types
+ * @phpstan-import-type WorkOrderDetailRow from Types
+ * @phpstan-import-type TeamMemberRow from Types
+ * @phpstan-import-type TeamDetailRow from Types
+ * 
  */
 class ViewContext
 {
@@ -105,13 +112,18 @@ class ViewContext
      */
     public array $teams = [];
 
+    /** 
+     * @var array<int, TeamDetailRow> Seznam týmů s členy (pro teams/index)
+     */
+    public array $teamsWithMembers = [];
+
     /**
      * @var TeamRow|null Data konkrétního týmu
      */
     public ?array $team = null;
 
     /**
-     * @var array<int, UserRow> Členové týmu
+     * @var array<int, TeamMemberRow> Členové týmu
      */
     public array $members = [];
 
@@ -126,7 +138,7 @@ class ViewContext
     public array $rolesInTeam = [];
 
     /**
-     * @var array<int, TeamRow> Týmy uživatelů (např. pro výběr)
+     * @var array<int, list<array{id: int, name: string, color: string}>> Týmy uživatelů (např. pro výběr)
      */
     public array $userTeams = [];
 
@@ -141,6 +153,16 @@ class ViewContext
      * @var WorkOrderRow|null Data konkrétního pracovního příkazu
      */
     public ?array $order = null;
+
+    /**
+     * @var WorkOrderDetailRow|null Detail pracovního příkazu (pro detail)
+     */
+    public ?array $orderDetail = null;
+
+   /**
+     * @var array<int, TaskDetailRow>|null Úkoly konkrétní zakázky (pro detail)
+     */
+    public ?array $orderTasks = null;
 
     /**
      * @var array<string, mixed> Data z POST požadavku (pro zpětné zobrazení)
@@ -231,4 +253,27 @@ class ViewContext
      * @var string Vyhledávací řetězec
      */
     public string $search = '';
+
+
+    // ARCHIVE MODULE
+
+    /**
+     * @var array<int, ArchiveTaskListRow>|null Seznam archivovaných úkolů
+     */
+    public ?array $archiveTasks = [];
+
+    /**
+     * @var ArchiveTaskRow|null Detail archivovaného úkolu
+     */
+    public ?array $archiveTask = null;
+
+    /**
+     * @var array<int, ArchiveOrderRow>|null Seznam archivovaných zakázek
+     */
+    public ?array $archiveOrders = [];
+
+    /**
+     * @var ArchiveOrderRow|null Detail archivované zakázky
+     */
+    public ?array $archiveOrder = null;
 }

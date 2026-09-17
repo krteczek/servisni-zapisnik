@@ -29,7 +29,7 @@ $workOrders = $view->orders;
         <div class="card">
             <!-- HLAVIČKA KARTY -->
             <div class="card-header">
-                <span class="card-title">  <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id'] . '/detail/#main') ?>" 
+                <span class="card-title">  <a href="<?= Url::to('/{tenant}/work-orders/' . $wo['id'] . '/detail/#main') ?>" 
                    class="card-title"
                    title="Otevřít detail zakázky">
                     <?= e($wo['title']) ?>
@@ -55,7 +55,7 @@ $workOrders = $view->orders;
                     </div>
                     <div class="meta-item">
                        <span class="meta-label">Celkem úkolů: </span>
-                        <span class="meta-value"><?= (int)$wo['tasks_total'] ?></span>
+                        <span class="meta-value"><?= $wo['tasks_total'] ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Otevřených: </span>
@@ -71,7 +71,7 @@ $workOrders = $view->orders;
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Napsáno reportů: </span>
-                        <span class="meta-value"><?= (int)$wo['reports_count'] ?></span>
+                        <span class="meta-value"><?= $wo['reports_count'] ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Najeto: </span>
@@ -83,11 +83,11 @@ $workOrders = $view->orders;
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Zákazník: </span>
-                        <span class="meta-value"><?= e($wo['customer_name'] ? $wo['customer_name'] : 'nezadán') ?></span>
+                        <span class="meta-value"><?= e($wo['customer_name'] !== "" ? $wo['customer_name'] : 'nezadán') ?></span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Adresa: </span>
-                        <span class="meta-value"><?= e($wo['customer_address'] ? $wo['customer_address'] : 'nezadána') ?></span>
+                        <span class="meta-value"><?= e($wo['customer_address'] !== "" ? $wo['customer_address'] : 'nezadána') ?></span>
                     </div>
                </div>
             </div>
@@ -95,12 +95,12 @@ $workOrders = $view->orders;
             <!-- PATIČKA KARTY -->
             <div class="card-footer">
                 <div class="actions">
-                    <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id'] . '/detail/#main') ?>" 
+                    <a href="<?= Url::to('/{tenant}/work-orders/' . $wo['id'] . '/detail/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Detail zakázky, můžete přidat úkol k zakázce">
                         🔍 Detail zakázky
                     </a>
-                    <a href="<?= Url::to('/{tenant}/work-orders/' . (int)$wo['id'] . '/edit/#main') ?>" 
+                    <a href="<?= Url::to('/{tenant}/work-orders/' . $wo['id'] . '/edit/#main') ?>" 
                        class="btn btn-secondary" 
                        title="Upravit zakázku">
                         ✏️ Upravit
