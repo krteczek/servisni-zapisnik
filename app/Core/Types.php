@@ -104,6 +104,31 @@ namespace App\Core;
  *     team_color: string
  * }
  *
+ * @phpstan-type TaskBaseRow array{
+ *   id: int,
+ *   company_id: int,
+ *   team_id: int,
+ *   work_order_id: int,
+ *   due_date: ?string,
+ *   task_type: string,
+ *   recurring_task_id: ?int,
+ *   generated_date: ?string,
+ *   title: string,
+ *   description: ?string,
+ *   status: string,
+ *   created_by_user_id: int,
+ *   created_at: string,
+ *   done_at: ?string,
+ *   billing_export_id: ?int,
+ *   is_generated_task: int,
+ *   recurring_master_id: ?int,
+ *   recurring_frequency_type: ?string,
+ *   recurring_frequency_value: ?int,
+ *   recurring_next_due_date: ?string,
+ *   recurring_warning_days_before: ?int,
+ *   recurring_active: ?int
+ * }
+ * 
  * @phpstan-type WorkOrderRow array{
  *     id: int,
  *     company_id: int,
@@ -175,6 +200,76 @@ namespace App\Core;
  *  company_name: string,
  *  ready_for_done: bool,
  *  ready_for_cancel: bool
+ * }
+ * 
+ * @phpstan-type WorkbenchTaskRow array{
+ *     id: int,
+ *     title: string,
+ *     status: string,
+ *     due_date: ?string,
+ *     team_id: int,
+ *     work_order_id: int,
+ *     created_at: string,
+ *     recurring_task_id: ?int,
+ *     task_type: string,
+ *     work_order_title: string,
+ *     work_order_priority: string,
+ *     team_name: string,
+ *     team_color: string,
+ *     assignments_count?: int
+ * }
+ *
+ * @phpstan-type WorkbenchOrderRow array{
+ *     id: int,
+ *     company_id: int,
+ *     parent_id: ?int,
+ *     external_number: ?string,
+ *     title: string,
+ *     description: string,
+ *     wo_due_date: ?string,
+ *     source: string,
+ *     requested_by: string,
+ *     contact_person: string,
+ *     priority: string,
+ *     estimated_hours: ?string,
+ *     status: string,
+ *     is_system: int,
+ *     created_by_user_id: int,
+ *     created_at: string,
+ *     closed_at: ?string,
+ *     internal_number: int,
+ *     contact_id: ?int,
+ *     price_per_hour: int,
+ *     price_per_km: int,
+ *     year: int,
+ *     tasks?: array<int, WorkbenchTaskRow>,
+ *     can_be_done?: bool,
+ *     can_be_cancelled?: bool
+ * }
+ * 
+ * @phpstan-type WorkOrderBaseRow array{
+ *   id: int,
+ *   company_id: int,
+ *   parent_id: ?int,
+ *   external_number: ?string,
+ *   title: string,
+ *   description: string,
+ *   wo_due_date: ?string,
+ *   source: string,
+ *   requested_by: string,
+ *   contact_person: string,
+ *   priority: string,
+ *   estimated_hours: ?string,
+ *   status: string,
+ *   is_system: int,
+ *   created_by_user_id: int,
+ *   created_at: string,
+ *   closed_at: ?string,
+ *   internal_number: int,
+ *   contact_id: ?int,
+ *   price_per_hour: int,
+ *   price_per_km: int,
+ *   year: int
  * }
  * 
  * @phpstan-type ContactRow array{
@@ -328,35 +423,28 @@ namespace App\Core;
  *   total_kilometers: int
  * }
  * 
- * @phpstan-type WorkbenchOrderRow array{
- *   id: int,
- *   company_id: int,
- *   parent_id: ?int,
- *   external_number: ?string,
- *   title: string,
- *   description: string,
- *   wo_due_date: ?string,
- *   source: string,
- *   requested_by: string,
- *   contact_person: string,
- *   priority: string,
- *   estimated_hours: ?string,
- *   status: string,
- *   is_system: int,
- *   created_by_user_id: int,
- *   created_at: string,
- *   closed_at: ?string,
- *   internal_number: int,
- *   contact_id: ?int,
- *   price_per_hour: int,
- *   price_per_km: int,
- *   year: int,
- *   tasks?: array<int, WorkbenchTaskRow>,
- *   can_be_done?: bool,
- *   can_be_cancelled?: bool
+ *
+ * @phpstan-type WorkbenchDataRow array{
+ *     myTeams: array<int, TeamRow>,
+ *     otherTeams: array<int, TeamRow>,
+ *     myTeamTasks: array<int, WorkbenchTaskRow>,
+ *     otherTeamTasks: array<int, WorkbenchTaskRow>,
+ *     myReadyToDoneTasks: array<int, WorkbenchTaskRow>,
+ *     otherReadyToDoneTasks: array<int, WorkbenchTaskRow>,
+ *     myOrdersInProgress: array<int, WorkbenchOrderRow>,
+ *     otherOrdersInProgress: array<int, WorkbenchOrderRow>,
+ *     myReadyToCancelTasks: array<int, WorkbenchTaskRow>,
+ *     myInvoiceToReady: array<int, WorkbenchInvoiceTaskRow>,
+ *     otherInvoiceToReady: array<int, WorkbenchInvoiceTaskRow>,
+ *     myReadyToDoneOrders?: array<int, WorkbenchOrderRow>,
+ *     myReadyToCancelOrders?: array<int, WorkbenchOrderRow>,
+ *     otherReadyToDoneOrders?: array<int, WorkbenchOrderRow>,
+ *     otherReadyToCancelOrders?: array<int, WorkbenchOrderRow>,
+ *     isInternalBilling?: bool,
+ *     isExternalAccounting?: bool
  * }
- * 
  */
+
 final class Types
 {
 }

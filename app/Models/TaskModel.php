@@ -11,8 +11,9 @@ use App\Services\Tasks\TaskStatus;
 use App\Core\Types;
 
 
-/**
+/** 
  * @phpstan-import-type TaskDetailRow from Types
+ * @phpstan-import-type TaskBaseRow from Types
  */
 final class TaskModel extends BaseModel
 {
@@ -677,5 +678,13 @@ $sql =
         $row = $this->fetchOne($sql, $params);
 
         return (int) ($row['instance_count'] ?? 0);
+    }
+
+    /**
+     * @return TaskBaseRow|null
+     */
+    public function find(int $taskId): ?array
+    {
+        return parent::find($taskId);
     }
 }

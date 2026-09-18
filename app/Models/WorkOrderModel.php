@@ -7,8 +7,12 @@ use PDO;
 use App\Core\Auth;
 use App\Core\Transaction;
 use App\Services\WorkOrders\WOStatus;
+use App\Core\Types;
 
-
+/** 
+ * @phpstan-import-type WorkOrderBaseRow from Types
+ * @phpstan-import-type TaskDetailRow from Types
+ */
 class WorkOrderModel extends BaseModel
 {
     protected string $table = 'work_orders';
@@ -322,4 +326,11 @@ $params = [
         return $this->fetchAll($sql, $params);
     }
 
+    /**
+     * @return WorkOrderBaseRow|null
+     */
+    public function find(int $orderId): ?array
+    {
+        return parent::find($orderId);
+    }
 }

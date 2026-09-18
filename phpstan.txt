@@ -5,14 +5,6 @@
 /var/www/servisni-zapisnik/app/Controllers/ExportsController.php:87:Method App\Controllers\ExportsController::toCsv() has parameter $rows with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/InvoiceController.php:105:Only booleans are allowed in a negated boolean, mixed given.
 /var/www/servisni-zapisnik/app/Controllers/SystemController.php:46:Method App\Controllers\SystemController::searchCompany() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskController.php:57:Method App\Controllers\TaskController::getOrderOrRedirect() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskController.php:82:Method App\Controllers\TaskController::saveTask() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskController.php:240:Method App\Controllers\TaskController::getTaskOrRedirect() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskController.php:250:Method App\Controllers\TaskController::ensureTaskEditable() has parameter $task with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskController.php:269:Method App\Controllers\TaskController::ensureTaskClosable() has parameter $task with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskController.php:456:Method App\Controllers\TaskController::validateTask() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskController.php:456:Method App\Controllers\TaskController::validateTask() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskController.php:803:Method App\Controllers\TaskController::canUserAddReport() has no return type specified.
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:33:Method App\Controllers\TaskRecurringController::getTaskRecurringOrRedirect() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:146:Method App\Controllers\TaskRecurringController::validateRecurring() has parameter $data with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:146:Method App\Controllers\TaskRecurringController::validateRecurring() has parameter $defaults with no value type specified in iterable type array.

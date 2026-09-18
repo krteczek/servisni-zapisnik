@@ -23,7 +23,13 @@ use App\Services\Tasks\TaskType;
 use App\Services\Tasks\TaskStatus;
 use App\Services\WorkOrders\WOStatus;
 use Throwable;
+use App\Core\Types;
 
+
+/** 
+ * @phpstan-import-type WorkOrderBaseRow from Types
+ * @phpstan-import-type TaskBaseRow from Types 
+ */
 class TaskController extends Controller
 {
 
@@ -53,7 +59,9 @@ class TaskController extends Controller
         return $this->render('tasks/create');
     }
 
-
+/** 
+ * @return WorkOrderBaseRow 
+ */
 private function getOrderOrRedirect(int $orderId): array
 {
     if ($orderId <= 0) {
@@ -78,7 +86,9 @@ private function getOrderOrRedirect(int $orderId): array
 
 }
 
-
+/** 
+ * @param array<string, mixed> $data 
+ */ 
 private function saveTask(array $data, int $workOrderId): string
 {
     $this->checkCsrf();
@@ -89,7 +99,7 @@ private function saveTask(array $data, int $workOrderId): string
 
     // 2️⃣ Validace
     $post = $this->validateTask($data);
-    $teamId = (int) $post['team_id'];
+    $teamId = $post['team_id'];
 
     $teamModel = new TeamModel();
     $teams     = $teamModel->byActive(true);
@@ -237,7 +247,10 @@ private function saveTask(array $data, int $workOrderId): string
 
     }
 	// ověří existenci tasku, pokud existuje, vrátí jeho hodnoty, jinak redirect
-	private function getTaskOrRedirect(int $taskId): array
+    /** 
+     * @return TaskBaseRow
+     */ 
+    private function getTaskOrRedirect(int $taskId): array
 	{
 		$task = (new TaskModel())->find($taskId);
 		if($task === null) {
@@ -247,6 +260,9 @@ private function saveTask(array $data, int $workOrderId): string
 		return $task;	
 	}
 
+    /** 
+     * @param TaskBaseRow $task 
+     */
     private function ensureTaskEditable(array $task): void
     {
         if (TaskStatus::isDone($task['status'])) {
@@ -265,7 +281,10 @@ private function saveTask(array $data, int $workOrderId): string
         }
     }
 
-
+    /** 
+     * @param TaskBaseRow $task 
+     * 
+     */
     private function ensureTaskClosable(array $task, string $action = 'done'):void
     {
         $label = $action === 'done' ? 'uzavřít' : 'zrušit';
@@ -365,7 +384,7 @@ private function saveTask(array $data, int $workOrderId): string
         $post = $_POST;
         //nelze změnit tým, takže pro validaci 
         //musíme nastavit původní team_id
-        $post['team_id'] = (int)$task['team_id'];
+        $post['team_id'] = $task['team_id'];
         
 		$post = $this->validateTask($post);
 
@@ -449,16 +468,19 @@ private function saveTask(array $data, int $workOrderId): string
             Url::redirect('/{tenant}/work-orders/' . $order['id'] . '/detail/#main');
         }
     
-        return $this->saveTask($_POST, (int) $task['work_order_id']);
+        return $this->saveTask($_POST, $task['work_order_id']);
     }
 
-
+/** 
+ * @param array<string, mixed> $data 
+ * @return array<string, mixed> 
+ */
     private function validateTask(array $data): array
     {
         $title           = trim($data['title'] ?? '');
         $description     = trim($data['description'] ?? '');
         $is_recurring_master    = (int) ($data['is_recurring_master'] ?? 0);
-        $team_id         = (int) ($data['team_id'] ?? 0);
+        $team_id         = ($data['team_id'] ?? 0);
         $dueDate         = DateHelper::parseDate($data['due_date'] ?? null);
         
         //print_r($data);
@@ -602,9 +624,9 @@ private function saveTask(array $data, int $workOrderId): string
         }
 
         // 2. Data reportu
-        $report       = trim($data['report'] ?? '');
-        $kilometers   = (int) ($data['kilometers'] ?? 0);
-        $participants = $data['participants'] ?? [];
+        $report       = trim($data['report']);
+        $kilometers   = $data['kilometers'];
+        $participants = $data['participants'];
     
         // 3. Validace reportu
         if ($report === '') {
@@ -622,14 +644,14 @@ private function saveTask(array $data, int $workOrderId): string
         // 5. Aktuální členové týmu úkolu
         $teamMembership = new TeamMembership();
         $teamMembers = $teamMembership->currentMembers(
-            (int) $task['team_id']
+            $task['team_id']
         );
 
         $allowedUserIds = array_column($teamMembers, 'id');
 
         // 6. Validace účastníků
         foreach ($participants as $userId => &$participantData) {
-            $userId = (int) $userId;
+            $userId = $userId;
 
             // Nezaškrtnutý pracovník nás nezajímá.
             if (($participantData['selected'] ?? null) !== 'on') {
@@ -733,7 +755,7 @@ private function saveTask(array $data, int $workOrderId): string
 
         $assignmentId = $assignmentModel->createReport(
             $taskId,
-            $task['work_order_id'] ?? 0,
+            $task['work_order_id'],
             $data
         );
 
@@ -800,17 +822,20 @@ private function saveTask(array $data, int $workOrderId): string
         return $this->render('tasks/report');
     }
 
-        private function canUserAddReport(int $taskId)
-        {
-            //zízkáme id aktuálního přihlášeného uživatele
-            $userId = Auth::id();
+    /** 
+     * @return bool 
+     */ 
+    private function canUserAddReport(int $taskId): bool
+    {
+        //zízkáme id aktuálního přihlášeného uživatele
+        $userId = Auth::id();
 
-            //zjistíme, jestli má právo přidat report k tomuto úkolu
-            if((new TaskModel())->canUserAddReport($taskId, (int) $userId) === true)
-            {
-                return true;
-            }
-        return false;
+        //zjistíme, jestli má právo přidat report k tomuto úkolu
+        if((new TaskModel())->canUserAddReport($taskId, (int) $userId) === true)
+        {
+            return true;
         }
+    return false;
+    }
 
 }
