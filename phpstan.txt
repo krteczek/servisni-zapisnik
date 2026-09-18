@@ -1,26 +1,7 @@
-/var/www/servisni-zapisnik/app/Controllers/ArchiveController.php:27:Method App\Controllers\ArchiveController::getFiltersFromRequest() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:62:Method App\Controllers\ContactsController::getContactOrRedirect() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:105:Method App\Controllers\ContactsController::validateContacts() has parameter $post with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/ContactsController.php:105:Method App\Controllers\ContactsController::validateContacts() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/ExportsController.php:87:Method App\Controllers\ExportsController::toCsv() has parameter $rows with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/InvoiceController.php:105:Only booleans are allowed in a negated boolean, mixed given.
+/var/www/servisni-zapisnik/app/Controllers/ExportsController.php:63:Strict comparison using !== between int<min, -1>|int<1, max> and 0 will always evaluate to true.
 /var/www/servisni-zapisnik/app/Controllers/SystemController.php:46:Method App\Controllers\SystemController::searchCompany() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:33:Method App\Controllers\TaskRecurringController::getTaskRecurringOrRedirect() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:146:Method App\Controllers\TaskRecurringController::validateRecurring() has parameter $data with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:146:Method App\Controllers\TaskRecurringController::validateRecurring() has parameter $defaults with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:146:Method App\Controllers\TaskRecurringController::validateRecurring() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:229:Method App\Controllers\TaskRecurringController::ensureRecurringTaskClosable() has parameter $task with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/TaskRecurringController.php:330:Method App\Controllers\TaskRecurringController::ensureRecurringEditable() has parameter $task with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/UserController.php:316:Method App\Controllers\UserController::validateUserData() has parameter $data with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Controllers/UserController.php:316:Method App\Controllers\UserController::validateUserData() has parameter $old with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:152:Method App\Controllers\WorkOrderController::guardEditable() has parameter $order with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:372:Method App\Controllers\WorkOrderController::getOrderOrRedirect() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:389:Method App\Controllers\WorkOrderController::validate() has parameter $post with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:389:Method App\Controllers\WorkOrderController::validate() return type has no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:477:Method App\Controllers\WorkOrderController::closeOrderCanceled() has no return type specified.
-/var/www/servisni-zapisnik/app/Controllers/WorkOrderController.php:515:Method App\Controllers\WorkOrderController::closeOrderDone() has no return type specified.
-/var/www/servisni-zapisnik/app/Controllers/WorkbenchController.php:33:Method App\Controllers\WorkbenchController::canOrdersBeDoneOrCancel() has parameter $orders with no value type specified in iterable type array.
-/var/www/servisni-zapisnik/app/Controllers/WorkbenchController.php:33:Method App\Controllers\WorkbenchController::canOrdersBeDoneOrCancel() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Onboarding/OnboardingService.php:20:Method App\Services\Onboarding\OnboardingService::run() has parameter $load with no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Onboarding/OnboardingService.php:20:Method App\Services\Onboarding\OnboardingService::run() return type has no value type specified in iterable type array.
 /var/www/servisni-zapisnik/app/Services/Recurrings/RecurringRunner.php:126:Method App\Services\Recurrings\RecurringRunner::processCompany() has parameter $company with no value type specified in iterable type array.

@@ -42,7 +42,11 @@ final class SystemController extends Controller
 
         return $this->render('system/detail');
     }    
-    
+
+    /**
+     * @param string $search
+     * @return array<int, array<string, mixed>>
+     */
     private function searchCompany(string $search): array
     {
         if ($search === '') {

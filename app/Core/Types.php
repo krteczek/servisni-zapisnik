@@ -129,6 +129,32 @@ namespace App\Core;
  *   recurring_active: ?int
  * }
  * 
+ * @phpstan-type RecurringTaskRow array{
+ *   id: int,
+ *   company_id: int,
+ *   team_id: int,
+ *   work_order_id: int,
+ *   due_date: ?string,
+ *   task_type: string,
+ *   recurring_task_id: ?int,
+ *   generated_date: ?string,
+ *   title: string,
+ *   description: ?string,
+ *   status: string,
+ *   created_by_user_id: int,
+ *   created_at: string,
+ *   done_at: ?string,
+ *   billing_export_id: ?int,
+ *   is_generated_task: int,
+ *   recurring_master_id: ?int,
+ *   recurring_frequency_type: ?string,
+ *   recurring_frequency_value: ?int,
+ *   recurring_next_due_date: ?string,
+ *   recurring_warning_days_before: ?int,
+ *   recurring_active: ?int,
+ *   count_instances: int
+ * }
+ *
  * @phpstan-type WorkOrderRow array{
  *     id: int,
  *     company_id: int,

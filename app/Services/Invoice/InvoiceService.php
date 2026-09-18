@@ -155,7 +155,7 @@ final class InvoiceService
     /**
      * @param int $taskId
      * @param array<string, mixed> $post
-     * @return array<string, mixed>
+     * @return array{success: bool, errors?: array<string, list<string>>, data?: array<string, mixed>, invoice_id?: int}
      */
     public function invoiceFromTask(
         int $taskId,
@@ -222,10 +222,11 @@ final class InvoiceService
 
 /**
  * @param array<string, mixed> $post
- * @return array<string, mixed>
+ * @return array{title: string, issued_at: string, due_date: string, note: string, customer: array<string, mixed>, items: array<int, array<string, mixed>>, errors: array<string, list<string>>}
  */
 private function validateInvoiceData(array $post): array
 {
+    /** @var array<string, list<string>> $errors */
     $errors = [];
 
     // ------------------
@@ -237,15 +238,15 @@ private function validateInvoiceData(array $post): array
     $dueDate = (string) ($post['due_date'] ?? '');
 
     if ($title === '') {
-        $errors['title'] = 'Název faktury je povinný.';
+        $errors['title'][] = 'Název faktury je povinný.';
     }
 
     if ($issuedAt === '') {
-        $errors['issued_at'] = 'Datum vystavení je povinné.';
+        $errors['issued_at'][] = 'Datum vystavení je povinné.';
     }
 
     if ($dueDate === '') {
-        $errors['due_date'] = 'Datum splatnosti je povinné.';
+        $errors['due_date'][] = 'Datum splatnosti je povinné.';
     }
 
     // ------------------
@@ -279,12 +280,12 @@ private function validateInvoiceData(array $post): array
         );
 
         if ($title === '') {
-            $errors["items.$i.title"] =
+            $errors["items.$i.title"][] =
                 'Název položky je povinný.';
         }
 
         if ($minutes === 0 && $kilometers === 0) {
-            $errors["items.$i"] =
+            $errors["items.$i"][] =
                 'Položka musí obsahovat čas nebo kilometry.';
         }
 

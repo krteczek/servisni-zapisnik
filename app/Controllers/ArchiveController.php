@@ -24,6 +24,10 @@ use Throwable;
 
 class ArchiveController extends Controller
 {
+
+    /**
+     * @return array{status: string, q: string}
+     */
     private function getFiltersFromRequest(): array
     {
         $status = $_GET['status'] ?? 'all';
@@ -36,8 +40,6 @@ class ArchiveController extends Controller
         return [
             'status' => $status,
             'q'      => $q,
-            // future:
-            // 'date_from' => ...
         ];
     }
 
@@ -70,7 +72,13 @@ class ArchiveController extends Controller
         //získáme reporty
         $reports = [];
         $task['allReportsParticipants'] = [];
+
         $wo = (new WorkOrderModel())->find($task['work_order_id']);
+        if ($wo === null) {
+            Flash::error('Zakázka neexistuje.');
+            Url::redirect('/{tenant}/archive/tasks/#main');
+        }
+        
         $task['WOStatus'] = $wo['status'];
         $task['totalKm'] = 0;
         $this->view->title .= ' > ' . $task['title'] . ' ';

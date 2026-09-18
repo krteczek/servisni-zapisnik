@@ -46,14 +46,17 @@ private function dataToView(): void
     public function exportTasksPost(): string
     {
 
-        $ids = $_POST['ids'] ?? [];
-
+        $rawIds = $_POST['ids'] ?? [];
+        if (!is_array($rawIds)) {
+            $rawIds = [];
+        }
         $ids = array_values(array_unique(
             array_filter(
-                array_map('intval', $ids),
-                static fn (int $id): bool => $id !== 0
+                array_map('intval', $rawIds),
+                static fn (int $id): bool => $id > 0
             )
         ));
+
 
         if ($ids === []) {
             $this->dataToView();
@@ -83,7 +86,9 @@ private function dataToView(): void
 
     /**
      * Jednoduchý CSV export
-     */
+    * @param array<int, array<string, mixed>> $rows
+    * @return string
+    */
     private function toCsv(array $rows): string
     {
         if ($rows === []) {
@@ -100,7 +105,13 @@ private function dataToView(): void
             fputcsv($out, $row);
         }
 
+        //rewind($out);
+        //return stream_get_contents($out);
+
         rewind($out);
-        return stream_get_contents($out);
+        $content = stream_get_contents($out);
+        fclose($out);
+
+        return $content !== false ? $content : '';
     }
 }

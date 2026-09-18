@@ -10,9 +10,8 @@ use App\Core\Flash;
 use App\Core\UserGuard;
 use App\Core\Auth;
 use App\Core\LoggerHolder;
-
+use App\Core\ViewContext;
 use App\Models\UserModel;
-
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
 use App\Services\Mail\MailService;
@@ -22,15 +21,11 @@ use App\Services\Users\BuildMailService;
 final class UserController extends Controller
 {
     private UserModel $users;
-
-    //private const MAX_EMAIL_LENGTH           = 255;
     private const MAX_EMPLOYEE_NUMBER_LENGTH = 50;
     private const MAX_FIRST_NAME_LENGTH      = 100;
     private const MAX_LAST_NAME_LENGTH       = 100;
-    //private const MAX_PASSWORD_LENGTH        = 255;
-    //private const MIN_PASSWORD_LENGTH        = 8;
-
-    public function __construct($view)
+ 
+    public function __construct(ViewContext $view)
     {
         parent::__construct($view);
         $this->users = new UserModel();
@@ -61,14 +56,13 @@ final class UserController extends Controller
      */
     public function store(): string
     {
-        $data = $_POST;
-        $this->view->data  = $data;
-        $this->view->roles = Roles::effective();
-
         $this->checkCsrf();
-        $this->validateUserData($data);
+        $data = $this->validateUserData($_POST);
 
         if ($this->hasErrors()) {
+            $this->view->roles = Roles::effective();
+            $this->view->data  = $data;
+
             return $this->render('users/create');
         }
 
@@ -94,6 +88,9 @@ final class UserController extends Controller
                 'global',
                 'Litujeme, uživatele se nepodařilo vytvořit.'
             );
+
+            $this->view->roles = Roles::effective();
+            $this->view->data  = $data;
 
             return $this->render('users/create');
         }
@@ -160,75 +157,6 @@ final class UserController extends Controller
         Url::redirect('/{tenant}/users/' . $userId . '/detail/#main');
     }
 
-public function storeOLD(): string
-	{
-	    $data = $_POST;
-	    $this->view->data  = $data;
-	    $this->view->roles = Roles::effective();
-	
-	    $this->checkCsrf();
-	    $this->validateUserData($data);
-	
-	    if ($this->hasErrors()) {
-	        return $this->render('users/create');
-	    }
-	
-	    $userId = $this->users->create([
-	        'email'           => strtolower(trim($data['email'])),
-	        'employee_number' => trim($data['employee_number']),
-	        'telefon' 		  => trim($data['telefon']),
-	        
-	        'first_name'      => trim($data['first_name']),
-	        'last_name'       => trim($data['last_name']),
-	        'global_role'     => $data['global_role'],
-	        'active'          => 0,
-	        'password_hash'   => null,
-	    ]);
-	
-	
-	    try {
-
-	    	//vytvoříme token
-				$token = (new TokenService())->create(
-				    type: TokenType::INVITATION,
-				    email: $data['email'],
-				    userId: $userId
-				);
-
-				$url = Url::base() . Url::to('/activate/complete?token=' . $token);
-				$to = [
-				    'activationUrl' => $url,
-				    'companyName'   => Auth::company(),
-				];
-			//vytvoříme emailovou zprávu
-			[$subject, $htmlBody, $textBody] = BuildMailService::build('users.invitation', $to);
-
-			//pošleme email
-        $ok = (new MailService())->send(
-  				toEmail: $data['email'],
-				toName: $data['email'],
-				subject: $subject,
-				html: $htmlBody,
-				text: $textBody
-        );
-	
-	
-	        Flash::success(
-	            'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
-	            ' byl úspěšně vytvořen. Aktivační e-mail byl odeslán.'
-	        );
-	
-	    } catch (\Throwable $e) {
-	//var_dump($e);
-	        // ideálně logovat $e
-	        Flash::error(
-	            'Uživatel: ' . $data['first_name'] . ' ' . $data['last_name'] .
-	            ' byl vytvořen, ale aktivační e-mail se nepodařilo odeslat.' 
-	        );
-	    }
-	
-	    Url::redirect('/{tenant}/users/' . $userId . '/detail/#main');
-	}
 
 
     /* =============================
@@ -257,21 +185,20 @@ public function storeOLD(): string
             Url::redirect('/{tenant}/users/#main');
         }
 
-        $data = $_POST;
-
-        $this->view->data  = $data;
-        $this->view->old   = $old;
         $this->view->roles = Roles::effective();
+        $this->view->old   = $old;
 
         $this->checkCsrf();
-        $this->validateUserData($data, $old);
+        $data = $this->validateUserData($_POST);
 
-        if ($this->hasErrors()) {
+        $this->view->data  = $data;
+        if ($this->hasErrors()) {                    
+            
             return $this->render('users/edit');
         }
 
         $arr1 = [
-            'telefon'			=> trim(trim($data['telefon'])),
+            'telefon'		  => trim($data['telefon']),
             'employee_number' => trim($data['employee_number']),
             'first_name'      => trim($data['first_name']),
             'last_name'       => trim($data['last_name']),
@@ -279,31 +206,30 @@ public function storeOLD(): string
         $arr2 = [];
         //pokud není uživatel doménový Superadmin, povolíme editovat:
         // email, globas_role s active
-			if (!UserGuard::isProtected($old))
-			{
-                 $data['active'] = isset($data['active']) ? 1 : 0;
+        if (!UserGuard::isProtected($old))
+        {
+            $active = isset($_POST['active']) ? 1 : 0;
+            $arr2 = [
+                'email'           => strtolower(trim($data['email'])),
+                'global_role'     => $data['global_role'],
+                'active'          => $active,
+            ];
 
-				$arr2 = [
-				'email'           => strtolower(trim($data['email'])),
-				'global_role'     => $data['global_role'],
-				'active'          => $data['active'],
-				];
+            // uživatel byl deaktivován,. jdeme ho i odhlásit, pokud je přihlášený
+            if ($active === 0 && (int)$old['active'] === 1)
+                {
+                    $arr2['session_version'] = (int)$old['session_version'] + 1;
+                }
 
-                // uživatel byl deaktivován,. jdeme ho i odhlásit, pokud je přihlášený
-                if ($data['active'] === 0 && $old['active'] === 1)
-                    {
-                        $data['session_version'] = $old['session_version'] + 1;
-                        $arr2['session_version'] = $data['session_version'];
-                    }
+        }
 
-			}
-
-			$update = array_merge($arr1, $arr2);
+		$update = array_merge($arr1, $arr2);
 
         if ($this->users->update($id, $update)) {
             Flash::success('Data byla změněna.');
         } else {
             Flash::error('Data se nepodařilo změnit.');
+            return $this->render('users/edit');
         }
 
         Url::redirect('/{tenant}/users/#main');
@@ -312,22 +238,25 @@ public function storeOLD(): string
     /* =============================
      * VALIDACE
      * ============================= */
-
-    private function validateUserData(array $data, ?array $old = null): void
+    /**
+     * @param array<string, mixed> $data
+     * @return array
+     */
+    private function validateUserData(array $data): array
     {
         $email          = strtolower(trim($data['email'] ?? ''));
         $employeeNumber = trim($data['employee_number'] ?? '');
-		  $telefon        = trim($data['telefon'] ?? '');
+		$telefon        = trim($data['telefon'] ?? '');
         $firstname      = trim($data['first_name'] ?? '');
         $lastname       = trim($data['last_name'] ?? '');
-        $role 				= trim($data['global_role'] ?? '');
+        $role 			= trim($data['global_role'] ?? '');
 
         if ($firstname === '') {
-            $this->addError('firstname', 'Jméno je povinné.');
+            $this->addError('first_name', 'Jméno je povinné.');
         }
-        elseif (mb_strlen($firstname,'utf-8') >= self::MAX_FIRST_NAME_LENGTH)
+        elseif (mb_strlen($firstname,'utf-8') > self::MAX_FIRST_NAME_LENGTH)
         {
-            $this->addError('firstname', 'Jméno je příliš dlouhé.');
+            $this->addError('first_name', 'Jméno je příliš dlouhé.');
         }
 
         if ($lastname === '') {
@@ -349,10 +278,19 @@ public function storeOLD(): string
         {
             $this->addError('employee_number', 'Osobní číslo je příliš dlouhé.');
         }
-			if(!Roles::exists($role))
-			{
-				$role = Roles::default();
-			}
+        if(!Roles::exists($role))
+        {
+            $role = Roles::default();
+        }
+
+        return [
+            'email'             => $email,
+            'employee_number'   => $employeeNumber,
+            'telefon'           => $telefon,
+            'first_name'        => $firstname,
+            'last_name'         => $lastname,
+            'global_role'       => $role,
+        ];
     }
 
     /* =============================
@@ -387,7 +325,7 @@ public function storeOLD(): string
     public function resendActivationEmail(int $id): string
     {
         $user = $this->users->find($id);
-//var_dump($user);exit;
+
         if ($user === null) {
             Flash::error('Uživatel neexistuje.');
             Url::redirect('/{tenant}/users/#main');
@@ -432,7 +370,7 @@ public function storeOLD(): string
 	       {
 	       		Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
-	            ' se nepodařilo aktivační e-mail odeslat. 1'
+	            ' se nepodařilo aktivační e-mail odeslat.'
 	            );
 
 	       }
@@ -447,11 +385,10 @@ public function storeOLD(): string
 
 		    ]);
 	    	
-			//var_dump($e);exit;
 	        
 	        Flash::error(
 	            'Uživateli: ' . $user['first_name'] . ' ' . $user['last_name'] .
-	            ' se aktivační e-mail nepodařilo odeslat.2'
+	            ' se aktivační e-mail nepodařilo odeslat.'
 	        );
 	    }
 	

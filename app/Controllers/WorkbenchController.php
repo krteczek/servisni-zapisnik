@@ -7,7 +7,10 @@ use App\Core\Controller;
 use App\Models\WorkbenchModel;
 use App\Core\ViewContext;
 use App\Services\Settings\SettingsService;
-
+use App\Core\Types;
+/**
+ * @phpstan-import-type WorkbenchOrderRow from Types
+ */
 class WorkbenchController extends Controller
 {
     private WorkbenchModel $model;
@@ -30,6 +33,10 @@ class WorkbenchController extends Controller
 
     }
 
+    /**
+     * @param array<int, WorkbenchOrderRow> $orders
+     * @return array{0: array<int, WorkbenchOrderRow>, 1: array<int, WorkbenchOrderRow>}
+     */
     private function canOrdersBeDoneOrCancel(array $orders): array
     {
         $woCancel = [];

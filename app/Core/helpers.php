@@ -1,14 +1,11 @@
 <?php
 declare(strict_types=1);
 
-use App\Core\Types;
+//use App\Core\Types;
 
 /**
  * Bezpečně escapuje text pro výstup do HTML.
  * Zabrání XSS útoku při zobrazování uživatelského vstupu.
- *
- * TODO: [SECURITY] Zvážit použití HTML Purifier pro povolené HTML tagy
- * TODO: [PERFORMANCE] Přidat caching pro často escapované identické texty
  *
  * @param mixed $value Text k escapování
  * @return string Escapovaný text (prázdný string pokud vstup je null)
@@ -30,9 +27,6 @@ function e(mixed $value): string
  * Formátuje hodnotu pro zobrazení v uživatelském rozhraní.
  * Speciálně formátuje boolean, null a číselné hodnoty.
  *
- * TODO: [I18N] Přidat lokalizaci pro "ano"/"ne" podle jazyka uživatele
- * TODO: [FEATURE] Přidat formátování pro pole a objekty (json_encode)
- *
  * @param mixed $v Hodnota k formátování
  * @return string Formátovaný a escapovaný výstup
  */
@@ -47,7 +41,6 @@ function formatValue(mixed $v): string {
  * Formátuje počet minut na čitelný časový údaj (hodiny a minuty).
  * Používá české zkratky "h" a "min".
  *
- * TODO: [I18N] Přidat podporu pro jiné jazyky (hours/minutes)
  * TODO: [FEATURE] Přidat volbu formátu (např. 1.5h místo 1 h 30 min)
  *
  * @param int $minutes Počet minut
@@ -74,7 +67,6 @@ function formatMinutes(int $minutes): string
  * Formátuje datetime na český dlouhý formát s měsícem v genitivu.
  * Vrací ve formátu "1. ledna 2023 14:30".
  *
- * TODO: [I18N] Přidat podporu pro další jazyky (anglické, německé měsíce)
  * TODO: [FEATURE] Přidat volbu zahrnutí/vyloučení času
  *
  * @param string|null $datetime DateTime string (musí být parsovatelný PHP DateTime)
@@ -124,13 +116,17 @@ function formatCzDate(?string $datetime, bool $withTime = false): string
 }
 
 /**
- * @param mixed $key
- * @return string
+ * Přeloží interní klíč na textový popisek.
+ *
+ * Výsledek není escapovaný pro HTML.
+ *
+ * @param mixed $key Interní klíč
+ * @return string Přeložený nebo původní klíč
  */
 function t(mixed $key): string
 {
     if (!is_string($key)) {
-        return e((string)$key);
+        return (string)$key;
     }
 
     $statuses = [
@@ -150,7 +146,7 @@ function t(mixed $key): string
         'active'      => 'Aktivní',
         'inactive'    => 'Neaktivní',
         'pending'     => 'Čeká na aktivaci',
-        'phone'       => 'Telefón',
+        'phone'       => 'Telefon',
         'email'       => 'Email',
         'personal'    => 'Osobně',
         'exported'    => 'Exportováno',
@@ -158,12 +154,14 @@ function t(mixed $key): string
 
     $key = strtolower(trim($key));
 
-    return e($statuses[$key] ?? $key);
+    return $statuses[$key] ?? $key;
 }
 
 /**
- * @param mixed $key
- * @return string
+ * Přeloží interní klíč a escapuje výsledek pro HTML.
+ *
+ * @param mixed $key Interní klíč
+ * @return string Přeložený a HTML-escapovaný text
  */
 function te(mixed $key): string
 {
@@ -193,20 +191,6 @@ function ipToBinary(string $ip): string
     $binary = @inet_pton($ip);
 
     return $binary !== false ? $binary : (string) inet_pton('0.0.0.0');
-}
-
-/**
- * Zjistí user agenta klienta.
- *
- * @return string
- */
-function getClientUserAgent(): string
-{
-    if (!isset($_SERVER['HTTP_USER_AGENT'])) {
-        return 'Unknown';
-    }
-
-    return mb_substr($_SERVER['HTTP_USER_AGENT'], 0, 255);
 }
 
 /**

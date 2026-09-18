@@ -138,7 +138,7 @@ $fullName = $fullName === '' ? 'Bez jména' : $fullName;
                             <label class="checkbox" style="display:flex; align-items:center; gap:8px;">
                                 <input type="checkbox"
                                        name="active"
-                                       <?= $old['active'] !== '' ? 'checked' : '' ?>
+                                       <?= (int)($old['active'] ?? 0) === 1 ? 'checked' : '' ?>
                                        style="width:auto;">
                                 <span>Aktivní účet</span>
                             </label>
