@@ -102,7 +102,7 @@ class InvoiceController extends Controller
                 $_POST
             );
 
-            if (!$result['success']) {
+            if ($result['success'] !== true) {
 
                 $this->view->errors = $result['errors'];
                 $this->view->data   = $result['data'];

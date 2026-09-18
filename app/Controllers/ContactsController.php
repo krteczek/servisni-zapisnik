@@ -9,7 +9,11 @@ use App\Core\Url;
 use App\Core\Flash;
 use App\Core\Auth;
 use App\Models\ContactsModel;
+use App\Core\Types;
 
+/** 
+ * @phpstan-import-type ContactRow from Types
+ */
 class ContactsController extends Controller
 {
     private ContactsModel $model;
@@ -59,6 +63,9 @@ class ContactsController extends Controller
         Url::redirect('/{tenant}/contacts/index/#main');
     }
 
+    /**
+     * @return ContactRow
+     */
     private function getContactOrRedirect(int $id): array
     {
         $contact = $this->model->find($id);
@@ -101,7 +108,10 @@ class ContactsController extends Controller
         Url::redirect('/{tenant}/contacts/index/#main');
     }
 
-
+/**
+ * @param array<string, mixed> $post
+ * @return array<string, mixed>
+ */
 private function validateContacts(array $post): array
 {
     $data = [

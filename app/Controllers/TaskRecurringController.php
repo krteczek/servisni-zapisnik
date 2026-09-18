@@ -15,11 +15,13 @@ use App\Models\RecurringTaskModel;
 use App\Models\TeamModel;
 use App\Services\Tasks\TaskType;
 use App\Services\Tasks\TaskStatus;
-
 use Throwable;
+use App\Core\Types;
 
-use Override;
-
+/** 
+ * @phpstan-import-type TaskBaseRow from Types
+ * @phpstan-import-type RecurringTaskRow from Types
+ */
 final class TaskRecurringController extends Controller
 {
     private RecurringTaskModel $model;
@@ -30,6 +32,9 @@ final class TaskRecurringController extends Controller
         $this->model = new RecurringTaskModel();
     }
 
+    /**
+     * @return RecurringTaskRow 
+     */
     private function getTaskRecurringOrRedirect(int $taskId): array
 	{
         // možná ušetříme dotaz
@@ -142,7 +147,11 @@ final class TaskRecurringController extends Controller
 
     }
 
-
+    /**
+     * @param array<string, mixed> $data 
+     * @param array<string, mixed> $defaults 
+     * @return array<string, mixed> 
+     */
     private function validateRecurring(array $data, array $defaults): array
     {
         return [
@@ -225,6 +234,9 @@ final class TaskRecurringController extends Controller
 
     /**
      * Ověří, zda je šablona opakujícího se úkolu uzavíratelná.
+     * 
+     * @param TaskBaseRow $task
+     * @return void
      */
     public function ensureRecurringTaskClosable(array $task): void
     {
@@ -324,7 +336,7 @@ final class TaskRecurringController extends Controller
     /** 
      * Ověří, zda je opakující se úkol upravitelný.
      *
-     * @param array $task Úkol k ověření
+     * @param TaskBaseRow $task Úkol k ověření
      * @return void
      */
     private function ensureRecurringEditable(array $task): void
