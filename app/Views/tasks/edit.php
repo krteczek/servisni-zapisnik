@@ -10,7 +10,6 @@ use App\Services\Tasks\TaskType;
 
 require __DIR__ . '/../layout/header.php';
 
-/** @var array[] $tasks */
 
 $workOrder = $view->order;
 $team = $view->team;
@@ -83,7 +82,7 @@ $errors = $view->errors;
 						</p>
 
 
-						<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/clone/#main') ?>"
+						<a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/clone/#main') ?>"
 							class="btn btn-secondary"
 							target="_blank"
 							rel="noopener noreferrer"
@@ -106,7 +105,7 @@ $errors = $view->errors;
 										Tento úkol je opakovací. Kliknutím na tlačítko <strong>Nastavit opakování úkolu</strong>
 										se dostanete na stránku, kde můžete nastavit frekvenci opakování úkolu.
 									</label>
-							<a href="<?= Url::to('/{tenant}/tasks/' . (int) $task['id'] . '/recurringEdit/#main') ?>" 
+							<a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurringEdit/#main') ?>" 
 								class="btn btn-secondary">
 								
 								Nastavit opakování úkolu
@@ -126,7 +125,7 @@ $errors = $view->errors;
 						Upravit úkol
 					</button>
 
-					<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $workOrder['id'] . '/detail/#main') ?>" 
+					<a href="<?= Url::to('/{tenant}/work-orders/' . $workOrder['id'] . '/detail/#main') ?>" 
 						class="btn btn-secondary">
 						<span class="btn-icon">←</span>
 						Na detail zakázky

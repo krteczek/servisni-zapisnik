@@ -10,24 +10,32 @@ use App\Services\WorkOrders\WorkOrderSequenceService;
 use App\Core\Database;
 use Throwable;
 use PDO;
+use App\Core\Types;
+
+/**
+ * @phpstan-import-type WorkOrderCreateData from Types
+ */
 class WorkOrderNumberService
 {
-public function generateAndCreate(array $data, PDO $pdo): int
-{
-    $workOrderModel = new WorkOrderModel();
-    $sequenceModel = new WorkOrderSequencesModel();
+    /** 
+     * @param WorkOrderCreateData $data
+     */
+    public function generateAndCreate(array $data, PDO $pdo): int
+    {
+        $workOrderModel = new WorkOrderModel();
+        $sequenceModel = new WorkOrderSequencesModel();
 
-    $workOrderModel->setConnection($pdo);
-    $sequenceModel->setConnection($pdo);
+        $workOrderModel->setConnection($pdo);
+        $sequenceModel->setConnection($pdo);
 
-    $sequenceService = new WorkOrderSequenceService($sequenceModel);
+        $sequenceService = new WorkOrderSequenceService($sequenceModel);
 
-    $number = $sequenceService->nextNumber();
+        $number = $sequenceService->nextNumber();
 
-    $data['internal_number'] = $number;
-    $data['year'] = (int) date('Y');
+        $data['internal_number'] = $number;
+        $data['year'] = (int) date('Y');
 
-    return $workOrderModel->create($data);
-}
+        return $workOrderModel->create($data);
+    }
 
 }

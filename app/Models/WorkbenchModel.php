@@ -5,9 +5,13 @@ namespace App\Models;
 
 use App\Core\Auth;
 use App\Services\Tasks\TaskType;
+use App\Core\Types;
 
 /**
  * Model pro práci s daty na Workbenchi
+ */
+/**
+ * @phpstan-import-type WorkbenchDataRow from Types
  */
 class WorkbenchModel extends BaseModel
 {
@@ -15,8 +19,9 @@ class WorkbenchModel extends BaseModel
     protected string $connection = 'admin';
     protected bool $tenantAware = true;
  
+
     /**
-     * @return array<string, array<int, array<string, mixed>>>
+     * @return WorkbenchDataRow
      */
     public function forIndex(): array
     {
@@ -626,6 +631,7 @@ private function otherInvoiceToReady(array $teamIds): array
     t.id,
     t.title,
     t.done_at,
+    t.status,
 
     wo.id AS work_order_id,
     wo.title AS work_order_title,

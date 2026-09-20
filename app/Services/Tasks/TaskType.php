@@ -10,8 +10,9 @@ final class TaskType
     public const RECURRING_MASTER   = 'recurring_master';
 
 
-    /** @return array{string} **/
-
+    /** 
+     * @return array<int, self::NORMAL|self::RECURRING_INSTANCE|self::RECURRING_MASTER>
+     */
     public static function all(): array
     {
         return [

@@ -28,8 +28,13 @@ final class UserPasswordResetService
         private MailService $mailService = new MailService(),
     ) {}
 
+    /**
+     * @param string $tenantSlug
+     * @param string $email
+     * @return array{ok: bool, result: string}
+     */
     public function request(
-        ?string $tenantSlug,
+        string $tenantSlug,
         string $email
     ): array {
 //var_dump(self::PASSWORD_RESET);exit;

@@ -1,12 +1,8 @@
 <?php
 declare(strict_types=1);
 
+
 /** @var \App\Core\ViewContext $view */
-/** @var array[] $tasks */
-
-use App\Core\Url;
-use App\Core\Csrf;
-
 
 require __DIR__ . '/../../layout/header.php';
 
@@ -41,18 +37,17 @@ $tasks = $view->tasks ?? [];
             
             <div>
                 <div>
-                    <strong><?= e($task['title'] ?? '') ?></strong>
+                    <strong><?= e($task['title']) ?></strong>
                 </div>
 
                 <div class="text-sm opacity-70">
-                    <?= e($task['team_name'] ?? '—') ?>
-                    ·
-                    <?= e($task['status'] ?? '') ?>
+                    <?= e($task['team_name']) ?>
+                    
                 </div>
             </div>
 
             <div>
-                <input type="checkbox" name="ids[]" value="<?= (int)$task['id'] ?>">
+                <input type="checkbox" name="ids[]" value="<?= $task['id'] ?>">
             </div>
 
         </div>

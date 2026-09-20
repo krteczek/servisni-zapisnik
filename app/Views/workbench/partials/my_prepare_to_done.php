@@ -1,12 +1,10 @@
 <?php
 declare(strict_types=1); 
 
-/** @var \App\Core\ViewContext $view */
-
-
 use App\Core\Url;
 
-$data = $view->data;
+/** @var \App\Core\ViewContext $view */
+$data = $view->WBData;
 //var_dump($data['myReadyToDoneOrders']);
 
 $myTeams = [];

@@ -8,18 +8,16 @@ use App\Core\Url;
 use App\Core\Csrf;
 use App\Core\Config;
 use App\Services\Tasks\TaskStatus;
-use App\Services\Tasks\TaskType;
 
 require __DIR__ . '/../layout/header.php';
-
-/** @var array[] $tasks */
 
 $workOrder = $view->order;
 $teams = $view->teams;
 $task = $view->task;
 $errors = $view->errors;
+
+/** @var array<string, mixed> $data */
 $data = $view->data; 
-//var_dump($post);
 $frequencies = Config::get('recurring.frequencies');
 $default = Config::get('recurring.default');
 $limits = Config::get('recurring.limits');
@@ -55,7 +53,7 @@ if (!$type || !array_key_exists($type, $frequencies)) {
 					<select name="frequency_type">
 						<?php foreach ($frequencies as $key => $value): ?>
 							<option value="<?= e($key) ?>"
-								<?= $key === ($data['frequency_type'] ?? $default['frequency_type']) ? 'selected' : '' ?>>
+								<?= $key === (string) ($data['frequency_type'] ?? $default['frequency_type']) ? 'selected' : '' ?>
 								<?= e($value) ?>
 							</option>
 						<?php endforeach; ?>

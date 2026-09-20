@@ -14,20 +14,27 @@ use App\Core\Types;
  *
  * @phpstan-import-type TaskListRow from Types
  * @phpstan-import-type TaskDetailRow from Types
- * @phpstan-import-type TaskBaseRow from Types 
+ * @phpstan-import-type TaskBaseRow from Types
+ * 
  * @phpstan-import-type WorkOrderRow from Types
  * @phpstan-import-type WorkOrderDetailRow from Types
  * @phpstan-import-type WorkOrderBaseRow from Types
+ * 
  * @phpstan-import-type UserRow from Types
- * @phpstan-import-type TeamRow from Types
- * @phpstan-import-type TeamMemberRow from Types
+ * 
+ * @phpstan-import-type TeamRow from Types 
+ * @phpstan-import-type TeamMemberRow from Types 
  * @phpstan-import-type TeamDetailRow from Types
+ * 
  * @phpstan-import-type MenuSection from Types
  * @phpstan-import-type MenuItem from Types
+ * 
  * @phpstan-import-type ContactRow from Types
+ * 
  * @phpstan-import-type ArchiveTaskRow from Types
  * @phpstan-import-type ArchiveOrderRow from Types
  * @phpstan-import-type ArchiveTaskListRow from Types
+ * @phpstan-import-type WorkbenchDataRow from Types
  * 
  * 
  */
@@ -173,9 +180,9 @@ class ViewContext
     public array $post = [];
 
      /**
-     * @var array<string, mixed> Data z POST požadavku (pro zpětné zobrazení)
+     * @var WorkbenchDataRow
      */
-    public array $WBData = [];
+    public array $WBData;
 
     // ADMIN MODULE
 

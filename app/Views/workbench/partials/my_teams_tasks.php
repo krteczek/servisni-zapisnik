@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 use App\Core\Url;
 
-$data = $view->data;
+$data = $view->WBData;
 
 ?>
 

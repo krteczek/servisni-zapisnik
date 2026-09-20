@@ -50,7 +50,7 @@ class AuditLogController extends Controller
         $log = (new AuditLogModel())->find($id);
 
         if ($log === null) {
-            Flash::error('Audit záznam nebyl nalezen');
+            Flash::error('Auditní záznam nebyl nalezen');
             Url::redirect('/admin/audit/#main');
         }
 

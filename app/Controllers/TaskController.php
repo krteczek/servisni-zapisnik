@@ -26,7 +26,7 @@ use Throwable;
 use App\Core\Types;
 
 
-/** 
+/**
  * @phpstan-import-type WorkOrderBaseRow from Types
  * @phpstan-import-type TaskBaseRow from Types 
  */
@@ -88,6 +88,8 @@ private function getOrderOrRedirect(int $orderId): array
 
 /** 
  * @param array<string, mixed> $data 
+ * @param int $workOrderId
+ * @return string
  */ 
 private function saveTask(array $data, int $workOrderId): string
 {

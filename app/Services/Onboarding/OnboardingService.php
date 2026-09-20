@@ -6,6 +6,7 @@ namespace App\Services\Onboarding;
 use App\Core\Transaction;
 use App\Core\DatabaseScope;
 use App\Core\LoggerHolder;
+use App\Core\Types;
 use Throwable;
 use PDO;
 
@@ -15,13 +16,34 @@ use App\Services\Users\BuildMailService;
 use App\Models\CompanyModel;
 use App\Services\Tokens\TokenService;
 
+/** @phpstan-import-type OnboardingResult from Types */
+
 class OnboardingService
 {
+    /**
+     * @param array{data: array<string, mixed>, token: string, type: string} $load
+     * @return OnboardingResult
+     */
     public function run(array $load): array
     {
         $d     = $load['data'];
         $token = $load['token'];
         $type  = $load['type'];
+
+        // Prázdná data pro error stavy
+        $emptyData = [
+            'company_id'        => 0,
+            'db_name'           => '',
+            'user_id'           => 0,
+            'team_id'           => 0,
+            'email'             => '',
+            'first_name'        => '',
+            'last_name'         => '',
+            'company_name'      => '',
+            'slug'              => '',
+            'session_version'   => 0,
+            'global_role'       => '',
+        ];
 
         /*
          * ==========================
@@ -35,11 +57,11 @@ class OnboardingService
                     $tokenData = (new TokenService())->consume($token, $type);
 
                     if ($tokenData['ok'] === false) {
-                        return $tokenData;
+                        return $tokenData;  // TokenConsumeError
                     }
 
                     $data = [
-                        'email'      => $tokenData['email'],
+                        'email'      => $tokenData['data']['email'],
                         'first_name' => $d['first_name'],
                         'last_name'  => $d['last_name'],
                         'password'   => $d['password'],
@@ -53,8 +75,13 @@ class OnboardingService
                 'admin'
             );
 
-            if (!($adminResult['ok'] ?? false)) {
-                return $adminResult;
+            // Normalizace: když token selhal, převeď na OnboardingResult
+            if ($adminResult['ok'] === false) {
+                return [
+                    'ok'     => false,
+                    'result' => 'Token invalid or admin onboarding failed',
+                    'data'   => $emptyData,
+                ];
             }
 
         } catch (Throwable $e) {
@@ -65,8 +92,9 @@ class OnboardingService
             ]);
 
             return [
-                'ok'    => false,
-                'error' => 'Admin onboarding failed',
+                'ok'     => false,
+                'result' => 'Admin onboarding failed',
+                'data'   => $emptyData,
             ];
         }
 
@@ -105,7 +133,6 @@ class OnboardingService
             $this->markOnboardingDone($companyId);
 
         } catch (Throwable $e) {
-
             $this->markOnboardingFailed($companyId, $e);
 
             LoggerHolder::get()->error('OnboardingService.run-work: failed', [
@@ -137,7 +164,23 @@ class OnboardingService
             ]);
         }
 
-        return $adminResult;
+        return [
+            'ok'     => true,
+            'result' => 'Onboarding completed',
+            'data'   => [
+                'company_id'      => $companyId,
+                'db_name'         => $dbName,
+                'user_id'         => $adminData['user_id'],
+                'team_id'         => $adminData['team_id'],
+                'email'           => $adminData['email'],
+                'first_name'      => $adminData['first_name'],
+                'last_name'       => $adminData['last_name'],
+                'company_name'    => $adminData['company_name'],
+                'slug'            => $adminData['slug'],
+                'session_version' => $adminData['session_version'],
+                'global_role'     => $adminData['global_role'],
+            ],
+        ];
     }
 
     private function markOnboardingDone(int $companyId): void

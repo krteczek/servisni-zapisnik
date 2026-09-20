@@ -7,11 +7,20 @@ use App\Core\Config;
 
 class WorkOrderNumberFormatter
 {
-     protected array $allowed = [];
+    /** @var array<int, string> */
+    protected array $allowed = [];
 
-     public function __construct() {
-        $this->allowed = Config::get('workOrderSettings.allowed');
-     }
+    public function __construct() {
+ 
+       $this->allowed = Config::get('workOrderSettings.allowed');
+    }
+
+
+    /**
+     * @param string $format
+     * @param array{prefix: string, number: string} $data
+     * @return string
+     */
      public function format(string $format, array $data): string
     {
         $return = str_replace(

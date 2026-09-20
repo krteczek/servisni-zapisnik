@@ -6,8 +6,7 @@ declare(strict_types=1);
 
 use App\Core\Url;
 
-$data = $view->data;
- var_dump($data['otherReadyToDoneOrders']);
+$data = $view->WBData;
 
 $otherTeams = [];
 foreach ($data['otherTeams'] as $team) {
@@ -75,8 +74,8 @@ $otherTeams[$team['id']]['color'] = $team['color'];
                     <?= te($orders['status']) ?>
                 </span></td>
                 <td><?= count($orders['tasks'] ?? []) ?></td>
-                <td><?= e($orders['can_be_done'] !== 0 ? 'Ano' : 'Ne') ?></td>
-                <td><?= e($orders['can_be_cancelled'] !== 0 ? 'Ano' : 'Ne') ?></td>
+                <td><?= $orders['can_be_done'] ? 'Ano' : 'Ne' ?></td>
+                <td><?= $orders['can_be_cancelled'] ? 'Ano' : 'Ne' ?></td>
             </tr>
         <?php endforeach; ?>
     </tbody>
