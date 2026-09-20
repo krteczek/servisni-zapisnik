@@ -19,7 +19,7 @@ class SettingsController extends Controller
     private SettingsModel $model;
     
 
-    public function __construct(ViewContext $view)
+    public function __construct(ViewContext $view) 
     {
         parent::__construct($view);
         $this->model = new SettingsModel();

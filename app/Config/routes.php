@@ -20,6 +20,7 @@ use App\Controllers\WorkbenchController;
 use App\Controllers\SettingsController;
 use App\Controllers\InvoiceController;
 use App\Controllers\DevAuthController;
+use App\Controllers\RootController;
 
 return [
 
@@ -993,67 +994,6 @@ return [
     'title'   => 'Faktury: Stornování faktury',
 ],
 
-/*-------------------------------------
-   Fakturace DEPRECATED NEPOUŽÍVAT
--------------------------------------** /
-[
-    'method'  => 'GET',
-    'path'    => '/{tenant}/exports/billing/index',
-    'action'  => [BillingExportController::class, 'index'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'exports',
-    'menu'   => 'Exporty',
-    'submenu'=> 'Výpis exportů',
-    'title'   => 'Exporty: Výpis exportů',
-],
-
-[
-    'method'  => 'GET',
-    'path'    => '/{tenant}/exports/billing/create',
-    'action'  => [BillingExportController::class, 'create'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'exports',
-    'menu'   => 'Exporty',
-    'submenu'=> 'Vytvořit fakturační export',
-    'title'   => 'Exporty: Vytvořit fakturační export',
-],
-
-[
-    'method'  => 'POST',
-    'path'    => '/{tenant}/exports/billing/create',
-    'action'  => [BillingExportController::class, 'store'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'exports',
-    'menu'   => 'Exporty',
-    'submenu'=> 'Vytvořit fakturační export',
-    'title'   => 'Exporty: Vytvořit fakturační export',
-],
-
-[
-    'method'  => 'GET',
-    'path'    => '/{tenant}/exports/billing/{id}/detail',
-    'action'  => [BillingExportController::class, 'detail'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'exports',
-    'menu'    => 'Exporty',
-    'title'   => 'Exporty: Detail fakturačního exportu',
-],
-
-[
-    'method'  => 'GET',
-    'path'    => '/{tenant}/exports/billing/{id}/pdf',
-    'action'  => [BillingExportController::class, 'pdf'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'menu'    => 'Exporty',
-    'section' => 'exports',
-    'title'   => 'Exporty: Export do PDF',
-],
-*/
 
 /*-------------------------------------
    Exporty
@@ -1085,46 +1025,63 @@ Přepínaní rolí u admina
     'method'        => 'GET',
     'path'          => '/{tenant}/admin/switch-role/{role:admin|mistr|predak|monter}',
     'action'        => [AdminController::class, 'switchRole'],
-    'roles'  => ['admin'],
+    'roles'         => ['admin'],
     'auth'          => true,
 ],
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN / SYSTEM
+| ROOT / SYSTEM
 |--------------------------------------------------------------------------
 */
 
 [
     'method' => 'GET',
-    'path'   => '/{tenant}/system',
-    'action' => [SystemController::class, 'index'],
+    'path'   => '/{tenant}/root/list-companies',
+    'action' => [RootController::class, 'index'],
     'roles'  => ['root'],
-    'menu'   => 'Administrace',
-    'submenu'=> 'Firemní účty',
-    'section'=> 'system',
+    'menu'   => 'ROOT',
+    'submenu'=> 'Výpis firem v systému',
+    'section'=> 'root',
     'auth'   => true,
-    'title'  => 'Firemní účty: Výpis',
+    'title'  => 'Výpis firem v systému',
 ],
 
 [
     'method' => 'GET',
-    'path'   => '/{tenant}/system/companies/{id}',
-    'action' => [SystemController::class, 'companyDetail'],
+    'path'   => '/{tenant}/root/detail-company/{id:\d+}',
+    'action' => [RootController::class, 'companyDetail'],
     'roles'  => ['root'],
-    'section'=> 'system',
+    'menu'   => 'ROOT',
+    'submenu'=> '',//'Výpis firem v systému',
+    'section'=> 'root',
     'auth'   => true,
-    'title'  => 'Firemní účty: Výpis',
+    'title'  => 'Detail firmy v systému',
 ],
 
+/*
+|--------------------------------------------------------------------------
+| ADMIN / audit
+|--------------------------------------------------------------------------
+*/
 [
     'method' => 'GET',
-    'path'   => '/{tenant}/admin/audit',
+    'path'   => '/{tenant}/system/audit',
     'action' => [AuditLogController::class, 'index'],
     'roles'  => ['admin'],
     'menu'   => 'Administrace',
-    'submenu'=> 'Audit log',
-    'section'=> 'admin',
+    'submenu'=> 'Auditní záznamy',
+    'section'=> 'system',
+    'auth'   => true,
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/audit/{id:\d+}',
+    'action' => [AuditLogController::class, 'index'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'section'=> 'system',
     'auth'   => true,
 ],
 

@@ -49,8 +49,8 @@ dc($task);
 </br></br>
 	
 		<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" class="btn btn-secondary" title="Jít na výpis úkolů">Jít na výpis úkolů</a>
-		<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/detail/#main') ?>" class="btn btn-secondary" title="Jít na detail Zakázky k níž patří tento úkol">Jít na detail Zakázky</a>
-		<a href="<?= Url::to('/{tenant}/archive/tasks/' . (int) $task['id'] . '/reports/#main') ?>" class="btn btn-secondary" title="Jít do Archivu na detail tohoto úkolu a jeho reportů">Jít do Archivu</a>
+		<a href="<?= Url::to('/{tenant}/work-orders/' .  $task['work_order_id'] . '/detail/#main') ?>" class="btn btn-secondary" title="Jít na detail Zakázky k níž patří tento úkol">Jít na detail Zakázky</a>
+		<a href="<?= Url::to('/{tenant}/archive/tasks/' . $task['id'] . '/reports/#main') ?>" class="btn btn-secondary" title="Jít do Archivu na detail tohoto úkolu a jeho reportů">Jít do Archivu</a>
     </p>
 
 <?php elseif ($task['canUserAddReport'] === true): ?>
@@ -67,7 +67,7 @@ dc($task);
 					                class="form-control" 
 					                rows="5"
 					            ><?= e($oldData['report'] ?? '') ?></textarea>
-					            <?php if (isset($errors['report']) && is_array($errors['report'])): ?>
+					            <?php if (isset($errors['report'])): ?>
 									<?php foreach ($errors['report'] as $msg): ?>
 										<span class="error-message"><?= e($msg) ?></span><br>
 									<?php endforeach; ?>
@@ -101,9 +101,9 @@ dc($task);
             $hours   = $oldData['participants'][$userId]['hours'] ?? '';
             $minutes = $oldData['participants'][$userId]['minutes'] ?? '';
 
-            $userErrors = $errors['participants'][$userId] ?? [];
+            $userErrors = $errors['participants'][$userId] ?? '';
         ?>
-			<div class="member-row <?= $userErrors !== [] ? 'has-error' : '' ?>">
+			<div class="member-row <?= $userErrors !== '' ? 'has-error' : '' ?>">
 
                 <div class="member-checkbox">
                     <input 
@@ -112,7 +112,7 @@ dc($task);
                         id="user-<?= $userId ?>"
                         class="user-checkbox"
                         data-user-id="<?= $userId ?>"
-                        <?= $checked ? 'checked' : '' ?>
+                        <?= $checked === 1 ? 'checked' : '' ?>
                     >
                 </div>                        
 
@@ -122,7 +122,7 @@ dc($task);
                     </label>
                 </div>
 
-                <div class="member-time" id="time-<?= $userId ?>" style="display: <?= $checked ? 'block' : 'none' ?>;">
+                <div class="member-time" id="time-<?= $userId ?>" style="display: <?= $checked === 1 ? 'block' : 'none' ?>;">
                     <div class="time-input-group">
 						<select name="participants[<?= $userId ?>][sign]" class="time-sign">
 							<option value="+">+</option>
@@ -152,10 +152,8 @@ dc($task);
 
                 <!-- 🔥 chyby -->
                 
-				<?php if ($userErrors !== []): ?>
-                    <?php foreach ($userErrors as $msg): ?>
-                        <span class="error-message"><?= e($msg) ?></span><br>
-                    <?php endforeach; ?>
+				<?php if ($userErrors !== ''): ?>
+                        <span class="error-message"><?= e($userErrors) ?></span><br>
                 <?php endif; ?>
 
             </div>
@@ -167,7 +165,7 @@ dc($task);
 					                Uložit report
 					            </button>
 								<a href="<?= Url::to('/{tenant}/tasks/#main') ?>" class="btn btn-secondary" title="Jít na výpis úkolů">Jít na výpis úkolů</a>
-								<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $task['work_order_id'] . '/detail/#main') ?>" class="btn btn-secondary" title="Jít na detail Zakázky k níž patří tento úkol">Jít na detail Zakázky</a>
+								<a href="<?= Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main') ?>" class="btn btn-secondary" title="Jít na detail Zakázky k níž patří tento úkol">Jít na detail Zakázky</a>
 					        </div>
 					    </form>
 				</div>

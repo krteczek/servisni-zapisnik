@@ -4,7 +4,6 @@ declare(strict_types=1);
 //view/work_orders/detail.php
 
 /** @var \App\Core\ViewContext $view */
-/** @var int $expiresMinutes */
 require __DIR__ . '/../layout/header.php';
 
 use App\Core\Url;
@@ -18,7 +17,6 @@ use App\Services\Tasks\TaskType;
 use App\Services\Tasks\TaskStatus;
 use App\Services\WorkOrders\WOStatus;
 
-/** @var array[] $tasks */
 $order = $view->orderDetail;
 $tasks = $view->orderTasks;
 $errors = $view->errors;
@@ -380,7 +378,7 @@ echo "Errors:
 
         <div
             class="task-card card status-<?= e($task['status']) ?>"
-            id="taskId_<?= (int) $task['id'] ?>"
+            id="taskId_<?= $task['id'] ?>"
             style="--task-color: <?= e($task['team_color']) ?>"
         >
 
@@ -407,7 +405,7 @@ echo "Errors:
                 <?php endif; ?>
 
                 <strong>
-                    <?= e($task['title'] ?? 'Bez názvu') ?>
+                    <?= e($task['title']) ?>
                 </strong>
 
                 <span class="badge badge-status-<?= e($task['status']) ?>">
@@ -475,7 +473,7 @@ echo "Errors:
                     <span class="meta-label">Reporty:</span>
 
                     <span class="meta-value">
-                        <?= (int)($task['stats']['assignments_count']) ?>
+                        <?= ($task['stats']['assignments_count']) ?>
                     </span>
                 </div>
 
@@ -506,7 +504,7 @@ echo "Errors:
                             ) ?>
 
                             Stav:
-                            <?= $task['recurring_active']
+                            <?= $task['recurring_active'] === 1
                                 ? 'Aktivní'
                                 : 'Neaktivní' ?>
                         </p>
@@ -605,7 +603,7 @@ echo "Errors:
                     <a
                         href="<?= Url::to(
                             '/{tenant}/tasks/' .
-                            (int)$task['id'] .
+                            $task['id'] .
                             '/edit/#main'
                         ) ?>"
                         class="btn btn-secondary"
@@ -625,7 +623,7 @@ echo "Errors:
                     <a
                         href="<?= Url::to(
                             '/{tenant}/tasks/' .
-                            (int)$task['id'] .
+                            $task['id'] .
                             '/recurring/#main'
                         ) ?>"
                         class="btn btn-secondary"

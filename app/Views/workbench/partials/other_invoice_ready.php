@@ -15,7 +15,6 @@ $data = $view->WBData;
     <thead>
         <tr>
             <th>Název úkolu</th>
-            <th>stav</th>
             <th>Zakázka</th>        
             <th>Akce</th>
         </tr>
@@ -23,8 +22,7 @@ $data = $view->WBData;
     <tbody>
         <?php foreach ($data['otherInvoiceToReady'] as $task): ?>
         <tr>
-            <td><?= e($task['title']) ?></td>
-            <td><?= e($task['status']) ?></td>
+            <td><?= e($task['title']) ?></td>            
             <td></td>
             <td></td>
         </tr>

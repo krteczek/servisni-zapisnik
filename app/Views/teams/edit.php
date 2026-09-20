@@ -97,7 +97,7 @@ require __DIR__ . '/../layout/header.php';
                                 <?= Csrf::getField() ?>
                                 <input type="hidden"
                                        name="change_user_role"
-                                       value="<?= (int) $m['membership_id'] ?>">
+                                       value="<?= $m['membership_id'] ?>">
 
                                 <select name="role_in_team"
                                     class="form-control js-auto-submit">
@@ -120,7 +120,7 @@ require __DIR__ . '/../layout/header.php';
                                 <?= Csrf::getField() ?>
                                 <input type="hidden"
                                        name="remove_membership_id"
-                                       value="<?= (int) $m['membership_id'] ?>">
+                                       value="<?= $m['membership_id'] ?>">
 
                                 <button class="btn btn-secondary small-btn"
                                         title="Odebrat z týmu">
@@ -148,7 +148,7 @@ require __DIR__ . '/../layout/header.php';
 
                             <input type="hidden"
                                    name="add_user_id"
-                                   value="<?= (int)$u['id'] ?>">
+                                   value="<?= $u['id'] ?>">
 
                             <input type="hidden"
                                    name="role_in_team"

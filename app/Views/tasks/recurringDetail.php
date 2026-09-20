@@ -39,7 +39,7 @@ $errors = $view->errors; // chyby validace
     <div class="card-body">
         <div class="card-section">
             <span class="section-label">Stav šablony: </span>
-            <?php if ($data['active']): ?>
+            <?php if ($data['active'] === 1): ?>
                 <span class="badge badge-status-open">Aktivní</span>
             <?php else: ?>
                 <span class="badge badge-status-cancelled">Neaktivní</span>
@@ -88,7 +88,7 @@ $errors = $view->errors; // chyby validace
     <div class="card-body">
 
         <p>
-            #<?= (int)$task['work_order_id'] ?>
+            #<?= $task['work_order_id'] ?>
             : <?= e($order['title'] ?? '') ?>
             <span class="badge badge-status-<?= e($order['status']) ?>">
                 <?= te($order['status']) ?>
@@ -132,7 +132,7 @@ $errors = $view->errors; // chyby validace
                 Upravit podrobnosti úkolu
             </a>
 
-            <?php if ($data['active'] ?? false): ?>
+            <?php if ($data['active'] === 1): ?>
 
                 <a
                     href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurring/#main') ?>"
@@ -152,7 +152,7 @@ $errors = $view->errors; // chyby validace
 
             <?php endif; ?>
 
-            <?php if (!$data['active']): ?>
+            <?php if ($data['active'] === 0): ?>
 
                 <form
                     method="post"

@@ -8,7 +8,7 @@ use App\Models\UserModel;
 use App\Models\CompanyModel;
 
 
-final class SystemController extends Controller
+final class RootController extends Controller
 {
    public function index(): string
     {
@@ -19,7 +19,7 @@ final class SystemController extends Controller
             $this->view->companies = (new CompanyModel())->findAll();
         }
         
-        return $this->render('system/index');
+        return $this->render('root/index');
     }
     
     
@@ -31,7 +31,7 @@ final class SystemController extends Controller
         $company = $companyModel->find($id);
 
         if ($company === null) {
-            throw new \RuntimeException('Firma nenalezena');
+            throw new \RuntimeException('Firma nenalezena'); 
         }
 
         // ROOT → globální přístup
@@ -40,7 +40,7 @@ final class SystemController extends Controller
         $this->view->company = $company;
         $this->view->users   = $users;
 
-        return $this->render('system/detail');
+        return $this->render('root/detail');
     }    
 
     /**

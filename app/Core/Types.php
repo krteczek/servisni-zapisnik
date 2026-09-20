@@ -103,7 +103,7 @@ use App\Services\Tokens\TokenResult;
  *     can_cancel: bool,
  *     can_close: bool,
  *     team_name: string,
- *     team_color: string
+ *     team_color: string,
  * }
  *
  * @phpstan-type TaskBaseRow array{
@@ -129,7 +129,9 @@ use App\Services\Tokens\TokenResult;
  *   recurring_next_due_date: ?string,
  *   recurring_warning_days_before: ?int,
  *   recurring_active: ?int,
- *   count_instances?: int
+ *   count_instances?: int,
+ *   canUserAddReport?: bool
+
  * }
  * 
  * @phpstan-type RecurringTaskRow array{
