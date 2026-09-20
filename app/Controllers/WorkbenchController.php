@@ -10,6 +10,7 @@ use App\Services\Settings\SettingsService;
 use App\Core\Types;
 /**
  * @phpstan-import-type WorkbenchOrderRow from Types
+ * @phpstan-import-type WorkbenchDataRow from Types
  */
 class WorkbenchController extends Controller
 {
@@ -21,11 +22,12 @@ class WorkbenchController extends Controller
     }
 	public function index(): string
 	{
+        /** @var WorkbenchDataRow $data */
         $data = $this->model->forIndex();
         [$data['myReadyToDoneOrders'], $data['myReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['myOrdersInProgress']);
         [$data['otherReadyToDoneOrders'], $data['otherReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['otherOrdersInProgress']);
       
-        
+        /** @var WorkbenchDataRow $data */
         $this->view->WBData = $data;
         $this->view->WBData['isInternalBilling'] = (new SettingsService())->isInternalBilling();
         $this->view->WBData['isExternalAccounting'] = (new SettingsService())->isExternalAccounting();

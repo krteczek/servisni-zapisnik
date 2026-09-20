@@ -3,12 +3,11 @@ declare(strict_types=1);
 
 /** @var \App\Core\ViewContext $view */
 
-use App\Core\Url;
-use App\Core\Csrf;
 
-/** @var array[] $teams */
 $date = $view->data['date'] ?? null;
+
 $teams = $view->teams;
+
 
 ?>
 
@@ -24,7 +23,7 @@ $teams = $view->teams;
         <select name="team_id">
             <option value="">Vše</option>
             <?php foreach ($teams as $team): ?>
-                <option value="<?= (int) $team['id'] ?>">
+                <option value="<?= $team['id'] ?>">
                     <?= e($team['name']) ?>
                 </option>
             <?php endforeach; ?>

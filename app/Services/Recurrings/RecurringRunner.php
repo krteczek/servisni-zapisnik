@@ -29,7 +29,7 @@ final class RecurringRunner
             'key' => self::JOB_KEY,
         ]);
 
-        $lockSeconds = (int) Config::get('recurring.runner.lock_seconds', 30);
+        $lockSeconds = Config::get('recurring.runner.lock_seconds', 30);
 
         // =========================
         // 1) ATOMICKÝ LOCK
@@ -73,7 +73,7 @@ final class RecurringRunner
     {
         $pdo = Database::admin();
 
-        $batchSize = (int) Config::get('recurring.runner.batch_size_companies', 20);
+        $batchSize = Config::get('recurring.runner.batch_size_companies', 20);
 
         $job = $pdo->prepare("
             SELECT last_company_id
@@ -83,7 +83,7 @@ final class RecurringRunner
         ");
         $job->execute(['key' => self::JOB_KEY]);
 
-        $lastCompanyId = (int) ($job->fetchColumn() ?? 0);
+        $lastCompanyId = ($job->fetchColumn() ?? 0);
 
         $companies = $pdo->prepare("
             SELECT *
@@ -110,7 +110,7 @@ final class RecurringRunner
         $pocet = 0;
         foreach ($rows as $company) {
             self::processCompany($company);
-            $lastCompanyId = (int) $company['id'];
+            $lastCompanyId = $company['id'];
         }
 
         $pdo->prepare("
@@ -123,146 +123,152 @@ final class RecurringRunner
         ]);
     }
 
-private static function processCompany(array $company): void
-{
-    Database::useWorkDatabase($company['db_name']);
-    TenantContext::set((int)$company['id']);
+    /**
+     * @param array{id: int, db_name: string} $company
+     * @return void
+     */
+    private static function processCompany(array $company): void
+    {
+        Database::useWorkDatabase($company['db_name']);
+        TenantContext::set($company['id']);
 
-    $pdo = Database::admin();
-    $taskLimit = (int) Config::get('recurring.runner.batch_size_tasks', 20);
+        $pdo = Database::admin();
+        $taskLimit = Config::get('recurring.runner.batch_size_tasks', 20);
 
-    $recurringModel = new RecurringRunnerModel();
-    $taskModel = new TaskModel();
+        $recurringModel = new RecurringRunnerModel();
+        $taskModel = new TaskModel();
 
-    try {
-        $recurrings = $recurringModel->findDueTasks((int)$company['id'], $taskLimit);
+        try {
+            $recurrings = $recurringModel->findDueTasks($company['id'], $taskLimit);
 
-        if ($recurrings === []) {
-            return;
-        }
-
-        foreach ($recurrings as $rt) {
-            // =========================
-            // 1) LOCK
-            // =========================
-            if (!$recurringModel->lockTask(
-                (int)$rt['id'],
-                (int)$company['id']
-            )) {
-                continue;
+            if ($recurrings === []) {
+                return;
             }
 
-            
-
-            // =========================
-            // 3) SOURCE TASK
-            // =========================
-            $source = $taskModel->find((int)$rt['task_id']);
-             if ($source === null) {
-                LoggerHolder::get()->warning('RecurringRunner: missing source task', [
-                    'rt_id'   => $rt['id'],
-                    'task_id' => $rt['task_id'],
-                ]);
-                $recurringModel->clearProcessing((int)$rt['id'], (int)$company['id']);
-                continue;
-            }
-
-            // =========================
-            // 4) TRANSACTION
-            // =========================
-            $pdo->beginTransaction();
-
-            try {
-                $date = date('Y-m-d');
-                $iterations = 0;
-
-                while ($rt['next_due_date'] <= $date){
-                    $iterations++;
-                    if ($iterations > 100) {
-                        throw new \RuntimeException(sprintf(
-                            'Recurring task %d exceeded 100 iterations. next_due_date=%s, today=%s, frequency=%s/%d',
-                            $rt['id'],
-                            $rt['next_due_date'],
-                            $date,
-                            $rt['frequency_type'],
-                            $rt['frequency_value']
-                        ));
-                    }
-
-                    if (!$recurringModel->taskAlreadyExistsForDate(
-                        (int)$rt['id'],
-                        (int)$company['id'],
-                        $rt['next_due_date']
-                    )) {
-                        $taskModel->create([
-                            'team_id'            => $source['team_id'],
-                            'work_order_id'      => $source['work_order_id'],
-                            'recurring_task_id'  => $rt['id'],
-                            'title'              => $source['title'],
-                            'description'        => $source['description'],
-                            'status'             => 'open',
-                            'created_by_user_id' => $source['created_by_user_id'],
-                            'due_date'           => $rt['next_due_date'],
-                            'task_type'          => 'recurring_instance',
-                        ]);
-                    }
-
-                    $rt['next_due_date'] = self::calculateNextDate(
-                        $rt['next_due_date'],
-                        $rt['frequency_type'],
-                        (int)$rt['frequency_value']
-                    );
+            foreach ($recurrings as $rt) {
+                // =========================
+                // 1) LOCK
+                // =========================
+                if (!$recurringModel->lockTask(
+                    $rt['id'],
+                    $company['id']
+                )) {
+                    continue;
                 }
 
-                $recurringModel->updateNextDueDate(
-                    (int)$rt['id'],
-                    (int)$company['id'],
-                    $rt['next_due_date']
-                );
+                
 
-                $pdo->commit();
+                // =========================
+                // 3) SOURCE TASK
+                // =========================
+                $source = $taskModel->find($rt['task_id']);
+                if ($source === null) {
+                    LoggerHolder::get()->warning('RecurringRunner: missing source task', [
+                        'rt_id'   => $rt['id'],
+                        'task_id' => $rt['task_id'],
+                    ]);
+                    $recurringModel->clearProcessing($rt['id'], $company['id']);
+                    continue;
+                }
 
-                $recurringModel->clearProcessing(
-                    (int)$rt['id'],
-                    (int)$company['id']
-                );
+                // =========================
+                // 4) TRANSACTION
+                // =========================
+                $pdo->beginTransaction();
 
-            } catch (Throwable $e) {
+                try {
+                    $date = date('Y-m-d');
+                    $iterations = 0;
 
-                $pdo->rollBack();
+                    while ($rt['next_due_date'] <= $date){
+                        $iterations++;
+                        if ($iterations > 100) {
+                            throw new \RuntimeException(sprintf(
+                                'Recurring task %d exceeded 100 iterations. next_due_date=%s, today=%s, frequency=%s/%d',
+                                $rt['id'],
+                                $rt['next_due_date'],
+                                $date,
+                                $rt['frequency_type'],
+                                $rt['frequency_value']
+                            ));
+                        }
 
-                $recurringModel->clearProcessing(
-                    (int)$rt['id'],
-                    (int)$company['id']
-                );
+                        if (!$recurringModel->taskAlreadyExistsForDate(
+                            $rt['id'],
+                            $company['id'],
+                            $rt['next_due_date']
+                        )) {
+                            $taskModel->create([
+                                'team_id'            => $source['team_id'],
+                                'work_order_id'      => $source['work_order_id'],
+                                'recurring_task_id'  => $rt['id'],
+                                'title'              => $source['title'],
+                                'description'        => $source['description'],
+                                'status'             => 'open',
+                                'created_by_user_id' => $source['created_by_user_id'],
+                                'due_date'           => $rt['next_due_date'],
+                                'task_type'          => 'recurring_instance',
+                            ]);
+                        }
 
-                LoggerHolder::get()->error(
-                    'RecurringRunner: transaction failed',
-                    [
-                        'message' => $e->getMessage(),
-                        'rt_id'   => $rt['id'],             
-                        'file'    => $e->getFile(),
-                        'line'    => $e->getLine(),
-                        'trace'   => $e->getTraceAsString(),
-                   ]
-                );
+                        $rt['next_due_date'] = self::calculateNextDate(
+                            $rt['next_due_date'],
+                            $rt['frequency_type'],
+                            $rt['frequency_value']
+                        );
+                    }
+
+                    $recurringModel->updateNextDueDate(
+                        $rt['id'],
+                        $company['id'],
+                        $rt['next_due_date']
+                    );
+
+                    $pdo->commit();
+
+                    $recurringModel->clearProcessing(
+                        $rt['id'],
+                        $company['id']
+                    );
+
+                } catch (Throwable $e) {
+
+                    $pdo->rollBack();
+
+                    $recurringModel->clearProcessing(
+                        $rt['id'],
+                        $company['id']
+                    );
+
+                    LoggerHolder::get()->error(
+                        'RecurringRunner: transaction failed',
+                        [
+                            'message' => $e->getMessage(),
+                            'rt_id'   => $rt['id'],             
+                            'file'    => $e->getFile(),
+                            'line'    => $e->getLine(),
+                            'trace'   => $e->getTraceAsString(),
+                    ]
+                    );
+                }
             }
+
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error('RecurringRunner: processCompany failed', [
+                'message'    => $e->getMessage(),
+                'company_id' => $company['id'],
+                
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+
+        ]);
+        } finally {
+            TenantContext::clear();
         }
-
-    } catch (Throwable $e) {
-        LoggerHolder::get()->error('RecurringRunner: processCompany failed', [
-            'message'    => $e->getMessage(),
-            'company_id' => $company['id'],
-            
-            'file'    => $e->getFile(),
-            'line'    => $e->getLine(),
-            'trace'   => $e->getTraceAsString(),
-
-       ]);
-    } finally {
-        TenantContext::clear();
     }
-}
+
+
     private static function calculateNextDate(
         string $current,
         string $type,

@@ -10,6 +10,9 @@ final class TaskStatus
     public const DONE      = 'done';
     public const CANCELLED = 'cancelled';
 
+    /**
+     * @return array<int, self::OPEN|self::DONE|self::CANCELLED>
+     */
     public static function all(): array
     {
         return [

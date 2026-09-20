@@ -235,12 +235,11 @@ final class UserController extends Controller
         Url::redirect('/{tenant}/users/#main');
     }
 
-    /* =============================
-     * VALIDACE
-     * ============================= */
-    /**
+    /** =============================
+     *   VALIDACE
+     *  =============================
      * @param array<string, mixed> $data
-     * @return array
+     * @return array<string, mixed>
      */
     private function validateUserData(array $data): array
     {

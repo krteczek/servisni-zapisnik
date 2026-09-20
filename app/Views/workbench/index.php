@@ -7,8 +7,8 @@ require __DIR__ . '/../layout/header.php';
 
 use App\Core\Url;
 
-$data = $view->data;
-//var_dump($data);
+$data = $view->WBData;
+//dd($data);
 ?>
 
 <div class="workbench-container">
@@ -16,7 +16,7 @@ $data = $view->data;
         <div class="card card-wb-teams">
             <details>
                 <summary>Moje týmy</summary>
-                <?php if ($data['myTeams'] === ''): ?>
+                <?php if ($data['myTeams'] === []): ?>
                     <p>Nejste členem žádného týmu.</p>
                 <?php else: ?>
                     <ul>
@@ -31,7 +31,7 @@ $data = $view->data;
         <div class="card card-wb-teams">
             <details>
                 <summary>Ostatní týmy</summary>
-                <?php if ($data['otherTeams'] === ''): ?>
+                <?php if ($data['otherTeams'] === []): ?>
                     <p>Neexistují žádné další týmy.</p> 
                 <?php else: ?>
                     <ul>

@@ -566,7 +566,7 @@ public function forgotPasswordPost(): string
 					
 				]);
 			
-				Flash::success('Vítej v aplikaci, ' . ($d['first_name'] ?? $d['email']) . ' 👋'
+				Flash::success('Vítej v aplikaci, ' . $d['first_name'] . ' 👋'
 				);
 				$url = '/' . Auth::tenantSlug() . '/tasks/#main';
 				Url::redirect($url);

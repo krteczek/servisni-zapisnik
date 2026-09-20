@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Services\Tokens\TokenResult;
+
 /**
  * Centrální definice PHPStan type aliasů pro celou aplikaci.
  *
@@ -126,7 +128,8 @@ namespace App\Core;
  *   recurring_frequency_value: ?int,
  *   recurring_next_due_date: ?string,
  *   recurring_warning_days_before: ?int,
- *   recurring_active: ?int
+ *   recurring_active: ?int,
+ *   count_instances?: int
  * }
  * 
  * @phpstan-type RecurringTaskRow array{
@@ -445,8 +448,8 @@ namespace App\Core;
  *   work_order_id: int,
  *   work_order_title: string,
  *   team_name: string,
- *   total_minutes: int,
- *   total_kilometers: int
+ *   total_minutes: string,
+ *   total_kilometers: string
  * }
  * 
  *
@@ -469,8 +472,97 @@ namespace App\Core;
  *     isInternalBilling?: bool,
  *     isExternalAccounting?: bool
  * }
+ * 
+ * @phpstan-type WorkOrderCreateData array{
+ *     contact_id: int,
+ *     price_per_hour: int,
+ *     price_per_km: int,
+ *     external_number: ?string,
+ *     title: string,
+ *     description: string,
+ *     source: string,
+ *     requested_by: string,
+ *     contact_person: string,
+ *     priority: string,
+ *     created_by_user_id: int,
+ *     wo_due_date: ?string,
+ *     estimated_hours: ?int,
+ *     internal_number?: int,
+ *     year?: int
+ * }
+ *
+ *
+ * @phpstan-type TokenData array{
+ *     id: int,
+ *     email: string,
+ *     user_id: ?int
+ * }
+ *
+ * @phpstan-type TokenConsumeSuccess array{
+ *     ok: true,
+ *     result: TokenResult,
+ *     data: TokenData
+ * }
+ *
+ * @phpstan-type TokenConsumeError array{
+ *     ok: false,
+ *     result: TokenResult,
+ *     data: array{}
+ * }
+ *
+ * @phpstan-type TokenConsumeResult TokenConsumeSuccess|TokenConsumeError
+ * 
+ * @phpstan-type OnboardingResult array{
+ *     ok: bool,
+ *     result: string,
+ *     data: array{
+ *         company_id: int,
+ *         db_name: string,
+ *         user_id: int,
+ *         team_id: int,
+ *         email: string,
+ *         first_name: string,
+ *         last_name: string,
+ *         company_name: string,
+ *         slug: string,
+ *         session_version: int,
+ *         global_role: string
+ *     }
+ * }
+ * 
+ * @phpstan-type CompanyRegistrationResult array{
+ *     ok: true,
+ *     data: array{
+ *         user_id: int,
+ *         email: string,
+ *         company_id: int,
+ *         company_name: string,
+ *         slug: string,
+ *         first_name: string,
+ *         last_name: string,
+ *         global_role: string,
+ *         db_name: string,
+ *         team_id: int,
+ *         session_version: int
+ *     }
+ * }|array{
+ *     ok: false
+ * }
+ * 
+ * @phpstan-type AuditLogRow array{
+ *     id: int,
+ *     company_id: ?int,
+ *     user_id: ?int,
+ *     user_email: ?string,
+ *     action: string,
+ *     entity: string,
+ *     entity_id: ?int,
+ *     diff: ?string,
+ *     ip_address: ?string,
+ *     user_agent: ?string,
+ *     created_at: string
+ * }
  */
-
 final class Types
 {
 }

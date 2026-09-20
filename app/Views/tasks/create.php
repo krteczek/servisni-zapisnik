@@ -9,13 +9,12 @@ use App\Core\Csrf;
 
 require __DIR__ . '/../layout/header.php';
 
-/** @var array[] $tasks */
 
 $workOrder = $view->order;
 $teams     = $view->teams;
 $post      = $view->post;
 $errors    = $view->errors; 
-//var_dump($post);
+
 
 
 ?>
@@ -73,7 +72,7 @@ $errors    = $view->errors;
 					
                     <?= (($post['team_id'] ?? null) === $team['id']) ? 'selected' : '' ?>
                 >
-                    <?= e($team['name'] ?? '') ?>
+                    <?= e($team['name']) ?>
                 </option>
             <?php endforeach; ?>
             </select>
@@ -98,7 +97,7 @@ $errors    = $view->errors;
 								Vytvořit úkol
 							</button>
 		
-							<a href="<?= Url::to('/{tenant}/work-orders/' . (int) $workOrder['id'] . '/detail/#main') ?>" 
+							<a href="<?= Url::to('/{tenant}/work-orders/' . $workOrder['id'] . '/detail/#main') ?>" 
 								class="btn btn-secondary">
 								<span class="btn-icon">←</span>
 								Na detail zakázky

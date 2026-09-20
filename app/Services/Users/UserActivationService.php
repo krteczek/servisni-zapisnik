@@ -24,6 +24,12 @@ final class UserActivationService
         private UserModel $userModel = new UserModel(),
     ) {}
 
+    /**
+     * @param string $rawToken
+     * @param string $type
+     * @param string $password
+     * @return array<string, mixed>
+     */
     public function consumeAndProcess(
         string $rawToken,
         string $type,
@@ -47,14 +53,11 @@ final class UserActivationService
 			            if ($tokenData['ok'] === false) {
 			                return $tokenData;
 			            }
-
-				        if ($this->hasUser($tokenData) === false) {
-				            return [
-				                "ok" => false,
-				                "result" => "Token neobsahuje uživatele."
-				            ];
-				        }
-				        $userId = (int)$tokenData["user_id"];
+                        
+                        if ($tokenData['data']['id'] <= 0) {
+                            return ['ok' => false, 'result' => 'Token neobsahuje uživatele.'];
+                        }
+                        $userId = $tokenData['data']['user_id'];
 
 				        $user = $this->userModel->findByIdWithoutTenant($userId);
 				        if ($user === null) {
@@ -68,7 +71,7 @@ final class UserActivationService
                             || (int)$user['company_id'] === 0
                         ) {
                             throw new \LogicException('User has no company_id');
-    }
+                        }
 
 				        TenantContext::set((int)$user['company_id']);
 
@@ -119,7 +122,11 @@ final class UserActivationService
         }
     }
 
-
+    /**
+     * @param array<string, mixed> $user
+     * @param string $password
+     * @return array<string, mixed>
+     */
     private function handleInvitation(array $user, string $password): array
     {
 
@@ -136,6 +143,11 @@ final class UserActivationService
             : ["ok" => true, "result" => "Uživatel byl úspěšně aktivován."];
     }
 
+    /**
+     * @param array<string, mixed> $user
+     * @param string $password
+     * @return array<string, mixed>
+     */
     private function handlePasswordReset(array $user, string $password): array
     {
         if ((int)$user["active"] !== 1) {
@@ -179,9 +191,5 @@ final class UserActivationService
             : ["ok" => true, "result" => "Heslo bylo úspěšně změněno."];
     }
 
-    private function hasUser(array $token): bool
-    {
-        return $token['user_id'] !== null;
-    }
-    
+
 }

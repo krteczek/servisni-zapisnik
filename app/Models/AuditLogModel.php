@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Core\Types;
+
 /**
  * Model pro práci s auditním logem konkrétní firmy v admin DB.
  *
@@ -10,6 +12,8 @@ namespace App\Models;
  * ale z pohledu aplikace je tenant-aware.
  * Každé čtení je omezeno na aktuální tenant.
  */
+/** @phpstan-import-type AuditLogRow from Types */
+
 final class AuditLogModel extends BaseModel
 {
     protected string $table = 'audit_logs';
@@ -45,11 +49,17 @@ final class AuditLogModel extends BaseModel
      * - user_agent
      * - from (YYYY-MM-DD)
      * - to   (YYYY-MM-DD)
-     * 
-     * @param array<string, mixed> $filters
-     * @param int $limit
-     * @return array<int, array<string, mixed>>
-     */
+     * @param array{
+     *     user_id: ?string,
+     *     action: ?string,
+     *     entity: ?string,
+     *     from: ?string,
+     *     to: ?string,
+     *     ip: ?string,
+     *     user_agent: ?string
+     * } $filters
+     * @return array<int, AuditLogRow>
+    */
     public function findByFilters(array $filters, int $limit = 100): array
     {
         $where  = [];

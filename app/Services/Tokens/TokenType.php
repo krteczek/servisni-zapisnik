@@ -10,8 +10,10 @@ final class TokenType
     public const PASSWORD_RESET   = 'password_reset';
     public const ACTIVATE_USER    = 'activate_user';
 
-    /** @return array{string} **/
-
+    /** 
+     * @return list<string>
+     *   
+     */
     public static function all(): array
     {
         return [

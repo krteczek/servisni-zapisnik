@@ -6,7 +6,8 @@ declare(strict_types=1);
 
 use App\Core\Url;
 
-$data = $view->data;
+/** @var \App\Core\ViewContext $view */
+$data = $view->WBData;
 // var_dump($data);
 ?>
 <h2>Připraveno ke stornování</h2>
@@ -26,7 +27,7 @@ $data = $view->data;
     <thead>
         <tr>
             <th>Název</th>
-            <th>Popis</th>
+            
             <th>Status</th>
             <th>Počet reportů</th>
         </tr>
@@ -38,7 +39,7 @@ $data = $view->data;
                                     title="Jít na detail úkolu a zkontrolovat nebo přidat reporty."
                                     >
                                     <?= e($task['title']) ?></a></td>
-                <td><?= e($task['description'] ?? '') ?></td>
+                
                 <td><span class="badge badge-status-<?= e($task['status']) ?>">
                     <?= te($task['status']) ?>
                 </span></td>

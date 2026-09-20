@@ -12,6 +12,7 @@ final class WOStatus
     public const CANCELLED      = 'cancelled';
     public const EXPORTED       = 'exported';
 
+    /** @return array<int, string> */
     public static function all(): array
     {
         return [

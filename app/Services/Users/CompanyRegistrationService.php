@@ -16,11 +16,14 @@ use App\Core\TenantContext;
 use App\Core\LoggerHolder;
 use Throwable;
 use RuntimeException;
+use App\Core\Types;
 use PDO;
 use App\Core\Transaction;
 use App\Core\DatabaseScope;
 
-
+/**
+ * @phpstan-import-type CompanyRegistrationResult from Types 
+ */
 final class CompanyRegistrationService
 {
     public function __construct(
@@ -62,34 +65,18 @@ final class CompanyRegistrationService
      * ADMIN část
      * ==========================
      */
-  /**
-    * @param array{
-    *     name: string,
-    *     ico: string,
-    *     email: string,
-    *     first_name: string,
-    *     last_name: string,
-    *     password: string
-    * } $data
-    * @return array{
-    *     ok: true,
-    *     data: array{
-    *         user_id: int,
-    *         email: string,
-    *         company_id: int,
-    *         company_name: string,
-    *         slug: string,
-    *         first_name: string,
-    *         last_name: string,
-    *         global_role: string,
-    *         db_name: string,
-    *         team_id: int
-    *     }
-    * }|array{
-    *     ok: false
-    *    
-    * }
-    */
+
+    /**
+      * @param array{
+      *     name: string,
+      *     ico: string,
+      *     email: string,
+      *     first_name: string,
+      *     last_name: string,
+      *     password: string
+      * } $data
+      * @return CompanyRegistrationResult
+      */
  public function completeAdmin(array $data): array
     {
         try {
