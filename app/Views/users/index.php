@@ -28,14 +28,14 @@ require __DIR__ . '/../layout/header.php';
 <?php foreach ($view->users as $user): ?>
 
     <?php
-        $fullName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+        $fullName = trim(($user['first_name']) . ' ' . ($user['last_name']));
         $fullName = $fullName === '' ? 'Bez jména' : $fullName;
 
 		$isActive = a($user);
     ?>
 <div class="card  <?= $isActive ?>">
     <div class="card-header">
-        <span class="card-title"><a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/detail/#main') ?>"><?= e($fullName) ?></a></span>
+        <span class="card-title"><a href="<?= Url::to('/{tenant}/users/' . $user['id'] . '/detail/#main') ?>"><?= e($fullName) ?></a></span>
         <span class="badge badge-<?= e($isActive) ?>"><?= te($isActive) ?></span>
     </div>
     
@@ -43,23 +43,23 @@ require __DIR__ . '/../layout/header.php';
         <div class="meta-list">
             <div class="meta-item">
                 <span class="meta-label">Telefón: </span>
-                <span class="meta-value"><?= e($user['telefon'] ?? 'Neuveden') ?></span>
+                <span class="meta-value"><?= e($user['telefon']) ?></span>
             </div>
 
             <div class="meta-item">
                 <span class="meta-label">Číslo zaměstnance: </span>
-                <span class="meta-value"><?= e($user['employee_number'] ?? '—') ?></span>
+                <span class="meta-value"><?= e($user['employee_number']) ?></span>
             </div>
             <div class="meta-item">
                 <span class="meta-label">Role: </span>
-                <span class="meta-value"><?= te($user['global_role'] ?? '—') ?></span>
+                <span class="meta-value"><?= te($user['global_role']) ?></span>
             </div>
         </div>
     </div>
     
     <div class="card-footer">
-                    <a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/edit/#main') ?>" class="btn btn-secondary">✏️ Upravit</a>
-            <a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/detail/#main') ?>" class="btn btn-secondary">🔍 Detail</a>
+                    <a href="<?= Url::to('/{tenant}/users/' . $user['id'] . '/edit/#main') ?>" class="btn btn-secondary">✏️ Upravit</a>
+            <a href="<?= Url::to('/{tenant}/users/' . $user['id'] . '/detail/#main') ?>" class="btn btn-secondary">🔍 Detail</a>
     </div>
 </div>
 

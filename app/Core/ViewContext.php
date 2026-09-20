@@ -35,7 +35,7 @@ use App\Core\Types;
  * @phpstan-import-type ArchiveOrderRow from Types
  * @phpstan-import-type ArchiveTaskListRow from Types
  * @phpstan-import-type WorkbenchDataRow from Types
- * 
+ * @phpstan-import-type AuditLogRow from Types 
  * 
  */
 class ViewContext
@@ -187,11 +187,11 @@ class ViewContext
     // ADMIN MODULE
 
     /**
-     * @var array<int, array<string, mixed>>|null Logy/audit záznamy
+     * @var array<int, AuditLogRow>|null 
      */
     public ?array $logs = [];
 
-    /** @var array<string, mixed>|null Jeden auditní záznam */
+    /** @var AuditLogRow|null */
     public ?array $log = null;
 
     /**

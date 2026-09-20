@@ -38,11 +38,11 @@ $companies = $view->companies;
         <tbody>
 
             <?php foreach ($companies as $company): ?>
-                <tr onclick="window.location='/system/companies/<?= (int)$company['id'] ?>'" style="cursor:pointer;">
+                <tr onclick="window.location='/root/companies/<?= (int)$company['id'] ?>'" style="cursor:pointer;">
                     
                     <td><?= (int) $company['id'] ?></th>
                     <td><?= e($company['slug']) ?></td>
-                    <td><a href="<?= Url::to('/{tenant}/system/companies/' . (int)$company['id']); ?>"><?= e($company['name']) ?></a></td>
+                    <td><a href="<?= Url::to('/{tenant}/root/detail-company/' . (int)$company['id']); ?>"><?= e($company['name']) ?></a></td>
                     <td><?= e($company['db_name']) ?></td>
                     <td><?= e($company['ico']) ?></td>
                     <td><?= e($company['active']) ?></td>

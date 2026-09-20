@@ -21,10 +21,11 @@ $data = $view->data;
 $frequencies = Config::get('recurring.frequencies');
 $default = Config::get('recurring.default');
 $limits = Config::get('recurring.limits');
-$type = $data['frequency_type'] ?? null;
 
-if (!$type || !array_key_exists($type, $frequencies)) {
-    $data['frequency_type'] = $default['frequency_type'];
+/** @var string|null $type */
+$type = is_string($data['frequency_type'] ?? null) ? $data['frequency_type'] : null;
+if ($type === null || !array_key_exists($type, $frequencies)) {
+	$data['frequency_type'] = $default['frequency_type'];
 }
 ?>
 <div class="create-container">
@@ -52,8 +53,7 @@ if (!$type || !array_key_exists($type, $frequencies)) {
 				    <label>Frekvence: </label>
 					<select name="frequency_type">
 						<?php foreach ($frequencies as $key => $value): ?>
-							<option value="<?= e($key) ?>"
-								<?= $key === (string) ($data['frequency_type'] ?? $default['frequency_type']) ? 'selected' : '' ?>
+							<option value="<?= e($key) ?>"<?= $key === (string) ($data['frequency_type'] ?? $default['frequency_type']) ? 'selected' : '' ?>>
 								<?= e($value) ?>
 							</option>
 						<?php endforeach; ?>
@@ -97,7 +97,7 @@ if (!$type || !array_key_exists($type, $frequencies)) {
 
 				      <label>
 				        <input type="checkbox" name="active"
-                        <?= ($data['active'] ?? 1) ? 'checked' : '' ?>
+                        <?= ($data['active'] === 1) ? 'checked' : '' ?>
                         value="1"
                         >
 				            Aktivní

@@ -100,7 +100,7 @@ require __DIR__ . '/../../../public/css/deadline.css';
     <ul class="menu">
 <?php foreach ($view->menu as $section): ?>
 <?php
-$hasSubmenu = isset($section['items']);
+$hasSubmenu = $section['items'] !== [];
 $classes = [
     'menu-item',
     $section['active'] ? 'active' : '',

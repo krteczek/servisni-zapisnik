@@ -38,7 +38,10 @@ require __DIR__ . '/../../layout/header.php';
         <?php foreach ($logs as $log): 
         
             //$diff = json_decode($log['diff'] ?? '', true);
-            $diff = $log['diff'] ? json_decode($log['diff'], true) : null;
+            $diff = null;
+            if ($log['diff'] !== null && $log['diff'] !== '') {
+                $diff = json_decode($log['diff'], true);
+            }
         ?>
         <tr>
             <td><?= e($log['created_at']) ?></td>
@@ -78,7 +81,7 @@ require __DIR__ . '/../../layout/header.php';
             <td><?= e($log['ip_address']) ?></td>
 
             <td>
-                <a href="<?= Url::to('/admin/audit/' . (int)$log['id']) ?>">
+                <a href="<?= Url::to('/{tenant}/admin/audit/' . $log['id']) ?>">
                     detail
                 </a>
             </td>

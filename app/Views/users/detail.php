@@ -17,7 +17,7 @@ $user = $view->user ?? [];
 if ($user !== []): ?>
 
 <?php
-$fullName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+$fullName = trim(($user['first_name']) . ' ' . ($user['last_name']));
 $fullName = $fullName === '' ? 'Bez jména' : $fullName;
 
 $active = active($user);
@@ -65,7 +65,7 @@ $active = active($user);
                     <div style="font-size:1.1rem; font-weight:500;"><?= e($user['created_at']) ?></div>
                 </div>
 
-                <?php if ($user['telefon'] !== null): ?>
+                <?php if ($user['telefon'] === ''): ?>
                 <div>
                     <div style="font-size:0.85rem; color:#4b5563; margin-bottom:4px;">Telefon</div>
                     <div style="font-size:1.1rem; font-weight:500;"><?= e($user['telefon']) ?></div>
@@ -76,10 +76,10 @@ $active = active($user);
 
             <!-- AKCE (tlačítka) - přesunuté dovnitř karty -->
 <form method="post"
-                          action="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/resend-activation') ?>">
+                          action="<?= Url::to('/{tenant}/users/' . $user['id'] . '/resend-activation') ?>">
             <div class="form-actions">
 
-                <?php if ($user['password_hash'] === null): ?>
+                <?php if ($user['password_hash'] === ''): ?>
                     
                         <?= Csrf::getField() ?>
                         <button type="submit" class="btn btn-primary">
@@ -88,7 +88,7 @@ $active = active($user);
                    
                 <?php endif; ?>
 
-                <a href="<?= Url::to('/{tenant}/users/' . (int)$user['id'] . '/edit') ?>/#main"
+                <a href="<?= Url::to('/{tenant}/users/' . $user['id'] . '/edit') ?>/#main"
                    class="btn btn-secondary">
                     Upravit uživatele
                 </a>
