@@ -63,7 +63,7 @@ abstract class Controller
 
         ob_start();
         require __DIR__ . '/../Views/' . $template . '.php';
-        return ob_get_clean();
+        return (string) ob_get_clean();
     }
 
     /* =========================

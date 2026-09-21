@@ -53,7 +53,7 @@ class DevAuthController extends Controller
         Auth::login($toLogin);
 
         $url = match ($user['global_role']) {
-            'root'  => '/' . $company['slug'] . '/system/#main',
+            'root'  => '/' . $company['slug'] . '/root/list-companies/#main',
             'admin' => '/' . $company['slug'] . '/workbench/#main',
             'mistr' => '/' . $company['slug'] . '/workbench/#main',
             default => '/' . $company['slug'] . '/tasks/#main',

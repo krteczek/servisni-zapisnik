@@ -8,7 +8,7 @@ use App\Core\Url;
 use App\Core\Csrf;
 use App\Services\Settings\BillingMode;
 $data = $view->data;
-// var_dump($data['myReadyToDoneOrders']);
+// var_dump($data['myReadyToDoneOrders']); 
 
 ?>
 <div class="settings-grid">

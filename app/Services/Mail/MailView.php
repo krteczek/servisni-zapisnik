@@ -33,7 +33,7 @@ class MailView
        ob_start();
        require __DIR__ . "/../../Views/mails/{$template}.txt.php";
 	    $content = ob_get_clean();
-       return $content;
+       return (string) $content;
 
     }
 
