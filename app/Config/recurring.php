@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 //nastavení defaultní hodnoty pro recurring
+/** některé položky jsou default pro recuring a jiné jak se spouští */
 return [
 
     'frequencies' => [
