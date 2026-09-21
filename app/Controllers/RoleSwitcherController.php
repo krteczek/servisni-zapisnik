@@ -8,7 +8,7 @@ use App\Core\Auth;
 use App\Core\Url;
 
 
-final class AdminController extends Controller
+final class RoleSwitcherController extends Controller
 {
     /**
      * Přepnutí pohledu role (jen admin)

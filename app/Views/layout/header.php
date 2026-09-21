@@ -88,7 +88,7 @@ require __DIR__ . '/../../../public/css/deadline.css';
     <small class="role-switcher-label">Pohled jako: <strong><?= e(Auth::effectiveRole()) ?></strong></small>
     <div class="role-switch"><!-- Odkazy pro přepínání rolí, které volají AdminController@switchRole -->   
 <?php foreach (Roles::effective() as $key => $label): ?>
-    <a href="<?= Url::to('/' . Auth::tenantSlug() . '/admin/switch-role/' . $key) ?>" class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"><?= e($label) ?></a>
+    <a href="<?= Url::to('/' . Auth::tenantSlug() . '/role-switch/' . $key) ?>" class="<?= Auth::effectiveRole() === $key ? 'active' : '' ?>"><?= e($label) ?></a>
 <?php endforeach; ?>
     </div><!-- .role-switch -->
 </div><!-- .role-switcher -->

@@ -26,14 +26,14 @@ class SettingsController extends Controller
     }
 
 
-    public function index(): string
+    public function indexBilling(): string
     {
         $this->view->data = [
             'billing' => $this->model->getBillingSettings(),
             'work_orders' => $this->model->getWorkOrderSettings(),
         ];
 
-        return $this->render('settings/index');
+        return $this->render('settings/indexBilling');
     }
 
     public function saveBilling(): void
@@ -44,7 +44,7 @@ class SettingsController extends Controller
 
         if (!BillingMode::isValid($mode)) {
             Flash::error('Neplatný režim fakturace.');
-            Url::redirect('/{tenant}/system/settings#settings-billing/#main');
+            Url::redirect('/{tenant}/system/settings/billing/#main');
         }
 
         $default = (new SettingsService())->getInvoiceDueDays();
@@ -60,7 +60,7 @@ class SettingsController extends Controller
             ]);
 
             Flash::success('Nastavení fakturace bylo uloženo.');
-            Url::redirect('/{tenant}/system/settings#settings-billing/#main');
+            Url::redirect('/{tenant}/system/settings/billing/#main');
 
         } catch (Throwable $e) {
             LoggerHolder::get()->error('SettingsController.saveBilling FAILED', [
@@ -71,7 +71,7 @@ class SettingsController extends Controller
         ]);
 
             Flash::error('Nastavení fakturace se nepodařilo uložit.');
-            Url::redirect('/{tenant}/system/settings#settings-billing/#main');
+            Url::redirect('/{tenant}/system/settings/billing/#main');
 
         }
      }

@@ -154,7 +154,7 @@ public function login(): string
     );
     //$url = '/' . Auth::tenantSlug() . ($user['global_role'] === 'root' ? '/system' : (in_array($user['global_role'],['mistr', 'admin']) ? '/workbench/#main' : '/tasks/#main') );
 	$url = match ($user['global_role']) {
-		'root'  => '/' . Auth::tenantSlug() . '/system/#main',
+		'root'  => '/' . Auth::tenantSlug() . '/root/list-companies/#main',
 		'admin',
 		'mistr' => '/' . Auth::tenantSlug() . '/workbench/#main',
 		default => '/' . Auth::tenantSlug() . '/tasks/#main',

@@ -2,13 +2,13 @@
 declare(strict_types=1);
 
 use App\Controllers\AuthController;
-use App\Controllers\DashboardController;
+// use App\Controllers\DashboardController;//nepoužíváme 
 use App\Controllers\UserController;
 use App\Controllers\TeamController;
-use App\Controllers\AdminController;
+//use App\Controllers\AdminController; //--> RoleSwitcherController
 use App\Controllers\WorkOrderController;
 use App\Controllers\AuditLogController;
-use App\Controllers\SystemController;
+//use App\Controllers\SystemController;// --> RootControlleRootController
 use App\Controllers\TaskController;
 use App\Controllers\PageController;
 use App\Controllers\TaskRecurringController;
@@ -21,6 +21,7 @@ use App\Controllers\SettingsController;
 use App\Controllers\InvoiceController;
 use App\Controllers\DevAuthController;
 use App\Controllers\RootController;
+use App\Controllers\RoleSwitcherController;
 
 return [
 
@@ -225,7 +226,7 @@ return [
 | DASHBOARD / ÚKOLY
 |--------------------------------------------------------------------------
 */
-/* Dashboard je prozatím zrušen
+/* Dashboard je prozatím zrušen, máme workbench :)
 [
     'method'  => 'GET',
     'path'    => '/dashboard',
@@ -271,18 +272,7 @@ return [
     'section' => 'tasks',
 	'title'   => 'Úkoly: Přehled',
 ],
-/*
-[
-    'method'  => 'GET',
-    'path'    => '/{tenant}/tasks',
-    'action'  => [TaskController::class, 'index'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr', 'predak', 'monter'],
-    'submenu'    => 'Přehled',
-    'section' => 'tasks',
-	'title'   => 'Úkoly > Přehled',
-],
-*/
+
 
 //přidání reportu
 [
@@ -1023,8 +1013,8 @@ Přepínaní rolí u admina
 -------------------------------------**/
 [
     'method'        => 'GET',
-    'path'          => '/{tenant}/admin/switch-role/{role:admin|mistr|predak|monter}',
-    'action'        => [AdminController::class, 'switchRole'],
+    'path'          => '/{tenant}/role-switch/{role:admin|mistr|predak|monter}',
+    'action'        => [RoleSwitcherController::class, 'switchRole'],
     'roles'         => ['admin'],
     'auth'          => true,
 ],
@@ -1053,11 +1043,12 @@ Přepínaní rolí u admina
     'action' => [RootController::class, 'companyDetail'],
     'roles'  => ['root'],
     'menu'   => 'ROOT',
-    'submenu'=> '',//'Výpis firem v systému',
+    'submenu'=> '',//'detail firmy v systému',
     'section'=> 'root',
     'auth'   => true,
     'title'  => 'Detail firmy v systému',
 ],
+
 
 /*
 |--------------------------------------------------------------------------
@@ -1093,13 +1084,14 @@ Přepínaní rolí u admina
 */
 [
     'method' => 'GET',
-    'path'   => '/{tenant}/system/settings',
-    'action' => [SettingsController::class, 'index'],
+    'path'   => '/{tenant}/system/settings/billing',
+    'action' => [SettingsController::class, 'indexBilling'],
     'roles'  => ['admin'],
     'menu'   => 'Administrace',
     'submenu'=> 'Nastavení',
-    'section'=> 'admin',
+    'section'=> 'system',
     'auth'   => true,
+    'title'  => 'Nastavení fakturace',
 ],
 
 [
@@ -1108,6 +1100,8 @@ Přepínaní rolí u admina
     'action' => [SettingsController::class, 'saveBilling'],
     'roles'  => ['admin'],
     'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Nastavení fakturace',
 ],
 
 /*
