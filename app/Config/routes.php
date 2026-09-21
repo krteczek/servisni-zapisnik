@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use App\Controllers\AuthController;
+use App\Controllers\AuthController; // login
 // use App\Controllers\DashboardController;//nepoužíváme 
-use App\Controllers\UserController;
+use App\Controllers\UserController; 
 use App\Controllers\TeamController;
 //use App\Controllers\AdminController; //--> RoleSwitcherController
 use App\Controllers\WorkOrderController;
@@ -1021,7 +1021,7 @@ Přepínaní rolí u admina
 
 /*
 |--------------------------------------------------------------------------
-| ROOT / SYSTEM
+| ROOT:rozhraní pro roota
 |--------------------------------------------------------------------------
 */
 
