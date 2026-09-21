@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-
+/** které tabulky budou podrobovány auditu */
 return [
     'enabled' => true,
 

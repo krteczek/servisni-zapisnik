@@ -5,6 +5,7 @@ declare(strict_types=1);
  **********************************************************************/
 use App\Services\Tokens\TokenType;
 
+/** možná by stálo za to, aby tohle mohl ovlivnovat root ve svém rozhraní... */
 return [
 
     TokenType::PASSWORD_RESET => [
