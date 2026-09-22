@@ -5,11 +5,13 @@ namespace App\Services\Invoice;
 use App\Models\WorkOrderModel;
 use App\Models\ContactsModel;
 use App\Models\TaskModel;
+// use App\Models\InternalInvoiceModel;
 use App\Services\Settings\SettingsService;
 use App\Core\Csrf;
 use \RuntimeException;
 use \App\Core\Flash;
 use \App\Core\Url;
+
 final class InvoiceService
 {
 
@@ -155,7 +157,7 @@ final class InvoiceService
     /**
      * @param int $taskId
      * @param array<string, mixed> $post
-     * @return array{success: bool, errors?: array<string, list<string>>, data?: array<string, mixed>, invoice_id?: int}
+     * @return array{success: bool, errors: array<string, list<string>>, data: array<string, mixed>, invoice_id: int}
      */
     public function invoiceFromTask(
         int $taskId,
@@ -201,9 +203,10 @@ final class InvoiceService
             $draft['items']    = $data['items'];
 
             return [
-                'success' => false,
-                'errors'  => $data['errors'],
-                'data'    => $draft,
+                'success'    => false,
+                'invoice_id' => 0,
+                'errors'     => $data['errors'],
+                'data'       => $draft,
             ];
         }
 
@@ -217,6 +220,9 @@ final class InvoiceService
         return [
             'success'    => true,
             'invoice_id' => $invoiceId,
+            'errors'     => [],
+            'data'       => [],
+           
         ];
     }
 
@@ -267,7 +273,7 @@ private function validateInvoiceData(array $post): array
 
         $taskId = (int) ($item['task_id'] ?? 0);
 
-        $title = trim((string) ($item['title'] ?? ''));
+        $taskTitle = trim((string) ($item['title'] ?? ''));
 
         $minutes = max(
             0,
@@ -279,7 +285,7 @@ private function validateInvoiceData(array $post): array
             (float) ($item['kilometers'] ?? 0)
         );
 
-        if ($title === '') {
+        if ($taskTitle === '') {
             $errors["items.$i.title"][] =
                 'Název položky je povinný.';
         }
@@ -291,7 +297,7 @@ private function validateInvoiceData(array $post): array
 
         $items[] = [
             'task_id'       => $taskId,
-            'title'         => $title,
+            'title'         => $taskTitle,
             'minutes'       => $minutes,
             'kilometers'    => $kilometers,
             'visible_time' => ($item['visible_time'] ?? null) === 'on',
@@ -400,4 +406,6 @@ private function validateInvoiceData(array $post): array
         return '';
     }
         */
+
+
 }

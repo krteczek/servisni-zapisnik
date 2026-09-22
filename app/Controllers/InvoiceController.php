@@ -11,21 +11,23 @@ use App\Core\Url;
 use App\Models\ContactsModel;
 use App\Models\TaskModel;
 use App\Models\WorkOrderModel;
+use App\Models\InternalInvoiceModel;
 use App\Services\Invoice\InvoiceService;
+use App\Services\Settings\SettingsService;
 use Throwable;
 use App\Core\LoggerHolder;
 
 class InvoiceController extends Controller
 {
     private InvoiceService $invoice;
+
     public function __construct(ViewContext $view)
     {
         parent::__construct($view);
         $this->invoice = new InvoiceService();
     }
 
- 
-    /** 
+     /** 
      * /billing/invoice/create/work-order/456
      * momentálně ještě nepoužito
      * /
@@ -83,26 +85,35 @@ class InvoiceController extends Controller
     }
 
 
-        /**
+    /**
      * POST
      */
     public function storeTask(int $id): string
     {
         if ($_POST === []) {
-            Flash::error('Neplatná žádost.');
+            Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
             Url::back();
         }
 
         $this->checkCsrf();
 
         try {
+            /** 
+             * vrací:
+             * return [
+             *      'success'    => true, bool
+             *      'invoice_id' => $invoiceId, int
+             *      'errors'     => [], array list
+             *      'data'       => [], array list
+             * ];
 
+             */
             $result = $this->invoice->invoiceFromTask(
                 $id,
                 $_POST
             );
 
-            if ($result['success'] !== true) {
+            if ($result['success'] === false) {
 
                 $this->view->errors = $result['errors'];
                 $this->view->data   = $result['data'];
@@ -113,7 +124,7 @@ class InvoiceController extends Controller
             Flash::success('Faktura byla vytvořena.');
 
             Url::redirect(
-                '/{tenant}/billing/invoice/' . $result['invoice_id'] . '/#main'
+                '/{tenant}/billing/invoice/' . $result['invoice_id'] . '/detail/#main'
             );
 
         } catch (Throwable $e) {
@@ -162,15 +173,25 @@ class InvoiceController extends Controller
         return $this->render('billing/invoice/create-export');
     }
 
-
-
     /**
-     * seznam faktur
+     * seznam hotových faktur
      */
-    public function index(): string
-    {
-        return $this->render('billing/invoice/index');
+public function index(): string
+{
+    $settingsService = new SettingsService();
+
+    $this->view->invoiceSettingsConfirmed =
+        $settingsService->areInvoiceSettingsConfirmed();
+
+    if ($this->view->invoiceSettingsConfirmed === true) {
+        $model = new InternalInvoiceModel();
+
+        $this->view->invoices = $model->all();
     }
+
+    return $this->render('invoices/index');
+}
+
 
     /**
      * detail faktury
