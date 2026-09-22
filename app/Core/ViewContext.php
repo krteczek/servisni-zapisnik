@@ -36,6 +36,8 @@ use App\Core\Types;
  * @phpstan-import-type ArchiveTaskListRow from Types
  * @phpstan-import-type WorkbenchDataRow from Types
  * @phpstan-import-type AuditLogRow from Types 
+ * @phpstan-import-type InternalInvoiceRow from Types 
+ * 
  * 
  */
 class ViewContext
@@ -291,4 +293,18 @@ class ViewContext
      * @var ArchiveOrderRow|null Detail archivované zakázky
      */
     public ?array $archiveOrder = null;
+
+    /**
+     * @var array<int, InternalInvoiceRow>
+     */
+    public array $invoices = [];
+
+    /**
+     * @var bool Zda je již nastaveno, odkud začíná po založení firmy číslování faktur
+     */
+    public bool $invoiceSettingsConfirmed = false;
+
+    
+    
+
 }

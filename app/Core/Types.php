@@ -564,6 +564,21 @@ use App\Services\Tokens\TokenResult;
  *     user_agent: ?string,
  *     created_at: string
  * }
+ * 
+ * @phpstan-type InternalInvoiceRow array{
+ *     id: int,
+ *     company_id: int,
+ *     invoice_number: string,
+ *     work_order_id: ?int,
+ *     contact_id: ?int,
+ *     customer_name: string,
+ *     issued_at: string,
+ *     due_date: string,
+ *     status: string,
+ *     invoice_json: string,
+ *     created_by: int,
+ *     created_at: string
+ * }
  */
 final class Types
 {

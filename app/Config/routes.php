@@ -858,7 +858,7 @@ return [
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/billing/invoice',
-    'action'  => [InvoiceController ::class, 'index'],
+    'action'  => [InvoiceController::class, 'index'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
@@ -867,23 +867,38 @@ return [
     'title'   => 'Faktury: Výpis faktur',
 ],
 
-//GET  /billing/invoice/create/task/123
+//GET  /billing/invoice/create/from-task/123
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/create/task/{id:\d+}',
-    'action'  => [InvoiceController ::class, 'createTask'],
+    'path'    => '/{tenant}/billing/invoice/create/from-task/{id:\d+}',
+    'action'  => [InvoiceController::class, 'createTask'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
-    //'section' => 'billing',
-    //'menu'   => 'Faktury',
+    'section' => 'billing',
+    'menu'    => 'Faktury',
     //'submenu'=> 'Výpis faktur',
     'title'   => 'Faktury: Vytvoření faktury z úkolu',
 ],
-//POST billing/invoice/create/task/123
+//POST billing/invoice/create/from-task/123
 [
     'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/create/task/{id:\d+}',
-    'action'  => [InvoiceController ::class, 'storeTask'],
+    'path'    => '/{tenant}/billing/invoice/create/from-task/{id:\d+}',
+    'action'  => [InvoiceController::class, 'storeTask'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    //'submenu'=> 'Výpis faktur',
+    'title'   => 'Faktury: Vytvoření faktury z úkolu',
+],
+
+//GET  /billing/invoice/create/from-task/123
+//GET /billing/invoice/{invoiceId}/detail
+//GET /billing/invoice/{invoiceId}/detail
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/{invoiceId:\d+}/detail',
+    'action'  => [InvoiceController::class, 'detail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',
@@ -892,11 +907,13 @@ return [
     'title'   => 'Faktury: Vytvoření faktury z úkolu',
 ],
 
-//GET  /billing/invoice/create/work-order/123
+
+
+//GET  /billing/invoice/create/from-work-order/123
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/create/work-order/{id:\d+}',
-    'action'  => [InvoiceController ::class, 'createWO'],
+    'path'    => '/{tenant}/billing/invoice/create/from-work-order/{id:\d+}',
+    'action'  => [InvoiceController::class, 'createWO'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',
@@ -904,11 +921,11 @@ return [
     //'submenu'=> 'Výpis faktur',
     'title'   => 'Faktury: Vytvoření faktury ze zakázky',
 ],
-//POST /billing/invoice/create/work-order/123
+//POST /billing/invoice/create/from-work-order/123
 [
     'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/create/work-order/{id:\d+}',
-    'action'  => [InvoiceController ::class, 'storeWO'],
+    'path'    => '/{tenant}/billing/invoice/create/from-work-order/{id:\d+}',
+    'action'  => [InvoiceController::class, 'storeWO'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',
@@ -922,7 +939,7 @@ return [
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/billing/invoice/create/export/{id:\d+}',
-    'action'  => [InvoiceController ::class, 'createExport'],
+    'action'  => [InvoiceController::class, 'createExport'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',
@@ -934,7 +951,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/billing/invoice/create/export/{id:\d+}',
-    'action'  => [InvoiceController ::class, 'storeExport'],
+    'action'  => [InvoiceController::class, 'storeExport'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',
@@ -947,7 +964,7 @@ return [
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/billing/invoice/{id:\d+}/detail',
-    'action'  => [InvoiceController ::class, 'detail'],
+    'action'  => [InvoiceController::class, 'detail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
@@ -961,7 +978,7 @@ return [
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/billing/invoice/{id:\d+}/pdf',
-    'action'  => [InvoiceController ::class, 'pdf'],
+    'action'  => [InvoiceController::class, 'pdf'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
@@ -975,7 +992,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/billing/invoice/{id:\d+}/cancel',
-    'action'  => [InvoiceController ::class, 'cancel'],
+    'action'  => [InvoiceController::class, 'cancel'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
@@ -1050,6 +1067,116 @@ Přepínaní rolí u admina
 ],
 
 
+
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN / Settings
+|--------------------------------------------------------------------------
+*/
+/**
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/settings/billing',
+    'action' => [SettingsController::class, 'billing'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Fakturace',
+    'section'=> 'system',
+    'auth'   => true,
+    'title'  => 'Nastavení fakturace',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing',
+    'action' => [SettingsController::class, 'saveBilling'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Nastavení fakturace',
+],
+*/
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN / Settings
+|--------------------------------------------------------------------------
+*/
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/settings/billing',
+    'action' => [SettingsController::class, 'billing'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Fakturace',
+    'section'=> 'system',
+    'auth'   => true,
+    'title'  => 'Nastavení fakturace',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing/mode',
+    'action' => [SettingsController::class, 'saveBillingMode'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Nastavení fakturace',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing/due-days',
+    'action' => [SettingsController::class, 'saveInvoiceDueDays'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Nastavení fakturace',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing/number-start',
+    'action' => [SettingsController::class, 'saveInvoiceNumberStart'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Nastavení fakturace',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing/number-start/confirm',
+    'action' => [SettingsController::class, 'confirmInvoiceNumberStart'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Nastavení fakturace',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing/number-format',
+    'action' => [SettingsController::class, 'saveInvoiceNumberFormat'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Nastavení fakturace',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/settings/billing/number-format/confirm',
+    'action' => [SettingsController::class, 'confirmInvoiceNumberFormat'],
+    'roles'  => ['admin'],
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Nastavení fakturace',
+],
+
+
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN / audit
@@ -1077,32 +1204,7 @@ Přepínaní rolí u admina
 ],
 
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN / Settings
-|--------------------------------------------------------------------------
-*/
-[
-    'method' => 'GET',
-    'path'   => '/{tenant}/system/settings/billing',
-    'action' => [SettingsController::class, 'indexBilling'],
-    'roles'  => ['admin'],
-    'menu'   => 'Administrace',
-    'submenu'=> 'Nastavení',
-    'section'=> 'system',
-    'auth'   => true,
-    'title'  => 'Nastavení fakturace',
-],
 
-[
-    'method' => 'POST',
-    'path'   => '/{tenant}/system/settings/billing',
-    'action' => [SettingsController::class, 'saveBilling'],
-    'roles'  => ['admin'],
-    'auth'   => true,
-    'section'=> 'system',
-    'title'  => 'Nastavení fakturace',
-],
 
 /*
 |--------------------------------------------------------------------------

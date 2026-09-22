@@ -7,7 +7,7 @@ final class BillingMode
 {
     public const INTERNAL = 'internal';
 
-    public const EXTERNAL_ACCOUNTANT = 'external_accountant';
+    public const EXTERNAL_ACCOUNTANT = 'external_accountant'; 
 
     /** @return array<string> */
     public static function all(): array
