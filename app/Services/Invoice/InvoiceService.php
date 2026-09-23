@@ -2,18 +2,29 @@
 declare(strict_types=1);
 
 namespace App\Services\Invoice;
+use App\Core\Auth;
+use App\Core\Transaction;
+use App\Models\InternalInvoiceModel;
+use App\Models\SettingsModel;
+use App\Services\Invoice\InvoiceNumberService;
+use DateTimeImmutable;
+use PDO;
 use App\Models\WorkOrderModel;
 use App\Models\ContactsModel;
 use App\Models\TaskModel;
+use App\Models\InternalInvoiceItemModel;
 // use App\Models\InternalInvoiceModel;
 use App\Services\Settings\SettingsService;
 use App\Core\Csrf;
 use \RuntimeException;
 use \App\Core\Flash;
 use \App\Core\Url;
+use App\Services\Tasks\TaskType;
+use App\Services\Tasks\TaskStatus;
 
 final class InvoiceService
 {
+
 
     /**
      * @param int $id
@@ -21,44 +32,17 @@ final class InvoiceService
      */
     private function requireTaskForInvoice(int $id): array
     {
-        if ($id <= 0) {
-            Flash::error('Požadovaný úkol neexistuje');
+        try {
+            return (new InvoiceGuard())
+                ->assertTaskCanBeInvoiced($id);
+        } catch (RuntimeException $e) {
+            Flash::error($e->getMessage());
             Url::back();
         }
 
-        $task = (new TaskModel())->findById($id);
-
-        if ($task === null) {
-            Flash::error('Požadovaný úkol neexistuje');
-            Url::back();
-        }
-
-        if ($task['status'] !== 'done') {
-            Flash::error(
-                'Fakturovat lze pouze dokončené úkoly.'
-            );
-            Url::back();
-        }
-
-        if (in_array($task['task_type'], ['recurring_master'], true))
-        {
-            Flash::error('Šablonu opakovaného úkolu nelze fakturovat.');
-            Url::back();
-        }
-
-        if ($task['billing_export_id'] !== null) {
-            Flash::error(
-                'Úkol již byl fakturován nebo exportován.'
-            );
-            Url::back();
-        }
-
-        return $task;
     }
 
-    
- 
-    /**
+     /**
      * @param int $taskId
      * @return array<string, mixed>
      */
@@ -135,24 +119,6 @@ final class InvoiceService
         ];
         return $data;
     }
-    /**
-     * @param int $orderId
-     * @return array<string, mixed>
-     */
-    public function buildDraftFromWorkOrder(int $orderId): array
-    {
-        return [];
-    }
-    /**
-     * Vytvoří fakturu z celé zakázky.
-     * /
-    public function createFromWorkOrder(
-        int $companyId,
-        int $workOrderId,
-        array $data
-    ): int {
-    }
-*/
 
     /**
      * @param int $taskId
@@ -215,7 +181,8 @@ final class InvoiceService
         // ULOŽENÍ
         // =====================
 
-        $invoiceId = $this->createInvoice($data);
+        //$invoiceId = $this->createInvoice($data);
+        $invoiceId = $this->createInvoice($data, $workOrder);
 
         return [
             'success'    => true,
@@ -316,19 +283,6 @@ private function validateInvoiceData(array $post): array
 }
 
     /**
-     * Detail faktury.
-     * @param int $companyId
-     * @param int $invoiceId
-     * @return array<string, mixed>
-     */
-    public function getDetail(
-        int $companyId,
-        int $invoiceId
-    ): array {
-        return [];
-    }
-
-    /**
      * Seznam faktur.
      * @param int $companyId
      * @return array<string, mixed>
@@ -368,44 +322,371 @@ private function validateInvoiceData(array $post): array
         return '';
     }
 
+
     /**
-     * Vytvoří fakturu.
+     * Vytvoří interní fakturu.
+     *
+     * Číslování, snapshot a samotné uložení probíhá
+     * v jedné databázové transakci.
+     *
      * @param array<string, mixed> $invoice
-     * @return int
+     * @param array<string, mixed> $workOrder
+     * @return int ID vytvořené faktury
      */
-    private function createInvoice(array $invoice): int
-    {
-        return 0;
+    private function createInvoice(
+        array $invoice,
+        array $workOrder
+    ): int {
+        $companyId = Auth::companyId();
+
+        if ($companyId === null || $companyId <= 0) {
+            throw new RuntimeException('Company context is missing.');
+        }
+
+        $issuedAt = (string) ($invoice['issued_at'] ?? '');
+        $dueDate  = (string) ($invoice['due_date'] ?? '');
+
+        $issuedDate = DateTimeImmutable::createFromFormat(
+            '!Y-m-d',
+            $issuedAt
+        );
+
+        $dueDateValue = DateTimeImmutable::createFromFormat(
+            '!Y-m-d',
+            $dueDate
+        );
+
+        if ($issuedDate === false) {
+            throw new RuntimeException('Invalid invoice issue date.');
+        }
+
+        if ($dueDateValue === false) {
+            throw new RuntimeException('Invalid invoice due date.');
+        }
+
+        $year  = (int) $issuedDate->format('Y');
+        $month = (int) $issuedDate->format('m');
+
+        $title = trim((string) ($invoice['title'] ?? ''));
+
+        if ($title === '') {
+            throw new RuntimeException('Invoice title is empty.');
+        }
+
+        $customer = $invoice['customer'] ?? [];
+        $items    = $invoice['items'] ?? [];
+
+        if (!is_array($customer)) {
+            throw new RuntimeException('Invalid customer data.');
+        }
+
+        if (!is_array($items)) {
+            throw new RuntimeException('Invalid invoice items.');
+        }
+
+        $workOrderId = isset($workOrder['id'])
+            ? (int) $workOrder['id']
+            : 0;
+
+        if ($workOrderId <= 0) {
+            throw new RuntimeException(
+                'Work order ID is missing.'
+            );
+        }
+
+        return Transaction::run(
+            function (PDO $db) use (
+                $companyId,
+                $year,
+                $month,
+                $issuedAt,
+                $dueDate,
+                $invoice,
+                $customer,
+                $items,
+                $workOrder,
+                $workOrderId
+            ): int {
+                $settings = new SettingsModel($db);
+                $billing  = $settings->getBillingSettings();
+
+                if (!$settings->areRequiredSettingsConfirmed('billing')) {
+                    throw new RuntimeException(
+                        'Nastavení fakturace nebylo potvrzeno.'
+                    );
+                }
+
+                $start = (int) ($billing['invoice_number_start'] ?? 0);
+                $format = (string) (
+                    $billing['invoice_number_format'] ?? ''
+                );
+
+                if ($start < 1) {
+                    throw new RuntimeException(
+                        'Invoice number start is invalid.'
+                    );
+                }
+
+                if ($format === '') {
+                    throw new RuntimeException(
+                        'Invoice number format is empty.'
+                    );
+                }
+
+                $numberService = new InvoiceNumberService();
+
+                $number = $numberService->nextNumber(
+                    $db,
+                    $companyId,
+                    $year,
+                    $start
+                );
+
+                $invoiceNumber = $numberService->format(
+                    $year,
+                    $month,
+                    $number,
+                    $format
+                );
+
+                $snapshot = [
+                    'invoice' => $invoice,
+                    'customer' => $customer,
+                    'workOrder' => $workOrder,
+                    'items' => $items,
+                ];
+
+                $invoiceJson = json_encode(
+                    $snapshot,
+                    JSON_THROW_ON_ERROR
+                );
+
+                $customerName = trim(
+                    (string) ($customer['company_name'] ?? '')
+                );
+
+                $contactId = isset($customer['id'])
+                    ? (int) $customer['id']
+                    : null;
+
+                $createdBy = Auth::id();
+
+                if ($createdBy === null || $createdBy <= 0) {
+                    throw new RuntimeException(
+                        'Authenticated user is missing.'
+                    );
+                }
+
+                $model = new InternalInvoiceModel($db);
+
+                $invoiceId = $model->create(
+                    [
+                        'year'           => $year,
+                        'number'         => $number,
+                        'invoice_number' => $invoiceNumber,
+                        'work_order_id'  => $workOrderId,
+                        'contact_id'     => $contactId,
+                        'customer_name'  => $customerName,
+                        'issued_at'      => $issuedAt,
+                        'due_date'       => $dueDate,
+                        'status'         => 'issued',
+                        'invoice_json'   => $invoiceJson,
+                        'created_by'     => $createdBy,
+                    ]
+                );
+
+                $itemModel = new InternalInvoiceItemModel($db);
+
+                foreach ($items as $item) {
+                    $taskId = (int) ($item['task_id'] ?? 0);
+
+                    if ($taskId <= 0) {
+                        throw new RuntimeException(
+                            'Invoice item task ID is invalid.'
+                        );
+                    }
+
+                    $itemModel->create([
+                        'invoice_id' => $invoiceId,
+                        'task_id'    => $taskId,
+                    ]);
+                }
+
+                return $invoiceId;        },
+            'admin'
+        );
     }
 
-    /*
-    private function getTaskSnapshot(
-        int $companyId,
-        int $taskId
-    ): array {
-         return [];
+/**
+ * Připraví návrh faktury ze zakázky.
+ *
+ * Do návrhu zařadí dokončené úkoly zakázky.
+ * Zrušené a otevřené úkoly se nefakturují.
+ *
+ * @param int $workOrderId
+ * @return array<string, mixed>
+ */
+public function buildDraftFromWorkOrder(int $workOrderId): array
+{
+    if ($workOrderId <= 0) {
+        throw new RuntimeException('Work order not found');
     }
 
-    private function getWorkOrderSnapshot(
-        int $companyId,
-        int $workOrderId
-    ): array {
-         return [];
+    $workOrder = (new WorkOrderModel())->find($workOrderId);
+
+    if ($workOrder === null) {
+        throw new RuntimeException('Work order not found');
     }
 
-    private function getExportSnapshot(
-        int $companyId,
-        int $exportId
-    ): array {
-        return [];
+    $tasks = (new TaskModel())
+        ->forWorkOrderWithStats($workOrderId);
+
+    $customer = (new ContactsModel())
+        ->find($workOrder['contact_id'] ?? 0);
+
+    $dueDays = (new SettingsService())
+        ->getInvoiceDueDays();
+
+    $customerData = [
+        'company_name' => '',
+        'ico'          => '',
+        'dic'          => '',
+        'street'       => '',
+        'city'         => '',
+        'zip'          => '',
+        'country'      => '',
+        'email'        => '',
+        'phone'        => '',
+    ];
+
+    if ($customer !== null) {
+        $customerData = array_merge(
+            $customerData,
+            $customer
+        );
     }
 
-    private function renderPdf(
-        array $invoice
-    ): string {
-        return '';
-    }
-        */
+    $items = [];
 
+    foreach ($tasks as $task) {
+        if ($task['status'] !== TaskStatus::DONE) {
+            continue;
+        }
+
+        if ($task['task_type'] === TaskType::RECURRING_MASTER) {
+            continue;
+        }
+
+        $stats = $task['stats'];
+
+        $items[] = [
+            'task_id'       => $task['id'],
+            'title'         => $task['title'],
+            'minutes'       => ($stats['total_minutes']),
+            'kilometers'    => (float) ($stats['total_km']),
+            'visible_title' => true,
+            'visible_time'  => true,
+            'visible_km'    => true,
+        ];
+    }
+
+    return [
+        'invoice' => [
+            'title'     => $workOrder['title'],
+            'issued_at' => date('Y-m-d'),
+            'due_date'  => date(
+                'Y-m-d',
+                strtotime('+' . $dueDays . ' days')
+            ),
+            'note'      => '',
+        ],
+
+        'customer' => $customerData,
+
+        'workOrder' => [
+            'id'          => $workOrder['id'],
+            'title'       => $workOrder['title'],
+            'description' => ($workOrder['description']),
+        ],
+
+        'items' => $items,
+    ];
+}
+
+/**
+ * Detail faktury.
+ *
+ * @param int $companyId
+ * @param int $invoiceId
+ * @return array<string, mixed>
+ */
+public function getDetail(
+    int $companyId,
+    int $invoiceId
+): array {
+    if ($companyId <= 0 || $invoiceId <= 0) {
+        throw new RuntimeException(
+            'Požadovaná faktura v systému neexistuje.'
+        );
+    }
+
+    $invoiceModel = new InternalInvoiceModel();
+
+    $invoice = $invoiceModel->find($invoiceId);
+
+    if ($invoice === null) {
+        throw new RuntimeException(
+            'Požadovaná faktura v systému neexistuje.'
+        );
+    }
+
+    if ((int) $invoice['company_id'] !== $companyId) {
+        throw new RuntimeException(
+            'Požadovaná faktura v systému neexistuje.'
+        );
+    }
+
+    try {
+        $snapshot = json_decode(
+            $invoice['invoice_json'],
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+    } catch (\JsonException $e) {
+        throw new RuntimeException(
+            'Data faktury jsou poškozena.',
+            0,
+            $e
+        );
+    }
+
+    if (!is_array($snapshot)) {
+        throw new RuntimeException(
+            'Data faktury jsou poškozena.'
+        );
+    }
+
+    return [
+        'id'            => $invoice['id'],
+        'invoice_number'=> $invoice['invoice_number'],
+        'year'          => $invoice['year'],
+        'number'        => $invoice['number'],
+        'company_id'    => $invoice['company_id'],
+        'work_order_id' => $invoice['work_order_id'],
+        'contact_id'    => $invoice['contact_id'],
+        'customer_name' => $invoice['customer_name'],
+        'issued_at'     => $invoice['issued_at'],
+        'due_date'      => $invoice['due_date'],
+        'status'        => $invoice['status'],
+        'created_by'    => $invoice['created_by'],
+        'created_at'    => $invoice['created_at'],
+
+        'invoice'       => $snapshot['invoice'] ?? [],
+        'customer'      => $snapshot['customer'] ?? [],
+        'workOrder'     => $snapshot['workOrder'] ?? [],
+        'items'         => $snapshot['items'] ?? [],
+    ];
+}
 
 }
