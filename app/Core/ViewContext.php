@@ -300,6 +300,11 @@ class ViewContext
     public array $invoices = [];
 
     /**
+     * @var InternalInvoiceRow|null
+     */
+    public ?array $invoice = null;
+
+    /**
      * @var bool Zda je již nastaveno, odkud začíná po založení firmy číslování faktur
      */
     public bool $invoiceSettingsConfirmed = false;

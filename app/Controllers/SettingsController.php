@@ -10,6 +10,7 @@ use App\Core\Url;
 use App\Core\ViewContext;
 use App\Models\SettingsModel;
 use App\Services\Settings\BillingMode;
+use App\Services\Invoice\InvoiceNumberService;
 use Throwable;
 
 class SettingsController extends Controller
@@ -185,8 +186,18 @@ class SettingsController extends Controller
 
         $format = $_POST['invoice_number_format'] ?? null;
 
+
         if (!is_string($format) || trim($format) === '') {
             Flash::error('Formát čísla faktury nesmí být prázdný.');
+            Url::redirect('/{tenant}/system/settings/billing/#main');
+        }
+
+        $format = trim($format);
+
+        $numberService = new InvoiceNumberService();
+
+        if (!$numberService->isValidFormat($format)) {
+            Flash::error('Neplatný formát čísla faktury.');
             Url::redirect('/{tenant}/system/settings/billing/#main');
         }
 

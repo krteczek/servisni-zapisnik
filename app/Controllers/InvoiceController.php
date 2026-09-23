@@ -16,6 +16,8 @@ use App\Services\Invoice\InvoiceService;
 use App\Services\Settings\SettingsService;
 use Throwable;
 use App\Core\LoggerHolder;
+use App\Core\Auth;
+use RuntimeException;
 
 class InvoiceController extends Controller
 {
@@ -193,13 +195,63 @@ public function index(): string
 }
 
 
-    /**
-     * detail faktury
-     */
-    public function detail(int $id): string
-    {
-        return $this->render('billing/invoice/detail');
+ /**
+ * Detail faktury
+ */
+public function detail(int $id): string
+{
+    try {
+        $companyId = Auth::companyId();
+
+        if ($companyId === null || $companyId <= 0) {
+            Flash::error(
+                'Nelze určit pracovní prostor.'
+            );
+
+            Url::redirect('/{tenant}/billing/invoices/#main');
+        }
+
+        $this->view->invoice = $this->invoice->getDetail(
+            $companyId,
+            $id
+        );
+
+        return $this->render('invoices/detail');
+
+    } catch (RuntimeException $e) {
+
+        LoggerHolder::get()->warning(
+            'Invoice detail unavailable',
+            [
+                'invoice_id' => $id,
+                'message'    => $e->getMessage(),
+            ]
+        );
+
+        Flash::error(
+            $e->getMessage()
+        );
+
+        Url::redirect('/{tenant}/billing/invoices/#main');
+    } catch (Throwable $e) {
+
+        LoggerHolder::get()->error(
+            'InvoiceController.detail FAILED',
+            [
+                'invoice_id' => $id,
+                'message'    => $e->getMessage(),
+                'file'       => $e->getFile(),
+                'line'       => $e->getLine(),
+            ]
+        );
+
+        Flash::error(
+            'Detail faktury se nepodařilo načíst.'
+        );
+
+        Url::redirect('/{tenant}/billing/invoices/#main');
     }
+}
 
     /**
      * pdf
