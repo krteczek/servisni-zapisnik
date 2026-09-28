@@ -599,7 +599,6 @@ LEFT JOIN (
 
 WHERE t.company_id = ?
   AND t.status = 'done'
-  AND t.billing_export_id IS NULL
   AND t.task_type <> ?
   AND t.team_id IN ($placeholders)
 
@@ -680,7 +679,6 @@ LEFT JOIN (
 
 WHERE t.company_id = ?
   AND t.status = 'done'
-  AND t.billing_export_id IS NULL
   AND t.task_type <> ?
   AND t.team_id NOT IN ($placeholders)
 

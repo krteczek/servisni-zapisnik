@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace App\Services\Invoice;
 
+use App\Core\Url;
+use App\Core\Flash;
 use App\Models\InternalInvoiceItemModel;
 use App\Models\TaskModel;
 use App\Services\Tasks\TaskStatus;
 use App\Services\Tasks\TaskType;
-use RuntimeException;
 
 final class InvoiceGuard
 {
@@ -16,45 +17,39 @@ final class InvoiceGuard
      *
      * @param int $taskId ID úkolu
      * @return array<string, mixed> Ověřený úkol
-     *
-     * @throws RuntimeException Pokud úkol nelze fakturovat.
      */
     public function assertTaskCanBeInvoiced(int $taskId): array
     {
         if ($taskId <= 0) {
-            throw new RuntimeException(
-                'Požadovaný úkol neexistuje.'
-            );
+            Flash::error('Požadovaný úkol neexistuje.');
+            Url::back();
+           
         }
 
         $task = (new TaskModel())->findById($taskId);
 
         if ($task === null) {
-            throw new RuntimeException(
-                'Požadovaný úkol neexistuje.'
-            );
+            Flash::error('Požadovaný úkol neexistuje.');
+            Url::back();
         }
 
         if ($task['status'] !== TaskStatus::DONE) {
-            throw new RuntimeException(
-                'Fakturovat lze pouze dokončený úkol.'
-            );
+            Flash::error('Fakturovat lze pouze dokončený úkol.');
+            Url::back();
         }
 
         if ($task['task_type'] === TaskType::RECURRING_MASTER) {
-            throw new RuntimeException(
-                'Šablonu opakovaného úkolu nelze fakturovat.'
-            );
-        }
+            Flash::error('Šablonu opakovaného úkolu nelze fakturovat.');
+            Url::back();
+       }
 
         $invoiceItems = new InternalInvoiceItemModel();
 
         if ($invoiceItems->isTaskActivelyInvoiced($taskId)) {
-            throw new RuntimeException(
-                'Tento úkol již byl fakturován.'
-            );
-        }
+            Flash::error('Tento úkol již byl fakturován.');
+            Url::back();
+         }
 
-        return $task;
+        return $task; 
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 use App\Core\AccessLogger;
+use App\Validators\Validator;
 
 /**
  * Abstraktní základní třída pro všechny controllery aplikace.
@@ -21,6 +22,8 @@ abstract class Controller
      */
     protected ViewContext $view;
 
+    protected Validator $validator;
+
     /**
      * Inicializuje controller a nastaví pracovní prostředí.
      *
@@ -36,6 +39,9 @@ abstract class Controller
         $this->view = $view;
         //$this->view->errors ??= [];
         //$this->view->data   ??= [];
+
+        // obecná validační třída
+        $this->validator = new Validator();
 
         // TODO: [MAINTENANCE] Přesunout logiku přepínání databází do middleware nebo samostatné služby
         // TODO: [PERFORMANCE] Zvážit cachování databázového připojení na úrovni requestu
@@ -64,6 +70,47 @@ abstract class Controller
         ob_start();
         require __DIR__ . '/../Views/' . $template . '.php';
         return (string) ob_get_clean();
+    }
+
+
+    /* =========================
+       COMMON PAGES
+       ========================= */
+
+    /**
+     * Vykreslí stránku 403 - Přístup zakázán.
+     * Loguje pokus o neoprávněný přístup.
+     *
+     * Vedlejší efekty:
+     * - Nastaví HTTP status code 403
+     * - Loguje událost přes AccessLogger
+     *
+     * @return string HTML obsah stránky 403
+     */
+    public function forbidden(): string
+    {
+        AccessLogger::log(403);
+        http_response_code(403);
+        $this->view->title = '403 – Přístup zakázán';
+        return $this->render('errors/403');
+    }
+
+    /**
+     * Vykreslí stránku 404 - Stránka nenalezena.
+     * Loguje pokus o přístup k neexistujícímu obsahu.
+     *
+     * Vedlejší efekty:
+     * - Nastaví HTTP status code 404
+     * - Loguje událost přes AccessLogger
+     *
+     * @return string HTML obsah stránky 404
+     */
+    public function notFound(): string
+    {
+        AccessLogger::log(404);
+        http_response_code(404);
+        $this->view->title = '404 – Stránka nenalezena';
+        return $this->render('errors/404');
     }
 
     /* =========================
@@ -113,7 +160,8 @@ abstract class Controller
      */
     protected function addError(string $field, string $message): void
     {
-        $this->view->errors[$field][] = $message;
+        //$this->view->errors[$field][] = $message;
+        $this->validator->addError($field, $message);
     }
 
     /**
@@ -123,7 +171,8 @@ abstract class Controller
      */
     protected function hasErrors(): bool
     {
-        return $this->view->errors !== [];
+        //return $this->view->errors !== [];
+        return $this->validator->hasErrors();
     }
 
     /**
@@ -134,50 +183,11 @@ abstract class Controller
      * @param string $key
      * @return list<string>|string
      */
-    public function getError($key): mixed
+    public function getError($key): array|string
     {
-        return $this->view->errors[$key] ?? '';
+        return $this->validator->getError($key);
     }
     
-    /* =========================
-       COMMON PAGES
-       ========================= */
-
-    /**
-     * Vykreslí stránku 403 - Přístup zakázán.
-     * Loguje pokus o neoprávněný přístup.
-     *
-     * Vedlejší efekty:
-     * - Nastaví HTTP status code 403
-     * - Loguje událost přes AccessLogger
-     *
-     * @return string HTML obsah stránky 403
-     */
-    public function forbidden(): string
-    {
-        AccessLogger::log(403);
-        http_response_code(403);
-        $this->view->title = '403 – Přístup zakázán';
-        return $this->render('errors/403');
-    }
-
-    /**
-     * Vykreslí stránku 404 - Stránka nenalezena.
-     * Loguje pokus o přístup k neexistujícímu obsahu.
-     *
-     * Vedlejší efekty:
-     * - Nastaví HTTP status code 404
-     * - Loguje událost přes AccessLogger
-     *
-     * @return string HTML obsah stránky 404
-     */
-    public function notFound(): string
-    {
-        AccessLogger::log(404);
-        http_response_code(404);
-        $this->view->title = '404 – Stránka nenalezena';
-        return $this->render('errors/404');
-    }
 
     /**
      * Validuje maximální délku textového pole.
@@ -200,15 +210,33 @@ abstract class Controller
         int $max,
         string $label
     ): void {
-        if ($value === null) {
-            return;
-        }
 
-        if (mb_strlen($value, 'UTF-8') > $max) {
-            $this->addError(
-                $field,
-                "{$label} může mít maximálně {$max} znaků"
-            );
+        $this->validator->maxLength($field, $value, $max, $label);
+    }
+
+    public function isValid(): bool
+    {
+        return $this->validator->isValid();
+    }
+
+ 
+    /**
+     * @return array<string, list<string>>
+     */
+    public function getErrors(): array
+    {
+        return $this->validator->getErrors();
+    }
+
+ 
+    public function required(
+        string $field,
+        string $value,
+        string $message
+    ): void {
+        if ($value === '') {
+            $this->validator->required($field, $value, $message);
         }
     }
+
 }

@@ -22,6 +22,7 @@ use App\Controllers\InvoiceController;
 use App\Controllers\DevAuthController;
 use App\Controllers\RootController;
 use App\Controllers\RoleSwitcherController;
+use App\Controllers\AjaxController;
 
 return [
 
@@ -892,8 +893,6 @@ return [
     'title'   => 'Faktury: Vytvoření faktury z úkolu',
 ],
 
-//GET  /billing/invoice/create/from-task/123
-//GET /billing/invoice/{invoiceId}/detail
 //GET /billing/invoice/{invoiceId}/detail
 [
     'method'  => 'GET',
@@ -904,9 +903,44 @@ return [
     //'section' => 'billing',
     //'menu'   => 'Faktury',
     //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Vytvoření faktury z úkolu',
+    'title'   => 'Faktury: Detail faktury',
 ],
 
+// GET /billing/invoice/{invoiceId}/edit
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/{invoiceId:\d+}/edit',
+    'action'  => [InvoiceController::class, 'edit'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Úprava návrhu faktury',
+],
+
+// POST /billing/invoice/{invoiceId}/edit
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/{invoiceId:\d+}/edit',
+    'action'  => [InvoiceController::class, 'update'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Úprava návrhu faktury',
+],
+
+// POST /billing/invoice/{invoiceId}/confirm
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/{invoiceId:\d+}/confirm',
+    'action'  => [InvoiceController::class, 'confirm'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Potvrzení faktury',
+],
 
 
 //GET  /billing/invoice/create/from-work-order/123
@@ -921,7 +955,7 @@ return [
     //'submenu'=> 'Výpis faktur',
     'title'   => 'Faktury: Vytvoření faktury ze zakázky',
 ],
-//POST /billing/invoice/create/from-work-order/123
+// invoice/create/from-work-order/123
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/billing/invoice/create/from-work-order/{id:\d+}',
@@ -1203,7 +1237,19 @@ Přepínaní rolí u admina
     'auth'   => true,
 ],
 
+/*
+|--------------------------------------------------------------------------
+| AJAX
+|--------------------------------------------------------------------------
+*/
 
+
+[
+    'method' => 'GET',
+    'path' => '/{tenant}/ajax/ares/{ico:ico\d+}',
+    'action' => [AjaxController::class, 'aresIco'],
+    'auth'   => false,
+],
 
 
 /*

@@ -16,9 +16,9 @@ $errors    = $view->errors;
 
 ?>
 
-<div class="create-container">
+<div class="create-container-invoice">
 
-    <div class="card">
+    <div class="card-invoice">
 
         <div class="card-header">
             Vytvoření faktury z úkolu
@@ -78,83 +78,27 @@ $errors    = $view->errors;
                 </div>
 
                 <h3>Odběratel</h3>
-                <input 
-                    type="hidden"
-                    name="contact_id"
-                    value="<?= (int)($customer['id'] ?? 0) ?>"
-                >
-                <div class="form-group">
-                    <label>Název firmy</label>
-                    <input
-                        type="text"
-                        name="customer[company_name]"
-                        value="<?= e($customer['company_name'] ?? '') ?>"
-                    >
-                </div>
+                
+<?php
+/** -- tady by mělo dojit k require: --*/
+$data = $customer;
+require __DIR__ . '/../contacts/_contactForm.php'; 
+?>
 
-                <div class="form-group">
-                    <label>IČO</label>
-                    <input
-                        type="text"
-                        name="customer[ico]"
-                        value="<?= e($customer['ico'] ?? '') ?>"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label>DIČ</label>
-                    <input
-                        type="text"
-                        name="customer[dic]"
-                        value="<?= e($customer['dic'] ?? '') ?>"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label>Ulice</label>
-                    <input
-                        type="text"
-                        name="customer[street]"
-                        value="<?= e($customer['street'] ?? '') ?>"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label>Město</label>
-                    <input
-                        type="text"
-                        name="customer[city]"
-                        value="<?= e($customer['city'] ?? '') ?>"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label>PSČ</label>
-                    <input
-                        type="text"
-                        name="customer[zip]"
-                        value="<?= e($customer['zip'] ?? '') ?>"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label>Země</label>
-                    <input
-                        type="text"
-                        name="customer[country]"
-                        value="<?= e($customer['country'] ?? '') ?>"
-                    >
-                </div>
-
+<div class="form-group">
+    <label><input type="checkbox" name="save_customer" value="1" <?= !isset($invoice['save_customer']) || $invoice['save_customer'] === true ? 'checked' : '' ?> > Uložit nového zákazníka / uložit případné změny u zákazníka </label>
+</div>
                 <h3>Položky faktury</h3>
 
                 <table class="table">
 
                     <thead>
                         <tr>
-                            <th>Úkol</th>
-                            <th>Čas</th>
-                            <th>Km</th>
+                            <th>Popis položky</th>
+                            <th>Množství</th>
+                            <th>Měrná Jednotka</th>
+                            <th>Cena MJ</th>
+                            <th>Cena celkem</th>
                         </tr>
                     </thead>
 
@@ -180,19 +124,10 @@ $errors    = $view->errors;
                                 <input
                                     type="number"
                                     name="items[<?= $i ?>][minutes]"
-                                    value="<?= (int)($item['minutes'] ?? 0) ?>"
+                                    value="<?= formatMinutes((int)($item['minutes'] ?? 0)) ?>"
                                 > minut<br>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        name="items[<?= $i ?>][visible_time]"
-                                        value="1"
-                                        <?= isset($item['visible_time']) ? 'checked' : '' ?>
-                                    >
-                                    Zobrazit čas na faktuře
-                                </label>
-
                             </td>
+                            <td><select></select></td>
 
                             <td>
                                 <input
