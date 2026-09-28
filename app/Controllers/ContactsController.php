@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\AjaxStatus;
 use App\Core\Controller;
 use App\Core\ViewContext;
 use App\Core\Url;
@@ -10,6 +11,7 @@ use App\Core\Flash;
 use App\Core\Auth;
 use App\Models\ContactsModel;
 use App\Core\Types;
+use App\Validators\ContactValidator;
 
 /** 
  * @phpstan-import-type ContactRow from Types
@@ -34,7 +36,9 @@ class ContactsController extends Controller
 
     public function createContact(): string
     {
-        $this->view->data = [];
+        AjaxStatus::set();
+        dc($_SESSION);
+        $this->view->data = ['country' => 'CZ'];
         //$this->view->errors = [];
 
         return $this->render('contacts/create');
@@ -43,25 +47,45 @@ class ContactsController extends Controller
     public function storeContact(): string
     {
         $this->checkCsrf();
-        $data = $this->validateContacts($_POST);
 
+        $validator = new ContactValidator();
 
-        if ($this->hasErrors()) {
+        $data = $validator->validate([
+            'company_name' => $_POST['company_name'] ?? '',
+            'ico'          => $_POST['ico'] ?? '',
+            'dic'          => $_POST['dic'] ?? '',
+            'street'       => $_POST['street'] ?? '',
+            'city'         => $_POST['city'] ?? '',
+            'zip'          => $_POST['zip'] ?? '',
+            'country'      => $_POST['country'] ?? 'CZ',
+            'email'        => $_POST['email'] ?? '',
+            'phone'        => $_POST['phone'] ?? '',
+        ]);
+
+        if (!$validator->isValid()) {
+            $this->view->errors = $validator->getErrors();
             $this->view->data = $data;
+
             return $this->render('contacts/create');
         }
 
         $ok = $this->model->create($data);
-        if ($ok <= 0)
-        {
-        	  $this->addError('global', 'Litujeme, zákazníka se nepodařilo uložit do systému. Zkuste to,  prosím, později.');
-        	  $this->view->data = $data;
-        	  return $this->render('contacts/create');
-        	}
+
+        if ($ok <= 0) {
+            $this->addError(
+                'global',
+                'Litujeme, zákazníka se nepodařilo uložit do systému. Zkuste to, prosím, později.'
+            );
+
+            $this->view->data = $data;
+
+            return $this->render('contacts/create');
+        }
 
         Flash::success('Zákazník uložen');
         Url::redirect('/{tenant}/contacts/index/#main');
     }
+
 
     /**
      * @return ContactRow
@@ -77,6 +101,8 @@ class ContactsController extends Controller
     }
     public function editContact(int $id): string
     {
+        AjaxStatus::set();
+        //dc($_SESSION);
 
         $contact = $this->getContactOrRedirect($id);
 
@@ -84,65 +110,49 @@ class ContactsController extends Controller
         return $this->render('contacts/create');
     }
 
-    public function updateContact(int $id): string
-    {
-        $this->checkCsrf();
-        $contact = $this->getContactOrRedirect($id);
-
-        $data = $this->validateContacts($_POST);
-        
-        if ($this->hasErrors()) {
-            $this->view->data = array_merge($contact, $data);
-            return $this->render('contacts/create');
-        }
-
-        $ok = $this->model->update($id, $data);
-        if(!$ok)
-        {
-                $this->addError('global', 'Litujeme, zákazníka se nepodařilo uložit do systému. Zkuste to,  prosím, později.');
-                $this->view->data = array_merge($contact, $data);
-                return $this->render('contacts/create');
-            }
-
-        Flash::success('Zákazník uložen');
-        Url::redirect('/{tenant}/contacts/index/#main');
-    }
-
-/**
- * @param array<string, mixed> $post
- * @return array<string, mixed>
- */
-private function validateContacts(array $post): array
+public function updateContact(int $id): string
 {
-    $data = [
-        'company_name' => trim($post['company_name'] ?? ''),
-        'ico'          => trim($post['ico'] ?? ''),
-        'dic'          => trim($post['dic'] ?? ''),
-        'street'       => trim($post['street'] ?? ''),
-        'city'         => trim($post['city'] ?? ''),
-        'zip'          => trim($post['zip'] ?? ''),
-        'country'      => trim($post['country'] ?? 'CZ'),
-        'email'        => trim($post['email'] ?? ''),
-        'phone'        => trim($post['phone'] ?? ''),
-    ];
+    
+    $this->checkCsrf();
 
-    // 🔴 povinné pole
-    if ($data['company_name'] === '') {
-        $this->addError('company_name', 'Název zákazníka je povinný');
+    $contact = $this->getContactOrRedirect($id);
+
+    $validator = new ContactValidator();
+
+    $data = $validator->validate([
+        'company_name' => $_POST['company_name'] ?? '',
+        'ico'          => $_POST['ico'] ?? '',
+        'dic'          => $_POST['dic'] ?? '',
+        'street'       => $_POST['street'] ?? '',
+        'city'         => $_POST['city'] ?? '',
+        'zip'          => $_POST['zip'] ?? '',
+        'country'      => $_POST['country'] ?? 'CZ',
+        'email'        => $_POST['email'] ?? '',
+        'phone'        => $_POST['phone'] ?? '',
+    ]);
+
+    if (!$validator->isValid()) {
+        $this->view->errors = $validator->getErrors();
+        $this->view->data = array_merge($contact, $data);
+
+        return $this->render('contacts/create');
     }
 
-    // 🔧 délky
-    $this->maxLength('company_name', $data['company_name'], 255, 'Název');
-    $this->maxLength('ico', $data['ico'], 20, 'IČO');
-    $this->maxLength('dic', $data['dic'], 20, 'DIČ');
-    $this->maxLength('street', $data['street'], 255, 'Ulice');
-    $this->maxLength('city', $data['city'], 100, 'Město');
-    $this->maxLength('zip', $data['zip'], 20, 'PSČ');
-    $this->maxLength('country', $data['country'], 100, 'Stát');
-    $this->maxLength('email', $data['email'], 255, 'Email');
-    $this->maxLength('phone', $data['phone'], 50, 'Telefon');
+    $ok = $this->model->update($id, $data);
 
-    return $data;
+    if (!$ok) {
+        $this->addError(
+            'global',
+            'Litujeme, zákazníka se nepodařilo uložit do systému. Zkuste to, prosím, později.'
+        );
+
+        $this->view->data = array_merge($contact, $data);
+
+        return $this->render('contacts/create');
+    }
+
+    Flash::success('Zákazník uložen');
+    Url::redirect('/{tenant}/contacts/index/#main');
 }
 
 

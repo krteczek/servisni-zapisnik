@@ -14,3 +14,5 @@ $invoice   = $view->invoice;
 $errors    = $view->errors;
 dc($invoice, $errors);
 ?>
+
+<?php require __DIR__ . '/../layout/footer.php'; ?>

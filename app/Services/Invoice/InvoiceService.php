@@ -48,15 +48,31 @@ final class InvoiceService
      */
     public function buildDraftFromTask(int $taskId): array
     {
-        $task      = $this->requireTaskForInvoice($taskId);
+        $task = $this->requireTaskForInvoice($taskId);
 
-        $taskStats = (new TaskModel())->statsForTasks([$task['id']]);
+        $taskStats = (new TaskModel())
+            ->statsForTasks([$task['id']]);
+
+        $workOrderId = (int) ($task['work_order_id'] ?? 0);
+
+        if ($workOrderId <= 0) {
+            throw new RuntimeException('Task has no work order.');
+        }
 
         $workOrder = (new WorkOrderModel())
-            ->find($task['work_order_id']);
+            ->find($workOrderId);
 
-        $customer = (new ContactsModel())
-            ->find($workOrder['contact_id'] ?? 0);
+        if ($workOrder === null) {
+            throw new RuntimeException(
+                'Work order for task was not found.'
+            );
+        }
+
+        $contactId = ($workOrder['contact_id'] ?? 0);
+
+        $customer = $contactId > 0
+            ? (new ContactsModel())->find($contactId)
+            : null;
 
         $dueDays = (new SettingsService())->getInvoiceDueDays();
 
@@ -82,10 +98,11 @@ final class InvoiceService
         $data =  [
 
             'invoice' => [
-                'title'     => $workOrder['title'],
-                'issued_at' => date('Y-m-d'),
-                'due_date'  => date('Y-m-d', strtotime('+' . $dueDays . ' days')),
-                'note'      => '',
+                'title'         => $workOrder['title'],
+                'issued_at'     => date('Y-m-d'),
+                'due_date'      => date('Y-m-d', strtotime('+' . $dueDays . ' days')),
+                'note'          => '',
+                'save_customer' => true,
             ],
 
             'customer' => $customerData,
@@ -93,7 +110,7 @@ final class InvoiceService
             'workOrder' => [
                 'id'            => $workOrder['id'],
                 'title'         => $workOrder['title'],
-                'description'   => $workOrder['description'] ?? '',
+                'description'   => $workOrder['description'],
             ],
 
             'items' => [
@@ -135,7 +152,10 @@ final class InvoiceService
         $task = (new TaskModel())->findById($taskId);
 
         if ($task === null) {
-            throw new RuntimeException('Task not found');
+            //throw new RuntimeException('Task not found');
+            //$errors['global'] = ['Úkol nebyl nalezen...'];
+            Flash::error('Úkol nebyl nalezen.');
+            Url::back();
         }
 
         $workOrder = (new WorkOrderModel())->find(
@@ -143,7 +163,10 @@ final class InvoiceService
         );
 
         if ($workOrder === null) {
-            throw new RuntimeException('Work order not found');
+            //throw new RuntimeException('Work order not found');
+            //$errors['global'] = ['Zakázka nebyla nalezana...'];
+            Flash::error('Zakázka nebyla nalezana...');
+            Url::back();
         }
 
         // =====================
@@ -151,10 +174,10 @@ final class InvoiceService
         // =====================
 
         $data = $this->validateInvoiceData($post);
+
         // =====================
         // PŘI CHYBĚ
         // =====================
-
 
         if ($data['errors'] !== []) {
 
@@ -165,8 +188,9 @@ final class InvoiceService
             $draft['invoice']['due_date']  = $data['due_date'];
             $draft['invoice']['note']      = $data['note'];
 
-            $draft['customer'] = $data['customer'];
-            $draft['items']    = $data['items'];
+            $draft['customer']                 = $data['customer'];
+            $draft['items']                    = $data['items'];
+            $draft['invoice']['save_customer'] = $data['save_customer'];
 
             return [
                 'success'    => false,
@@ -176,12 +200,12 @@ final class InvoiceService
             ];
         }
 
-
         // =====================
         // ULOŽENÍ
         // =====================
 
-        //$invoiceId = $this->createInvoice($data);
+        (new InvoiceGuard())->assertTaskCanBeInvoiced($taskId);
+
         $invoiceId = $this->createInvoice($data, $workOrder);
 
         return [
@@ -189,13 +213,21 @@ final class InvoiceService
             'invoice_id' => $invoiceId,
             'errors'     => [],
             'data'       => [],
-           
         ];
     }
 
 /**
  * @param array<string, mixed> $post
- * @return array{title: string, issued_at: string, due_date: string, note: string, customer: array<string, mixed>, items: array<int, array<string, mixed>>, errors: array<string, list<string>>}
+ * @return array{
+ *   title: string,
+ *   issued_at: string,
+ *   due_date: string,
+ *   note: string,
+ *   save_customer: bool,
+ *   customer: array<string, mixed>,
+ *   items: array<int, array<string, mixed>>,
+ *   errors: array<string, list<string>>
+ * }
  */
 private function validateInvoiceData(array $post): array
 {
@@ -226,7 +258,19 @@ private function validateInvoiceData(array $post): array
     // zákazník
     // ------------------
 
-    $customer = $post['customer'] ?? [];
+    $saveCustomer = isset($post['save_customer']);
+
+    $customer = [
+        'company_name' => trim((string) ($post['company_name'] ?? '')),
+        'ico'          => trim((string) ($post['ico'] ?? '')),
+        'dic'          => trim((string) ($post['dic'] ?? '')),
+        'street'       => trim((string) ($post['street'] ?? '')),
+        'city'         => trim((string) ($post['city'] ?? '')),
+        'zip'           => trim((string) ($post['zip'] ?? '')),
+        'country'      => trim((string) ($post['country'] ?? '')),
+        'email'        => trim((string) ($post['email'] ?? '')),
+        'phone'        => trim((string) ($post['phone'] ?? '')),
+    ];
 
     // později můžeš přidat validace IČO, DIČ atd.
 
@@ -263,65 +307,27 @@ private function validateInvoiceData(array $post): array
         }
 
         $items[] = [
-            'task_id'       => $taskId,
-            'title'         => $taskTitle,
-            'minutes'       => $minutes,
-            'kilometers'    => $kilometers,
-            'visible_time' => ($item['visible_time'] ?? null) === 'on',
-            'visible_km'   => ($item['visible_km'] ?? null) === 'on',        ];
+            'task_id'      => $taskId,
+            'title'        => $taskTitle,
+            'minutes'      => $minutes,
+            'kilometers'   => $kilometers,
+            'visible_time' => isset($item['visible_time']),
+            'visible_km'   => isset($item['visible_km']),
+        ];
     }
 
     return [
-        'title'     => $title,
-        'issued_at' => $issuedAt,
-        'due_date'  => $dueDate,
-        'note'      => (string) ($post['note'] ?? ''),
-        'customer'  => $customer,
-        'items'     => $items,
-        'errors'    => $errors,
+        'title'         => $title,
+        'issued_at'     => $issuedAt,
+        'due_date'      => $dueDate,
+        'note'          => (string) ($post['note'] ?? ''),
+        'customer'      => $customer,
+        'save_customer' => $saveCustomer,
+        'items'         => $items,
+        'errors'        => $errors,
+
     ];
 }
-
-    /**
-     * Seznam faktur.
-     * @param int $companyId
-     * @return array<string, mixed>
-     */
-    public function getInvoices(
-        int $companyId
-    ): array {
-         return [];
-    }
-
-    /**
-     * Storno.
-     * @param int $companyId
-     * @param int $invoiceId
-     * @param int $userId
-     * @param ?string $reason
-     * @return void
-     */
-    public function cancel(
-        int $companyId,
-        int $invoiceId,
-        int $userId,
-        ?string $reason = null
-    ): void {
-    }
-
-    /**
-     * PDF.
-     * @param int $companyId
-     * @param int $invoiceId
-     * @return string
-     */
-    public function generatePdf(
-        int $companyId,
-        int $invoiceId
-    ): string {
-        return '';
-    }
-
 
     /**
      * Vytvoří interní fakturu.
@@ -465,9 +471,82 @@ private function validateInvoiceData(array $post): array
                     (string) ($customer['company_name'] ?? '')
                 );
 
-                $contactId = isset($customer['id'])
-                    ? (int) $customer['id']
-                    : null;
+                $contactId = null;
+                $contactId = isset($workOrder['contact_id'])
+                    ? (int) $workOrder['contact_id']
+                    : 0;
+
+                if (($invoice['save_customer'] ?? false) === true) {
+                    $contactsModel = new ContactsModel($db);
+
+                    $contactData = [
+                        'company_name' => trim(
+                            (string) ($customer['company_name'] ?? '')
+                        ),
+                        'ico' => trim(
+                            (string) ($customer['ico'] ?? '')
+                        ),
+                        'dic' => trim(
+                            (string) ($customer['dic'] ?? '')
+                        ),
+                        'street' => trim(
+                            (string) ($customer['street'] ?? '')
+                        ),
+                        'city' => trim(
+                            (string) ($customer['city'] ?? '')
+                        ),
+                        'zip' => trim(
+                            (string) ($customer['zip'] ?? '')
+                        ),
+                        'country' => trim(
+                            (string) ($customer['country'] ?? '')
+                        ),
+                        'email' => trim(
+                            (string) ($customer['email'] ?? '')
+                        ),
+                        'phone' => trim(
+                            (string) ($customer['phone'] ?? '')
+                        ),
+                    ];
+
+                    if ($contactId > 0) {
+                        $updated = $contactsModel->update(
+                            $contactId,
+                            $contactData
+                        );
+
+                        if (!$updated) {
+                            throw new RuntimeException(
+                                'Customer update failed.'
+                            );
+                        }
+                    } else {
+                        $contactId = $contactsModel->create(
+                            $contactData
+                        );
+
+                        if ($contactId <= 0) {
+                            throw new RuntimeException(
+                                'Customer creation failed.'
+                            );
+                        }
+
+                        $workOrderModel = new WorkOrderModel($db);
+
+                        $updated = $workOrderModel->update(
+                            $workOrderId,
+                            [
+                                'contact_id' => $contactId,
+                            ]
+                        );
+
+                        if (!$updated) {
+                            throw new RuntimeException(
+                                'Work order contact update failed.'
+                            );
+                        }
+                    }
+                }
 
                 $createdBy = Auth::id();
 
@@ -477,6 +556,7 @@ private function validateInvoiceData(array $post): array
                     );
                 }
 
+ 
                 $model = new InternalInvoiceModel($db);
 
                 $invoiceId = $model->create(
@@ -489,7 +569,7 @@ private function validateInvoiceData(array $post): array
                         'customer_name'  => $customerName,
                         'issued_at'      => $issuedAt,
                         'due_date'       => $dueDate,
-                        'status'         => 'issued',
+                        'status'         => InvoiceStatus::DRAFT,
                         'invoice_json'   => $invoiceJson,
                         'created_by'     => $createdBy,
                     ]
@@ -685,7 +765,7 @@ public function getDetail(
         'invoice'       => $snapshot['invoice'] ?? [],
         'customer'      => $snapshot['customer'] ?? [],
         'workOrder'     => $snapshot['workOrder'] ?? [],
-        'items'         => $snapshot['items'] ?? [],
+        'items'         => $snapshot['items'] ?? [], 
     ];
 }
 
