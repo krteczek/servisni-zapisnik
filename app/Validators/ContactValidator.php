@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Validators;
@@ -6,7 +7,7 @@ namespace App\Validators;
 final class ContactValidator extends Validator
 {
     /**
-     * Validuje a normalizuje kontaktní údaje.
+     * Validuje a normalizuje údaje zákazníka.
      *
      * @param array<string, mixed> $data
      * @return array<string, string>
@@ -16,94 +17,106 @@ final class ContactValidator extends Validator
         $this->errors = [];
 
         $validated = [
-            'company_name' => trim((string) ($data['company_name'] ?? '')),
-            'ico'          => trim((string) ($data['ico'] ?? '')),
-            'dic'          => trim((string) ($data['dic'] ?? '')),
-            'street'       => trim((string) ($data['street'] ?? '')),
-            'city'         => trim((string) ($data['city'] ?? '')),
-            'zip'          => str_replace(' ', '', trim((string) ($data['zip'] ?? ''))),
-            'country'      => strtoupper(trim((string) ($data['country'] ?? ''))),
-            'email'        => trim((string) ($data['email'] ?? '')),
-            'phone'        => trim((string) ($data['phone'] ?? '')),
+            'official_name'      => trim((string) ($data['official_name'] ?? '')),
+            'ico'                => trim((string) ($data['ico'] ?? '')),
+            'dic'                => trim((string) ($data['dic'] ?? '')),
+
+            'street'             => trim((string) ($data['street'] ?? '')),
+            'house_number'       => trim((string) ($data['house_number'] ?? '')),
+            'orientation_number' => trim((string) ($data['orientation_number'] ?? '')),
+            'city_part'          => trim((string) ($data['city_part'] ?? '')),
+            'city'               => trim((string) ($data['city'] ?? '')),
+            'postal_code'        => str_replace(
+                ' ',
+                '',
+                trim((string) ($data['postal_code'] ?? ''))
+            ),
+            'country_code'       => strtoupper(
+                trim((string) ($data['country_code'] ?? 'CZ'))
+            ),
+
+            'delivery_address_1' => trim((string) ($data['delivery_address_1'] ?? '')),
+            'delivery_address_2' => trim((string) ($data['delivery_address_2'] ?? '')),
+            'delivery_address_3' => trim((string) ($data['delivery_address_3'] ?? '')),
+
+            'email'              => trim((string) ($data['email'] ?? '')),
+            'phone'              => trim((string) ($data['phone'] ?? '')),
+
+            'bank_account'       => trim((string) ($data['bank_account'] ?? '')),
+            'bank_code'          => trim((string) ($data['bank_code'] ?? '')),
         ];
 
         $this->required(
-            'company_name',
-            $validated['company_name'],
-            'Název zákazníka je povinný'
-        );
-
-        $this->required(
-            'street',
-            $validated['street'],
-            'Ulice je povinná'
-        );
-
-        $this->required(
-            'city',
-            $validated['city'],
-            'Město je povinné'
-        );
-
-        $this->required(
-            'zip',
-            $validated['zip'],
-            'PSČ je povinné'
-        );
-
-        $this->required(
-            'country',
-            $validated['country'],
-            'Stát je povinný'
+            'official_name',
+            $validated['official_name'],
+            'Oficiální název je povinný'
         );
 
         $this->maxLength(
-            'company_name',
-            $validated['company_name'],
+            'official_name',
+            $validated['official_name'],
             255,
             'Název'
         );
 
-        $this->maxLength(
-            'ico',
-            $validated['ico'],
-            20,
-            'IČO'
-        );
+        $this->maxLength('ico', $validated['ico'], 20, 'IČO');
+        $this->maxLength('dic', $validated['dic'], 20, 'DIČ');
 
+        $this->maxLength('street', $validated['street'], 255, 'Ulice');
         $this->maxLength(
-            'dic',
-            $validated['dic'],
+            'house_number',
+            $validated['house_number'],
             20,
-            'DIČ'
+            'Číslo domu'
         );
-
         $this->maxLength(
-            'street',
-            $validated['street'],
+            'orientation_number',
+            $validated['orientation_number'],
+            20,
+            'Číslo orientační'
+        );
+        $this->maxLength(
+            'city_part',
+            $validated['city_part'],
             255,
-            'Ulice'
+            'Část obce'
         );
-
         $this->maxLength(
             'city',
             $validated['city'],
-            100,
+            255,
             'Město'
         );
-
         $this->maxLength(
-            'zip',
-            $validated['zip'],
-            20,
+            'postal_code',
+            $validated['postal_code'],
+            10,
             'PSČ'
+        );
+        $this->maxLength(
+            'country_code',
+            $validated['country_code'],
+            2,
+            'Kód státu'
         );
 
         $this->maxLength(
-            'country',
-            $validated['country'],
-            100,
-            'Stát'
+            'delivery_address_1',
+            $validated['delivery_address_1'],
+            255,
+            'Doručovací adresa'
+        );
+        $this->maxLength(
+            'delivery_address_2',
+            $validated['delivery_address_2'],
+            255,
+            'Doručovací adresa'
+        );
+        $this->maxLength(
+            'delivery_address_3',
+            $validated['delivery_address_3'],
+            255,
+            'Doručovací adresa'
         );
 
         $this->maxLength(
@@ -112,7 +125,6 @@ final class ContactValidator extends Validator
             255,
             'Email'
         );
-
         $this->maxLength(
             'phone',
             $validated['phone'],
@@ -120,24 +132,38 @@ final class ContactValidator extends Validator
             'Telefon'
         );
 
+        $this->maxLength(
+            'bank_account',
+            $validated['bank_account'],
+            50,
+            'Číslo účtu'
+        );
+        $this->maxLength(
+            'bank_code',
+            $validated['bank_code'],
+            10,
+            'Kód banky'
+        );
+
         if (
-            $validated['country'] === 'CZ'
-            && $validated['ico'] !== ''            
+            $validated['country_code'] === 'CZ'
+            && $validated['ico'] !== ''
         ) {
             $validated['ico'] = self::normalizeCzechIco($validated['ico']);
-            if(self::validateCzechIco($validated['ico']) === false) {
+
+            if (!self::validateCzechIco($validated['ico'])) {
                 $this->addError('ico', 'IČO není platné');
             }
-            
         }
 
         if (
-            $validated['country'] === 'CZ'
-            && $validated['zip'] !== ''
-            && !self::validateCzechZip($validated['zip'])
+            $validated['country_code'] === 'CZ'
+            && $validated['postal_code'] !== ''
+            && !self::validateCzechZip($validated['postal_code'])
         ) {
-            $this->addError('zip', 'PSČ není platné');
+            $this->addError('postal_code', 'PSČ není platné');
         }
+
         return $validated;
     }
 
@@ -180,10 +206,9 @@ final class ContactValidator extends Validator
         return preg_match('/^\d{5}$/', $zip) === 1;
     }
 
-    /* v případě,že vstupní string je kratší než 8 znaků, doplní na začátek nuly 
-     * @property string $ico
-     * @return string
-     */ 
+    /**
+     * Doplní české IČO zleva nulami na osm znaků.
+     */
     public static function normalizeCzechIco(string $ico): string
     {
         return str_pad($ico, 8, '0', STR_PAD_LEFT);

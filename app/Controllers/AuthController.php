@@ -47,7 +47,7 @@ class AuthController extends Controller
 
     public function root(): string
     {
-    		$url = '/' . Auth::tenantSlug() . (Auth::check() ? '/tasks/#main' : '/login/#main');
+    	$url = '/' . Auth::tenantSlug() . (Auth::check() ? '/tasks/#main' : '/login/#main');
         Url::redirect($url);
     }
 

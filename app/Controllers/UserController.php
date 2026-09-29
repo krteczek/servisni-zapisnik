@@ -165,6 +165,7 @@ final class UserController extends Controller
 
     public function edit(int $id): string
     {
+        $this->setSessionCheck('user_id', $id);
         $user = $this->users->find($id);
         if ($user === null) {
             Flash::error('Uživatel neexistuje.');
@@ -179,6 +180,7 @@ final class UserController extends Controller
 
     public function update(int $id): string
     {
+        $this->confirmSessionCheck('user_id', $id, '/{tenant}/users/#main');
         $old = $this->users->find($id);
         if ($old === null) {
             Flash::error('Uživatel neexistuje.');
@@ -193,7 +195,7 @@ final class UserController extends Controller
 
         $this->view->data  = $data;
         if ($this->hasErrors()) {                    
-            
+            $this->setSessionCheck('user_id', $id);
             return $this->render('users/edit');
         }
 
@@ -228,6 +230,7 @@ final class UserController extends Controller
         if ($this->users->update($id, $update)) {
             Flash::success('Data byla změněna.');
         } else {
+            $this->setSessionCheck('user_id', $id);
             Flash::error('Data se nepodařilo změnit.');
             return $this->render('users/edit');
         }

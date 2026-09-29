@@ -32,18 +32,18 @@ class InvoiceController extends Controller
     /**
      * /billing/invoice/create/task/123 GET
      */
-public function createTask(int $id): string
+public function createFromTask(int $id): string
 {
+    $this->setSessionCheck('task_id', $id);
     try {
-        $this->view->data =
-            $this->invoice->buildDraftFromTask($id);
-
+        $this->view->data = $this->invoice->buildDraftFromTask($id);
+        $this->view->contacts = (new ContactsModel())->all();
         return $this->render('invoices/create-from-task');
 
     } catch (Throwable $e) {
 
         LoggerHolder::get()->error(
-            'InvoiceController.createTask FAILED',
+            'InvoiceController.createFromTask FAILED',
             [
                 'task_id' => $id,
                 'message' => $e->getMessage(),
@@ -64,8 +64,10 @@ public function createTask(int $id): string
     /**
      * POST
      */
-    public function storeTask(int $id): string
+    public function storeFromTask(int $id): string
     {
+        $this->confirmSessionCheck('task_id', $id, '/{tenant}/billing/invoice/#main');
+        
         if ($_POST === []) {
             Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
             Url::back();
@@ -90,6 +92,7 @@ public function createTask(int $id): string
             );
 
             if ($result['success'] === false) {
+                $this->setSessionCheck('task_id', $id);
 
                 $this->view->errors = $result['errors'];
                 $this->view->data   = $result['data'];
@@ -106,7 +109,7 @@ public function createTask(int $id): string
         } catch (Throwable $e) {
 
             LoggerHolder::get()->error(
-                'InvoiceController.storeTask FAILED',
+                'InvoiceController.storeFromTask FAILED',
                 [
                     'message' => $e->getMessage(),
                     'file'    => $e->getFile(),

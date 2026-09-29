@@ -30,7 +30,7 @@ $errors    = $view->errors;
 
 <?php else : ?>
 
-    <?php dc($invoices); ?>
+
 
 <?php endif; ?>
 

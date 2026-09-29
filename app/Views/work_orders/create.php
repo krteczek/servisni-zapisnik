@@ -144,7 +144,7 @@ $teams = $view->teams;
                             <option value="<?= $c['id'] ?>"
                                 <?= (($data['contact_id'] ?? null) === $c['id']) ? 'selected' : '' ?>
                             >
-                                <?= e($c['company_name']) ?>
+                                <?= e($c['official_name']) ?>
                             </option>
                         <?php endforeach; ?>
 

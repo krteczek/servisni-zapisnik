@@ -220,8 +220,8 @@ private function saveTask(array $data, int $workOrderId): string
     }
    
     
-    public function createTaskFromOrderGet(int $orderId):string
-    {
+    public function createTaskFromOrderGet(int $orderId):string {
+        $this->setSessionCheck('order_id', $orderId);
         $order = $this->getOrderOrRedirect($orderId);
         if (!WOStatus::isNew($order['status'])) {
             Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
@@ -239,6 +239,7 @@ private function saveTask(array $data, int $workOrderId): string
     }
     public function createTaskFromOrderPost(int $orderId):string
     {
+        $this->confirmSessionCheck('order_id', $orderId, '/{tenant}/work-orders/#main');
         $order = $this->getOrderOrRedirect($orderId);
         if (!WOStatus::isNew($order['status'])) {
             Flash::error('Jen u nové zakázky lze vytvořit úkol ze zakázky.');
@@ -322,6 +323,7 @@ private function saveTask(array $data, int $workOrderId): string
 
 	public function editTaskGet(int $taskId): string 
 	{
+        $this->setSessionCheck('task_id', $taskId);
 		//ověříme že úkol existuje
 		$task = $this->getTaskOrRedirect($taskId);
 	    $this->ensureTaskEditable($task);
@@ -350,6 +352,7 @@ private function saveTask(array $data, int $workOrderId): string
         }
 
 		//print_r($team);
+        $this->setSessionCheck('task_id', $taskId);
 		$this->view->team = $team;
 		$this->view->order = $order;
 		$this->view->task = $task;
@@ -359,6 +362,7 @@ private function saveTask(array $data, int $workOrderId): string
 	
 	public function editTaskPost(int $taskId): string 
 	{
+        $this->confirmSessionCheck('task_id', $taskId, '/{tenant}/tasks/#main');
 		$task = $this->getTaskOrRedirect($taskId);
 
 	    $this->ensureTaskEditable($task);		
@@ -394,6 +398,8 @@ private function saveTask(array $data, int $workOrderId): string
 
 	  if ($this->hasErrors())
 	  {
+        $this->setSessionCheck('task_id', $taskId);
+
 		$this->view->team = $team;
 		$this->view->order = $order;
 		$this->view->task = $task;
@@ -410,6 +416,7 @@ private function saveTask(array $data, int $workOrderId): string
         
         if(!$row)
         {
+            $this->setSessionCheck('task_id', $taskId);
             $this->view->team = $team;
             $this->view->order = $order;
             $this->view->task = $task;
@@ -424,6 +431,7 @@ private function saveTask(array $data, int $workOrderId): string
 
     public function cloneTaskGet(int $taskId): string
     {
+        $this->setSessionCheck('task_id', $taskId);
         $task = $this->getTaskOrRedirect($taskId);
         // $this->ensureTaskEditable($task);
 
@@ -455,6 +463,7 @@ private function saveTask(array $data, int $workOrderId): string
 
     public function cloneTaskPost(int $taskId): string
     {
+        $this->confirmSessionCheck('task_id', $taskId, '/{tenant}/tasks/#main');
         $task = $this->getTaskOrRedirect($taskId);
         // $this->ensureTaskEditable($task);
         
@@ -583,6 +592,7 @@ private function saveTask(array $data, int $workOrderId): string
     public function addTaskReportGet(int $taskId): string
     {
         //ověříme právo na přidání Reportu
+        $this->setSessionCheck('task_id', $taskId);
         return $this->addTaskReport($taskId);
 
     }   
@@ -593,6 +603,7 @@ private function saveTask(array $data, int $workOrderId): string
 
     public function addTaskReportPost(int $taskId): string
     {
+        $this->confirmSessionCheck('task_id', $taskId, '/{tenant}/tasks/#main');
         // ověříme právo na přidání reportu
         $this->checkCsrf();
         $data = $_POST;
@@ -748,7 +759,7 @@ private function saveTask(array $data, int $workOrderId): string
         // 7. Pokud jsou chyby, vrať se zpět
         if ($this->hasErrors()) {
             $this->view->old = $data;
-
+            $this->setSessionCheck('task_id', $taskId);
             return $this->addTaskReport($taskId);
         }
 
@@ -766,6 +777,7 @@ private function saveTask(array $data, int $workOrderId): string
         } else {
             $this->addError('global', 'Nepodařilo se uložit report');
             $this->view->data = $data;
+            $this->setSessionCheck('task_id', $taskId);
 
             return $this->addTaskReport($taskId);
         }

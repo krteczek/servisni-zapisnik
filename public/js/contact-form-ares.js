@@ -90,6 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                if (result.error === 'duplicate_contact') {
+                    showMessage(result.message ?? 'Údaje o zákazníkovi již máte v databázi, načtěte je, prosím,  z ní');
+                    return;
+                }
+
                 if (result.error === 'ares_error') {
                     showMessage(
                         result.message ??
@@ -105,7 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                showMessage('Údaje se nepodařilo načíst.');
+                
+                showMessage('Údaje se nepodařilo načíst.:' + response.data);
                 return;
             }
 
@@ -142,3 +148,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+
+const contactSelect = document.querySelector('[name="contact_id"]');
+
+if (contactSelect) {
+    contactSelect.addEventListener('change', async () => {
+        const contactId = contactSelect.value;
+
+        if (contactId === '') {
+            return;
+        }
+
+        try {
+            const url = `/vanek-software/ajax/contact/${encodeURIComponent(contactId)}`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            let result;
+
+            try {
+                result = await response.json();
+            } catch {
+                console.error('Server vrátil neplatnou JSON odpověď.');
+                return;
+            }
+
+            if (!response.ok || result.ok !== true) {
+                console.error(
+                    result.message ?? 'Údaje zákazníka se nepodařilo načíst.'
+                );
+                return;
+            }
+
+            console.log('Načtený zákazník:', result.data);
+
+        } catch (error) {
+            console.error(
+                'Chyba při načítání zákazníka:',
+                error
+            );
+        }
+    });
+}

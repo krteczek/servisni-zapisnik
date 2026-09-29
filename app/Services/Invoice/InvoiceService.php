@@ -103,6 +103,7 @@ final class InvoiceService
                 'due_date'      => date('Y-m-d', strtotime('+' . $dueDays . ' days')),
                 'note'          => '',
                 'save_customer' => true,
+                'contact_id'    => (int) $contactId,
             ],
 
             'customer' => $customerData,

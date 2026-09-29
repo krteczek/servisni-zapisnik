@@ -67,6 +67,7 @@ final class TaskRecurringController extends Controller
 
     public function recurringGet(int $taskId): string
     {
+        $this->setSessionCheck("task_id", $taskId);
         $task = $this->getTaskRecurringOrRedirect($taskId);
         //var_dump($task);
         $this->ensureRecurringEditable($task);
@@ -105,7 +106,7 @@ final class TaskRecurringController extends Controller
     public function recurringPost(int $taskId): string
     {
         $this->checkCsrf();
-
+        $this->confirmSessionCheck('task_id', $taskId, '/{tenant}/tasks/#main');
         $task = $this->getTaskRecurringOrRedirect($taskId);
         $this->ensureRecurringEditable($task);
         //validace

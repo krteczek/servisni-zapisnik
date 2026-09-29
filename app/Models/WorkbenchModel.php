@@ -540,13 +540,13 @@ private function otherOrdersInProgress(): array
  */
 private function myInvoiceToReady(array $teamIds): array
 {
-    if ($teamIds ===[]) {
+    if ($teamIds === []) {
         return [];
     }
 
     $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
 
-    $sql = 
+    $sql =
         "SELECT
     t.id,
     t.title,
@@ -600,6 +600,16 @@ LEFT JOIN (
 WHERE t.company_id = ?
   AND t.status = 'done'
   AND t.task_type <> ?
+  AND NOT EXISTS (
+      SELECT 1
+      FROM internal_invoice_items iit
+      INNER JOIN internal_invoices ii
+          ON ii.id = iit.invoice_id
+         AND ii.company_id = iit.company_id
+      WHERE iit.company_id = t.company_id
+        AND iit.task_id = t.id
+        AND ii.status IN ('issued', 'paid')
+  )
   AND t.team_id IN ($placeholders)
 
 ORDER BY t.done_at ASC";
@@ -619,13 +629,13 @@ ORDER BY t.done_at ASC";
  */
 private function otherInvoiceToReady(array $teamIds): array
 {
-    if ($teamIds ===[]) {
+    if ($teamIds === []) {
         return [];
     }
 
     $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
 
-    $sql = 
+    $sql =
         "SELECT
     t.id,
     t.title,
@@ -680,6 +690,16 @@ LEFT JOIN (
 WHERE t.company_id = ?
   AND t.status = 'done'
   AND t.task_type <> ?
+  AND NOT EXISTS (
+      SELECT 1
+      FROM internal_invoice_items iit
+      INNER JOIN internal_invoices ii
+          ON ii.id = iit.invoice_id
+         AND ii.company_id = iit.company_id
+      WHERE iit.company_id = t.company_id
+        AND iit.task_id = t.id
+        AND ii.status IN ('issued', 'paid')
+  )
   AND t.team_id NOT IN ($placeholders)
 
 ORDER BY t.done_at ASC";

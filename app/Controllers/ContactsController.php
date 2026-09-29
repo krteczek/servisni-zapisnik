@@ -3,17 +3,16 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Core\AjaxStatus;
+use App\Services\Ares\AjaxStatus;
 use App\Core\Controller;
-use App\Core\ViewContext;
-use App\Core\Url;
 use App\Core\Flash;
-use App\Core\Auth;
-use App\Models\ContactsModel;
 use App\Core\Types;
+use App\Core\Url;
+use App\Core\ViewContext;
+use App\Models\ContactsModel;
 use App\Validators\ContactValidator;
 
-/** 
+/**
  * @phpstan-import-type ContactRow from Types
  */
 class ContactsController extends Controller
@@ -29,7 +28,6 @@ class ContactsController extends Controller
     public function index(): string
     {
         $this->view->contacts = $this->model->all();
-        // debugViewVariables($this->view);
 
         return $this->render('contacts/index');
     }
@@ -37,9 +35,11 @@ class ContactsController extends Controller
     public function createContact(): string
     {
         AjaxStatus::set();
-        dc($_SESSION);
-        $this->view->data = ['country' => 'CZ'];
-        //$this->view->errors = [];
+        $this->view->contacts = $this->model->all();
+
+        $this->view->data = [
+            'country_code' => 'CZ',
+        ];
 
         return $this->render('contacts/create');
     }
@@ -51,25 +51,38 @@ class ContactsController extends Controller
         $validator = new ContactValidator();
 
         $data = $validator->validate([
-            'company_name' => $_POST['company_name'] ?? '',
-            'ico'          => $_POST['ico'] ?? '',
-            'dic'          => $_POST['dic'] ?? '',
-            'street'       => $_POST['street'] ?? '',
-            'city'         => $_POST['city'] ?? '',
-            'zip'          => $_POST['zip'] ?? '',
-            'country'      => $_POST['country'] ?? 'CZ',
-            'email'        => $_POST['email'] ?? '',
-            'phone'        => $_POST['phone'] ?? '',
+            'official_name'      => $_POST['official_name'] ?? '',
+            'ico'                => $_POST['ico'] ?? '',
+            'dic'                => $_POST['dic'] ?? '',
+
+            'street'             => $_POST['street'] ?? '',
+            'house_number'       => $_POST['house_number'] ?? '',
+            'orientation_number' => $_POST['orientation_number'] ?? '',
+            'city_part'          => $_POST['city_part'] ?? '',
+            'city'               => $_POST['city'] ?? '',
+            'postal_code'        => $_POST['postal_code'] ?? '',
+            'country_code'       => $_POST['country_code'] ?? 'CZ',
+
+            'delivery_address_1' => $_POST['delivery_address_1'] ?? '',
+            'delivery_address_2' => $_POST['delivery_address_2'] ?? '',
+            'delivery_address_3' => $_POST['delivery_address_3'] ?? '',
+
+            'email'              => $_POST['email'] ?? '',
+            'phone'              => $_POST['phone'] ?? '',
+
+            'bank_account'       => $_POST['bank_account'] ?? '',
+            'bank_code'          => $_POST['bank_code'] ?? '',
         ]);
 
         if (!$validator->isValid()) {
             $this->view->errors = $validator->getErrors();
             $this->view->data = $data;
-
+            //$this->view->contacts = $this->model->all();
             return $this->render('contacts/create');
         }
 
         $ok = $this->model->create($data);
+
 
         if ($ok <= 0) {
             $this->addError(
@@ -78,14 +91,13 @@ class ContactsController extends Controller
             );
 
             $this->view->data = $data;
-
+            //$this->view->contacts = $this->model->all();
             return $this->render('contacts/create');
         }
 
         Flash::success('Zákazník uložen');
-        Url::redirect('/{tenant}/contacts/index/#main');
+        Url::redirect('/{tenant}/contacts/detail/#main');
     }
-
 
     /**
      * @return ContactRow
@@ -93,67 +105,84 @@ class ContactsController extends Controller
     private function getContactOrRedirect(int $id): array
     {
         $contact = $this->model->find($id);
+
         if ($contact === null) {
             Flash::error('Zákazník nenalezen');
             Url::redirect('/{tenant}/contacts/index/#main');
         }
+
         return $contact;
     }
+
     public function editContact(int $id): string
     {
         AjaxStatus::set();
-        //dc($_SESSION);
-
+        $this->setSessionCheck('contact_id', $id);
         $contact = $this->getContactOrRedirect($id);
 
         $this->view->data = $contact;
-        return $this->render('contacts/create');
-    }
-
-public function updateContact(int $id): string
-{
-    
-    $this->checkCsrf();
-
-    $contact = $this->getContactOrRedirect($id);
-
-    $validator = new ContactValidator();
-
-    $data = $validator->validate([
-        'company_name' => $_POST['company_name'] ?? '',
-        'ico'          => $_POST['ico'] ?? '',
-        'dic'          => $_POST['dic'] ?? '',
-        'street'       => $_POST['street'] ?? '',
-        'city'         => $_POST['city'] ?? '',
-        'zip'          => $_POST['zip'] ?? '',
-        'country'      => $_POST['country'] ?? 'CZ',
-        'email'        => $_POST['email'] ?? '',
-        'phone'        => $_POST['phone'] ?? '',
-    ]);
-
-    if (!$validator->isValid()) {
-        $this->view->errors = $validator->getErrors();
-        $this->view->data = array_merge($contact, $data);
+        // $this->view->contacts = $this->model->all();
 
         return $this->render('contacts/create');
     }
 
-    $ok = $this->model->update($id, $data);
+    public function updateContact(int $id): string
+    {
+        $this->confirmSessionCheck('contact_id', $id,  '/{tenant}/contacts/list/#main');
 
-    if (!$ok) {
-        $this->addError(
-            'global',
-            'Litujeme, zákazníka se nepodařilo uložit do systému. Zkuste to, prosím, později.'
-        );
+        $this->checkCsrf();
+        
+        $contact = $this->getContactOrRedirect($id);
 
-        $this->view->data = array_merge($contact, $data);
+        $validator = new ContactValidator();
 
-        return $this->render('contacts/create');
+        $data = $validator->validate([
+            'official_name'      => $_POST['official_name'] ?? '',
+            'ico'                => $_POST['ico'] ?? '',
+            'dic'                => $_POST['dic'] ?? '',
+
+            'street'             => $_POST['street'] ?? '',
+            'house_number'       => $_POST['house_number'] ?? '',
+            'orientation_number' => $_POST['orientation_number'] ?? '',
+            'city_part'          => $_POST['city_part'] ?? '',
+            'city'               => $_POST['city'] ?? '',
+            'postal_code'        => $_POST['postal_code'] ?? '',
+            'country_code'       => $_POST['country_code'] ?? 'CZ',
+
+            'delivery_address_1' => $_POST['delivery_address_1'] ?? '',
+            'delivery_address_2' => $_POST['delivery_address_2'] ?? '',
+            'delivery_address_3' => $_POST['delivery_address_3'] ?? '',
+
+            'email'              => $_POST['email'] ?? '',
+            'phone'              => $_POST['phone'] ?? '',
+
+            'bank_account'       => $_POST['bank_account'] ?? '',
+            'bank_code'          => $_POST['bank_code'] ?? '',
+        ]);
+
+        if (!$validator->isValid()) {
+            $this->setSessionCheck('contact_id', $id);
+            $this->view->errors = $validator->getErrors();
+            $this->view->data = array_merge($contact, $data);
+
+            return $this->render('contacts/create');
+        }
+
+        $ok = $this->model->update($id, $data);
+
+        if (!$ok) {
+            $this->addError(
+                'global',
+                'Litujeme, zákazníka se nepodařilo uložit do systému. Zkuste to, prosím, později.'
+            );
+
+            $this->view->data = array_merge($contact, $data);
+            $this->setSessionCheck('contact_id', $id);
+
+            return $this->render('contacts/create');
+        }
+
+        Flash::success('Zákazník uložen');
+        Url::redirect('/{tenant}/contacts/index/#main');
     }
-
-    Flash::success('Zákazník uložen');
-    Url::redirect('/{tenant}/contacts/index/#main');
-}
-
-
 }

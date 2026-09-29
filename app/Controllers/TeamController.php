@@ -135,6 +135,7 @@ final class TeamController extends Controller
      */
     public function edit(int $id): string
     {
+        $this->setSessionCheck('team_id', $id);
         $teamModel       = new TeamModel();
         $membershipModel = new TeamMembership();
         $userModel       = new UserModel();
@@ -182,6 +183,7 @@ final class TeamController extends Controller
      */
     public function update(int $id): void
     {
+        $this->confirmSessionCheck('team_id', $id, '/{tenant}/teams/#main');
         $this->checkCsrf();
 
         $teamModel       = new TeamModel();
@@ -266,17 +268,8 @@ final class TeamController extends Controller
         if (isset($_POST['change_user_role'], $_POST['role_in_team'])) {
             $membershipId = (int) $_POST['change_user_role'];
             $role         = $_POST['role_in_team'];
-            /*
-            roles_in_team: array [
-    'default' => 'member',
 
-    'roles' => [
-        'leader' => 'Vedoucí',
-        'member' => 'Člen',
-        'guest'  => 'Host',
-    ],
-];
-*/          // ošetřeni proti podvržení
+            // ošetřeni proti podvržení
             $roles = Config::get('roles_in_team.roles');
             if (!array_key_exists($role, $roles))
             {
