@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Core;
+namespace App\Services\Ares;
+
+use App\Core\Session;
 
 final class AjaxStatus
 {

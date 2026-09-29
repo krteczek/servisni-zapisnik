@@ -31,9 +31,13 @@ public function forIndex(): array
         SELECT
             w.*,
 				-- 🔹 zákazník
-				    c.company_name AS customer_name,
-				    c.city         AS customer_city,
-				    c.street       AS customer_street,
+				    c.official_name AS customer_name,
+				    c.city          AS customer_city,
+                    c.city_part     AS customer_city_part,
+				    c.street        AS customer_street,
+                    c.house_number  AS customer_house_number,
+                    c.orientation_number  AS customer_orientation_number,                  
+                    c.postal_code   AS customer_postal_code,
             -- TASKY
             COALESCE(t.tasks_total, 0)       AS tasks_total,
             COALESCE(t.tasks_open, 0)        AS tasks_open,
@@ -116,10 +120,23 @@ $params = [
                 ? round(($order['tasks_done'] / $order['tasks_total']) * 100)
                 : 0;
         $order['customer_name'] = $order['customer_name'] ?? '';
-
+/*
+   				    c.official_name AS customer_name,
+				    c.city          AS customer_city,
+                    c.city_part     AS customer_city_part,
+				    c.street        AS customer_street,
+                    c.house_number  AS customer_house_number,
+                    c.orientation_number  AS customer_orientation_number,
+                    c.house_number  AS customer_house_number,                  
+                    c.postal_code   AS customer_postal_code,
+*/
         $order['customer_address'] = trim(
                                         ($order['customer_street'] ?? '') . ' ' .
-                                        ($order['customer_city'] ?? '')
+                                        ($order['customer_house_number'] ?? '') . ' ' . 
+                                        ($order['customer_orientation_number'] ? '/' . $order['customer_orientation_number'] : '') . ' ' .
+                                        ($order['customer_city'] ?? '') . ' ' . 
+                                        ($order['customer_city_part'] ? '- ' .  $order['customer_city_part']: '') . ' ' . 
+                                        ($order['customer_postal_code'] ? ', PSČ: ' .  $order['customer_postal_code']: '') . ' '
                                        );
     }
 

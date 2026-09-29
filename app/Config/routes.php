@@ -797,7 +797,7 @@ return [
 -------------------------------------------*/
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/contacts/index',
+    'path'    => '/{tenant}/contacts/list',
     'action'  => [ContactsController::class, 'index'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
@@ -872,7 +872,7 @@ return [
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/billing/invoice/create/from-task/{id:\d+}',
-    'action'  => [InvoiceController::class, 'createTask'],
+    'action'  => [InvoiceController::class, 'createFromTask'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
@@ -884,7 +884,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/billing/invoice/create/from-task/{id:\d+}',
-    'action'  => [InvoiceController::class, 'storeTask'],
+    'action'  => [InvoiceController::class, 'storeFromTask'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
@@ -1251,6 +1251,13 @@ Přepínaní rolí u admina
     'auth'   => false,
 ],
 
+[
+    'method' => 'GET',
+    'path' => '/{tenant}/ajax/contact/{id:\d+}',
+    'action' => [AjaxController::class, 'getContactData'],
+    'roles'  => ['admin', 'mistr'],
+    'auth'   => true,
+],
 
 /*
 |--------------------------------------------------------------------------

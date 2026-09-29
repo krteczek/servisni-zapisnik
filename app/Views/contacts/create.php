@@ -29,10 +29,30 @@ $errors = $view->errors;
 			<div class="form-container">
 				<form method="post">
 				    <?= \App\Core\Csrf::getField() ?>
+					<div class="form-group">
 					<?php
 /** tady se vkládají formulářová políčka */
 require __DIR__ . '/_contactForm.php';
 					?>
+
+					<h3>Kontakt a fakturace</h3> 
+					<div class="form-group"> 
+						<label for="email">E-mail pro zasílání faktur</label>
+						<input type="email" id="email" name="email" value="<?= htmlspecialchars( (string) ($data['email'] ?? ''), ENT_QUOTES, 'UTF-8' ) ?>" > 
+					</div> 
+					<div class="form-group"> 
+						<label for="phone">Telefon</label> 
+						<input type="text" id="phone" name="phone" value="<?= htmlspecialchars( (string) ($data['phone'] ?? ''), ENT_QUOTES, 'UTF-8' ) ?>" > 
+					</div> 
+					<h4>Bankovní spojení</h4>
+					<div class="form-group"> 
+						<label for="bank_account">Číslo účtu</label> 
+						<input type="text" id="bank_account" name="bank_account" value="<?= htmlspecialchars( (string) ($data['bank_account'] ?? ''), ENT_QUOTES, 'UTF-8' ) ?>" > 
+					</div> 
+					<div class="form-group"> 
+						<label for="bank_code">Kód banky</label> 
+						<input type="text" id="bank_code" name="bank_code" value="<?= htmlspecialchars( (string) ($data['bank_code'] ?? ''), ENT_QUOTES, 'UTF-8' ) ?>" maxlength="10" > 
+					</div>
 
 				    <div class="form-actions">
 

@@ -171,6 +171,7 @@ class WorkOrderController extends Controller
 
     public function editForm(int $orderId): string
     {
+        $this->setSessionCheck('order_id', $orderId);
         $order = $this->getOrderOrRedirect($orderId);
         $this->guardEditable($order, $orderId);
 
@@ -192,6 +193,7 @@ class WorkOrderController extends Controller
 
     public function editFormUpdate(int $orderId): string
     {
+        $this->confirmSessionCheck('order_id', $orderId, '/{tenant}/work-orders/#main');
         $order = $this->getOrderOrRedirect($orderId);
         $this->guardEditable($order, $orderId);
 
@@ -337,7 +339,7 @@ public function detailOrder(int $orderId): string
     $order['open_tasks_count']      = $openTaskCount;
     $order['done_tasks_count']      = $doneTaskCount;
     $order['cancelled_tasks_count'] = $cancelledTaskCount;
-    $order['company_name']          = $contact['company_name'];
+    $order['company_name']          = $contact['official_name'];
     
     // příznak pro zobrazení odkazu na dokončení zakázky, pokud jsou všechny 
     // úkoly hotové nebo zrušené, nebo pokud nejsou žádné úkoly

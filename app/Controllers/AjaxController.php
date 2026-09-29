@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Core\AjaxStatus;
+use App\Services\Ares\AjaxStatus;
 use App\Core\Controller;
 use App\Services\Ares\AresClient;
 use App\Services\Ares\AresCompanyMapper;
 use App\Validators\ContactValidator;
+use App\Models\ContactsModel;
+
 /**
  * Stavové kódy a jejich význam:
  * 200  → ARES data máme
  * 403  → nemáš platné povolení AJAX požadavku
+ * 409  → konflikt, duplikátní ičo
  * 422  → IČO není platné / ARES ho nenašel
  * 503  → ARES je technicky nedostupný
  */
@@ -26,8 +29,9 @@ final class AjaxController extends Controller
      * 1. ověří AjaxStatus vSession,
      * 2. normalizuje IČO,
      * 3. ověří jeho platnost,
-     * 4. zavolá ARES,
-     * 5. vrátí výsledek AJAX požadavku.
+     * 4. ověří, jestli existuje u nás v databázi kontaktů a pokud ano, vrátí chybu 409
+     * 5. zavolá ARES,
+     * 6. vrátí výsledek AJAX požadavku.
      *
      * IČO je předáváno v URL, AjaxStatus ověří, že požadavek přišel z našeho 
      * systému a ověření zneplatní.
@@ -59,6 +63,18 @@ final class AjaxController extends Controller
             ], 422);
         }
 
+        /** provedeme ověření s naší db */
+        $result = (new ContactsModel())->findByIco($ico);
+        if($result !== null) {
+            return $this->json([
+                    'ok' => false,
+                    'error' => 'duplicate_contact',
+                    'message' => 'Ve vašem seznamu zákazníků již existuje záznam s tímto IČO. Vyberte ho ze seznamu výše.',
+                    'ico' => null,
+                    'data' => null,
+                ], 409);
+            
+        }
 
         $client = new AresClient( new AresCompanyMapper());
         
@@ -87,6 +103,23 @@ final class AjaxController extends Controller
         ]);
     }
 
+    public function getContactData(int $id): string {
+        $data = (new ContactsModel())->find($id);
+        if($data === null) {
+            return $this->json([
+                'ok' => false,
+                'message' => 'Požadovaný záznam v databázi není...',
+                'data' => [],
+            ], 404);
+        }
+
+        return $this->json([
+                'ok' => true,
+                'message' => 'Data byla doplněna do polí formuláře...',
+                'data' => $data,
+            ], 200);
+    }
+
     /**
      * Vytvoří JSON HTTP odpověď.
      *
@@ -102,4 +135,6 @@ final class AjaxController extends Controller
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
         );
     }
+
+    
 }

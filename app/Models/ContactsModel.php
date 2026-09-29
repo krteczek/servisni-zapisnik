@@ -22,4 +22,14 @@ class ContactsModel extends BaseModel
     {
         return parent::find($id);
     }
+
+    /**
+     * Najde zákazníka podle IČO v aktuálním tenantovi.
+     *
+     * @return ContactRow|null
+     */
+    public function findByIco(string $ico): ?array
+    {
+        return $this->firstWhere('ico', $ico);
+    }
 }

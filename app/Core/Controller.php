@@ -239,4 +239,47 @@ abstract class Controller
         }
     }
 
+
+/**
+ * ochrana proti přepisování hodnot jako id a zkoušení 
+ * měnit jiné údaje než které jsou ke změně vybrané...
+ * 
+ * Nastaví jednorázovou hodnotu pro session kontrolu.
+ *
+ * @param string $key Klíč kontroly.
+ * @param int|string $value Hodnota kontroly.
+ */
+protected function setSessionCheck(
+    string $key,
+    int|string $value
+): void {
+    Session::set('_checks.' . $key, $value);
+}
+
+/**
+ * Ověří a spotřebuje jednorázovou hodnotu ze session.
+ *
+ * @param string $key Klíč kontroly.
+ * @param int|string $value Očekávaná hodnota.
+ * @return bool True pouze pokud hodnota v session odpovídá.
+ */
+protected function confirmSessionCheck(
+    string $key,
+    int|string $value,
+    string $redirect
+): bool {
+    $sessionKey = '_checks.' . $key;
+    $stored = Session::get($sessionKey);
+
+    Session::forget($sessionKey);
+
+    if($stored === $value) {
+        return true;
+    
+    }
+
+    /** nejspíše pokus o podstrčení cizích dat */
+    Flash::error('Nesourodá vstupní data. Vyberte si ze seznamu, kterou položku chcete upravit...');
+    Url::redirect($redirect);
+}
 }

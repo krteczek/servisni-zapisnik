@@ -78,6 +78,18 @@ $errors    = $view->errors;
                 </div>
 
                 <h3>Odběratel</h3>
+<label for="contact_id">Existující zákazník</label>
+
+    <select id="contact_id" name="contact_id">
+        <option value="">— vyberte zákazníka —</option>
+
+        <?php foreach ($view->contacts as $contact): ?>
+            <option value="<?= (int) $contact['id'] ?>" <?= (int) ($invoice['contact_id'] ?? 0) === (int) $contact['id'] ? 'selected' : '' ?>>
+                <?=  $invoice['official_name'] ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
                 
 <?php
 /** -- tady by mělo dojit k require: --*/

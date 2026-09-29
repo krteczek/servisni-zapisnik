@@ -303,17 +303,28 @@ use App\Services\Tokens\TokenResult;
  *     id: int,
  *     company_id: int,
  *     company_name: string,
- *     ico: string,
- *     dic: string,
- *     street: string,
- *     city: string,
- *     zip: string,
- *     country: string,
- *     email: string,
- *     phone: string,
- *     created_at: string
+ *     official_name: string,
+ *     ico: ?string,
+ *     dic: ?string,
+ *     street: ?string,
+ *     house_number: ?string,
+ *     orientation_number: ?string,
+ *     city_part: ?string,
+ *     city: ?string,
+ *     postal_code: ?string,
+ *     country_code: string,
+ *     delivery_address_1: ?string,
+ *     delivery_address_2: ?string,
+ *     delivery_address_3: ?string,
+ *     email: ?string,
+ *     phone: ?string,
+ *     bank_account: ?string,
+ *     bank_code: ?string,
+ *     created_at: string,
+ *     updated_at: string,
+ *     contact?: string
  * }
- *
+ * 
  * @phpstan-type UserRow array{
  *     id: int,
  *     company_id: int,
