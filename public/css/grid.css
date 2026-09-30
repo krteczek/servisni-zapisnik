@@ -2,29 +2,39 @@
    CSS/GRID.CSS
    ========================= */
 
-
-
 .entity-grid {
+
   display: grid;
+
   grid-template-columns: repeat(3, 1fr);
+
   gap: 20px;
+
 }
 
 .task-grid {
+
   display: grid;
+
   gap: 1rem;
+
   grid-template-columns: repeat(auto-fill, minmax(420px, 420px));
+
 }
 
-
-@media (max-width: 1100px) {
-  .entity-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.invoice-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    
 }
 
 @media (max-width: 700px) {
+
   .entity-grid {
+
     grid-template-columns: 1fr;
+
   }
+
 }

@@ -21,28 +21,29 @@ use App\Core\Session;
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
 <link rel="apple-touch-icon" href="<?= Url::to('/favicon_io/apple-touch-icon.png') ?>">
 
-<!--	  -->  
-    <link rel="stylesheet" href="<?= Url::to('/css/base.css?v=' . filemtime(__DIR__ . '/../../../public/css/base.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/logo.css?v=' . filemtime(__DIR__ . '/../../../public/css/logo.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/menu.css?v=' . filemtime(__DIR__ . '/../../../public/css/menu.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/grid.css?v=' . filemtime(__DIR__ . '/../../../public/css/grid.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/card.css?v=' . filemtime(__DIR__ . '/../../../public/css/card.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/badge.css?v=' . filemtime(__DIR__ . '/../../../public/css/badge.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/ui.css?v=' . filemtime(__DIR__ . '/../../../public/css/ui.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/buttons.css?v=' . filemtime(__DIR__ . '/../../../public/css/buttons.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/teams.css?v=' . filemtime(__DIR__ . '/../../../public/css/teams.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/meta.css?v=' . filemtime(__DIR__ . '/../../../public/css/meta.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/form.css?v=' . filemtime(__DIR__ . '/../../../public/css/form.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/flash.css?v=' . filemtime(__DIR__ . '/../../../public/css/flash.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/footer.css?v=' . filemtime(__DIR__ . '/../../../public/css/footer.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/table.css?v=' . filemtime(__DIR__ . '/../../../public/css/table.css')) ?>">
-    <link rel="stylesheet" href="<?= Url::to('/css/deadline.css?v=' . filemtime(__DIR__ . '/../../../public/css/deadline.css')) ?>">
-<!--  -->
+<!--	  -- >  
+    <link rel="stylesheet" href="<?= Url::to('/css/base.css?v=' .      filemtime(__DIR__ . '/../../../public/css/base.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/logo.css?v=' .      filemtime(__DIR__ . '/../../../public/css/logo.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/menu.css?v=' .      filemtime(__DIR__ . '/../../../public/css/menu.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/grid.css?v=' .      filemtime(__DIR__ . '/../../../public/css/grid.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/card.css?v=' .      filemtime(__DIR__ . '/../../../public/css/card.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/badge.css?v=' .     filemtime(__DIR__ . '/../../../public/css/badge.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/ui.css?v=' .        filemtime(__DIR__ . '/../../../public/css/ui.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/buttons.css?v=' .   filemtime(__DIR__ . '/../../../public/css/buttons.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/teams.css?v=' .     filemtime(__DIR__ . '/../../../public/css/teams.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/meta.css?v=' .      filemtime(__DIR__ . '/../../../public/css/meta.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/form.css?v=' .      filemtime(__DIR__ . '/../../../public/css/form.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/flash.css?v=' .     filemtime(__DIR__ . '/../../../public/css/flash.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/footer.css?v=' .    filemtime(__DIR__ . '/../../../public/css/footer.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/table.css?v=' .     filemtime(__DIR__ . '/../../../public/css/table.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/deadline.css?v=' .  filemtime(__DIR__ . '/../../../public/css/deadline.css')) ?>">
+    <link rel="stylesheet" href="<?= Url::to('/css/invoice.css?v=' .   filemtime(__DIR__ . '/../../../public/css/invoice.css')) ?>">
+<! --  -->
 
 <!--    -->
  <style>
  <?php
- /* * /
+ /* */
 require __DIR__ . '/../../../public/css/base.css';
 require __DIR__ . '/../../../public/css/logo.css';
 require __DIR__ . '/../../../public/css/menu.css';
@@ -58,13 +59,17 @@ require __DIR__ . '/../../../public/css/flash.css';
 require __DIR__ . '/../../../public/css/footer.css';
 require __DIR__ . '/../../../public/css/table.css';
 require __DIR__ . '/../../../public/css/deadline.css';
+require __DIR__ . '/../../../public/css/invoice.css';
+
 /* */
 ?>
  </style>
 
- <script src="<?= Url::to('/js/app.js?v=' . filemtime(__DIR__ . '/../../../public/js/app.js')) ?>"></script>
- <script src="<?= Url::to('/js/invoice-create.js?v=' . filemtime(__DIR__ . '/../../../public/js/invoice-create.js')) ?>"></script>
- <script src="<?= Url::to('/js/contact-form-ares.js?v=' . filemtime(__DIR__ . '/../../../public/js/contact-form-ares.js')) ?>"></script>
+ <script src="<?= Url::to('/js/app.js?v=' . filemtime(__DIR__ . '/../../../public/js/app.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/invoice-create.js?v=' . filemtime(__DIR__ . '/../../../public/js/invoice-create.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/contact-form-ares.js?v=' . filemtime(__DIR__ . '/../../../public/js/contact-form-ares.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/get-task-reports.js?v=' . filemtime(__DIR__ . '/../../../public/js/get-task-reports.js')) ?>" defer></script>
+
 </head>
 <body>
 

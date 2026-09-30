@@ -1259,6 +1259,13 @@ Přepínaní rolí u admina
     'auth'   => true,
 ],
 
+[
+    'method' => 'GET',
+    'path' => '/{tenant}/ajax/task/{id:\d+}/get-reports',
+    'action' => [AjaxController::class, 'getTaskReports'],
+    'roles'  => ['admin', 'mistr'],
+    'auth'   => true,
+],
 /*
 |--------------------------------------------------------------------------
 | LOGOUT

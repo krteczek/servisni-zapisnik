@@ -1,22 +1,40 @@
+/**
+ * Slouží k obsluze formuláře pro vytváření faktur
+ */
 (function () {
     'use strict';
 
     const invoiceForm = document.getElementById('invoice-form');
-    let nextLineIndex = Number(invoiceForm.dataset.nextLineIndex);
 
-    const form = document.getElementById('invoice-form');
-    const otherLines = document.getElementById('other-invoice-lines');
+    if (invoiceForm === null) {
+        return;
+    }
+
+    let nextLineIndex = Number(
+        invoiceForm.dataset.nextLineIndex
+    );
+
+    const form = invoiceForm;
+
+    const otherLines =
+        document.getElementById('other-invoice-lines');
+
     const addOtherLineButton =
         document.getElementById('add-other-line');
 
+
+    /**
+     * Vytvoří novou fakturační položku.
+     */
     function createLine(taskId) {
         const index = nextLineIndex++;
 
-        const wrapper = document.createElement('div');
+        const wrapper =
+            document.createElement('div');
 
         wrapper.className = 'invoice-line';
-
-        wrapper.dataset.lineIndex = String(index);
+        wrapper.dataset.lineIndex =
+            String(index);
 
         wrapper.innerHTML = `
             <input
@@ -110,6 +128,10 @@
         return wrapper;
     }
 
+
+    /**
+     * Přepočítá cenu jedné fakturační položky.
+     */
     function updateLineTotal(line) {
         const quantity =
             parseFloat(
@@ -135,17 +157,21 @@
                 )?.value || '0'
             );
 
-        let total = quantity * unitPrice;
+        let total =
+            quantity * unitPrice;
 
         if (
-            unit === 'min'
-            && priceUnit === 'hod'
+            unit === 'min' &&
+            priceUnit === 'hod'
         ) {
-            total = (quantity / 60) * unitPrice;
+            total =
+                (quantity / 60) * unitPrice;
         }
 
         const output =
-            line.querySelector('.invoice-line-total');
+            line.querySelector(
+                '.invoice-line-total'
+            );
 
         if (output === null) {
             return;
@@ -158,11 +184,16 @@
             }) + ' Kč';
     }
 
+
+    /**
+     * Přepočítá celkovou částku faktury.
+     */
     function updateInvoiceTotal() {
         let total = 0;
 
         form.querySelectorAll('.invoice-line')
             .forEach(function (line) {
+
                 const quantity =
                     parseFloat(
                         line.querySelector(
@@ -188,8 +219,8 @@
                     );
 
                 if (
-                    unit === 'min'
-                    && priceUnit === 'hod'
+                    unit === 'min' &&
+                    priceUnit === 'hod'
                 ) {
                     total +=
                         (quantity / 60) * unitPrice;
@@ -202,19 +233,30 @@
         const output =
             document.getElementById('invoice-total');
 
-        if (output !== null) {
-            output.textContent =
-                total.toLocaleString('cs-CZ', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }) + ' Kč';
+        if (output === null) {
+            return;
         }
+
+        output.textContent =
+            total.toLocaleString('cs-CZ', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' Kč';
     }
 
+
+    /*
+     * Přidání ostatní fakturační položky.
+     */
     if (addOtherLineButton !== null) {
         addOtherLineButton.addEventListener(
             'click',
             function () {
+
+                if (otherLines === null) {
+                    return;
+                }
+
                 otherLines.appendChild(
                     createLine('')
                 );
@@ -224,10 +266,17 @@
         );
     }
 
+
+    /*
+     * Kliknutí na tlačítka uvnitř fakturačního formuláře.
+     */
     form.addEventListener(
         'click',
         function (event) {
 
+            /*
+             * Přidání položky k úkolu.
+             */
             const addButton =
                 event.target.closest(
                     '.js-add-task-line'
@@ -256,6 +305,10 @@
                 return;
             }
 
+
+            /*
+             * Odebrání fakturační položky.
+             */
             const removeButton =
                 event.target.closest(
                     '.js-remove-line'
@@ -277,13 +330,18 @@
         }
     );
 
+
+    /*
+     * Změna množství nebo ceny.
+     */
     form.addEventListener(
         'input',
         function (event) {
 
             if (
                 event.target.matches(
-                    '[name$="[quantity]"], [name$="[unit_price]"]'
+                    '[name$="[quantity]"], ' +
+                    '[name$="[unit_price]"]'
                 )
             ) {
                 const line =
@@ -300,13 +358,18 @@
         }
     );
 
+
+    /*
+     * Změna jednotky nebo jednotky ceny.
+     */
     form.addEventListener(
         'change',
         function (event) {
 
             if (
                 event.target.matches(
-                    '[name$="[unit]"], [name$="[price_unit]"]'
+                    '[name$="[unit]"], ' +
+                    '[name$="[price_unit]"]'
                 )
             ) {
                 const line =
@@ -323,96 +386,13 @@
         }
     );
 
+
+    /*
+     * Přepočítání existujících položek po načtení stránky.
+     */
     form.querySelectorAll('.invoice-line')
         .forEach(updateLineTotal);
 
     updateInvoiceTotal();
-
-
-    /*
-     * Reporty tasků.
-     *
-     * URL dodá controller prostřednictvím
-     * $view->data['report_url'].
-     */
-    document.addEventListener(
-        'click',
-        function (event) {
-
-            const button =
-                event.target.closest(
-                    '.js-load-task-report'
-                );
-
-            if (button === null) {
-                return;
-            }
-
-            const url =
-                button.dataset.reportUrl || '';
-
-            const taskId =
-                button.dataset.taskId || '';
-
-            if (url === '' || taskId === '') {
-                return;
-            }
-
-            const item =
-                button.closest(
-                    '.task-report-item'
-                );
-
-            if (item === null) {
-                return;
-            }
-
-            const target =
-                item.querySelector(
-                    '.task-report-content'
-                );
-
-            if (target === null) {
-                return;
-            }
-
-            button.disabled = true;
-
-            fetch(
-                url +
-                (url.includes('?') ? '&' : '?') +
-                'task_id=' +
-                encodeURIComponent(taskId),
-                {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With':
-                            'XMLHttpRequest'
-                    }
-                }
-            )
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error(
-                            'HTTP ' + response.status
-                        );
-                    }
-
-                    return response.text();
-                })
-                .then(function (html) {
-                    target.innerHTML = html;
-                    button.textContent =
-                        'Skrýt report';
-                })
-                .catch(function () {
-                    target.textContent =
-                        'Report se nepodařilo načíst.';
-                })
-                .finally(function () {
-                    button.disabled = false;
-                });
-        }
-    );
 
 })();
