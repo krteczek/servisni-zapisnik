@@ -41,7 +41,9 @@
 }
 
 
-/* Kompaktní kontaktní formulář */
+/* =====================================================
+   KOMPAKTNÍ KONTAKTNÍ FORMULÁŘ
+   ===================================================== */
 
 .contact-form-grid {
     display: grid;
@@ -54,12 +56,29 @@
 }
 
 /* běžná pole */
-.contact-col-2 { grid-column: span 2; }
-.contact-col-3 { grid-column: span 3; }
-.contact-col-4 { grid-column: span 4; }
-.contact-col-6 { grid-column: span 6; }
-.contact-col-8 { grid-column: span 8; }
-.contact-col-12 { grid-column: span 12; }
+.contact-col-2 {
+    grid-column: span 2;
+}
+
+.contact-col-3 {
+    grid-column: span 3;
+}
+
+.contact-col-4 {
+    grid-column: span 4;
+}
+
+.contact-col-6 {
+    grid-column: span 6;
+}
+
+.contact-col-8 {
+    grid-column: span 8;
+}
+
+.contact-col-12 {
+    grid-column: span 12;
+}
 
 
 @media (max-width: 800px) {
@@ -83,155 +102,224 @@
     }
 }
 
+
 /* =====================================================
    KOMPAKTNÍ FORMULÁŘ ODBĚRATELE
    ===================================================== */
 
-.invoice-customer-form { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 12px; 
-} 
-.invoice-customer-form .customer-select, .invoice-customer-form .customer-save { 
-    width: 100%; 
-} 
-
-/* * Vnitřní fieldsety kontaktu */ 
-.invoice-customer-form fieldset { 
-    margin-top: 12px; 
-} 
-
-/* ===================================================== 
-   ZÁKLADNÍ ÚDAJE 
-   ===================================================== */ 
-.invoice-customer-form fieldset:nth-of-type(1) { 
-    display: grid;
-     grid-template-columns: 1fr 1fr 2fr; 
-     gap: 12px; 
-} 
-
-.invoice-customer-form fieldset:nth-of-type(1) .form-group { 
-    min-width: 0; 
-} 
-
-/* ===================================================== 
-    ADRESA 
-===================================================== */ 
-.invoice-customer-form fieldset:nth-of-type(2) { 
-    display: grid; 
-    grid-template-columns: 2fr 1fr 1fr 1fr; 
-    gap: 12px; 
-} 
-
-.invoice-customer-form fieldset:nth-of-type(2) .form-group { 
-    min-width: 0; 
-} 
-
-/* ===================================================== 
-    DORUČOVACÍ ADRESA 
-===================================================== */ 
-.invoice-customer-form fieldset:nth-of-type(3) { 
-    display: grid; 
-    grid-template-columns: repeat(3, minmax(0, 1fr)); 
-    gap: 12px; 
-} 
-
-.invoice-customer-form fieldset:nth-of-type(3) .form-group { 
-    min-width: 0; 
-} 
-
-/* ===================================================== 
-KONTAKT 
-===================================================== */ 
-
-.invoice-customer-form fieldset:nth-of-type(4) { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 12px; 
-} 
-.invoice-customer-form fieldset:nth-of-type(4) .form-group {
-     min-width: 0; 
-    } 
-/* ===================================================== 
-BANKOVNÍ SPOJENÍ 
-===================================================== */ 
-
-.invoice-customer-form fieldset:nth-of-type(5) { 
-    display: grid; 
-    grid-template-columns: 2fr 1fr; 
-    gap: 12px; 
-} 
-
-.invoice-customer-form fieldset:nth-of-type(5) .form-group { 
-    min-width: 0; 
-} 
-
-/* ===================================================== 
-NASTAVENÍ FAKTURY 
-===================================================== */ 
-.invoice-settings-grid { 
-    display: grid; 
-    grid-template-columns: minmax(0, 1fr) 150px 150px 90px; 
-    gap: 12px; 
-    align-items: end; 
-} 
-
-.invoice-settings-grid .form-group { 
-    min-width: 0; 
-} 
-
-/* ===================================================== 
-ZPRACOVÁNÍ 
-===================================================== */ 
-
-#processing_note { 
-    max-width: 100%; 
-} 
-/* ===================================================== 
-UŽŠÍ OBRAZOVKY 
-===================================================== */ 
-@media (max-width: 900px) { 
-    .invoice-settings-grid { 
-        grid-template-columns: 1fr 1fr; 
-    } 
-    .invoice-title { 
-        grid-column: 1 / -1; 
-    } 
-    .invoice-customer-form fieldset:nth-of-type(1), 
-    .invoice-customer-form fieldset:nth-of-type(2), 
-    .invoice-customer-form fieldset:nth-of-type(3), 
-    .invoice-customer-form fieldset:nth-of-type(4), 
-    .invoice-customer-form fieldset:nth-of-type(5) { 
-        grid-template-columns: 1fr 1fr; 
-    } 
-} 
-
-@media (max-width: 600px) { 
-    .invoice-settings-grid { 
-        grid-template-columns: 1fr; 
-    } 
-    
-    .invoice-title { 
-        grid-column: auto; 
-    } 
-    
-    .invoice-customer-form fieldset:nth-of-type(1), 
-    .invoice-customer-form fieldset:nth-of-type(2), 
-    .invoice-customer-form fieldset:nth-of-type(3), 
-    .invoice-customer-form fieldset:nth-of-type(4), 
-    .invoice-customer-form fieldset:nth-of-type(5) {
-        grid-template-columns: 1fr; 
-    } 
+.invoice-customer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.invoice-customer-form fieldset:nth-of-type(3) {
+.invoice-customer-form .customer-select,
+.invoice-customer-form .customer-save {
+    width: 100%;
+}
+
+/* Vnitřní fieldsety kontaktu */
+
+.invoice-customer-form fieldset {
+    margin-top: 12px;
+}
+
+
+/* =====================================================
+   ZÁKLADNÍ ÚDAJE
+   ===================================================== */
+
+.invoice-customer-form > fieldset:nth-of-type(1) {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 12px;
+}
+
+.invoice-customer-form > fieldset:nth-of-type(1) .form-group {
+    min-width: 0;
+}
+
+
+/* =====================================================
+   ADRESA
+   ===================================================== */
+
+.invoice-customer-form > fieldset:nth-of-type(2) {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+.invoice-customer-form > fieldset:nth-of-type(2) .form-group {
+    min-width: 0;
+}
+
+
+/* =====================================================
+   DORUČOVACÍ ADRESA
+   ===================================================== */
+
+.invoice-customer-form > fieldset:nth-of-type(3) {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }
 
-.invoice-customer-form fieldset:nth-of-type(3) .form-group {
+.invoice-customer-form > fieldset:nth-of-type(3) .form-group {
     min-width: 0;
-    width: auto;
+}
+
+
+/* =====================================================
+   KONTAKT
+   ===================================================== */
+
+.invoice-customer-form > fieldset:nth-of-type(4) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.invoice-customer-form > fieldset:nth-of-type(4) .form-group {
+    min-width: 0;
+}
+
+
+/* =====================================================
+   BANKOVNÍ SPOJENÍ
+   ===================================================== */
+
+.invoice-customer-form > fieldset:nth-of-type(5) {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+}
+
+.invoice-customer-form > fieldset:nth-of-type(5) .form-group {
+    min-width: 0;
+}
+
+
+/* =====================================================
+   NASTAVENÍ FAKTURY
+   ===================================================== */
+
+.invoice-settings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 150px 150px 90px;
+    gap: 12px;
+    align-items: end;
+}
+
+.invoice-settings-grid .form-group {
+    min-width: 0;
+}
+
+
+/* =====================================================
+   ZPRACOVÁNÍ
+   ===================================================== */
+
+#processing_note {
+    max-width: 100%;
+}
+
+
+/* =====================================================
+   UŽŠÍ OBRAZOVKY
+   ===================================================== */
+
+@media (max-width: 900px) {
+    .invoice-settings-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .invoice-title {
+        grid-column: 1 / -1;
+    }
+
+    .invoice-customer-form > fieldset:nth-of-type(1),
+    .invoice-customer-form > fieldset:nth-of-type(2),
+    .invoice-customer-form > fieldset:nth-of-type(3),
+    .invoice-customer-form > fieldset:nth-of-type(4),
+    .invoice-customer-form > fieldset:nth-of-type(5) {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .invoice-settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .invoice-title {
+        grid-column: auto;
+    }
+
+    .invoice-customer-form > fieldset:nth-of-type(1),
+    .invoice-customer-form > fieldset:nth-of-type(2),
+    .invoice-customer-form > fieldset:nth-of-type(3),
+    .invoice-customer-form > fieldset:nth-of-type(4),
+    .invoice-customer-form > fieldset:nth-of-type(5) {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =====================================================
+   NÁPOVĚDA
+   ===================================================== */
+
+.invoice-customer-help {
+    margin: 0 0 1px;
+}
+
+.invoice-customer-help p {
     margin: 0;
+}
+
+.invoice-customer-help ul {
+    margin: 0;
+}
+
+
+/* =====================================================
+   FORM GROUP
+   ===================================================== */
+
+.form-group {
+    margin: 0;
+    padding: 0;
+}
+
+
+/* =====================================================
+   VÝBĚR / IČO
+   ===================================================== */
+
+.customer-load-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.customer-load-row > * {
+    min-width: 0;
+}
+
+.customer-load-row .select-contact {
+    width: auto;
+    float: none;
+}
+
+/*
+ * Vnořená fieldset „Existující zákazník“ a „IČO“
+ * nesmí převzít gridové rozložení hlavních
+ * fieldsetů odběratele.
+ */
+
+.customer-load-row .invoice-section {
+    display: block;
+    width: 100%;
+    min-width: 0;
 }
