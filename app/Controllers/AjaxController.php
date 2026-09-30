@@ -10,6 +10,7 @@ use App\Services\Ares\AresClient;
 use App\Services\Ares\AresCompanyMapper;
 use App\Validators\ContactValidator;
 use App\Models\ContactsModel;
+use App\Models\TaskAssignmentModel;
 
 /**
  * Stavové kódy a jejich význam:
@@ -118,6 +119,30 @@ final class AjaxController extends Controller
                 'message' => 'Data byla doplněna do polí formuláře...',
                 'data' => $data,
             ], 200);
+    }
+
+    public function getTaskReports($taskId): string
+    {
+        $model = new TaskAssignmentModel();
+        $data = $model->findByTask($taskId);
+        if($data === []) {
+             return $this->json([
+                'ok' => false,
+                'message' => 'Požadovaný záznam v databázi není...',
+                'data' => [],
+            ], 404);
+        }
+
+        foreach ($data as &$report) {
+            $report['note'] = tx((string) $report['note']);
+        }
+        unset($report);
+
+        return $this->json([
+                'ok' => true,
+                'message' => 'Reporty byly nahrány a zobrazeny...',
+                'data' => $data,
+        ], 200);
     }
 
     /**

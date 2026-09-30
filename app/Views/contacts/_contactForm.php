@@ -82,6 +82,8 @@ use App\Core\Url;
     </details>
 </div>
 
+<fieldset>
+    <legend>Adresa</legend>
 <div class="form-group">
     <label>Ulice</label>
     <input
@@ -147,7 +149,7 @@ use App\Core\Url;
         required
     >
 </div>
-
+</fieldset>
 <fieldset>
     <legend>Doručovací adresa</legend>
 
@@ -177,4 +179,66 @@ use App\Core\Url;
             value="<?= e($data['delivery_address_3'] ?? '') ?>"
         >
     </div>
+</fieldset>
+<fieldset>
+    <legend>Kontakt</legend>
+
+    <div class="form-group">
+        <label for="email">
+            E-mail pro zasílání faktur
+        </label>
+
+        <input
+            type="email"
+            id="email"
+            name="email"
+            value="<?= e($data['email'] ?? '') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="phone">
+            Telefon
+        </label>
+
+        <input
+            type="text"
+            id="phone"
+            name="phone"
+            value="<?= e($data['phone'] ?? '') ?>"
+        >
+    </div>
+
+</fieldset>
+<fieldset>
+        <legend>Bankovní spojení</legend>
+
+        <div class="form-group">
+            <label for="bank_account">
+                Číslo účtu
+            </label>
+
+            <input
+                type="text"
+                id="bank_account"
+                name="bank_account"
+                value="<?= e($data['bank_account'] ?? '') ?>"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="bank_code">
+                Kód banky
+            </label>
+
+            <input
+                type="text"
+                id="bank_code"
+                name="bank_code"
+                value="<?= e($data['bank_code'] ?? '') ?>"
+                maxlength="10"
+            >
+        </div>
+   
+
 </fieldset>
