@@ -14,15 +14,10 @@ use App\Core\Url;
  */
 
 ?>
-
-<p>
-    Pokud zadáte IČO a kliknete na
-    <strong>Načíst data z ARES</strong>,
-    systém ověří jeho platnost a pokusí se načíst údaje o firmě z ARES.
-</p>
-
-<div class="form-group">
-    <label>IČO</label>
+<!--<div class="form-group customer-select">-->
+            <div class="select-contact">
+ 
+<label>IČO</label>
     <input
         type="text"
         name="ico"
@@ -38,7 +33,7 @@ use App\Core\Url;
     </button>
 
     
-    <details>
+    <details class="invoice-customer-help">
         <summary>?</summary>
         <p>
             Osmimístné identifikační číslo organizace.
@@ -46,6 +41,7 @@ use App\Core\Url;
             U českých subjektů se ověřuje jeho platnost.
         </p>
     </details>
+</div>
 </div>
 
 <div class="form-group">
@@ -57,7 +53,7 @@ use App\Core\Url;
         required
     >
 
-    <details>
+    <details class="invoice-customer-help">
         <summary>?</summary>
         <p>
             Oficiální název subjektu podle ARES.
@@ -74,7 +70,7 @@ use App\Core\Url;
         value="<?= e($data['dic'] ?? '') ?>"
     >
 
-    <details>
+    <details class="invoice-customer-help">
         <summary>?</summary>
         <p>
             Daňové identifikační číslo, pokud ho subjekt má.

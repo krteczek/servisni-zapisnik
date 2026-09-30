@@ -23,6 +23,7 @@ use App\Controllers\DevAuthController;
 use App\Controllers\RootController;
 use App\Controllers\RoleSwitcherController;
 use App\Controllers\AjaxController;
+use App\Controllers\CompanyController;
 
 return [
 
@@ -1101,37 +1102,6 @@ Přepínaní rolí u admina
 ],
 
 
-
-
-/*
-|--------------------------------------------------------------------------
-| ADMIN / Settings
-|--------------------------------------------------------------------------
-*/
-/**
-[
-    'method' => 'GET',
-    'path'   => '/{tenant}/system/settings/billing',
-    'action' => [SettingsController::class, 'billing'],
-    'roles'  => ['admin'],
-    'menu'   => 'Administrace',
-    'submenu'=> 'Fakturace',
-    'section'=> 'system',
-    'auth'   => true,
-    'title'  => 'Nastavení fakturace',
-],
-
-[
-    'method' => 'POST',
-    'path'   => '/{tenant}/system/settings/billing',
-    'action' => [SettingsController::class, 'saveBilling'],
-    'roles'  => ['admin'],
-    'auth'   => true,
-    'section'=> 'system',
-    'title'  => 'Nastavení fakturace',
-],
-*/
-
 /*
 |--------------------------------------------------------------------------
 | ADMIN / Settings
@@ -1209,8 +1179,75 @@ Přepínaní rolí u admina
     'title'  => 'Nastavení fakturace',
 ],
 
+/**
+ * ------------------------------------------------------------------------
+ *  ADMIN DETAILY FIRMY, NASTAVENÍ A SPRÁVA
+ * ------------------------------------------------------------------------
+ */
+// GET  /{tenant}/system/company/create   -> CompanyController::create
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/company/create',
+    'action' => [CompanyController::class, 'create'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Firemní údaje: Vytvořit',
+    'section'=> 'system',
+    'auth'   => true,
+    'title'  => 'Firemní údaje: Vytvořit',
+],
 
+// POST /{tenant}/system/company/create   -> CompanyController::store
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/company/create',
+    'action' => [CompanyController::class, 'store'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Firemní údaje: Vytvořit',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Firemní údaje: Vytvořit',
+],
 
+// GET  /{tenant}/system/company/detail   -> CompanyController::detail
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/company/detail',
+    'action' => [CompanyController::class, 'detail'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Firemní údaje: Detaily',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Firemní údaje: Detaily',
+],
+
+// GET  /{tenant}/system/company/edit     -> CompanyController::edit
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/company/edit',
+    'action' => [CompanyController::class, 'edit'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Firemní údaje: Změna',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Firemní údaje: Změna',
+],
+
+// POST /{tenant}/system/company/edit     -> CompanyController::update
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/company/edit',
+    'action' => [CompanyController::class, 'update'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Firemní údaje: Změna',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Firemní údaje: Změna',
+],
 /*
 |--------------------------------------------------------------------------
 | ADMIN / audit
