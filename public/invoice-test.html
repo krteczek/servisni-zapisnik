@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test fakturace zakázky</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f3f3f3;
+            color: #222;
+        }
+
+        .page {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+        }
+
+        .intro {
+            margin: 0 0 25px;
+            color: #666;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .panel {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .panel-header {
+            padding: 15px 18px;
+            border-bottom: 1px solid #ccc;
+            background: #f8f8f8;
+        }
+
+        .panel-header h2 {
+            margin: 0 0 5px;
+            font-size: 19px;
+        }
+
+        .panel-header p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .task {
+            padding: 16px 18px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .task:last-child {
+            border-bottom: 0;
+        }
+
+        .task h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+        }
+
+        .task-data {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 12px;
+            color: #555;
+        }
+
+        .task-data strong {
+            color: #222;
+        }
+
+        .task-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        button {
+            padding: 7px 11px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #eee;
+        }
+
+        .button-main {
+            background: #e8e8e8;
+            border-color: #888;
+        }
+
+        .invoice {
+            padding: 18px;
+        }
+
+        .invoice-lines {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .invoice-lines th,
+        .invoice-lines td {
+            border-bottom: 1px solid #ddd;
+            padding: 9px 7px;
+            vertical-align: top;
+        }
+
+        .invoice-lines th {
+            text-align: left;
+            background: #f5f5f5;
+            font-size: 14px;
+        }
+
+        .invoice-lines input,
+        .invoice-lines select {
+            width: 100%;
+            padding: 7px;
+            border: 1px solid #aaa;
+            border-radius: 3px;
+            font: inherit;
+        }
+
+        .invoice-lines .description {
+            min-width: 250px;
+        }
+
+        .invoice-lines .quantity {
+            width: 115px;
+        }
+
+        .invoice-lines .unit {
+            width: 90px;
+        }
+
+        .invoice-lines .price {
+            width: 120px;
+        }
+
+        .total-cell {
+            white-space: nowrap;
+            text-align: right;
+            padding-top: 17px !important;
+        }
+
+        .remove-cell {
+            width: 45px;
+            text-align: center;
+            padding-top: 14px !important;
+        }
+
+        .add-line {
+            margin-top: 14px;
+        }
+
+        .reports {
+            margin-top: 25px;
+            border-top: 2px solid #ccc;
+            padding-top: 18px;
+        }
+
+        .reports h3 {
+            margin: 0 0 5px;
+        }
+
+        .reports-intro {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .report {
+            border: 1px solid #ddd;
+            padding: 11px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .report-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .report-text {
+            color: #555;
+        }
+
+        .invoice-total {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #999;
+            text-align: right;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 950px) {
+            body {
+                padding: 15px;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .invoice-lines {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <h1>Vytvoření faktury ze zakázky</h1>
+    <p class="intro">
+        Testovací stránka – pouze HTML/CSS/JS, bez napojení na aplikaci.
+    </p>
+
+    <div class="layout">
+
+        <!-- LEVÁ STRANA: TASKY -->
+        <section class="panel">
+
+            <div class="panel-header">
+                <h2>Tasky zakázky</h2>
+                <p>Tasky jsou podklady pro fakturaci.</p>
+            </div>
+
+            <div class="task">
+                <h3>Instalace zařízení u zákazníka</h3>
+
+                <div class="task-data">
+                    <div>Čas: <strong>3 h 40 min</strong></div>
+                    <div>Km: <strong>70 km</strong></div>
+                </div>
+
+                <div class="task-actions">
+                    <button type="button" class="button-main">Použít tento čas</button>
+                    <button type="button">Použít km</button>
+                    <button type="button">Zobrazit reporty →</button>
+                </div>
+            </div>
+
+            <div class="task">
+                <h3>Dokončení stavebních prací</h3>
+
+                <div class="task-data">
+                    <div>Čas: <strong>6 h 15 min</strong></div>
+                    <div>Km: <strong>0 km</strong></div>
+                </div>
+
+                <div class="task-actions">
+                    <button type="button" class="button-main">Použít tento čas</button>
+                    <button type="button">Zobrazit reporty →</button>
+                </div>
+            </div>
+
+            <div class="task">
+                <h3>Kontrola a servis objektu</h3>
+
+                <div class="task-data">
+                    <div>Čas: <strong>2 h 30 min</strong></div>
+                    <div>Km: <strong>34 km</strong></div>
+                </div>
+
+                <div class="task-actions">
+                    <button type="button" class="button-main">Použít tento čas</button>
+                    <button type="button">Použít km</button>
+                    <button type="button">Zobrazit reporty →</button>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- PRAVÁ STRANA: FAKTURA -->
+        <section class="panel">
+
+            <div class="panel-header">
+                <h2>Položky faktury</h2>
+                <p>
+                    Tady vznikají skutečné řádky faktury. Nemusí odpovídat
+                    jednotlivým taskům.
+                </p>
+            </div>
+
+            <div class="invoice">
+
+                <table class="invoice-lines">
+
+                    <thead>
+                    <tr>
+                        <th>Co se fakturuje</th>
+                        <th class="quantity">Množství</th>
+                        <th class="unit">MJ</th>
+                        <th class="price">Cena/MJ</th>
+                        <th>Celkem</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr>
+                        <td class="description">
+                            <input type="text"
+                                   value="Instalace zařízení u zákazníka">
+                        </td>
+
+                        <td class="quantity">
+                            <input type="text"
+                                   value="3:40"
+                                   title="hodiny:minuty">
+                        </td>
+
+                        <td class="unit">
+                            <select>
+                                <option selected>hod</option>
+                                <option>ks</option>
+                                <option>km</option>
+                            </select>
+                        </td>
+
+                        <td class="price">
+                            <input type="number"
+                                   value="800"
+                                   min="0"
+                                   step="0.01">
+                        </td>
+
+                        <td class="total-cell">
+                            2 933 Kč
+                        </td>
+
+                        <td class="remove-cell">
+                            <button type="button" title="Odstranit řádek">×</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="description">
+                            <input type="text" value="Doprava">
+                        </td>
+
+                        <td class="quantity">
+                            <input type="number"
+                                   value="70"
+                                   min="0"
+                                   step="1">
+                        </td>
+
+                        <td class="unit">
+                            <select>
+                                <option>hod</option>
+                                <option>ks</option>
+                                <option selected>km</option>
+                            </select>
+                        </td>
+
+                        <td class="price">
+                            <input type="number"
+                                   value="20"
+                                   min="0"
+                                   step="0.01">
+                        </td>
+
+                        <td class="total-cell">
+                            1 400 Kč
+                        </td>
+
+                        <td class="remove-cell">
+                            <button type="button" title="Odstranit řádek">×</button>
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+                <button type="button" class="add-line">
+                    + Přidat položku
+                </button>
+
+
+                <!-- REPORTY -->
+                <div class="reports">
+
+                    <h3>Reporty k úkolu</h3>
+
+                    <div class="reports-intro">
+                        Instalace zařízení u zákazníka
+                    </div>
+
+                    <div class="report">
+                        <div class="report-head">
+                            <span>25. 9. 2026 · Petr</span>
+                            <span>2 h 10 min · 45 km</span>
+                        </div>
+                        <div class="report-text">
+                            Montáž zařízení a první kontrola funkčnosti.
+                        </div>
+                    </div>
+
+                    <div class="report">
+                        <div class="report-head">
+                            <span>26. 9. 2026 · Petr</span>
+                            <span>1 h 30 min · 25 km</span>
+                        </div>
+                        <div class="report-text">
+                            Dokončení montáže a předání zákazníkovi.
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="invoice-total">
+                    Celkem: 4 333 Kč
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+</body>
+</html>

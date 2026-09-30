@@ -63,6 +63,8 @@ require __DIR__ . '/../../../public/css/deadline.css';
  </style>
 
  <script src="<?= Url::to('/js/app.js?v=' . filemtime(__DIR__ . '/../../../public/js/app.js')) ?>"></script>
+ <script src="<?= Url::to('/js/invoice-create.js?v=' . filemtime(__DIR__ . '/../../../public/js/invoice-create.js')) ?>"></script>
+ <script src="<?= Url::to('/js/contact-form-ares.js?v=' . filemtime(__DIR__ . '/../../../public/js/contact-form-ares.js')) ?>"></script>
 </head>
 <body>
 

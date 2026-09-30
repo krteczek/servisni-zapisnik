@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const icoInput = document.querySelector('[name="ico"]');
     const loadButton = document.querySelector('[data-ares-load]');
@@ -91,7 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (result.error === 'duplicate_contact') {
-                    showMessage(result.message ?? 'Údaje o zákazníkovi již máte v databázi, načtěte je, prosím,  z ní');
+                    showMessage(
+                        result.message ??
+                        'Údaje o zákazníkovi již máte v databázi, načtěte je, prosím, z ní'
+                    );
                     return;
                 }
 
@@ -110,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                
                 showMessage('Údaje se nepodařilo načíst.:' + response.data);
                 return;
             }
@@ -147,53 +148,73 @@ document.addEventListener('DOMContentLoaded', () => {
             loadButton.disabled = false;
         }
     });
-});
 
+    const contactSelect = document.querySelector('[name="contact_id"]');
 
+    if (contactSelect) {
+        contactSelect.addEventListener('change', async () => {
+            const contactId = contactSelect.value;
 
-const contactSelect = document.querySelector('[name="contact_id"]');
-
-if (contactSelect) {
-    contactSelect.addEventListener('change', async () => {
-        const contactId = contactSelect.value;
-
-        if (contactId === '') {
-            return;
-        }
-
-        try {
-            const url = `/vanek-software/ajax/contact/${encodeURIComponent(contactId)}`;
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            let result;
+            if (contactId === '') {
+                return;
+            }
 
             try {
-                result = await response.json();
-            } catch {
-                console.error('Server vrátil neplatnou JSON odpověď.');
-                return;
-            }
+                const url = `/vanek-software/ajax/contact/${encodeURIComponent(contactId)}`;
 
-            if (!response.ok || result.ok !== true) {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                let result;
+
+                try {
+                    result = await response.json();
+                } catch {
+                    console.error('Server vrátil neplatnou JSON odpověď.');
+                    return;
+                }
+
+                if (!response.ok || result.ok !== true) {
+                    console.error(
+                        result.message ??
+                        'Údaje zákazníka se nepodařilo načíst.'
+                    );
+                    return;
+                }
+
+                const data = result.data;
+
+                setValue('official_name', data.official_name);
+                setValue('ico', data.ico);
+                setValue('dic', data.dic);
+
+                setValue('street', data.street);
+                setValue('house_number', data.house_number);
+                setValue('orientation_number', data.orientation_number);
+                setValue('city_part', data.city_part);
+                setValue('city', data.city);
+                setValue('postal_code', data.postal_code);
+                setValue('country_code', data.country_code);
+
+                setValue('delivery_address_1', data.delivery_address_1);
+                setValue('delivery_address_2', data.delivery_address_2);
+                setValue('delivery_address_3', data.delivery_address_3);
+
+                setValue('email', data.email);
+                setValue('phone', data.phone);
+                setValue('bank_account', data.bank_account);
+                setValue('bank_code', data.bank_code);
+
+            } catch (error) {
                 console.error(
-                    result.message ?? 'Údaje zákazníka se nepodařilo načíst.'
+                    'Chyba při načítání zákazníka:',
+                    error
                 );
-                return;
             }
-
-            console.log('Načtený zákazník:', result.data);
-
-        } catch (error) {
-            console.error(
-                'Chyba při načítání zákazníka:',
-                error
-            );
-        }
-    });
-}
+        });
+    }
+});

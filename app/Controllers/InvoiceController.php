@@ -96,8 +96,8 @@ public function createFromTask(int $id): string
 
                 $this->view->errors = $result['errors'];
                 $this->view->data   = $result['data'];
-
-                return $this->render('invoices/create-task');
+                $this->view->contacts = (new ContactsModel())->all();
+                return $this->render('invoices/create-from-task');
             }
 
             Flash::success('Návrh faktury byl vytvořen.');
@@ -216,6 +216,7 @@ public function detail(int $id): string
 
         Url::redirect('/{tenant}/billing/invoices/#main');
     }
+
 }
 
     /**
@@ -230,5 +231,108 @@ public function detail(int $id): string
      */
     public function cancel(int $id): void
     {
+    }
+
+    /**
+     * @param array<string, mixed> $post
+     * @return array<string, string>
+     */
+    private function validateInvoiceData(array $post): array
+    {
+        $errors = [];
+
+        $title = trim((string) ($post['title'] ?? ''));
+
+        if ($title === '') {
+            $errors['title'] = 'Zadejte název faktury.';
+        }
+
+        $issuedAt = trim((string) ($post['issued_at'] ?? ''));
+        $dueDate = trim((string) ($post['due_date'] ?? ''));
+
+        if (!$this->isValidDate($issuedAt)) {
+            $errors['issued_at'] = 'Datum vystavení není platné.';
+        }
+
+        if (!$this->isValidDate($dueDate)) {
+            $errors['due_date'] = 'Datum splatnosti není platné.';
+        }
+
+        if (
+            $this->isValidDate($issuedAt)
+            && $this->isValidDate($dueDate)
+            && $dueDate < $issuedAt
+        ) {
+            $errors['due_date'] = 'Datum splatnosti nemůže být před datem vystavení.';
+        }
+
+        $lines = $post['lines'] ?? [];
+
+        if (!is_array($lines)) {
+            $errors['lines'] = 'Fakturační položky nejsou platné.';
+            return $errors;
+        }
+
+        foreach ($lines as $index => $line) {
+            if (!is_array($line)) {
+                $errors["lines.{$index}"] = 'Fakturační položka není platná.';
+                continue;
+            }
+
+            $description = trim((string) ($line['description'] ?? ''));
+
+            if ($description === '') {
+                $errors["lines.{$index}.description"] =
+                    'Zadejte popis fakturační položky.';
+            }
+
+            $unit = trim((string) ($line['unit'] ?? ''));
+
+            if ($unit === '') {
+                $errors["lines.{$index}.unit"] =
+                    'Vyberte jednotku množství.';
+            }
+
+            $priceUnit = trim((string) ($line['price_unit'] ?? ''));
+
+            if ($priceUnit === '') {
+                $errors["lines.{$index}.price_unit"] =
+                    'Vyberte jednotku ceny.';
+            }
+
+            $quantityRaw = $line['quantity'] ?? null;
+
+            if (
+                $quantityRaw === null
+                || $quantityRaw === ''
+                || !is_numeric($quantityRaw)
+            ) {
+                $errors["lines.{$index}.quantity"] =
+                    'Zadejte množství.';
+            } elseif ((float) $quantityRaw <= 0) {
+                $errors["lines.{$index}.quantity"] =
+                    'Množství musí být větší než nula.';
+            }
+
+            $unitPriceRaw = $line['unit_price'] ?? null;
+
+            if (
+                $unitPriceRaw === null
+                || $unitPriceRaw === ''
+                || !is_numeric($unitPriceRaw)
+            ) {
+                $errors["lines.{$index}.unit_price"] =
+                    'Zadejte cenu za jednotku.';
+            } elseif ((float) $unitPriceRaw < 0) {
+                $errors["lines.{$index}.unit_price"] =
+                    'Cena nemůže být záporná.';
+            }
+
+            /*
+            * Celkovou cenu z POST vůbec nepřebíráme.
+            */
+        }
+
+        return $errors;
     }
 }
