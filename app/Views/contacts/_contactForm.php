@@ -178,5 +178,3 @@ use App\Core\Url;
         >
     </div>
 </fieldset>
-
-<script src="<?= Url::to('/js/contact-form-ares.js') ?>"></script>
