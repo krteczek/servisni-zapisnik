@@ -198,7 +198,6 @@ final class TeamController extends Controller
         }
 
         $this->confirmSessionCheck('team_id', $id, '/{tenant}/teams/#main');
-        $this->checkCsrf();
 
         $teamModel       = new TeamModel();
         $membershipModel = new TeamMembership();
