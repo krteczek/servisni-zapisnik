@@ -85,6 +85,7 @@ class OnboardingService
             }
 
         } catch (Throwable $e) {
+            $d['password'] = '***'; // neukládat heslo do logu
             LoggerHolder::get()->error('OnboardingService.run-admin: failed', [
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
