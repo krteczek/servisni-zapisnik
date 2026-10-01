@@ -187,10 +187,16 @@ final class TeamController extends Controller
      * TODO: [SECURITY] Přidat validaci, že uživatel má oprávnění měnit role (např. pouze admin může nastavit 'leader').
      *
      * @param int $id ID týmu k úpravě
-     * @return void
+     * @return string
      */
-    public function update(int $id): void
+    public function update(int $id): string
     {
+        $this->checkCsrf();
+        if($this->hasErrors() === true)
+        {
+            return $this->edit($id);
+        }
+
         $this->confirmSessionCheck('team_id', $id, '/{tenant}/teams/#main');
         $this->checkCsrf();
 
