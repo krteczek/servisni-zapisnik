@@ -11,6 +11,7 @@ use App\Core\Url;
 use App\Core\ViewContext;
 use App\Models\CompanyDetailsModel;
 use App\Models\CompanyModel;
+use App\Services\Ares\AjaxStatus;
 
 /**
  * Správa údajů vlastní firmy.
@@ -38,6 +39,7 @@ final class CompanyController extends Controller
      */
     public function create(): string
     {
+        AjaxStatus::set();
         $companyId = Auth::companyId();
 
         if ($companyId === null) {
@@ -82,7 +84,7 @@ final class CompanyController extends Controller
         $this->checkCsrf();
 
         $data = $this->validate($_POST);
-
+dd($_POST, $data);
         if ($this->hasErrors()) {
             $this->view->data = [
                 'company' => $this->companyModel->find($companyId),

@@ -165,3 +165,20 @@ details[open] summary {
 input[type="number"].form-control {
   appearance: textfield;
 }
+
+
+.company-ares-data dl {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 6px 16px;
+    margin: 0;
+}
+
+.company-ares-data dt {
+    font-weight: 600;
+    margin: 0;
+}
+
+.company-ares-data dd {
+    margin: 0;
+}

@@ -119,14 +119,6 @@ return [
 |--------------------------------------------------------------------------
 */
 
-/** zrušeno, máme novou homepage 
-[
-    'method' => 'GET',
-    'path'   => '/',
-    'action' => [TaskController::class, 'index'],
-    'auth'   => true,
-],
-*/
 [
     'method' => 'GET',
     'path'   => '/login',
@@ -780,7 +772,7 @@ return [
     'path'   => '/{tenant}/users/{id:\d+}/edit',
     'action' => [UserController::class, 'edit'],
     'auth'   => true,
-    'roles'  => ['admin', 'mistr'],
+    'roles'  => ['admin'],
     'section'=> 'users',
 ],
 
@@ -789,7 +781,7 @@ return [
     'path'   => '/{tenant}/users/{id:\d+}/edit',
     'action' => [UserController::class, 'update'],
     'auth'   => true,
-    'roles'  => ['admin', 'mistr'],
+    'roles'  => ['admin'],
 ],
 
 
@@ -1280,12 +1272,22 @@ Přepínaní rolí u admina
 |--------------------------------------------------------------------------
 */
 
-
+/** zjištění údajů o společnosti do kontaktů pomocí ARES */
 [
     'method' => 'GET',
-    'path' => '/{tenant}/ajax/ares/{ico:ico\d+}',
-    'action' => [AjaxController::class, 'aresIco'],
-    'auth'   => false,
+    'path'   => '/{tenant}/ajax/contact/ares/{ico:ico\d+}',
+    'action' => [AjaxController::class, 'contactAresIco'],
+    'roles'  => ['admin', 'mistr'],
+    'auth'   => true,
+],
+
+/** zjištění údajů o společnosti vlastnící účet u Bó systém pomocí ARES */
+[
+    'method' => 'GET',
+    'path' => '/{tenant}/ajax/company/ares/{ico:ico\d+}',
+    'action' => [AjaxController::class, 'companyAresIco'],
+    'roles'  => ['admin', 'mistr'],
+    'auth'   => true,
 ],
 
 [

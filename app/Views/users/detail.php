@@ -75,8 +75,7 @@ $active = active($user);
             </div>
 
             <!-- AKCE (tlačítka) - přesunuté dovnitř karty -->
-<form method="post"
-                          action="<?= Url::to('/{tenant}/users/' . $user['id'] . '/resend-activation') ?>">
+            <form method="post" action="<?= Url::to('/{tenant}/users/' . $user['id'] . '/resend-activation') ?>">
             <div class="form-actions">
 
                 <?php if ($user['password_hash'] === ''): ?>

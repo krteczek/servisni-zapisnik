@@ -67,8 +67,8 @@ require __DIR__ . '/../../../public/css/invoice.css';
 
  <script src="<?= Url::to('/js/app.js?v=' . filemtime(__DIR__ . '/../../../public/js/app.js')) ?>" defer></script>
  <script src="<?= Url::to('/js/invoice-create.js?v=' . filemtime(__DIR__ . '/../../../public/js/invoice-create.js')) ?>" defer></script>
- <script src="<?= Url::to('/js/contact-form-ares.js?v=' . filemtime(__DIR__ . '/../../../public/js/contact-form-ares.js')) ?>" defer></script>
  <script src="<?= Url::to('/js/get-task-reports.js?v=' . filemtime(__DIR__ . '/../../../public/js/get-task-reports.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/ajaxAresLoader.js?v=' . filemtime(__DIR__ . '/../../../public/js/ajaxAresLoader.js')) ?>" defer></script>
 
 </head>
 <body>

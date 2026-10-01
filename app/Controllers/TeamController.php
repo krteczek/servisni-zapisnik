@@ -96,13 +96,21 @@ final class TeamController extends Controller
      * - Nastaví flash zprávu
      * - Mění stav databáze
      *
-     * @return void
+     * @return string Pokud jsou chyby, vrátí HTML výstup šablony teams/create
      * @throws \Exception Pokud selže kontrola CSRF tokenu
      */
-    public function store(): void
+    public function store(): string
     {
         $this->checkCsrf();
-
+        if($_POST === [])
+        {
+            Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
+            Url::back();
+        }
+        if($this->hasErrors() === true)
+        {
+            return $this->create();
+        }
         $name  = trim($_POST['name'] ?? '');
         $color = trim($_POST['color'] ?? self::DEFAULT_COLOR);
 

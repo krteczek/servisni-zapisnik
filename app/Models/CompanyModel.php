@@ -124,13 +124,17 @@ final class CompanyModel extends BaseModel
 
 public function existsByIco(string $ico): bool
 {
-    $sql = "SELECT 1 FROM companies WHERE ico = :ico LIMIT 1";
-    
+    $sql = "SELECT 1
+            FROM {$this->tableName}
+            WHERE ico = :ico
+            LIMIT 1";
+
     $stmt = $this->db()->prepare($sql);
     $stmt->execute(['ico' => $ico]);
-    
+
     return (bool) $stmt->fetchColumn();
 }
+
 
 /**
  * @param string $search
@@ -156,5 +160,29 @@ public function searchCompany(string $search): array
     ]);
     
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Najde jinou společnost se zadaným IČO.
+ *
+ * Aktuální společnost se z kontroly vylučuje.
+ *
+ * @param string $ico IČO společnosti
+ * @param int $companyId ID aktuální společnosti
+ * @return array<string, mixed>|null Data jiné společnosti nebo null
+ */
+public function findOtherCompanyByIco(string $ico, int $companyId): ?array
+{
+    return $this->fetchOne(
+        "SELECT *
+         FROM {$this->tableName}
+         WHERE ico = :ico
+           AND id <> :company_id
+         LIMIT 1",
+        [
+            'ico' => $ico,
+            'company_id' => $companyId,
+        ]
+    );
 }
 }
