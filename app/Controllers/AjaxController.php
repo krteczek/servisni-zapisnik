@@ -11,6 +11,8 @@ use App\Services\Ares\AresCompanyMapper;
 use App\Validators\ContactValidator;
 use App\Models\ContactsModel;
 use App\Models\TaskAssignmentModel;
+use App\Core\Auth;
+use App\Models\CompanyModel;
 
 /**
  * Stavové kódy a jejich význam:
@@ -40,7 +42,7 @@ final class AjaxController extends Controller
      * @param string $ico IČO z URL.
      * @return string JSON odpověď.
      */
-    public function aresIco(string $ico): string
+    public function contactAresIco(string $ico): string
     {
         $ico = substr($ico, 3);
         
@@ -52,7 +54,7 @@ final class AjaxController extends Controller
                 'error' => 'ajax',
                 'message' => 'Platnost formuláře vypršela. Načtěte stránku znovu a opakujte odeslání.',
             ], 403);
-        }
+        } /** */
 
         $ico = ContactValidator::normalizeCzechIco($ico);
 
@@ -161,5 +163,73 @@ final class AjaxController extends Controller
         );
     }
 
+ public function companyAresIco(string $ico): string
+{
+    $ico = substr($ico, 3);
     
+    if (AjaxStatus::consume() === false) {
+        return $this->json([
+            'ok' => false,
+            'error' => 'ajax',
+            'message' => 'Platnost formuláře vypršela. Načtěte stránku znovu a opakujte odeslání.',
+        ], 403);
+    }
+
+    $ico = ContactValidator::normalizeCzechIco($ico);
+
+    if (!ContactValidator::validateCzechIco($ico)) {
+        return $this->json([
+            'ok' => false,
+            'error' => 'invalid_ico',
+            'message' => 'IČO není platné.',
+        ], 422);
+    }
+
+    $companyId = Auth::companyId();
+
+    if ($companyId === null) {
+        return $this->json([
+            'ok' => false,
+            'error' => 'auth',
+            'message' => 'Nelze určit aktuální firmu.',
+        ], 403);
+    }
+
+    $companyModel = new CompanyModel();
+
+    if ($companyModel->findOtherCompanyByIco($ico, $companyId) !== null) {
+        return $this->json([
+            'ok' => false,
+            'error' => 'duplicate_company',
+            'message' => 'Toto IČO již patří jiné firmě v systému.',
+        ], 409);
+    }
+
+    $client = new AresClient(new AresCompanyMapper());
+    $result = $client->findByIco($ico);
+
+    if ($result->isInvalidIco()) {
+        return $this->json([
+            'ok' => false,
+            'error' => 'invalid_ico',
+            'message' => 'IČO není platné.',
+        ], 422);
+    }
+
+    if ($result->isAresError()) {
+        return $this->json([
+            'ok' => false,
+            'error' => 'ares_error',
+            'message' => 'Údaje se momentálně nepodařilo ověřit. Zkuste to později nebo je zadejte ručně.',
+        ], 503);
+    }
+
+    return $this->json([
+        'ok' => true,
+        'ico' => $ico,
+        'data' => $result->data,
+    ]);
+}
+
+
 }

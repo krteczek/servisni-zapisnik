@@ -166,6 +166,13 @@ public function login(): string
 
     public function logout(): string
     {
+		$this->checkCsrf();
+        if($this->hasErrors() === true)
+        {
+            Flash::error($this->getError('_csrf'));
+            Url::back();
+        }
+
         Flash::success('Byl jste odhlášen. Přijďte zas!');
 
         Auth::logout();
@@ -256,7 +263,7 @@ private function processToken(string $type, string $successMessage): string
 		                'file'    => $e->getFile(),
 		                'line'    => $e->getLine(),
 		                'trace'   => $e->getTraceAsString(),
-		                'data'    => json_encode([$token, $type, $password]),
+		                'data'    => json_encode([$token, $type, 'password']),
 
 		    ]);
 		}

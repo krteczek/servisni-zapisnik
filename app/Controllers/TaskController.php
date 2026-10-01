@@ -526,6 +526,13 @@ private function saveTask(array $data, int $workOrderId): string
 
     public function done(int $taskId): void
     {
+        $this->checkCsrf();
+        if($this->hasErrors() === true)
+        {
+            Flash::error($this->getError('_csrf'));
+            Url::back();
+        }
+
         $task = $this->getTaskOrRedirect($taskId);
         $this->ensureTaskClosable($task, TaskStatus::DONE);
 
@@ -560,7 +567,13 @@ private function saveTask(array $data, int $workOrderId): string
 
     public function cancel(int $taskId): void
     {
-        $task = $this->getTaskOrRedirect($taskId);
+        $this->checkCsrf();
+        if($this->hasErrors() === true)
+        {
+            Flash::error($this->getError('_csrf'));
+            Url::back();
+        }
+       $task = $this->getTaskOrRedirect($taskId);
         $this->ensureTaskClosable($task, TaskStatus::CANCELLED);
 
         try {

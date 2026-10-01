@@ -187,7 +187,7 @@ final class UserController extends Controller
             Url::redirect('/{tenant}/users/#main');
         }
 
-        $this->view->roles = Roles::effective();
+        $this->view->roles = Roles::effective(); 
         $this->view->old   = $old;
 
         $this->checkCsrf();
@@ -284,6 +284,10 @@ final class UserController extends Controller
         {
             $role = Roles::default();
         }
+        /** V aplikaci nesmí nikdo povýšit na roota */
+        if(Roles::isRoot($role)) {
+            $role = Roles::default();
+        }
 
         return [
             'email'             => $email,
@@ -326,7 +330,13 @@ final class UserController extends Controller
 
     public function resendActivationEmail(int $id): string
     {
-        $user = $this->users->find($id);
+        $this->checkCsrf();
+        if($this->hasErrors() === true)
+        {
+            Flash::error($this->getError('_csrf'));
+            Url::back();
+        }
+       $user = $this->users->find($id);
 
         if ($user === null) {
             Flash::error('Uživatel neexistuje.');
