@@ -263,7 +263,7 @@ private function processToken(string $type, string $successMessage): string
 		                'file'    => $e->getFile(),
 		                'line'    => $e->getLine(),
 		                'trace'   => $e->getTraceAsString(),
-		                'data'    => json_encode([$token, $type, 'password']),
+		                'data'    => json_encode(['token', $type, 'password']),
 
 		    ]);
 		}
