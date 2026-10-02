@@ -152,6 +152,7 @@
                         field.textContent = value ?? '';                    
                     });
 
+                updateDiff();
                 showMessage(
                     'Údaje byly načteny.',
                     'success'
