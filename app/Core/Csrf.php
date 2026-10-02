@@ -78,13 +78,6 @@ class Csrf
                 'user_id' => Auth::id(),
             ]);
         }
-        /** 
-         * rušíme, může mít nepříjemný důsledek pro uživatele 
-         * * /
-        if ($out === true) {
-            self::regenerate();
-        }
-        **/
         return $out;
     }
         
