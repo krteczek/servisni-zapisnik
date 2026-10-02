@@ -200,8 +200,11 @@ $details = $data['details'] ?? [];
                                             <?= e($details['delivery_address_2'] ?? '') ?><br>
                                             <?= e($details['delivery_address_3'] ?? '') ?>
                                         </td>
-
-                                        <td data-ajax-field="deliveryAddress">
+                                       
+                                        <td>
+                                            <span data-ajax-field="deliveryAddress1"></span><br>
+                                            <span data-ajax-field="deliveryAddress2"></span><br>
+                                            <span data-ajax-field="deliveryAddress3"></span>
                                         </td>
                                     </tr>
 
@@ -252,7 +255,7 @@ $details = $data['details'] ?? [];
 
                         <button type="submit" class="btn btn-primary">
                             <span class="btn-icon"></span>
-                            Uložit obchodní název
+                            Aktualizovat data v databázi
                         </button>
 
                         <a

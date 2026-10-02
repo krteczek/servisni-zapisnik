@@ -38,7 +38,9 @@ use App\Core\Session;
     <link rel="stylesheet" href="<?= Url::to('/css/table.css?v=' .     filemtime(__DIR__ . '/../../../public/css/table.css')) ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/deadline.css?v=' .  filemtime(__DIR__ . '/../../../public/css/deadline.css')) ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/invoice.css?v=' .   filemtime(__DIR__ . '/../../../public/css/invoice.css')) ?>">
-<! --  -->
+    <link rel="stylesheet" href="<?= Url::to('/css/diff.css?v=' .      filemtime(__DIR__ . '/../../../public/css/diff.css')) ?>">
+
+    <! --  -->
 
 <!--    -->
  <style>
@@ -60,15 +62,18 @@ require __DIR__ . '/../../../public/css/footer.css';
 require __DIR__ . '/../../../public/css/table.css';
 require __DIR__ . '/../../../public/css/deadline.css';
 require __DIR__ . '/../../../public/css/invoice.css';
+require __DIR__ . '/../../../public/css/diff.css';
+
 
 /* */
 ?>
  </style>
 
- <script src="<?= Url::to('/js/app.js?v=' . filemtime(__DIR__ . '/../../../public/js/app.js')) ?>" defer></script>
- <script src="<?= Url::to('/js/invoice-create.js?v=' . filemtime(__DIR__ . '/../../../public/js/invoice-create.js')) ?>" defer></script>
- <script src="<?= Url::to('/js/get-task-reports.js?v=' . filemtime(__DIR__ . '/../../../public/js/get-task-reports.js')) ?>" defer></script>
- <script src="<?= Url::to('/js/ajaxAresLoader.js?v=' . filemtime(__DIR__ . '/../../../public/js/ajaxAresLoader.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/app.js?v=' .                filemtime(__DIR__ . '/../../../public/js/app.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/invoice-create.js?v=' .     filemtime(__DIR__ . '/../../../public/js/invoice-create.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/get-task-reports.js?v=' .   filemtime(__DIR__ . '/../../../public/js/get-task-reports.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/ajaxAresLoader.js?v=' .     filemtime(__DIR__ . '/../../../public/js/ajaxAresLoader.js')) ?>" defer></script>
+ <script src="<?= Url::to('/js/updateDiff.js?v=' .         filemtime(__DIR__ . '/../../../public/js/updateDiff.js')) ?>" defer></script>
 
 </head>
 <body>

@@ -43,20 +43,70 @@ final class Menu
             if (!self::isAllowed($route)) {
                 continue;
             }
-            
-            if (($route['menu'] ?? null) === null && ($route['submenu'] ?? null) === null) {
+
+            $routeMenu = $route['menu'] ?? null;
+            $routeSubmenu = $route['submenu'] ?? null;
+            $routeSection = $route['section'] ?? null;
+
+            if ($routeMenu === null && $routeSubmenu === null) {
                 continue;
             }
 
             $routePath = Url::to($route['path']);
-            $section   = $route['section'] ?? $route['menu'] ?? $route['path'];
+
+            $section = $routeSection
+                ?? $routeMenu
+                ?? $route['path'];
+
+            /*
+             * POST routy:
+             *
+             * POST routa může obsahovat menu/submenu metadata kvůli
+             * aktivnímu stavu, ale nikdy nesmí vytvořit vlastní položku menu.
+             *
+             * Předpokládáme, že odpovídající GET routa položku vytvoří.
+             */
+            if (($route['method'] ?? 'GET') === 'POST') {
+
+                if (!isset($menu[$section])) {
+                    continue;
+                }
+
+                /*
+                 * Aktivace hlavní sekce podle aktuální URL.
+                 */
+                if (str_starts_with($currentPath, $routePath)) {
+                    $menu[$section]['active'] = true;
+                }
+
+                /*
+                 * Pokud POST routa odpovídá konkrétnímu submenu,
+                 * označíme existující submenu jako aktivní.
+                 */
+                if ($routeSubmenu !== null) {
+                    foreach ($menu[$section]['items'] as $index => $item) {
+
+                        if ($item['label'] !== $routeSubmenu) {
+                            continue;
+                        }
+
+                        if ($currentPath === $routePath) {
+                            $menu[$section]['items'][$index]['active'] = true;
+                            $menu[$section]['active'] = true;
+                        }
+                    }
+                }
+
+                continue;
+            }
 
             /* ===== HLAVNÍ MENU ===== */
-            if (($route['menu'] ?? null) !== null) {
+
+            if ($routeMenu !== null) {
 
                 if (!isset($menu[$section])) {
                     $menu[$section] = [
-                        'label'  => $route['menu'],
+                        'label'  => $routeMenu,
                         'path'   => $routePath,
                         'method' => $route['method'],
                         'active' => false,
@@ -64,30 +114,34 @@ final class Menu
                     ];
                 }
 
-                // TODO: [UX] Zvážit fuzzy matching pro aktivní stav (regex, wildcards)
-                // aktivní sekce – URL začíná cestou sekce
+                /*
+                 * Aktivní hlavní sekce.
+                 */
                 if (str_starts_with($currentPath, $routePath)) {
                     $menu[$section]['active'] = true;
                 }
             }
 
             /* ===== SUBMENU ===== */
+
             if (
-                ($route['submenu'] ?? null) !== null
-                && ($route['section'] ?? null) !== null
-                && isset($menu[$route['section']])
+                $routeSubmenu !== null
+                && $routeSection !== null
+                && isset($menu[$routeSection])
             ) {
                 $active = ($currentPath === $routePath);
 
-                $menu[$route['section']]['items'][] = [
-                    'label'  => $route['submenu'],
+                $menu[$routeSection]['items'][] = [
+                    'label'  => $routeSubmenu,
                     'path'   => $routePath,
                     'active' => $active,
                 ];
 
-                // pokud je aktivní submenu, aktivuj i hlavní sekci
+                /*
+                 * Pokud je aktivní submenu, aktivuj i hlavní sekci.
+                 */
                 if ($active) {
-                    $menu[$route['section']]['active'] = true;
+                    $menu[$routeSection]['active'] = true;
                 }
             }
         }
@@ -110,12 +164,12 @@ final class Menu
         $isLogged = Auth::check();
         $requiresAuth = $route['auth'] ?? false;
 
-        // ❌ nepřihlášený → nevidí chráněné
+        // nepřihlášený → nevidí chráněné
         if (!$isLogged && $requiresAuth) {
             return false;
         }
 
-        // ❌ přihlášený → nevidí public (login, register…)
+        // přihlášený → nevidí public (login, register…)
         if ($isLogged && !$requiresAuth) {
             return false;
         }
