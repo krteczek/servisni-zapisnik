@@ -182,3 +182,30 @@ input[type="number"].form-control {
 .company-ares-data dd {
     margin: 0;
 }
+
+.company-edit-container {
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+}
+
+.company-ares-data {
+    width: 100%;
+}
+
+.company-ares-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.company-ares-table th,
+.company-ares-table td {
+    padding: 6px 8px;
+    vertical-align: top;
+}
+.company-ares-table th:first-child {
+    width: 20%;
+}
+
+.company-ares-table th:nth-child(2),
+.company-ares-table th:nth-child(3) {
+    width: 40%;
+}

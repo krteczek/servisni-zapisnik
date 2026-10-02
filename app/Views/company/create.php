@@ -14,6 +14,7 @@ $errors = $view->errors;
 $company = $data['company'] ?? [];
 $details = $data['details'] ?? [];
 $ares    = $data['ares'] ?? null;
+dc($errors);
 ?>
 
 <div class="create-container">

@@ -13,7 +13,7 @@ use App\Models\ContactsModel;
 use App\Models\TaskAssignmentModel;
 use App\Core\Auth;
 use App\Models\CompanyModel;
-
+use App\Services\Ares\AresSession;
 /**
  * Stavové kódy a jejich význam:
  * 200  → ARES data máme
@@ -223,11 +223,12 @@ final class AjaxController extends Controller
             'message' => 'Údaje se momentálně nepodařilo ověřit. Zkuste to později nebo je zadejte ručně.',
         ], 503);
     }
-
+    $data = (array)$result->data;
+    AresSession::set($ico, $data);
     return $this->json([
         'ok' => true,
         'ico' => $ico,
-        'data' => $result->data,
+        'data' => $data,
     ]);
 }
 

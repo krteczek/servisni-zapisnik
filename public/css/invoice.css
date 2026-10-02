@@ -323,3 +323,19 @@
     width: 100%;
     min-width: 0;
 }
+
+.company-details {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 8px 16px;
+    margin: 0;
+}
+
+.company-details dt {
+    font-weight: 600;
+    margin: 0;
+}
+
+.company-details dd {
+    margin: 0;
+}
