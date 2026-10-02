@@ -247,7 +247,8 @@ class Auth
     public static function login(array $userData): void
     {
         Session::start();
-        Session::regenerate();
+        Session::regenerate(); 
+        Csrf::regenerate();
         Session::set(self::USER_KEY, $userData);
         AccessLogger::log(AccessLogger::TYPE_LOGIN);
         self::$cachedUser = null;
