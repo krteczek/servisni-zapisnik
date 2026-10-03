@@ -1240,6 +1240,81 @@ Přepínaní rolí u admina
     'section'=> 'system',
     'title'  => 'Firemní údaje: Změna',
 ],
+
+/** Správa firemních bankovních účtů */
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/company/bank-accounts/list',
+    'action' => [CompanyController::class, 'listBankAccounts'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Bankovní účty: výpis',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Bankovní účty: Výpis',
+],
+
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/system/company/bank-accounts/create',
+    'action' => [CompanyController::class, 'createBankAccount'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Bankovní účty: Nový',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Bankovní účty: Nový',
+],
+
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/company/bank-accounts/create',
+    'action' => [CompanyController::class, 'storeBankAccount'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Bankovní účty: Nový',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Bankovní účty: Nový',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/company/bank-accounts/{id:\d+}/activate',
+    'action' => [CompanyController::class, 'toggleActiveBankAccount'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Bankovní účty: Nový',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Bankovní účty: Nový',
+],
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/company/bank-accounts/{id:\d+}/deactivate',
+    'action' => [CompanyController::class, 'toggleActiveBankAccount'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Bankovní účty: Nový',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Bankovní účty: Nový',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/system/company/bank-accounts/{id:\d+}/set-default',
+    'action' => [CompanyController::class, 'setDefaultBankAccount'],
+    'roles'  => ['admin'],
+    'menu'   => 'Administrace',
+    'submenu'=> 'Bankovní účty: Nový',
+    'auth'   => true,
+    'section'=> 'system',
+    'title'  => 'Bankovní účty: Nový',
+],
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN / audit

@@ -13,6 +13,7 @@ use App\Models\CompanyDetailsModel;
 use App\Models\CompanyModel;
 use App\Services\Ares\AjaxStatus;
 use App\Services\Ares\AresSession;
+use App\Models\CompanyBankAccountModel;
 
 /**
  * Správa údajů vlastní firmy.
@@ -24,6 +25,7 @@ final class CompanyController extends Controller
 {
     private CompanyModel $companyModel;
     private CompanyDetailsModel $detailsModel;
+    private CompanyBankAccountModel $bankAccountModel;
 
     public function __construct(ViewContext $view)
     {
@@ -31,6 +33,7 @@ final class CompanyController extends Controller
 
         $this->companyModel = new CompanyModel();
         $this->detailsModel = new CompanyDetailsModel();
+        $this->bankAccountModel = new CompanyBankAccountModel();
     }
 
     /**
@@ -554,4 +557,341 @@ final class CompanyController extends Controller
 
         return $value === '' ? null : $value;
     }
+
+    public function listBankAccounts(): string
+    {
+        $model = new CompanyBankAccountModel();
+
+        $accounts = $model->forCompany();
+        $this->view->bankAccounts = $accounts;
+        return $this->render('company/bankAccountsList');
+    }
+
+    /**
+ * Formulář pro vytvoření bankovního účtu.
+ *
+ * @return string
+ */
+public function createBankAccount(): string
+{
+    $companyId = Auth::companyId();
+
+    if ($companyId === null) {
+        return $this->forbidden();
+    }
+
+    $company = $this->companyModel->find($companyId);
+
+    if ($company === null) {
+        return $this->notFound();
+    }
+
+    //$this->setSessionCheck('company_bank_account_create', $companyId);
+
+    $this->view->title = 'Bankovní účet: Nový';
+
+    $this->view->data = [
+        'company' => $company,
+        'account' => [],
+    ];
+
+    return $this->render('company/bankAccountCreate');
+}
+
+    public function storeBankAccount(): string
+    {
+        $companyId = Auth::companyId();
+
+        if ($companyId === null) {
+            return $this->forbidden();
+        }
+
+        $this->checkCsrf();
+
+        $company = $this->companyModel->find($companyId);
+
+        if ($company === null) {
+            return $this->notFound();
+        }
+
+        $data = [
+            'name' => trim((string)($_POST['name'] ?? '')),
+            'account_prefix' => trim((string)($_POST['account_prefix'] ?? '')),
+            'account_number' => trim((string)($_POST['account_number'] ?? '')),
+            'bank_code' => trim((string)($_POST['bank_code'] ?? '')),
+            'iban' => trim((string)($_POST['iban'] ?? '')),
+            'bic' => trim((string)($_POST['bic'] ?? '')),
+        ];
+
+        $isDefault = isset($_POST['is_default'])
+            && (string)$_POST['is_default'] === '1';
+
+        if ($data['name'] === '') {
+            $this->addError(
+                'name',
+                'Název účtu je povinný.'
+            );
+        } elseif (mb_strlen($data['name']) > 100) {
+            $this->addError(
+                'name',
+                'Název účtu může mít nejvýše 100 znaků.'
+            );
+        }
+
+        if (mb_strlen($data['account_prefix']) > 6) {
+            $this->addError(
+                'account_prefix',
+                'Předčíslí účtu může mít nejvýše 6 znaků.'
+            );
+        }
+
+        if ($data['account_number'] === '') {
+            $this->addError(
+                'account_number',
+                'Číslo účtu je povinné.'
+            );
+        } elseif (mb_strlen($data['account_number']) > 20) {
+            $this->addError(
+                'account_number',
+                'Číslo účtu může mít nejvýše 20 znaků.'
+            );
+        }
+        if($data['bank_code'] === '') {
+            $this->addError(
+                'bank_code',
+                'Kód banky je povinný.'
+            );
+        } elseif (!preg_match('/^\d{4}$/', (string)$data['bank_code'])) {
+            $this->addError(
+                'bank_code',
+                'Kód banky musí být čtyřmístné číslo.'
+            );
+        }
+
+        if (mb_strlen($data['bank_code']) > 4) {
+            $this->addError(
+                'bank_code',
+                'Kód banky může mít nejvýše 4 znaky.'
+            );
+        }
+
+        if((string) $data['bank_code'] !== '' && !preg_match('/^\d{4}$/', (string) $data['bank_code'])) {
+            $this->addError(
+                'bank_code',
+                'Kód banky musí být čtyřmístné číslo.'
+            );
+        }
+
+        if (mb_strlen($data['iban']) > 34) {
+            $this->addError(
+                'iban',
+                'IBAN může mít nejvýše 34 znaků.'
+            );
+        }
+
+        if (mb_strlen($data['bic']) > 11) {
+            $this->addError(
+                'bic',
+                'BIC může mít nejvýše 11 znaků.'
+            );
+        }
+
+        if ($this->hasErrors()) {
+            $this->view->title = 'Bankovní účet: Nový';
+
+            $this->view->data = [
+                'company' => $company,
+                'account' => [
+                    ...$data,
+                    'is_default' => $isDefault ? 1 : 0,
+                ],
+            ];
+
+            return $this->render('company/bankAccountCreate');
+        }
+
+        try {
+            $accountId = $this->bankAccountModel->createForCompany([
+                ...$data,
+                'active' => 1,
+                'is_default' => 0,
+            ]);
+
+            if ($isDefault) {
+                if (!$this->bankAccountModel->setDefault($accountId)) {
+                    LoggerHolder::get()->error(
+                        'CompanyController.storeBankAccount: '
+                        . 'failed to set default account.',
+                        [
+                            'company_id' => $companyId,
+                            'account_id' => $accountId,
+                        ]
+                    );
+
+                    Flash::error(
+                        'Bankovní účet byl uložen, '
+                        . 'ale nepodařilo se jej nastavit jako výchozí.'
+                    );
+
+                    return Url::redirect(
+                        '/{tenant}/system/company/bank-accounts/list'
+                    );
+                }
+            }
+
+            Flash::success(
+                'Bankovní účet byl úspěšně uložen.'
+            );
+
+            return Url::redirect(
+                '/{tenant}/system/company/bank-accounts/list/#main'
+            );
+
+        } catch (\Throwable $e) {
+            LoggerHolder::get()->error(
+                'CompanyController.storeBankAccount: failed',
+                [
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                    'company_id' => $companyId,
+                ]
+            );
+
+            $this->addError(
+                'global',
+                'Bankovní účet se nepodařilo uložit.'
+            );
+
+            $this->view->title = 'Bankovní účet: Nový';
+
+            $this->view->data = [
+                'company' => $company,
+                'account' => [
+                    ...$data,
+                    'is_default' => $isDefault ? 1 : 0,
+                ],
+            ];
+
+            return $this->render('company/bankAccountCreate');
+        }
+    }
+
+    public function toggleActiveBankAccount(int $accountId): string
+    {
+        $companyId = Auth::companyId();
+
+        if ($companyId === null) {
+            return $this->forbidden();
+        }
+
+        $company = $this->companyModel->find($companyId);
+
+        if ($company === null) {
+            return $this->notFound();
+        }
+
+        $this->checkCsrf();
+
+        $account = $this->bankAccountModel->findById($accountId);
+
+        if ($account === null) {
+            return $this->notFound();
+        }
+
+        $active = (int)$account['active'] === 1;
+
+        if ($active) {
+            $ok = $this->bankAccountModel->deactivate($accountId);
+            $message = 'Bankovní účet byl deaktivován.';
+        } else {
+            $ok = $this->bankAccountModel->activate($accountId);
+            $message = 'Bankovní účet byl aktivován.';
+        }
+
+        if (!$ok) {
+            LoggerHolder::get()->error(
+                'Nepodařilo se změnit stav bankovního účtu.',
+                [
+                    'company_id' => $companyId,
+                    'account_id' => $accountId,
+                    'active'     => $active,
+                ]
+            );
+
+            Flash::error(
+                'Stav bankovního účtu se nepodařilo změnit.'
+            );
+
+            return Url::redirect(
+                '/{tenant}/system/company/bank-accounts/list/#main'
+            );
+        }
+
+        Flash::success($message);
+
+        return Url::redirect(
+            '/{tenant}/system/company/bank-accounts/list/#main'
+        );
+    }
+
+    public function setDefaultBankAccount(int $accountId): string
+    {
+        $companyId = Auth::companyId();
+
+        if ($companyId === null) {
+            return $this->forbidden();
+        }
+
+        $company = $this->companyModel->find($companyId);
+
+        if ($company === null) {
+            return $this->notFound();
+        }
+
+        $this->checkCsrf();
+
+        $account = $this->bankAccountModel->findById($accountId);
+
+        if ($account === null) {
+            return $this->notFound();
+        }
+
+        if ((int)$account['active'] !== 1) {
+            Flash::error(
+                'Neaktivní bankovní účet nelze nastavit jako výchozí.'
+            );
+
+            return Url::redirect(
+                '/{tenant}/system/company/bank-accounts/list/#main'
+            );
+        }
+
+        if (!$this->bankAccountModel->setDefault($accountId)) {
+            LoggerHolder::get()->error(
+                'Nepodařilo se nastavit výchozí bankovní účet.',
+                [
+                    'company_id' => $companyId,
+                    'account_id' => $accountId,
+                ]
+            );
+
+            Flash::error(
+                'Výchozí bankovní účet se nepodařilo nastavit. Zkuste akci opakovat.'
+            );
+
+            return Url::redirect(
+                '/{tenant}/system/company/bank-accounts/list/#main'
+            );
+        }
+
+        Flash::success(
+            'Bankovní účet byl nastaven jako výchozí.'
+        );
+
+        return Url::redirect(
+            '/{tenant}/system/company/bank-accounts/list/#main'
+        );
+    }    
 }
