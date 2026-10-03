@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Core\LoggerHolder;
+use App\Core\Transaction;
+use RuntimeException;
+use Throwable;
+
 final class CompanyBankAccountModel extends BaseModel
 {
     /**
@@ -128,40 +133,6 @@ final class CompanyBankAccountModel extends BaseModel
     }
 
     /**
-     * Nastaví účet jako výchozí.
-     *
-     * Předpokládá se, že účet patří aktuální firmě.
-     *
-     * @param int $accountId
-     * @return bool
-     */
-    public function setDefault(int $accountId): bool
-    {
-        $account = $this->find($accountId);
-
-        if ($account === null) {
-            return false;
-        }
-
-        if ((int)$account['active'] !== 1) {
-            return false;
-        }
-
-        /*
-         * Nejprve zrušíme default u všech ostatních účtů
-         * aktuální firmy.
-         */
-        $this->clearDefault();
-
-        return $this->update(
-            $accountId,
-            [
-                'is_default' => 1,
-            ]
-        );
-    }
-
-    /**
      * Zruší výchozí účet aktuální firmy.
      *
      * @return bool
@@ -244,4 +215,55 @@ final class CompanyBankAccountModel extends BaseModel
             ]
         );
     }
+
+ public function setDefault(int $accountId): bool
+{
+    $account = $this->find($accountId);
+
+    if ($account === null) {
+        return false;
+    }
+
+    if ((int)$account['active'] !== 1) {
+        return false;
+    }
+
+    // Už je výchozí – není co měnit.
+    if ((int)$account['is_default'] === 1) {
+        return true;
+    }
+
+    try {
+        Transaction::run(function () use ($accountId): bool {
+            if (!$this->clearDefault()) {
+                throw new RuntimeException(
+                    'Nepodařilo se zrušit původní výchozí bankovní účet.'
+                );
+            }
+
+            if (!$this->update(
+                $accountId,
+                ['is_default' => 1]
+            )) {
+                throw new RuntimeException(
+                    'Nepodařilo se nastavit nový výchozí bankovní účet.'
+                );
+            }
+
+            return true;
+        });
+
+        return true;
+    } catch (Throwable $e) {
+        LoggerHolder::get()->error(
+            'Nepodařilo se nastavit výchozí bankovní účet.',
+            [
+                'account_id' => $accountId,
+                'message'    => $e->getMessage(),
+            ]
+        );
+
+        return false;
+    }
+}
 }

@@ -227,14 +227,29 @@ final class Router
         foreach ($params as $value) {
             $args[] = ctype_digit($value) ? (int)$value : $value;
         }
-
         
         $callable = [$controller, $method];
 
         if (!is_callable($callable)) {
-            throw new LogicException('Controller action is not callable.');
-        }
+            LoggerHolder::get()->error(
+                'Controller action is not callable.',
+                [
+                    'controller' => $class,
+                    'method'     => $method,
+                    'params'     => $params,
+                    'callable'   => $callable,
+                    'exists'     => method_exists($controller, $method),
+                ]
+            );
 
+            throw new LogicException(
+                sprintf(
+                    'Controller action is not callable: %s::%s',
+                    $class,
+                    $method
+                )
+            );
+        }
         return $callable(...$args);
     }
 

@@ -310,6 +310,6 @@ class ViewContext
     public bool $invoiceSettingsConfirmed = false;
 
     
-    
+    public array $bankAccounts = [];
 
 }
