@@ -145,3 +145,40 @@
 .submenu-item.active a {
   padding-left: 15px;
 }
+
+
+/* =========================
+   LOGOUT
+   ========================= */
+
+.menu-item > form {
+  margin: 0;
+}
+
+.menu-item > form > button {
+  display: block;
+  width: 100%;
+  padding: 18px 22px;
+
+  background: transparent;
+  border: none;
+
+  text-align: left;
+  cursor: pointer;
+
+  color: #374151;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.menu-item > form > button:hover {
+  background: #e5e7eb;
+}
+
+.menu-item > form > button:focus {
+  outline: 2px solid #9ca3af;
+  outline-offset: 2px;
+}
