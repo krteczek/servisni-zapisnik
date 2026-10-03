@@ -132,6 +132,17 @@ $classes = [
 <?php endif; ?>
 </li>
 <?php endforeach; ?>
+
+<?php if(Auth::check()): ?>
+<li class="menu-item no-submenu">
+    <form method="post"
+          action="<?= Url::to('/logout') ?>"
+          data-confirm="Opravdu se chcete odhlásit?">
+        <?= Csrf::getField() ?>
+        <button type="submit">Odhlásit</button>
+    </form>
+</li>
+<?php endif; ?>
     </ul>
 </nav><!-- .nav -->
 

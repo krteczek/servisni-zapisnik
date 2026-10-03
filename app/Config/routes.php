@@ -1391,7 +1391,6 @@ Přepínaní rolí u admina
     'path'   => '/logout',
     'action' => [AuthController::class, 'logout'],
     'auth'   => true,
-    'menu'   => 'Odhlásit',
 ],
 
 ];
