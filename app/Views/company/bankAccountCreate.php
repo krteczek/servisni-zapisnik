@@ -194,7 +194,7 @@ $account = $data['account'] ?? [];
                                     type="checkbox"
                                     name="is_default"
                                     value="1"
-                                    <?= !empty($account['is_default']) ? 'checked' : '' ?>
+                                    <?= (int) ($account['is_default'] ?? 0) === 1 ? 'checked' : '' ?>
                                 >
 
                                 Nastavit jako výchozí účet

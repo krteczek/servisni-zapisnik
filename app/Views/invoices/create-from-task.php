@@ -66,27 +66,27 @@ $priceUnits = $data['price_units'] ?? [
                             <?= e($supplier['official_name'] ?? '') ?>
                         </strong>
 
-                        <?php if (!empty($supplier['ico'])): ?>
+                        <?php if ($supplier['ico'] !== ''): ?>
                             <div>
                                 IČO:
                                 <?= e($supplier['ico']) ?>
                             </div>
                         <?php endif; ?>
 
-                        <?php if (!empty($supplier['dic'])): ?>
+                        <?php if (($supplier['dic'] ?? '') !== ''): ?>
                             <div>
                                 DIČ:
                                 <?= e($supplier['dic']) ?>
                             </div>
                         <?php endif; ?>
 
-                        <?php if (!empty($supplier['address'])): ?>
+                        <?php if (($supplier['address'] ?? '') !== ''): ?>
                             <div>
                                 <?= e($supplier['address']) ?>
                             </div>
                         <?php endif; ?>
 
-                        <?php if (!empty($supplier['city'])): ?>
+                        <?php if (($supplier['city'] ?? '') !== ''): ?>
                             <div>
                                 <?= e($supplier['postal_code'] ?? '') ?>
                                 <?= e($supplier['city']) ?>
@@ -144,18 +144,13 @@ $priceUnits = $data['price_units'] ?? [
                                             <?php foreach ($contacts as $contact): ?>
 
                                                 <option
-                                                    value="<?= (int) $contact['id'] ?>"
+                                                    value="<?= $contact['id'] ?>"
                                                     <?= (int) ($invoice['contact_id'] ?? 0)
-                                                        === (int) $contact['id']
-                                                        ? 'selected'
-                                                        : '' ?>
+                                                            === $contact['id']
+                                                            ? 'selected'
+                                                            : '' ?>
                                                 >
-                                                    <?= e(
-                                                        (string) (
-                                                            $contact['official_name']
-                                                            ?? ''
-                                                        )
-                                                    ) ?>
+                                                    <?= e(($contact['official_name'])) ?>
                                                 </option>
 
                                             <?php endforeach; ?>

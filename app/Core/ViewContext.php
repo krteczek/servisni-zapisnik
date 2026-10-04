@@ -37,6 +37,8 @@ use App\Core\Types;
  * @phpstan-import-type WorkbenchDataRow from Types
  * @phpstan-import-type AuditLogRow from Types 
  * @phpstan-import-type InternalInvoiceRow from Types 
+ * @phpstan-import-type BankAccountRow from Types
+ * @phpstan-import-type CompanyDetailsRow from Types
  * 
  * 
  */
@@ -242,9 +244,9 @@ class ViewContext
     public ?array $contacts = [];
 
     /**
-     * @var array<string, mixed>|null Data společnosti
+     * @var CompanyDetailsRow|null Data společnosti
      */
-    public ?array $company = [];
+    public ?array $company = null;
 
     /**
      * @var string Režim zobrazení
@@ -309,7 +311,7 @@ class ViewContext
      */
     public bool $invoiceSettingsConfirmed = false;
 
-    
+    /** @var array<int, BankAccountRow> */
     public array $bankAccounts = [];
 
 }

@@ -133,10 +133,10 @@ $params = [
         $order['customer_address'] = trim(
                                         ($order['customer_street'] ?? '') . ' ' .
                                         ($order['customer_house_number'] ?? '') . ' ' . 
-                                        ($order['customer_orientation_number'] ? '/' . $order['customer_orientation_number'] : '') . ' ' .
+                                        (($order['customer_orientation_number'] ?? '') !== '' ? '/' . $order['customer_orientation_number'] : '') . ' ' .
                                         ($order['customer_city'] ?? '') . ' ' . 
-                                        ($order['customer_city_part'] ? '- ' .  $order['customer_city_part']: '') . ' ' . 
-                                        ($order['customer_postal_code'] ? ', PSČ: ' .  $order['customer_postal_code']: '') . ' '
+                                        (($order['customer_city_part'] ?? '') !== '' ? '- ' . $order['customer_city_part'] : '') . ' ' . 
+                                        (($order['customer_postal_code'] ?? '') !== '' ? ', PSČ: ' . $order['customer_postal_code'] : '') . ' '
                                        );
     }
 

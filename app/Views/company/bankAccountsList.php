@@ -53,8 +53,8 @@ $accounts = $view->bankAccounts;
                 <?php foreach ($accounts as $account): ?>
 
                     <?php
-                    $active = (int)$account['active'] === 1;
-                    $default = (int)$account['is_default'] === 1;
+                    $active = $account['active'] === 1;
+                    $default = $account['is_default'] === 1;
 
                     $accountNumber = $account['account_number'];
 
