@@ -4,40 +4,41 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Services\Ares\AjaxStatus;
+use App\Core\Auth;
 use App\Core\Controller;
-use App\Services\Ares\AresClient;
-use App\Services\Ares\AresCompanyMapper;
-use App\Validators\ContactValidator;
+use App\Core\Url;
+use App\Models\CompanyModel;
 use App\Models\ContactsModel;
 use App\Models\TaskAssignmentModel;
-use App\Core\Auth;
-use App\Models\CompanyModel;
+use App\Services\Ares\AjaxStatus;
+use App\Services\Ares\AresClient;
+use App\Services\Ares\AresCompanyMapper;
 use App\Services\Ares\AresSession;
+use App\Validators\ContactValidator;
+
 /**
  * Stavové kódy a jejich význam:
  * 200  → ARES data máme
  * 403  → nemáš platné povolení AJAX požadavku
- * 409  → konflikt, duplikátní ičo
+ * 409  → konflikt, duplikátní IČO
  * 422  → IČO není platné / ARES ho nenašel
  * 503  → ARES je technicky nedostupný
  */
-
 final class AjaxController extends Controller
 {
     /**
      * Ověří IČO přes ARES a vrátí výsledek jako JSON.
      *
      * Postup:
-     * 1. ověří AjaxStatus vSession,
+     * 1. ověří AjaxStatus v Session,
      * 2. normalizuje IČO,
      * 3. ověří jeho platnost,
-     * 4. ověří, jestli existuje u nás v databázi kontaktů a pokud ano, vrátí chybu 409
+     * 4. ověří, jestli existuje u nás v databázi kontaktů,
      * 5. zavolá ARES,
      * 6. vrátí výsledek AJAX požadavku.
      *
-     * IČO je předáváno v URL, AjaxStatus ověří, že požadavek přišel z našeho 
-     * systému a ověření zneplatní.
+     * IČO je předáváno v URL, AjaxStatus ověří, že požadavek
+     * přišel z našeho systému a ověření zneplatní.
      *
      * @param string $ico IČO z URL.
      * @return string JSON odpověď.
@@ -45,16 +46,14 @@ final class AjaxController extends Controller
     public function contactAresIco(string $ico): string
     {
         $ico = substr($ico, 3);
-        
 
-        /** Ověříme oprávněnost Ajax požadavku: */
-        if(AjaxStatus::consume() === false) {
+        if (AjaxStatus::consume() === false) {
             return $this->json([
                 'ok' => false,
                 'error' => 'ajax',
                 'message' => 'Platnost formuláře vypršela. Načtěte stránku znovu a opakujte odeslání.',
             ], 403);
-        } /** */
+        }
 
         $ico = ContactValidator::normalizeCzechIco($ico);
 
@@ -66,28 +65,28 @@ final class AjaxController extends Controller
             ], 422);
         }
 
-        /** provedeme ověření s naší db */
         $result = (new ContactsModel())->findByIco($ico);
-        if($result !== null) {
+
+        if ($result !== null) {
             return $this->json([
-                    'ok' => false,
-                    'error' => 'duplicate_contact',
-                    'message' => 'Ve vašem seznamu zákazníků již existuje záznam s tímto IČO. Vyberte ho ze seznamu výše.',
-                    'ico' => null,
-                    'data' => null,
-                ], 409);
-            
+                'ok' => false,
+                'error' => 'duplicate_contact',
+                'message' => 'Ve vašem seznamu zákazníků již existuje záznam s tímto IČO. Nelze přidat více zákazníků se stejným IČO. <a href="' .
+                    Url::to('/{tenant}/contacts/list/#main') .
+                    '">Zobrazit seznam zákazníků</a>.',
+                'ico' => null,
+                'data' => null,
+            ], 409);
         }
 
-        $client = new AresClient( new AresCompanyMapper());
-        
+        $client = new AresClient(new AresCompanyMapper());
         $result = $client->findByIco($ico);
 
         if ($result->isInvalidIco()) {
             return $this->json([
                 'ok' => false,
                 'error' => 'invalid_ico',
-                'message' => 'IČO není validní. Načtěte znovu stránku (klávesa F5 nebo kombinace CTRl + R), zadejte správné IČO.',
+                'message' => 'IČO není validní. Načtěte znovu stránku (klávesa F5 nebo kombinace CTRL + R), zadejte správné IČO.',
             ], 422);
         }
 
@@ -106,9 +105,11 @@ final class AjaxController extends Controller
         ]);
     }
 
-    public function getContactData(int $id): string {
+    public function getContactData(int $id): string
+    {
         $data = (new ContactsModel())->find($id);
-        if($data === null) {
+
+        if ($data === null) {
             return $this->json([
                 'ok' => false,
                 'message' => 'Požadovaný záznam v databázi není...',
@@ -117,18 +118,19 @@ final class AjaxController extends Controller
         }
 
         return $this->json([
-                'ok' => true,
-                'message' => 'Data byla doplněna do polí formuláře...',
-                'data' => $data,
-            ], 200);
+            'ok' => true,
+            'message' => 'Data byla doplněna do polí formuláře...',
+            'data' => $data,
+        ]);
     }
 
     public function getTaskReports($taskId): string
     {
         $model = new TaskAssignmentModel();
         $data = $model->findByTask($taskId);
-        if($data === []) {
-             return $this->json([
+
+        if ($data === []) {
+            return $this->json([
                 'ok' => false,
                 'message' => 'Požadovaný záznam v databázi není...',
                 'data' => [],
@@ -138,13 +140,14 @@ final class AjaxController extends Controller
         foreach ($data as &$report) {
             $report['note'] = tx((string) $report['note']);
         }
+
         unset($report);
 
         return $this->json([
-                'ok' => true,
-                'message' => 'Reporty byly nahrány a zobrazeny...',
-                'data' => $data,
-        ], 200);
+            'ok' => true,
+            'message' => 'Reporty byly nahrány a zobrazeny...',
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -163,74 +166,168 @@ final class AjaxController extends Controller
         );
     }
 
- public function companyAresIco(string $ico): string
-{
-    $ico = substr($ico, 3);
-    
-    if (AjaxStatus::consume() === false) {
+    public function companyAresIco(string $ico): string
+    {
+        $ico = substr($ico, 3);
+
+        if (AjaxStatus::consume() === false) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'ajax',
+                'message' => 'Platnost formuláře vypršela. Načtěte stránku znovu a opakujte odeslání.',
+            ], 403);
+        }
+
+        $ico = ContactValidator::normalizeCzechIco($ico);
+
+        if (!ContactValidator::validateCzechIco($ico)) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'invalid_ico',
+                'message' => 'IČO není platné.',
+            ], 422);
+        }
+
+        $companyId = Auth::companyId();
+
+        if ($companyId === null) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'auth',
+                'message' => 'Nelze určit aktuální firmu.',
+            ], 403);
+        }
+
+        $companyModel = new CompanyModel();
+
+        if ($companyModel->findOtherCompanyByIco($ico, $companyId) !== null) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'duplicate_company',
+                'message' => 'Toto IČO již patří jiné firmě v systému.',
+            ], 409);
+        }
+
+        $client = new AresClient(new AresCompanyMapper());
+        $result = $client->findByIco($ico);
+
+        if ($result->isInvalidIco()) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'invalid_ico',
+                'message' => 'IČO není platné.',
+            ], 422);
+        }
+
+        if ($result->isAresError()) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'ares_error',
+                'message' => 'Údaje se momentálně nepodařilo ověřit. Zkuste to později nebo je zadejte ručně.',
+            ], 503);
+        }
+
+        $data = (array) $result->data;
+
+        AresSession::set(
+            'company',
+            $companyId,
+            $ico,
+            $data
+        );
+
         return $this->json([
-            'ok' => false,
-            'error' => 'ajax',
-            'message' => 'Platnost formuláře vypršela. Načtěte stránku znovu a opakujte odeslání.',
-        ], 403);
+            'ok' => true,
+            'ico' => $ico,
+            'data' => $data,
+        ]);
     }
 
-    $ico = ContactValidator::normalizeCzechIco($ico);
+    public function contactEditAresIco(int $id, string $ico): string
+    {
+        $ico = substr($ico, 3);
 
-    if (!ContactValidator::validateCzechIco($ico)) {
+        if (AjaxStatus::consume() === false) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'ajax',
+                'message' => 'Platnost formuláře vypršela. Načtěte stránku znovu a opakujte odeslání.',
+            ], 403);
+        }
+
+        $ico = ContactValidator::normalizeCzechIco($ico);
+
+        if (!ContactValidator::validateCzechIco($ico)) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'invalid_ico',
+                'message' => 'IČO není platné.',
+            ], 422);
+        }
+
+        $model = new ContactsModel();
+
+        $contact = $model->find($id);
+
+        if ($contact === null) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'contact_not_found',
+                'message' => 'Požadovaný zákazník nebyl nalezen.',
+            ], 404);
+        }
+
+        $result = $model->findByIco($ico);
+
+        if ($result !== null && (int) $result['id'] !== $id) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'duplicate_contact',
+                'message' => 'Ve vašem seznamu zákazníků již existuje záznam s tímto IČO. Nelze přidat více zákazníků se stejným IČO. <a href="' .
+                    Url::to('/{tenant}/contacts/list/#main') .
+                    '">Zobrazit seznam zákazníků</a>.',
+                'ico' => null,
+                'data' => null,
+            ], 409);
+        }
+
+        $client = new AresClient(new AresCompanyMapper());
+        $aresResult = $client->findByIco($ico);
+
+        if ($aresResult->isInvalidIco()) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'invalid_ico',
+                'message' => 'IČO není platné.',
+            ], 422);
+        }
+
+        if ($aresResult->isAresError()) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'ares_error',
+                'message' => 'Údaje se momentálně nepodařilo ověřit. Zkuste to později nebo je zadejte ručně.',
+            ], 503);
+        }
+
+        $data = (array) $aresResult->data;
+
+        /*
+         * ARES data držíme na serveru podle typu objektu a jeho ID.
+         * Díky tomu mohou být současně otevřené např. kontakty 5, 8 a 12
+         * a jejich ARES data se navzájem nepřepíšou.
+         */
+        AresSession::set(
+            'contact',
+            $id,
+            $ico,
+            $data
+        );
+
         return $this->json([
-            'ok' => false,
-            'error' => 'invalid_ico',
-            'message' => 'IČO není platné.',
-        ], 422);
+            'ok' => true,
+            'ico' => $ico,
+            'data' => $data,
+        ]);
     }
-
-    $companyId = Auth::companyId();
-
-    if ($companyId === null) {
-        return $this->json([
-            'ok' => false,
-            'error' => 'auth',
-            'message' => 'Nelze určit aktuální firmu.',
-        ], 403);
-    }
-
-    $companyModel = new CompanyModel();
-
-    if ($companyModel->findOtherCompanyByIco($ico, $companyId) !== null) {
-        return $this->json([
-            'ok' => false,
-            'error' => 'duplicate_company',
-            'message' => 'Toto IČO již patří jiné firmě v systému.',
-        ], 409);
-    }
-
-    $client = new AresClient(new AresCompanyMapper());
-    $result = $client->findByIco($ico);
-
-    if ($result->isInvalidIco()) {
-        return $this->json([
-            'ok' => false,
-            'error' => 'invalid_ico',
-            'message' => 'IČO není platné.',
-        ], 422);
-    }
-
-    if ($result->isAresError()) {
-        return $this->json([
-            'ok' => false,
-            'error' => 'ares_error',
-            'message' => 'Údaje se momentálně nepodařilo ověřit. Zkuste to později nebo je zadejte ručně.',
-        ], 503);
-    }
-    $data = (array)$result->data;
-    AresSession::set($ico, $data);
-    return $this->json([
-        'ok' => true,
-        'ico' => $ico,
-        'data' => $data,
-    ]);
-}
-
-
 }

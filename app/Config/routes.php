@@ -816,7 +816,7 @@ return [
 [
     'method' => 'POST',
     'path'   => '/{tenant}/contacts/create',
-    'action' => [ContactsController::class, 'storeContact'],
+    'action' => [ContactsController::class, 'storeContact'], 
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
     'section'=> 'contacts',
@@ -824,24 +824,57 @@ return [
 
 ],
 
+// /{tenant}/contacts/{id}/manualEdit
+// /{tenant}/contacts/{id}/aresEdit
 [
     'method' => 'GET',
-    'path'   => '/{tenant}/contacts/{id:\d+}/edit',
-    'action' => [ContactsController::class, 'editContact'],
+    'path'   => '/{tenant}/contacts/{id:\d+}/manualEdit',
+    'action' => [ContactsController::class, 'manualEdit'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
     'section'=> 'contacts',
-    'title'  => 'Zákazníci: Upravit zákazníka',
+    'title'  => 'Zákazníci: Upravit zákazníka ručně',
 ],
 
 [
     'method' => 'POST',
-    'path'   => '/{tenant}/contacts/{id:\d+}/edit',
-    'action' => [ContactsController::class, 'updateContact'],
+    'path'   => '/{tenant}/contacts/{id:\d+}/manualEdit',
+    'action' => [ContactsController::class, 'manualEditUpdate'],
     'auth'   => true,
     'roles'  => ['admin', 'mistr'],
     'section'=> 'contacts',
-    'title'  => 'Zákazníci: Upravit zákazníka',
+    'title'  => 'Zákazníci: Upravit zákazníka ručně',
+],
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/contacts/{id:\d+}/aresEdit',
+    'action' => [ContactsController::class, 'aresEdit'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr'],
+    'section'=> 'contacts',
+    'title'  => 'Zákazníci: Upravit zákazníka podle ARES',
+],
+
+[
+    'method' => 'POST',
+    'path'   => '/{tenant}/contacts/{id:\d+}/aresEdit',
+    'action' => [ContactsController::class, 'aresEditUpdate'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr'],
+    'section'=> 'contacts',
+    'title'  => 'Zákazníci: Upravit zákazníka podle ARES',
+],
+
+
+[
+    'method' => 'GET',
+    'path'   => '/{tenant}/contacts/{id:\d+}/detail',
+    'action' => [ContactsController::class, 'detailContact'],
+    'auth'   => true,
+    'roles'  => ['admin', 'mistr'],
+    'section'=> 'contacts',
+    'title'  => 'Zákazníci: Detail zákazníka',
 ],
 
 /*----------------------------------------
@@ -1347,11 +1380,26 @@ Přepínaní rolí u admina
 |--------------------------------------------------------------------------
 */
 
-/** zjištění údajů o společnosti do kontaktů pomocí ARES */
+/** zjištění údajů o společnosti do kontaktů pomocí ARES 
+ * zde při vytváření kontaktu
+*/
 [
     'method' => 'GET',
     'path'   => '/{tenant}/ajax/contact/ares/{ico:ico\d+}',
     'action' => [AjaxController::class, 'contactAresIco'],
+    'roles'  => ['admin', 'mistr'],
+    'auth'   => true,
+],
+
+/** 
+ * zjištění údajů z Ares i z naší databáze, pokud existuje, nelze ho přidat znovu
+ * zde při editaci
+ */
+[
+    'method' => 'GET',
+//localhost/vanek-software/ajax/contact/5       /edit/ares/ico28613554
+    'path'   => '/{tenant}/ajax/contact/{id:\d+}/edit/ares/{ico:ico\d+}',
+    'action' => [AjaxController::class, 'contactEditAresIco'],
     'roles'  => ['admin', 'mistr'],
     'auth'   => true,
 ],
