@@ -119,7 +119,7 @@ $contacts = $view->contacts;
                 <div class="actions">
                     <a
                         href="<?= Url::to(
-                            '/{tenant}/contacts/' . $contact['id'] . '/edit/#main'
+                            '/{tenant}/contacts/' . $contact['id'] . '/detail/#main'
                         ) ?>"
                         class="btn btn-secondary"
                         title="Upravit informace o zákazníkovi"
