@@ -66,7 +66,7 @@ final class Menu
              *
              * Předpokládáme, že odpovídající GET routa položku vytvoří.
              */
-            if (($route['method'] ?? 'GET') === 'POST') {
+            if ($route['method'] === 'POST') {
 
                 if (!isset($menu[$section])) {
                     continue;

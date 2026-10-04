@@ -124,7 +124,7 @@ final class AjaxController extends Controller
         ]);
     }
 
-    public function getTaskReports($taskId): string
+    public function getTaskReports(int $taskId): string
     {
         $model = new TaskAssignmentModel();
         $data = $model->findByTask($taskId);
@@ -279,7 +279,7 @@ final class AjaxController extends Controller
 
         $result = $model->findByIco($ico);
 
-        if ($result !== null && (int) $result['id'] !== $id) {
+        if ($result !== null && $result['id'] !== $id) {
             return $this->json([
                 'ok' => false,
                 'error' => 'duplicate_contact',

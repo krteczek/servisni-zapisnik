@@ -205,15 +205,15 @@ final class InvoiceValidator
                 $line['unit_price'] ?? 0
             );
 
-            $hours = max(
-                0,
-                (int) ($line['hours'] ?? 0)
-            );
+            $hoursRaw = (int) ($line['hours'] ?? 0);
+            $minutesRaw = (int) ($line['minutes'] ?? 0);
 
-            $minutes = max(
-                0,
-                (int) ($line['minutes'] ?? 0)
-            );
+            if ($hoursRaw < 0 || $minutesRaw < 0) {
+                $errors["lines.$i"][] = 'Čas nesmí být záporný.';
+            }
+
+            $hours = max(0, $hoursRaw);
+            $minutes = max(0, $minutesRaw);
 
             $quantity = (float) (
                 $line['quantity'] ?? 0
@@ -242,11 +242,6 @@ final class InvoiceValidator
             if ($currency === '') {
                 $errors["lines.$i.currency"][] =
                     'Měna je povinná.';
-            }
-
-            if ($hours < 0 || $minutes < 0) {
-                $errors["lines.$i"][] =
-                    'Čas nesmí být záporný.';
             }
 
             $lines[] = [

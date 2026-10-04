@@ -113,7 +113,7 @@ final class CompanyController extends Controller
             return $this->render('company/create');
         }
 
-        $ares = AresSession::get();
+        $ares = AresSession::get('company', $companyId);
 
         if ($ares === null) {
             $this->addError(
@@ -133,7 +133,7 @@ final class CompanyController extends Controller
             return $this->render('company/create');
         }
 
-        if (($ares['ico'] ?? null) !== ($company['ico'] ?? null)) {
+        if ($ares['ico'] !== ($company['ico'] ?? null)) {
             $this->addError(
                 'global',
                 'Údaje z ARES neodpovídají IČO firmy. Načtěte je, prosím, znovu.'
@@ -151,26 +151,9 @@ final class CompanyController extends Controller
             return $this->render('company/create');
         }
 
-        $aresData = $ares['data'] ?? null;
+        $aresData = $ares['data'];
 
-        if (!is_array($aresData)) {
-            $this->addError(
-                'global',
-                'Údaje z ARES nejsou platné. Načtěte je, prosím, znovu.'
-            );
-
-            $this->view->title = 'Firemní údaje: Vytvořit';
-
-            $this->view->data = [
-                'company' => $company,
-                'details' => $data,
-            ];
-
-            AjaxStatus::set();
-
-            return $this->render('company/create');
-        }
-
+        
         $details = [
             'official_name'       => $aresData['officialName'] ?? '',
             'trade_name'          => $data['trade_name'],
@@ -208,7 +191,7 @@ final class CompanyController extends Controller
                 $details
             );
 
-            AresSession::forget();
+            AresSession::forget('company', $companyId);
 
             Flash::success('Firemní údaje byly úspěšně uloženy.');
             Url::redirect('/{tenant}/system/company/detail');
@@ -391,10 +374,10 @@ final class CompanyController extends Controller
             'ares_updated_at'     => $details['ares_updated_at'],
         ];
 
-        $ares = AresSession::get();
+        $ares = AresSession::get('company', $companyId);
 
         if ($ares !== null) {
-            if (($ares['ico'] ?? null) !== ($company['ico'] ?? null)) {
+            if ($ares['ico'] !== ($company['ico'] ?? null)) {
                 $this->addError(
                     'global',
                     'Údaje z ARES neodpovídají IČO firmy. Načtěte je, prosím, znovu.'
@@ -412,25 +395,7 @@ final class CompanyController extends Controller
                 return $this->render('company/edit');
             }
 
-            $aresData = $ares['data'] ?? null;
-
-            if (!is_array($aresData)) {
-                $this->addError(
-                    'global',
-                    'Údaje z ARES nejsou platné. Načtěte je, prosím, znovu.'
-                );
-
-                $this->view->title = 'Firemní údaje: Změna';
-
-                $this->view->data = [
-                    'company' => $company,
-                    'details' => array_merge($details, $postData),
-                ];
-
-                AjaxStatus::set();
-
-                return $this->render('company/edit');
-            }
+            $aresData = $ares['data'];
 
             $aresFields = [
                 'official_name'       => $aresData['officialName'] ?? null,
@@ -483,7 +448,7 @@ final class CompanyController extends Controller
                 return $this->render('company/edit');
             }
 
-            AresSession::forget();
+            AresSession::forget('company', $companyId);
 
             Flash::success(
                 'Firemní údaje byly úspěšně změněny.'
@@ -661,7 +626,7 @@ public function createBankAccount(): string
                 'bank_code',
                 'Kód banky je povinný.'
             );
-        } elseif (!preg_match('/^\d{4}$/', (string)$data['bank_code'])) {
+        } elseif (!preg_match('/^\d{4}$/', $data['bank_code'])) {
             $this->addError(
                 'bank_code',
                 'Kód banky musí být čtyřmístné číslo.'
@@ -675,7 +640,7 @@ public function createBankAccount(): string
             );
         }
 
-        if((string) $data['bank_code'] !== '' && !preg_match('/^\d{4}$/', (string) $data['bank_code'])) {
+        if($data['bank_code'] !== '' && !preg_match('/^\d{4}$/', $data['bank_code'])) {
             $this->addError(
                 'bank_code',
                 'Kód banky musí být čtyřmístné číslo.'

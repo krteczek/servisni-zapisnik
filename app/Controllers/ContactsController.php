@@ -234,7 +234,7 @@ final class ContactsController extends Controller
         $contact = $this->getContactOrRedirect($id);
 
         $ico = ContactValidator::normalizeCzechIco(
-            (string) ($contact['ico'] ?? '')
+            ($contact['ico'] ?? '')
         );
 
         if ($ico === '') {
@@ -309,7 +309,7 @@ final class ContactsController extends Controller
          * ARES data musí odpovídat aktuálnímu IČO zákazníka.
          */
         $currentIco = ContactValidator::normalizeCzechIco(
-            (string) ($contact['ico'] ?? '')
+            ($contact['ico'] ?? '')
         );
 
         if ($currentIco === '' || $currentIco !== $ares['ico']) {
@@ -332,7 +332,7 @@ final class ContactsController extends Controller
          * Přepisujeme pouze pole, která uživatel skutečně vybral.
          */
         $data = [
-            'official_name'      => $contact['official_name'] ?? '',
+            'official_name'      => $contact['official_name'],
             'ico'                => $contact['ico'] ?? '',
             'dic'                => $contact['dic'] ?? '',
             'street'             => $contact['street'] ?? '',
@@ -341,7 +341,7 @@ final class ContactsController extends Controller
             'city_part'          => $contact['city_part'] ?? '',
             'city'               => $contact['city'] ?? '',
             'postal_code'        => $contact['postal_code'] ?? '',
-            'country_code'       => $contact['country_code'] ?? 'CZ',
+            'country_code'       => $contact['country_code'],
             'delivery_address_1' => $contact['delivery_address_1'] ?? '',
             'delivery_address_2' => $contact['delivery_address_2'] ?? '',
             'delivery_address_3' => $contact['delivery_address_3'] ?? '',

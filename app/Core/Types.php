@@ -320,6 +320,7 @@ use App\Services\Tokens\TokenResult;
  *     phone: ?string,
  *     bank_account: ?string,
  *     bank_code: ?string,
+ *     notes: ?string,
  *     created_at: string,
  *     updated_at: string,
  *     contact?: string
@@ -584,6 +585,48 @@ use App\Services\Tokens\TokenResult;
  *     created_by: int,
  *     created_at: string
  * }
+ * 
+ *
+ * @phpstan-type CompanyDetailsRow array{
+ *     company_id: int,
+ *     official_name: string,
+ *     trade_name: ?string,
+ *     dic: ?string,
+ *     street: ?string,
+ *     house_number: ?string,
+ *     orientation_number: ?string,
+ *     city_part: ?string,
+ *     city: string,
+ *     postal_code: string,
+ *     country_code: string,
+ *     delivery_address_1: ?string,
+ *     delivery_address_2: ?string,
+ *     delivery_address_3: ?string,
+ *     legal_form_code: ?string,
+ *     legal_form_ros_code: ?string,
+ *     founded_at: ?string,
+ *     ares_updated_at: ?string,
+ *     created_at: string,
+ *     updated_at: string
+ * }
+ *
+ *
+ * @phpstan-type BankAccountRow array{
+ *     id: int,
+ *     company_id: int,
+ *     name: string,
+ *     account_prefix: ?string,
+ *     account_number: string,
+ *     bank_code: ?string,
+ *     iban: ?string,
+ *     bic: ?string,
+ *     is_default: int,
+ *     active: int,
+ *     created_at: string,
+ *     updated_at: string,
+ *     default_company_key: ?int
+ * }
+ *
  */
 final class Types
 {

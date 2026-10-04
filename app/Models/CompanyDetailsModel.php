@@ -2,13 +2,18 @@
 declare(strict_types=1);
 
 namespace App\Models;
+use App\Core\Types;
 
+/** @phpstan-import-type CompanyDetailsRow from Types */
 final class CompanyDetailsModel extends BaseModel
 {
     protected string $table      = 'company_details';
     protected string $connection = 'admin';
     protected bool $tenantAware  = false;
 
+    /**
+     * @return CompanyDetailsRow|null
+     */
     public function findByCompanyId(int $companyId): ?array
     {
         return $this->fetchOne(
@@ -18,7 +23,11 @@ final class CompanyDetailsModel extends BaseModel
             ['company_id' => $companyId]
         );
     }
-
+    
+    /**
+     * @param array<string, mixed> $data
+     * @return int
+     */
     public function createForCompany(int $companyId, array $data): int
     {
         $data['company_id'] = $companyId;
@@ -26,6 +35,10 @@ final class CompanyDetailsModel extends BaseModel
         return $this->insertRaw($data);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return bool
+     */
     public function updateForCompany(int $companyId, array $data): bool
     {
         if ($data === []) {

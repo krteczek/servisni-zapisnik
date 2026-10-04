@@ -22,12 +22,13 @@ use App\Validators\InvoiceValidator;
 use DateTimeImmutable;
 use PDO;
 use RuntimeException;
-
+use App\Core\Types;
+/** @phpstan-import-type TaskBaseRow from Types */
 final class InvoiceService
 {
     /**
      * @param int $id
-     * @return array<string, mixed>
+     * @return TaskBaseRow
      */
     private function requireTaskForInvoice(int $id): array
     {
@@ -70,7 +71,7 @@ final class InvoiceService
         ];
 
         $workOrder = (new WorkOrderModel())
-            ->find((int) $task['work_order_id']);
+            ->find( $task['work_order_id']);
 
         if ($workOrder === null) {
             throw new RuntimeException(
@@ -79,7 +80,7 @@ final class InvoiceService
         }
 
         $contactId = isset($workOrder['contact_id'])
-            ? (int) $workOrder['contact_id']
+            ? $workOrder['contact_id']
             : 0;
 
         $customer = $contactId > 0
@@ -103,7 +104,7 @@ final class InvoiceService
 
         return [
             'invoice' => [
-                'title' => (string) $workOrder['title'],
+                'title' => $workOrder['title'],
                 'issued_at' => $issuedAt,
                 'due_date' => $dueDate,
                 'note' => '',
@@ -115,18 +116,18 @@ final class InvoiceService
             'customer' => $customerData,
 
             'workOrder' => [
-                'id' => (int) $workOrder['id'],
-                'title' => (string) $workOrder['title'],
-                'description' => (string) (
-                    $workOrder['description'] ?? ''
+                'id' => $workOrder['id'],
+                'title' => $workOrder['title'],
+                'description' => (
+                    $workOrder['description']
                 ),
             ],
 
             'tasks' => [
                 [
-                    'task_id' => (int) $task['id'],
-                    'title' => (string) $task['title'],
-                    'minutes' => (int) (
+                    'task_id' =>  $task['id'],
+                    'title' => $task['title'],
+                    'minutes' => (
                         $taskStats['total_minutes'] ?? 0
                     ),
                     'kilometers' => (float) (
@@ -158,7 +159,7 @@ final class InvoiceService
         $task = $this->requireTaskForInvoice($taskId);
 
         $workOrder = (new WorkOrderModel())
-            ->find((int) $task['work_order_id']);
+            ->find( $task['work_order_id']);
 
         if ($workOrder === null) {
             throw new RuntimeException(
@@ -285,8 +286,8 @@ final class InvoiceService
             );
         }
 
-        $year = (int) $issuedDate->format('Y');
-        $month = (int) $issuedDate->format('m');
+        $year =  (int)$issuedDate->format('Y');
+        $month = (int)$issuedDate->format('m');
 
         $title = trim(
             (string) ($invoice['title'] ?? '')
@@ -321,7 +322,7 @@ final class InvoiceService
         }
 
         $workOrderId = isset($workOrder['id'])
-            ? (int) $workOrder['id']
+            ? $workOrder['id']
             : 0;
 
         if ($workOrderId <= 0) {
@@ -360,7 +361,7 @@ final class InvoiceService
                     );
                 }
 
-                $start = (int) (
+                $start = (
                     $billing['invoice_number_start'] ?? 0
                 );
 
@@ -420,7 +421,7 @@ final class InvoiceService
                     )
                 );
 
-                $contactId = (int) (
+                $contactId = (
                     $invoice['contact_id'] ?? 0
                 );
 
@@ -621,7 +622,7 @@ final class InvoiceService
                         );
                     }
 
-                    $taskId = (int) (
+                    $taskId = (
                         $task['task_id'] ?? 0
                     );
 
@@ -707,7 +708,7 @@ final class InvoiceService
         $tasks = (new TaskModel())
             ->forWorkOrderWithStats($workOrderId);
 
-        $contactId = (int) (
+        $contactId = (
             $workOrder['contact_id'] ?? 0
         );
 
@@ -738,20 +739,20 @@ final class InvoiceService
             $stats = $task['stats'];
 
             $draftTasks[] = [
-                'task_id' => (int) $task['id'],
-                'title' => (string) $task['title'],
-                'minutes' => (int) (
-                    $stats['total_minutes'] ?? 0
+                'task_id' => $task['id'],
+                'title' => $task['title'],
+                'minutes' => (
+                    $stats['total_minutes']
                 ),
                 'kilometers' => (float) (
-                    $stats['total_km'] ?? 0
+                    $stats['total_km']
                 ),
             ];
         }
 
         return [
             'invoice' => [
-                'title' => (string) $workOrder['title'],
+                'title' =>  $workOrder['title'],
                 'issued_at' => date('Y-m-d'),
                 'due_date' => date(
                     'Y-m-d',
@@ -768,11 +769,10 @@ final class InvoiceService
             'customer' => $customerData,
 
             'workOrder' => [
-                'id' => (int) $workOrder['id'],
-                'title' => (string) $workOrder['title'],
-                'description' => (string) (
-                    $workOrder['description'] ?? ''
-                ),
+                'id' => $workOrder['id'],
+                'title' => $workOrder['title'],
+                'description' => (
+                    $workOrder['description']               ),
             ],
 
             'tasks' => $draftTasks,
@@ -814,7 +814,7 @@ final class InvoiceService
         }
 
         if (
-            (int) $invoice['company_id']
+            $invoice['company_id']
             !== $companyId
         ) {
             throw new RuntimeException(
