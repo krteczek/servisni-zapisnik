@@ -27,27 +27,24 @@ use App\Validators\ContactValidator;
 final class AjaxController extends Controller
 {
     /**
-     * Ověří IČO přes ARES a vrátí výsledek jako JSON.
+     * Ověří IČO kontaktu přes ARES a vrátí výsledek jako JSON.
      *
-     * Postup:
-     * 1. ověří AjaxStatus v Session,
-     * 2. normalizuje IČO,
-     * 3. ověří jeho platnost,
-     * 4. ověří, jestli existuje u nás v databázi kontaktů,
-     * 5. zavolá ARES,
-     * 6. vrátí výsledek AJAX požadavku.
+     * Nejprve ověří oprávnění AJAX požadavku, poté normalizuje
+     * a validuje IČO. Následně ověří duplicitu kontaktu a pokud
+     * kontakt neexistuje, načte údaje z ARES.
      *
-     * IČO je předáváno v URL, AjaxStatus ověří, že požadavek
-     * přišel z našeho systému a ověření zneplatní.
+     * Úspěšně zpracovaný požadavek nebo konflikt spotřebuje
+     * jeden lístek AjaxStatus. Chyby vstupu a technická chyba
+     * ARES lístek nespotřebují.
      *
-     * @param string $ico IČO z URL.
+     * @param string $ico IČO předané v URL včetně tříznakového prefixu.
      * @return string JSON odpověď.
      */
     public function contactAresIco(string $ico): string
     {
         $ico = substr($ico, 3);
 
-        if (AjaxStatus::consume() === false) {
+        if (AjaxStatus::peek() === false) {
             return $this->json([
                 'ok' => false,
                 'error' => 'ajax',
@@ -68,6 +65,8 @@ final class AjaxController extends Controller
         $result = (new ContactsModel())->findByIco($ico);
 
         if ($result !== null) {
+            AjaxStatus::consume();
+
             return $this->json([
                 'ok' => false,
                 'error' => 'duplicate_contact',
@@ -98,6 +97,8 @@ final class AjaxController extends Controller
             ], 503);
         }
 
+        AjaxStatus::consume();
+
         return $this->json([
             'ok' => true,
             'ico' => $ico,
@@ -105,6 +106,12 @@ final class AjaxController extends Controller
         ]);
     }
 
+    /**
+     * Načte údaje kontaktu podle jeho ID a vrátí je jako JSON.
+     *
+     * @param int $id ID kontaktu.
+     * @return string JSON odpověď.
+     */
     public function getContactData(int $id): string
     {
         $data = (new ContactsModel())->find($id);
@@ -124,6 +131,12 @@ final class AjaxController extends Controller
         ]);
     }
 
+    /**
+     * Načte reporty přiřazené k úkolu a vrátí je jako JSON.
+     *
+     * @param int $taskId ID úkolu.
+     * @return string JSON odpověď.
+     */
     public function getTaskReports(int $taskId): string
     {
         $model = new TaskAssignmentModel();
@@ -153,7 +166,9 @@ final class AjaxController extends Controller
     /**
      * Vytvoří JSON HTTP odpověď.
      *
-     * @param array<string, mixed> $data
+     * @param array<string, mixed> $data Data JSON odpovědi.
+     * @param int $status HTTP stavový kód odpovědi.
+     * @return string JSON odpověď.
      */
     private function json(array $data, int $status = 200): string
     {
@@ -166,11 +181,26 @@ final class AjaxController extends Controller
         );
     }
 
+    /**
+     * Ověří IČO aktuální firmy přes ARES a uloží načtená data
+     * do serverové AresSession.
+     *
+     * Nejprve ověří oprávnění AJAX požadavku, poté normalizuje
+     * a validuje IČO, ověří duplicitu jiné firmy a následně
+     * načte údaje z ARES.
+     *
+     * Úspěšně zpracovaný požadavek nebo konflikt spotřebuje
+     * jeden lístek AjaxStatus. Chyby vstupu a technická chyba
+     * ARES lístek nespotřebují.
+     *
+     * @param string $ico IČO předané v URL včetně tříznakového prefixu.
+     * @return string JSON odpověď.
+     */
     public function companyAresIco(string $ico): string
     {
         $ico = substr($ico, 3);
 
-        if (AjaxStatus::consume() === false) {
+        if (AjaxStatus::peek() === false) {
             return $this->json([
                 'ok' => false,
                 'error' => 'ajax',
@@ -201,6 +231,8 @@ final class AjaxController extends Controller
         $companyModel = new CompanyModel();
 
         if ($companyModel->findOtherCompanyByIco($ico, $companyId) !== null) {
+            AjaxStatus::consume();
+
             return $this->json([
                 'ok' => false,
                 'error' => 'duplicate_company',
@@ -236,6 +268,8 @@ final class AjaxController extends Controller
             $data
         );
 
+        AjaxStatus::consume();
+
         return $this->json([
             'ok' => true,
             'ico' => $ico,
@@ -243,11 +277,27 @@ final class AjaxController extends Controller
         ]);
     }
 
+    /**
+     * Ověří IČO existujícího kontaktu přes ARES a uloží načtená
+     * data do serverové AresSession pro daný kontakt.
+     *
+     * Nejprve ověří oprávnění AJAX požadavku, poté normalizuje
+     * a validuje IČO, ověří existenci kontaktu a případnou duplicitu.
+     * Následně načte údaje z ARES.
+     *
+     * Úspěšně zpracovaný požadavek nebo konflikt spotřebuje
+     * jeden lístek AjaxStatus. Chyby vstupu, neexistující kontakt
+     * a technická chyba ARES lístek nespotřebují.
+     *
+     * @param int $id ID upravovaného kontaktu.
+     * @param string $ico IČO předané v URL včetně tříznakového prefixu.
+     * @return string JSON odpověď.
+     */
     public function contactEditAresIco(int $id, string $ico): string
     {
         $ico = substr($ico, 3);
 
-        if (AjaxStatus::consume() === false) {
+        if (AjaxStatus::peek() === false) {
             return $this->json([
                 'ok' => false,
                 'error' => 'ajax',
@@ -280,6 +330,8 @@ final class AjaxController extends Controller
         $result = $model->findByIco($ico);
 
         if ($result !== null && $result['id'] !== $id) {
+            AjaxStatus::consume();
+
             return $this->json([
                 'ok' => false,
                 'error' => 'duplicate_contact',
@@ -323,6 +375,8 @@ final class AjaxController extends Controller
             $ico,
             $data
         );
+
+        AjaxStatus::consume();
 
         return $this->json([
             'ok' => true,

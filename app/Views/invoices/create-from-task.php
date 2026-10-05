@@ -34,6 +34,8 @@ $priceUnits = $data['price_units'] ?? [
     'km'  => 'km',
     'ks'  => 'ks',
 ];
+
+$supplierBankAccounts = $supplier['bank_accounts'] ?? [];
 ?>
 
 <div class="create-container-invoice">
@@ -66,7 +68,7 @@ $priceUnits = $data['price_units'] ?? [
                             <?= e($supplier['official_name'] ?? '') ?>
                         </strong>
 
-                        <?php if ($supplier['ico'] !== ''): ?>
+                        <?php if (($supplier['ico'] ?? '') !== ''): ?>
                             <div>
                                 IČO:
                                 <?= e($supplier['ico']) ?>
@@ -80,9 +82,21 @@ $priceUnits = $data['price_units'] ?? [
                             </div>
                         <?php endif; ?>
 
-                        <?php if (($supplier['address'] ?? '') !== ''): ?>
+                        <?php
+                        $supplierAddress = trim(
+                            (string) ($supplier['street'] ?? '') . ' ' .
+                            (string) ($supplier['house_number'] ?? '') .
+                            (
+                                ($supplier['orientation_number'] ?? '') !== ''
+                                    ? '/' . $supplier['orientation_number']
+                                    : ''
+                            )
+                        );
+                        ?>
+
+                        <?php if ($supplierAddress !== ''): ?>
                             <div>
-                                <?= e($supplier['address']) ?>
+                                <?= e($supplierAddress) ?>
                             </div>
                         <?php endif; ?>
 
@@ -91,6 +105,97 @@ $priceUnits = $data['price_units'] ?? [
                                 <?= e($supplier['postal_code'] ?? '') ?>
                                 <?= e($supplier['city']) ?>
                             </div>
+                        <?php endif; ?>
+
+                        <?php if ($supplierBankAccounts !== []): ?>
+
+                            <div class="form-group">
+
+                                <label for="supplier_bank_account_id">
+                                    Bankovní účet
+                                </label>
+
+                                <select
+                                    id="supplier_bank_account_id"
+                                    name="supplier_bank_account_id"
+                                >
+
+                                    <?php foreach ($supplierBankAccounts as $bankAccount): ?>
+
+                                        <?php
+                                        $bankAccountId = (int) (
+                                            $bankAccount['id'] ?? 0
+                                        );
+
+                                        $accountPrefix = trim(
+                                            (string) (
+                                                $bankAccount['account_prefix']
+                                                ?? ''
+                                            )
+                                        );
+
+                                        $accountNumber = trim(
+                                            (string) (
+                                                $bankAccount['account_number']
+                                                ?? ''
+                                            )
+                                        );
+
+                                        $bankCode = trim(
+                                            (string) (
+                                                $bankAccount['bank_code']
+                                                ?? ''
+                                            )
+                                        );
+
+                                        $accountParts = [];
+
+                                        if ($accountPrefix !== '') {
+                                            $accountParts[] = $accountPrefix;
+                                        }
+
+                                        if ($accountNumber !== '') {
+                                            $accountParts[] = $accountNumber;
+                                        }
+
+                                        $accountText = implode('-', $accountParts);
+
+                                        if ($bankCode !== '') {
+                                            $accountText .= '/' . $bankCode;
+                                        }
+
+                                        $bankName = trim(
+                                            (string) (
+                                                $bankAccount['name'] ?? ''
+                                            )
+                                        );
+
+                                        if ($bankName !== '') {
+                                            $accountText .= ' – ' . $bankName;
+                                        }
+
+                                        $isDefault =
+                                            (int) (
+                                                $bankAccount['is_default']
+                                                ?? 0
+                                            ) === 1;
+                                        ?>
+
+                                        <option
+                                            value="<?= $bankAccountId ?>"
+                                            <?= $isDefault
+                                                ? 'selected'
+                                                : '' ?>
+                                        >
+                                            <?= e($accountText) ?>
+                                        </option>
+
+                                    <?php endforeach; ?>
+
+                                </select>
+
+                            </div>
+
                         <?php endif; ?>
 
                     </div>
@@ -112,110 +217,152 @@ $priceUnits = $data['price_units'] ?? [
 
                             <details class="invoice-customer-help">
                                 <summary>?</summary>
-                                <p>Je několik způsobů, jak na fakturu přidáte zákazníka: </p>
+
+                                <p>
+                                    Je několik způsobů, jak na fakturu
+                                    přidáte zákazníka:
+                                </p>
+
                                 <ul>
-                                    <li>Zákazníka již máte k zakázce samotné přidaného (například při zakládání zakázky), je načten a formulář vyplněn automaticky.</li>
-                                    <li>Máte-li zákazníka uloženého v Bó systému, můžete si jej vybrat z nabídky.</li>
-                                    <li>Je-li váš zákazník firmou, stačí zadat jeho IČO a zmáčknout tlačítko [Načíst data z ARES]. Systém se pokusí data načíst z centrální státní databáze a vyplní většinu políček.</li>
-                                    <li>Pokud je zákazník prostý občan nebo je systém ARES nefunkční, můžete jeho údaje vypsat ručně.</li>
+                                    <li>
+                                        Zákazníka již máte k zakázce samotné
+                                        přidaného (například při zakládání
+                                        zakázky), je načten a formulář
+                                        vyplněn automaticky.
+                                    </li>
+
+                                    <li>
+                                        Máte-li zákazníka uloženého v Bó
+                                        systému, můžete si jej vybrat
+                                        z nabídky.
+                                    </li>
+
+                                    <li>
+                                        Je-li váš zákazník firmou, stačí zadat
+                                        jeho IČO a zmáčknout tlačítko
+                                        [Načíst data z ARES]. Systém se pokusí
+                                        data načíst z centrální státní databáze
+                                        a vyplní většinu políček.
+                                    </li>
+
+                                    <li>
+                                        Pokud je zákazník prostý občan nebo je
+                                        systém ARES nefunkční, můžete jeho
+                                        údaje vypsat ručně.
+                                    </li>
                                 </ul>
                             </details>
 
                             <div class="customer-load-row">
 
+                                <fieldset class="invoice-section">
 
+                                    <legend>Existující zákazník</legend>
 
-                                    <fieldset class="invoice-section">
+                                    <div class="field-description">
+                                        Je zákazník, kterého jste si již
+                                        uložili v Bó systému.
+                                    </div>
 
-                                        <legend>Existující zákazník</legend>
+                                    <select
+                                        id="contact_id"
+                                        name="contact_id"
+                                    >
+                                        <option value="">
+                                            — vyberte zákazníka —
+                                        </option>
 
-                                        <div class="field-description">
-                                            Je zákazník, kterého jste si již uložili v Bó systému.
-                                        </div>
+                                        <?php foreach ($contacts as $contact): ?>
 
-                                        <select
-                                            id="contact_id"
-                                            name="contact_id"
-                                        >
-                                            <option value="">
-                                                — vyberte zákazníka —
+                                            <option
+                                                value="<?= $contact['id'] ?>"
+                                                <?= (int) (
+                                                    $invoice['contact_id'] ?? 0
+                                                ) === (int) $contact['id']
+                                                    ? 'selected'
+                                                    : '' ?>
+                                            >
+                                                <?= e(
+                                                    $contact['official_name']
+                                                ) ?>
                                             </option>
 
-                                            <?php foreach ($contacts as $contact): ?>
+                                        <?php endforeach; ?>
 
-                                                <option
-                                                    value="<?= $contact['id'] ?>"
-                                                    <?= (int) ($invoice['contact_id'] ?? 0)
-                                                            === $contact['id']
-                                                            ? 'selected'
-                                                            : '' ?>
-                                                >
-                                                    <?= e(($contact['official_name'])) ?>
-                                                </option>
+                                    </select>
 
-                                            <?php endforeach; ?>
+                                </fieldset>
 
-                                        </select>
 
-                                    </fieldset>
+                                <fieldset class="invoice-section">
 
-                                
-                                    <fieldset class="invoice-section">
+                                    <legend>IČO</legend>
 
-                                        <legend>IČO</legend>
+                                    <div class="field-description">
+                                        Osmimístné identifikační číslo
+                                        organizace. Pokud má méně než osm
+                                        číslic, doplňte zleva nuly.
+                                        U českých subjektů se ověřuje jeho
+                                        platnost.
+                                    </div>
 
-                                        <div class="field-description">
-                                            Osmimístné identifikační číslo organizace.
-                                            Pokud má méně než osm číslic, doplňte zleva nuly.
-                                            U českých subjektů se ověřuje jeho platnost.
-                                        </div>
+                                    <input
+                                        type="text"
+                                        name="ico"
+                                        value="<?= e(
+                                            $customer['ico'] ?? ''
+                                        ) ?>"
+                                    >
 
-                                        <input
-                                            type="text"
-                                            name="ico"
-                                            value="<?= e($data['ico'] ?? '') ?>"
-                                        >
+                                    <div data-ares-message hidden></div>
 
-                                        <div data-ares-message hidden></div>
+                                    <button
+                                        type="button"
+                                        data-ares-load
+                                        data-ares-url="<?= Url::to(
+                                            '/{tenant}/ajax/ares/ico'
+                                        ) ?>"
+                                    >
+                                        Načíst data z ARES
+                                    </button>
 
-                                        <button
-                                            type="button"
-                                            data-ares-load
-                                            data-ares-url="<?= Url::to('/{tenant}/ajax/ares/ico') ?>"
-                                        >
-                                            Načíst data z ARES
-                                        </button>
-
-                                    </fieldset>
-
-                                
+                                </fieldset>
 
                             </div>
+
 
                             <div class="customer-load-row">
 
                                 <fieldset class="invoice-section">
 
                                     <legend>
-                                        Jméno zákazníka / název firmy: <span class="req">*</span>
+                                        Jméno zákazníka / název firmy:
+                                        <span class="req">*</span>
                                     </legend>
 
                                     <input
                                         type="text"
                                         name="official_name"
-                                        value="<?= e($data['official_name'] ?? '') ?>"
+                                        value="<?= e(
+                                            $customer['official_name'] ?? ''
+                                        ) ?>"
                                         required
                                     >
 
                                     <details class="invoice-customer-help">
                                         <summary>?</summary>
+
                                         <p>
-                                            Zadejte celé jméno a příjmení nefiremního zákazníka
-                                            nebo název firmy. Bó systém nebo ARES vyplní automaticky.
+                                            Zadejte celé jméno a příjmení
+                                            nefiremního zákazníka nebo název
+                                            firmy. Bó systém nebo ARES vyplní
+                                            automaticky.
                                         </p>
+
                                     </details>
 
                                 </fieldset>
+
 
                                 <fieldset class="invoice-section">
 
@@ -224,15 +371,20 @@ $priceUnits = $data['price_units'] ?? [
                                     <input
                                         type="text"
                                         name="dic"
-                                        value="<?= e($data['dic'] ?? '') ?>"
+                                        value="<?= e(
+                                            $customer['dic'] ?? ''
+                                        ) ?>"
                                     >
 
                                     <details class="invoice-customer-help">
                                         <summary>?</summary>
+
                                         <p>
-                                            Daňové identifikační číslo, pokud ho subjekt má.
-                                            Uvádějte jen u zákazníků, kteří JSOU platci DPH.
+                                            Daňové identifikační číslo, pokud
+                                            ho subjekt má. Uvádějte jen
+                                            u zákazníků, kteří JSOU platci DPH.
                                         </p>
+
                                     </details>
 
                                 </fieldset>
@@ -241,77 +393,106 @@ $priceUnits = $data['price_units'] ?? [
 
                         </div>
 
+
                         <fieldset>
 
                             <legend>Adresa</legend>
 
                             <div class="form-group">
                                 <label>Ulice</label>
+
                                 <input
                                     type="text"
                                     name="street"
-                                    value="<?= e($data['street'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['street'] ?? ''
+                                    ) ?>"
                                 >
                             </div>
 
                             <div class="form-group">
                                 <label>Číslo domu</label>
+
                                 <input
                                     type="text"
                                     name="house_number"
-                                    value="<?= e($data['house_number'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['house_number'] ?? ''
+                                    ) ?>"
                                 >
                             </div>
 
                             <div class="form-group">
                                 <label>Číslo orientační</label>
+
                                 <input
                                     type="text"
                                     name="orientation_number"
-                                    value="<?= e($data['orientation_number'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['orientation_number'] ?? ''
+                                    ) ?>"
                                 >
                             </div>
 
                             <div class="form-group">
                                 <label>Část obce</label>
+
                                 <input
                                     type="text"
                                     name="city_part"
-                                    value="<?= e($data['city_part'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['city_part'] ?? ''
+                                    ) ?>"
                                 >
                             </div>
 
                             <div class="form-group">
-                                <label>Město <span class="req">*</span></label>
+                                <label>
+                                    Město <span class="req">*</span>
+                                </label>
+
                                 <input
                                     type="text"
                                     name="city"
-                                    value="<?= e($data['city'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['city'] ?? ''
+                                    ) ?>"
                                     required
                                 >
                             </div>
 
                             <div class="form-group">
-                                <label>PSČ<span class="req">*</span></label>
+                                <label>
+                                    PSČ <span class="req">*</span>
+                                </label>
+
                                 <input
                                     type="text"
                                     name="postal_code"
-                                    value="<?= e($data['postal_code'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['postal_code'] ?? ''
+                                    ) ?>"
                                     required
                                 >
                             </div>
 
                             <div class="form-group">
-                                <label>Stát<span class="req">*</span></label>
+                                <label>
+                                    Stát <span class="req">*</span>
+                                </label>
+
                                 <input
                                     type="text"
                                     name="country_code"
-                                    value="<?= e($data['country_code'] ?? 'CZ') ?>"
+                                    value="<?= e(
+                                        $customer['country_code'] ?? 'CZ'
+                                    ) ?>"
                                     required
                                 >
                             </div>
 
                         </fieldset>
+
 
                         <fieldset>
 
@@ -319,38 +500,49 @@ $priceUnits = $data['price_units'] ?? [
 
                             <div class="form-group">
                                 <label>Ulice a číslo domu</label>
+
                                 <input
                                     type="text"
                                     name="delivery_address_1"
-                                    value="<?= e($data['delivery_address_1'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['delivery_address_1'] ?? ''
+                                    ) ?>"
                                 >
                             </div>
 
                             <div class="form-group">
                                 <label>Část obce</label>
+
                                 <input
                                     type="text"
                                     name="delivery_address_2"
-                                    value="<?= e($data['delivery_address_2'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['delivery_address_2'] ?? ''
+                                    ) ?>"
                                 >
                             </div>
 
                             <div class="form-group">
                                 <label>Město a PSČ</label>
+
                                 <input
                                     type="text"
                                     name="delivery_address_3"
-                                    value="<?= e($data['delivery_address_3'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['delivery_address_3'] ?? ''
+                                    ) ?>"
                                 >
                             </div>
 
                         </fieldset>
+
 
                         <fieldset>
 
                             <legend>Kontakt</legend>
 
                             <div class="form-group">
+
                                 <label for="email">
                                     E-mail pro zasílání faktur
                                 </label>
@@ -359,11 +551,15 @@ $priceUnits = $data['price_units'] ?? [
                                     type="email"
                                     id="email"
                                     name="email"
-                                    value="<?= e($data['email'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['email'] ?? ''
+                                    ) ?>"
                                 >
+
                             </div>
 
                             <div class="form-group">
+
                                 <label for="phone">
                                     Telefon
                                 </label>
@@ -372,17 +568,22 @@ $priceUnits = $data['price_units'] ?? [
                                     type="text"
                                     id="phone"
                                     name="phone"
-                                    value="<?= e($data['phone'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['phone'] ?? ''
+                                    ) ?>"
                                 >
+
                             </div>
 
                         </fieldset>
+
 
                         <fieldset>
 
                             <legend>Bankovní spojení</legend>
 
                             <div class="form-group">
+
                                 <label for="bank_account">
                                     Číslo účtu
                                 </label>
@@ -391,11 +592,15 @@ $priceUnits = $data['price_units'] ?? [
                                     type="text"
                                     id="bank_account"
                                     name="bank_account"
-                                    value="<?= e($data['bank_account'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['bank_account'] ?? ''
+                                    ) ?>"
                                 >
+
                             </div>
 
                             <div class="form-group">
+
                                 <label for="bank_code">
                                     Kód banky
                                 </label>
@@ -404,16 +609,21 @@ $priceUnits = $data['price_units'] ?? [
                                     type="text"
                                     id="bank_code"
                                     name="bank_code"
-                                    value="<?= e($data['bank_code'] ?? '') ?>"
+                                    value="<?= e(
+                                        $customer['bank_code'] ?? ''
+                                    ) ?>"
                                     maxlength="10"
                                 >
+
                             </div>
 
                         </fieldset>
 
+
                         <div class="form-group customer-save">
 
                             <label>
+
                                 <input
                                     type="checkbox"
                                     name="save_customer"
@@ -426,6 +636,7 @@ $priceUnits = $data['price_units'] ?? [
 
                                 Uložit nového zákazníka /
                                 uložit případné změny
+
                             </label>
 
                         </div>
@@ -1324,4 +1535,4 @@ $priceUnits = $data['price_units'] ?? [
 </div>
 
 
-<?php require __DIR__ . '/../layout/footer.php'; ?>
+<?php require __DIR__ . '/../layout/footer.php'; 

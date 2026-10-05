@@ -15,6 +15,7 @@ use App\Models\InternalInvoiceModel;
 use App\Models\SettingsModel;
 use App\Models\TaskModel;
 use App\Models\WorkOrderModel;
+use App\Models\CompanyModel;
 use App\Services\Settings\SettingsService;
 use App\Services\Tasks\TaskStatus;
 use App\Services\Tasks\TaskType;
@@ -74,9 +75,8 @@ final class InvoiceService
             ->find( $task['work_order_id']);
 
         if ($workOrder === null) {
-            throw new RuntimeException(
-                'Zakázka nebyla nalezena.'
-            );
+            Flash::error('Zakázka nebyla nalezena.');
+            Url::back();
         }
 
         $contactId = isset($workOrder['contact_id'])
@@ -86,6 +86,13 @@ final class InvoiceService
         $customer = $contactId > 0
             ? (new ContactsModel())->find($contactId)
             : null;
+
+        $supplier = (new CompanyModel())->billingData($task['company_id']);
+
+        if ($supplier === null) {
+            Flash::error('Údaje dodavatele nebyly nalezeny.');
+            Url::back();
+        }
 
         $customerData = $this->buildCustomerData($customer);
 
@@ -112,6 +119,8 @@ final class InvoiceService
                 'contact_id' => $contactId,
                 'currency' => 'CZK',
             ],
+
+            'supplier' => $supplier,
 
             'customer' => $customerData,
 
