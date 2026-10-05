@@ -120,7 +120,7 @@ public function login(): string
     ) {
         // 1️⃣ Rate limit
 			$row = (new RateLimiterService())->tooManyAttempts(
-			    action:        self::BAD_LOGIN,
+			 action:        self::BAD_LOGIN,
              tenant:        $tenant,
              email:         $email,
 			);

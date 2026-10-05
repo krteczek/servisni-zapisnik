@@ -21,7 +21,7 @@ use App\Core\Session;
 use App\Core\Config;
 use App\Core\Database;
 use App\Core\Auth;
-use App\Core\Roles;
+use App\Core\Url;
 use App\Services\Guards\BanService;
 
 
@@ -97,9 +97,14 @@ Session::start();
 // -------------------------------------------------
 // ❗ PRVNÍ A NATVRDO PŘIPOJENÍ K DB = ADMIN
 // -------------------------------------------------
-//Database::admin();
 
-if (Auth::check() && Session::has('user.company_db_name')) {
+if (Auth::check()) {
+    $user = Auth::user();
+
+    if ($user === null) {
+        Url::redirect('/login');
+    }
+
     Database::useWorkDatabase(
         Session::get('user.company_db_name')
     );

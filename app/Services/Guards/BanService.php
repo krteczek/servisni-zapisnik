@@ -42,4 +42,11 @@ class BanService
 	   return unpack('N', hash('xxh32', $ip . '|' . $ua, true))[1];
 	}
 
+    /** metoda volá odhlášení v Auth */
+    public static function banLogout(string $type): void
+    {
+        self::ban($type);
+
+        Auth::banLogout();
+    }
 }
