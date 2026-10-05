@@ -97,7 +97,7 @@ final class ContactsController extends Controller
             'notes'              => $_POST['notes'] ?? '',
         ]);
 
-        if (!$validator->isValid()) {
+        if (!$validator->isValid() || $this->hasErrors() === true) {
             $this->view->errors = $validator->getErrors();
             $this->view->data = $data;
 
@@ -191,7 +191,7 @@ final class ContactsController extends Controller
             'notes'              => $_POST['notes'] ?? '',
         ]);
 
-        if (!$validator->isValid()) {
+        if (!$validator->isValid() || $this->hasErrors() === true) {
             $this->setSessionCheck('manual_contact_id', $id);
 
             $this->view->errors = $validator->getErrors();
@@ -325,6 +325,13 @@ final class ContactsController extends Controller
             return $this->render('contacts/aresEdit');
         }
 
+        if($this->hasErrors() === true)
+        {
+            $this->view->data = $contact;
+            return $this->render('contacts/aresEdit'); 
+
+        }
+
         $aresData = $ares['data'];
 
         /*
@@ -376,7 +383,7 @@ final class ContactsController extends Controller
             $this->view->errors = $validator->getErrors();
             $this->view->data = $validatedData;
 
-            return $this->render('contacts/ares-edit');
+            return $this->render('contacts/aresEdit');
         }
 
         $ok = $this->model->update($id, $validatedData);

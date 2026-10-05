@@ -30,7 +30,7 @@ $errors    = $view->errors;
 
 <?php else : ?>
 
-
+Zatím nemáme nic k tomu vytvořeno, jakože rozhraní
 
 <?php endif; ?>
 

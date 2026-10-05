@@ -5,6 +5,8 @@ namespace App\Models;
 
 use App\Core\Database;
 use PDO;
+use Throwable;
+use App\Core\LoggerHolder;
 
 /**
  * Model pro správu společností (tenantů) v multi-tenant architektuře.
@@ -184,5 +186,88 @@ public function findOtherCompanyByIco(string $ico, int $companyId): ?array
             'company_id' => $companyId,
         ]
     );
+}
+
+/**
+ * Vrátí údaje aktuální společnosti potřebné pro fakturaci.
+ *
+ * Obsahuje základní údaje společnosti, údaje z company_details
+ * a všechny aktivní bankovní účty.
+ *
+ * @param int $companyId ID společnosti
+ * @return array<string, mixed>|null
+ */
+public function billingData(int $companyId): ?array
+{
+        $sql = "SELECT
+                    c.id,
+                    c.ico,
+                    cd.official_name,
+                    cd.dic,
+                    cd.street,
+                    cd.house_number,
+                    cd.orientation_number,
+                    cd.city_part,
+                    cd.city,
+                    cd.postal_code,
+                    cd.country_code
+                FROM {$this->tableName} c
+                INNER JOIN company_details cd
+                    ON cd.company_id = c.id
+                WHERE c.id = :company_id
+                LIMIT 1";
+    $bankAccounts = [];
+
+    try{
+        // 1. Údaje společnosti + company_details
+
+        $stmt = $this->db()->prepare($sql);
+        $stmt->execute([
+            'company_id' => $companyId,
+        ]);
+
+        $supplier = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($supplier === false) {
+            return null;
+        }
+
+        // 2. Aktivní bankovní účty
+        $bankAccounts = (new CompanyBankAccountModel())->activeForCompany();
+
+        
+
+        return [
+            'id' => (int) $supplier['id'],
+            'official_name' => (string) $supplier['official_name'],
+            'ico' => (string) $supplier['ico'],
+            'dic' => (string) ($supplier['dic'] ?? ''),
+            'street' => (string) ($supplier['street'] ?? ''),
+            'house_number' => (string) ($supplier['house_number'] ?? ''),
+            'orientation_number' => (string) ($supplier['orientation_number'] ?? ''),
+            'city_part' => (string) ($supplier['city_part'] ?? ''),
+            'city' => (string) ($supplier['city'] ?? ''),
+            'postal_code' => (string) ($supplier['postal_code'] ?? ''),
+            'country_code' => (string) ($supplier['country_code'] ?? 'CZ'),
+            'bank_accounts' => $bankAccounts,
+        ];
+    
+        } catch (Throwable $e) {
+            LoggerHolder::get()->error(
+                'CompanyModel.billingData FAILED',
+                [
+                    'company_id' => $companyId,
+                    'message'    => $e->getMessage(),
+                    'file'       => $e->getFile(),
+                    'line'       => $e->getLine(),
+                    'sql'        => $sql,
+                    
+                ]
+            );
+
+            return null;
+        }
+
+
 }
 }

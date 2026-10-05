@@ -38,6 +38,7 @@ public function createFromTask(int $id): string
     try {
         $this->view->data = $this->invoice->buildDraftFromTask($id);
         $this->view->contacts = (new ContactsModel())->all();
+        dc($this->view->data);
         return $this->render('invoices/create-from-task');
 
     } catch (Throwable $e) {
@@ -74,6 +75,11 @@ public function createFromTask(int $id): string
         }
 
         $this->checkCsrf();
+        if($this->hasErrors() === true)
+        {
+            Flash::error($this->getError('_csrf'));
+            Url::back();
+        }
 
         try {
             /** 
@@ -82,7 +88,7 @@ public function createFromTask(int $id): string
              *      'success'    => true, bool
              *      'invoice_id' => $invoiceId, int
              *      'errors'     => [], array list
-             *      'data'       => [], array list
+             *      'data'       => [], array list 
              * ];
 
              */
