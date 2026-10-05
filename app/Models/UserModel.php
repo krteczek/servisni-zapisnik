@@ -218,4 +218,30 @@ public function activateUser(int $id, string $hash): ?array
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    /**
+     * Zvýší session_version uživatele a tím zneplatní jeho aktuální session.
+     *
+     * @param int $id ID uživatele
+     * @return bool TRUE pokud byl uživatel nalezen a verze zvýšena
+     */
+    public function incrementSessionVersion(int $id): bool
+    {
+        $where = $this->applyTenant(['id' => $id]);
+
+        $sql = "
+            UPDATE {$this->tableName}
+            SET session_version = session_version + 1
+            WHERE id = :id
+            AND {$this->tenantColumn} = :{$this->tenantColumn}
+            LIMIT 1
+        ";
+
+        $stmt = $this->db()->prepare($sql);
+
+        $ok = $stmt->execute($where);
+
+        return $ok && $stmt->rowCount() === 1;
+    }
 }

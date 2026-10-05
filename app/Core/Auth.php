@@ -276,7 +276,20 @@ class Auth
         self::$cachedUser = null;
     }
 
-    /* ========================= HELPERY ========================= */
+
+    public static function banLogout(): void
+    {
+        $userId = self::id();
+
+        if ($userId !== null) {
+            (new UserModel())->incrementSessionVersion($userId);
+        }
+
+        self::logout();
+    }
+
+
+        /* ========================= HELPERY ========================= */
 
     /**
      * Vrátí efektivní roli uživatele s ohledem na role-switching.
