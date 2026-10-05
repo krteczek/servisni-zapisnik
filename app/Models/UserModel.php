@@ -128,28 +128,29 @@ public function activateUser(int $id, string $hash): ?array
      * @param int $companyId
      * @return array<string, mixed>|null
      */
-	public function findByEmailAndCompany(
-	    string $email,
-	    int $companyId
-	): ?array {
-	    $sql = "
-	        SELECT *
-	        FROM {$this->table}
-	        WHERE email = :email
-	          AND company_id = :company
-	          AND active = 1
-	        LIMIT 1
-	    ";
-	
-	    $stmt = $this->db()->prepare($sql);
-	    $stmt->execute([
-	        'email'   => strtolower(trim($email)),
-	        'company' => $companyId,
-	    ]);
-	
-	    return $stmt->fetch() ?? null;
-	}
+public function findByEmailAndCompany(
+    string $email,
+    int $companyId
+): ?array {
+    $sql = "
+        SELECT *
+        FROM {$this->table}
+        WHERE email = :email
+          AND company_id = :company
+          AND active = 1
+        LIMIT 1
+    ";
 
+    $stmt = $this->db()->prepare($sql);
+    $stmt->execute([
+        'email'   => strtolower(trim($email)),
+        'company' => $companyId,
+    ]);
+
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $result !== false ? $result : null;
+}
     /**
      * @param int $teamId
      * @return array<int, array<string, mixed>>

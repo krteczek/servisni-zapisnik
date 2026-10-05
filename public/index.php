@@ -105,9 +105,22 @@ if (Auth::check()) {
         Url::redirect('/login');
     }
 
-    Database::useWorkDatabase(
-        Session::get('user.company_db_name')
-    );
+    $dbName = Auth::dbName();
+
+    if ($dbName === null || $dbName === '') {
+        LoggerHolder::get()->error(
+            'Authenticated user has no work database name',
+            [
+                'user_id' => Auth::id(),
+                'company_id' => Auth::companyId(),
+            ]
+        );
+
+        Auth::logout();
+        Url::redirect('/login');
+    }
+
+    Database::useWorkDatabase($dbName);
 }
 // -------------------------------------------------
 // Routing
