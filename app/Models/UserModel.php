@@ -82,36 +82,47 @@ class UserModel extends BaseModel
     /* ==========================================================
      * PASSWORD
      * ========================================================== */
+    /**
+     * @param int $id
+     * @param string $hash
+     * @return array{ok: bool, result: string}
+     */
 /**
- * @param int $id
- * @param string $hash
- * @return array<string, mixed>|null
+ * Aktivuje dosud neaktivního uživatele v aktuálním tenantovi.
+ *
+ * @return array{ok: bool, result: string}
  */
-public function activateUser(int $id, string $hash): ?array
+public function activateUser(int $id, string $hash): array
 {
-	     
+    $where = $this->applyTenant(['id' => $id]);
+
     $sql = "
         UPDATE {$this->tableName}
         SET password_hash = :hash,
             active = 1
         WHERE id = :id
+          AND {$this->tenantColumn} = :{$this->tenantColumn}
+          AND active = 0
         LIMIT 1
     ";
 
     $stmt = $this->db()->prepare($sql);
-
-     $ok = $stmt->execute([
+    $stmt->execute([
         'hash' => $hash,
-        'id'   => $id,
+        ...$where,
     ]);
-		
-		if (!$ok) {
-			return ['ok' => false, 'result' => 'Uživatele se nepodařilo aktivovat'];
-		}
 
-		return ['ok' => $stmt->rowCount() === 1, 'result' => 'Uživatel byl aktivován.'];
-		//return $ok;
+    if ($stmt->rowCount() !== 1) {
+        return [
+            'ok' => false,
+            'result' => 'Uživatele se nepodařilo aktivovat.',
+        ];
+    }
 
+    return [
+        'ok' => true,
+        'result' => 'Uživatel byl aktivován.',
+    ];
 }
 
     public function setPassword(int $id, string $hash): bool
@@ -128,29 +139,30 @@ public function activateUser(int $id, string $hash): ?array
      * @param int $companyId
      * @return array<string, mixed>|null
      */
-public function findByEmailAndCompany(
-    string $email,
-    int $companyId
-): ?array {
-    $sql = "
-        SELECT *
-        FROM {$this->table}
-        WHERE email = :email
-          AND company_id = :company
-          AND active = 1
-        LIMIT 1
-    ";
+    public function findByEmailAndCompany(
+        string $email,
+        int $companyId
+    ): ?array {
+        $sql = "
+            SELECT *
+            FROM {$this->table}
+            WHERE email = :email
+            AND company_id = :company
+            AND active = 1
+            LIMIT 1
+        ";
 
-    $stmt = $this->db()->prepare($sql);
-    $stmt->execute([
-        'email'   => strtolower(trim($email)),
-        'company' => $companyId,
-    ]);
+        $stmt = $this->db()->prepare($sql);
+        $stmt->execute([
+            'email'   => strtolower(trim($email)),
+            'company' => $companyId,
+        ]);
 
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return $result !== false ? $result : null;
-}
+        return $result !== false ? $result : null;
+    }
+
     /**
      * @param int $teamId
      * @return array<int, array<string, mixed>>

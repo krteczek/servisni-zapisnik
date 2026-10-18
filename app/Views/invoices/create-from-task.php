@@ -278,7 +278,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                                 value="<?= $contact['id'] ?>"
                                                 <?= (int) (
                                                     $invoice['contact_id'] ?? 0
-                                                ) === (int) $contact['id']
+                                                ) === $contact['id']
                                                     ? 'selected'
                                                     : '' ?>
                                             >
