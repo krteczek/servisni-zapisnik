@@ -14,6 +14,7 @@ use App\Core\LoggerHolder;
 use App\Core\Transaction;
 use Throwable;
 use App\Core\TenantContext;
+use App\Exceptions\OperationFailedException;
 use PDO;
 
 
@@ -44,6 +45,12 @@ final class UserActivationService
             ];
         }
 
+        if (!in_array($type, [TokenType::INVITATION, TokenType::PASSWORD_RESET], true)) {
+                    return [
+                        'ok' => false,
+                        'result' => 'Nepodporovaný typ tokenu.',
+                    ];
+        }
         try {
 			    $result = Transaction::run(
 			        function (PDO $db) use ($password, $rawToken, $type) {
@@ -53,12 +60,16 @@ final class UserActivationService
 			            if ($tokenData['ok'] === false) {
 			                return $tokenData;
 			            }
-                        
-                        if ($tokenData['data']['id'] <= 0) {
-                            return ['ok' => false, 'result' => 'Token neobsahuje uživatele.'];
-                        }
-                        $userId = $tokenData['data']['user_id'];
+                        $userId = $tokenData['data']['user_id'] ?? null;
 
+                        if ($userId === null || (int) $userId <= 0) {
+                            throw new OperationFailedException(
+                                'Token neobsahuje platného uživatele.'
+                            );
+                        }
+
+                        $userId = (int) $userId;
+ 
 				        $user = $this->userModel->findByIdWithoutTenant($userId);
 				        if ($user === null) {
 				            return [
@@ -102,6 +113,12 @@ final class UserActivationService
 				     "result" => $result["result"],
 				 ];
 
+
+        } catch (OperationFailedException $e) {
+            return [
+                'ok' => false,
+                'result' => $e->getMessage(),
+            ];
 
         } catch (Throwable $e) {
 
@@ -155,7 +172,7 @@ final class UserActivationService
 	        try {
 	        	   // pošleme email:
 	        	     //[$subject, $htmlBody, $textBody] = BuildMailService::($user);
-	        	     [$subject, $htmlBody, $textBody] = BuildMailService::build('user.not-active');
+	        	     [$subject, $htmlBody, $textBody] = BuildMailService::build('users.not-active');
 
 			        $ok = (new MailService())->send(
 			  				toEmail:  $user['email'],

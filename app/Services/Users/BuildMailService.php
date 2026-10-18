@@ -36,107 +36,105 @@ final class BuildMailService
 	    }
 	}
 
-/**
- * @param string $template
- * @param array{
- *   activationUrl?: string,
- *   companyName?: string|null,
- *   expiresMinutes?: string,
- *   user?: string,
- *   ico?: string,
- *   email?: string,
- *   loginLink?: string,
- *   first_name?: string,
- *   last_name?: string
- * } $data
- * @return array<string, mixed> $data
- */
+    /**
+     * @param string $template
+     * @param array{
+     *   activationUrl?: string,
+     *   companyName?: string|null,
+     *   expiresMinutes?: string,
+     *   user?: string,
+     *   ico?: string,
+     *   email?: string,
+     *   loginLink?: string,
+     *   first_name?: string,
+     *   last_name?: string
+     * } $data
+     * @return array<string, mixed> $data
+     */
+    private static function enrichData(string $template, array $data): array
+    {
+
+        // expirace podle typu template
+        if (!isset($data['expiresMinutes'])) {
+            $map = [
+                'users.registration'   => TokenType::COMPANY_CREATE,
+                'users.invitation'     => TokenType::INVITATION,
+                'users.reset-password' => TokenType::PASSWORD_RESET,
+            ];
+
+            if (isset($map[$template])) {
+                $data['expiresMinutes'] = self::expiresHuman($map[$template]);
+            }
+        }
+
+        $data['loginLink'] = '<a href="' . Url::base() . '">Bó systém: login</a>';
 
 
-private static function enrichData(string $template, array $data): array
-{
+        if (array_key_exists('first_name', $data) &&array_key_exists('last_name', $data))
+        {
+            $data['user'] = $data['first_name'] . ' ' . $data['last_name'];
+        }
 
-    // expirace podle typu template
-    if (!isset($data['expiresMinutes'])) {
+
+        return $data;
+    }
+
+
+
+    /**
+     * @param string $template
+     * @param array{
+     *   activationUrl?: string,
+     *   companyName?: string|null,
+     *   expiresMinutes?: string,
+     *   user?: string,
+     *   ico?: string,
+     *   email?: string,
+     *   loginLink?: string,
+     *   first_name?: string,
+     *   last_name?: string
+     * } $data
+     * @return array{0:string,1:string,2:string}
+     */
+    public static function build(string $template, array $data = []): array
+    {
+
         $map = [
-            'users.registration'   => TokenType::COMPANY_CREATE,
-            'users.invitation'     => TokenType::INVITATION,
-            'users.reset-password' => TokenType::PASSWORD_RESET,
+            'users.not-active'     => 'Informace o účtu',
+            'users.reset-password' => 'Obnovení hesla',
+            'users.invitation'     => 'Pozvánka do aplikace',
+            'users.registration'   => 'Dokončení registrace',
+            'users.registration-success' => 'Registrace dokončena',
         ];
 
-        if (isset($map[$template])) {
-            $data['expiresMinutes'] = self::expiresHuman($map[$template]);
-        }
+        // 👉 AUTO DATA (dle template)
+        $data = self::enrichData($template, $data);
+
+        self::validate($template, $data);
+
+        $subject = $map[$template] ?? 'Zpráva z aplikace';
+        $data['title'] = $subject;
+
+        $html = MailView::renderHtml(str_replace('.', '/', $template), $data);
+        $text = MailView::renderText(str_replace('.', '/', $template), $data);
+
+        //$text = strip_tags($html);
+
+        return [$subject, $html, $text];
     }
 
-    $data['loginLink'] = '<a href="' . Url::base() . '">Bó systém: login</a>';
-
-
-    if (array_key_exists('first_name', $data) &&array_key_exists('last_name', $data))
+    public static function expiresHuman(string $type): string
     {
-    	$data['user'] = $data['first_name'] . ' ' . $data['last_name'];
+        $minutes = (int) Config::get('tokenExpires.' . $type);
+
+        if ($minutes < 60) {
+            return "$minutes minut";
+        }
+
+        if ($minutes < 1440) {
+            return floor($minutes / 60) . " hodin";
+        }
+
+        return floor($minutes / 1440) . " dní";
     }
-
-
-    return $data;
-}
-
-
-
-/**
- * @param string $template
- * @param array{
- *   activationUrl?: string,
- *   companyName?: string|null,
- *   expiresMinutes?: string,
- *   user?: string,
- *   ico?: string,
- *   email?: string,
- *   loginLink?: string,
- *   first_name?: string,
- *   last_name?: string
- * } $data
- * @return array{0:string,1:string,2:string}
- */
-public static function build(string $template, array $data = []): array
-{
-
-    $map = [
-        'users.not-active'     => 'Informace o účtu',
-        'users.reset-password' => 'Obnovení hesla',
-        'users.invitation'     => 'Pozvánka do aplikace',
-        'users.registration'   => 'Dokončení registrace',
-        'users.registration-success' => 'Registrace dokončena',
-    ];
-
-    // 👉 AUTO DATA (dle template)
-    $data = self::enrichData($template, $data);
-
-	 self::validate($template, $data);
-
-    $subject = $map[$template] ?? 'Zpráva z aplikace';
-    $data['title'] = $subject;
-
-    $html = MailView::renderHtml(str_replace('.', '/', $template), $data);
-    $text = MailView::renderText(str_replace('.', '/', $template), $data);
-
-    //$text = strip_tags($html);
-
-    return [$subject, $html, $text];
-}
-
-public static function expiresHuman(string $type): string
-{
-    $minutes = (int) Config::get('tokenExpires.' . $type);
-
-    if ($minutes < 60) {
-        return "$minutes minut";
-    }
-
-    if ($minutes < 1440) {
-        return floor($minutes / 60) . " hodin";
-    }
-
-    return floor($minutes / 1440) . " dní";
-}
 }
