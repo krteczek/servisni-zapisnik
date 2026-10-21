@@ -78,7 +78,7 @@ $active = active($user);
             <form method="post" action="<?= Url::to('/{tenant}/users/' . $user['id'] . '/resend-activation') ?>">
             <div class="form-actions">
 
-                <?php if ($user['password_hash'] === ''): ?>
+                <?php if ($user['password_hash'] === null): ?>
                     
                         <?= Csrf::getField() ?>
                         <button type="submit" class="btn btn-primary">

@@ -62,20 +62,20 @@ final class UserActivationService
 			            }
                         $userId = $tokenData['data']['user_id'] ?? null;
 
-                        if ($userId === null || (int) $userId <= 0) {
+                        if ($userId === null || $userId <= 0) {
                             throw new OperationFailedException(
                                 'Token neobsahuje platného uživatele.'
                             );
                         }
 
-                        $userId = (int) $userId;
- 
-				        $user = $this->userModel->findByIdWithoutTenant($userId);
+                        $user = $this->userModel->findByIdWithoutTenant($userId);
 				        if ($user === null) {
+                            throw new OperationFailedException('Uživatel neexistuje.');
+                            /** 
 				            return [
 				                "ok" => false,
 				                "result" => "Uživatel neexistuje."
-				            ];
+				            ]; */
 				        }
                         if (
                             !isset($user['company_id'])
@@ -88,15 +88,10 @@ final class UserActivationService
 
 			            if($type === TokenType::INVITATION)
 			            {
-                        return $this->handleInvitation($user, $password);
+                            return $this->handleInvitation($user, $password);
 			            }
 
-			            if($type === TokenType::PASSWORD_RESET)
-			            {
-                        return $this->handlePasswordReset($user, $password);
-			            }
-
-			            throw new \InvalidArgumentException("Unknown Token type: {$type}");
+			            return $this->handlePasswordReset($user, $password);
 
 			        },
 			        'admin'
@@ -139,26 +134,38 @@ final class UserActivationService
         }
     }
 
+   
     /**
      * @param array<string, mixed> $user
      * @param string $password
-     * @return array<string, mixed>
+     * @return array{ok: bool, result: string}
      */
     private function handleInvitation(array $user, string $password): array
     {
-
-        if ((int)$user["active"] === 1) {
-            return ["ok" => false, "result" => "Účet je již aktivní"];
+        // Token se spotřebuje, i když je účet již aktivní.
+        if ((int) $user['active'] === 1) {
+            return [
+                'ok' => false,
+                'result' => 'Účet je již aktivní.',
+            ];
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
         $row = $this->userModel->activateUser((int) $user['id'], $hash);
 
-        return $row['ok'] === false
-            ? ["ok" => false, "result" => "Uživatele se nepodařilo aktivovat."]
-            : ["ok" => true, "result" => "Uživatel byl úspěšně aktivován."];
+        if (!$row['ok']) {
+            throw new OperationFailedException(
+                'Uživatele se nepodařilo aktivovat.'
+            );
+        }
+
+        return [
+            'ok' => true,
+            'result' => 'Uživatel byl úspěšně aktivován.',
+        ];
     }
+
 
     /**
      * @param array<string, mixed> $user
@@ -198,14 +205,17 @@ final class UserActivationService
                 "ok" => false,
                 "result" => "Váš účet není aktivní, zřejmě byl administrátorem pozastaven..."];
         }
-
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
-        $row = $this->userModel->setPassword($user['id'], $hash);
+        if (!$this->userModel->setPassword((int) $user['id'], $hash)) {
+            throw new OperationFailedException('Heslo nebylo změněno.');
+        }
 
-        return !$row
-            ? ["ok" => false, "result" => "Heslo nebylo změněno."]
-            : ["ok" => true, "result" => "Heslo bylo úspěšně změněno."];
+        return [
+            'ok' => true,
+            'result' => 'Heslo bylo úspěšně změněno.',
+        ];
+
     }
 
 
