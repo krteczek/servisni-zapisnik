@@ -332,7 +332,7 @@ use App\Services\Tokens\TokenResult;
  *     email: string,
  *     employee_number: string,
  *     telefon: string,
- *     password_hash: string,
+ *     password_hash: ?string,
  *     first_name: string,
  *     last_name: string,
  *     global_role: string,
