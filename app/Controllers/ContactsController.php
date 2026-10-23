@@ -74,9 +74,9 @@ final class ContactsController extends Controller
     {
         $this->checkCsrf();
 
-        $validator = new ContactValidator();
+        $contactValidator = new ContactValidator($this->validator);
 
-        $data = $validator->validate([
+        $data = $contactValidator->validate([
             'official_name'      => $_POST['official_name'] ?? '',
             'ico'                => $_POST['ico'] ?? '',
             'dic'                => $_POST['dic'] ?? '',
@@ -97,8 +97,8 @@ final class ContactsController extends Controller
             'notes'              => $_POST['notes'] ?? '',
         ]);
 
-        if (!$validator->isValid() || $this->hasErrors() === true) {
-            $this->view->errors = $validator->getErrors();
+        if (!$this->validator->isValid() || $this->hasErrors() === true) {
+            $this->view->errors = $this->validator->getErrors();
             $this->view->data = $data;
 
             return $this->render('contacts/create');
@@ -168,9 +168,9 @@ final class ContactsController extends Controller
 
         $contact = $this->getContactOrRedirect($id);
 
-        $validator = new ContactValidator();
+        $contactValidator = new ContactValidator($this->validator);
 
-        $data = $validator->validate([
+        $data = $contactValidator->validate([
             'official_name'      => $_POST['official_name'] ?? '',
             'ico'                => $_POST['ico'] ?? '',
             'dic'                => $_POST['dic'] ?? '',
@@ -191,10 +191,10 @@ final class ContactsController extends Controller
             'notes'              => $_POST['notes'] ?? '',
         ]);
 
-        if (!$validator->isValid() || $this->hasErrors() === true) {
+        if (!$this->validator->isValid() || $this->hasErrors() === true) {
             $this->setSessionCheck('manual_contact_id', $id);
 
-            $this->view->errors = $validator->getErrors();
+            $this->view->errors = $this->validator->getErrors();
             $this->view->data = array_merge($contact, $data);
 
             return $this->render('contacts/manualEdit');
@@ -374,13 +374,13 @@ final class ContactsController extends Controller
          * Validujeme až výsledná data.
          * Tím se validují i hodnoty převzaté z ARES.
          */
-        $validator = new ContactValidator();
-        $validatedData = $validator->validate($data);
+        $contactValidator = new ContactValidator($this->validator);
+        $validatedData = $contactValidator->validate($data);
 
-        if (!$validator->isValid()) {
+        if (!$this->validator->isValid()) {
             $this->setSessionCheck('ares_contact_id', $id);
 
-            $this->view->errors = $validator->getErrors();
+            $this->view->errors = $this->validator->getErrors();
             $this->view->data = $validatedData;
 
             return $this->render('contacts/aresEdit');
