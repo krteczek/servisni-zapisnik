@@ -37,16 +37,14 @@ abstract class Controller
     public function __construct(ViewContext $view)
     {
         $this->view = $view;
-        //$this->view->errors ??= [];
-        //$this->view->data   ??= [];
-
+ 
         // obecná validační třída
         $this->validator = new Validator();
 
         // TODO: [MAINTENANCE] Přesunout logiku přepínání databází do middleware nebo samostatné služby
         // TODO: [PERFORMANCE] Zvážit cachování databázového připojení na úrovni requestu
         if (Auth::check()) {
-            $db = Session::get('user.db_name');
+            $db = Auth::dbName();
             if ($db !== null && $db !== '') {
                 Database::useWorkDatabase($db);
             }
@@ -65,13 +63,18 @@ abstract class Controller
      */
     protected function render(string $template): string
     {
-        $view = $this->view;
+        foreach ($this->getErrors() as $field => $messages) {
+            $this->view->errors[$field] = array_values(array_unique([
+                ...($this->view->errors[$field] ?? []),
+                ...$messages,
+            ]));
+        }
 
+        $view = $this->view;
         ob_start();
         require __DIR__ . '/../Views/' . $template . '.php';
         return (string) ob_get_clean();
     }
-
 
     /* =========================
        COMMON PAGES
