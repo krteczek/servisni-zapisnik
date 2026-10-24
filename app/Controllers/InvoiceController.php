@@ -94,13 +94,13 @@ public function createFromTask(int $id): string
              */
             $result = $this->invoice->invoiceFromTask(
                 $id,
-                $_POST
+                $_POST,
+    $this->validator
             );
 
             if ($result['success'] === false) {
                 $this->setSessionCheck('task_id', $id);
 
-                $this->view->errors = $result['errors'];
                 $this->view->data   = $result['data'];
                 $this->view->contacts = (new ContactsModel())->all();
                 return $this->render('invoices/create-from-task');

@@ -8,6 +8,10 @@ use DateTimeImmutable;
 
 final class InvoiceValidator
 {
+    public function __construct(private Validator $validator)
+    {
+    }
+
     /**
      * Zvaliduje vstupní data faktury.
      *
@@ -30,62 +34,60 @@ final class InvoiceValidator
      */
     public function validate(array $post): array
     {
-        /** @var array<string, list<string>> $errors */
-        $errors = [];
-
         $title = trim((string) ($post['title'] ?? ''));
         $issuedAt = trim((string) ($post['issued_at'] ?? ''));
         $dueDate = trim((string) ($post['due_date'] ?? ''));
         $note = trim((string) ($post['note'] ?? ''));
 
         if ($title === '') {
-            $errors['title'][] = 'Název faktury je povinný.';
+            $this->validator->addError(
+                'title',
+                'Název faktury je povinný.'
+            );
         }
 
         if ($issuedAt === '') {
-            $errors['issued_at'][] =
-                'Datum vystavení je povinné.';
+            $this->validator->addError(
+                'issued_at',
+                'Datum vystavení je povinné.'
+            );
         } elseif (!$this->isValidDate($issuedAt)) {
-            $errors['issued_at'][] =
-                'Datum vystavení není platné.';
+            $this->validator->addError(
+                'issued_at',
+                'Datum vystavení není platné.'
+            );
         }
 
         if ($dueDate === '') {
-            $errors['due_date'][] =
-                'Datum splatnosti je povinné.';
+            $this->validator->addError(
+                'due_date',
+                'Datum splatnosti je povinné.'
+            );
         } elseif (!$this->isValidDate($dueDate)) {
-            $errors['due_date'][] =
-                'Datum splatnosti není platné.';
+            $this->validator->addError(
+                'due_date',
+                'Datum splatnosti není platné.'
+            );
         }
 
         $contactId = (int) ($post['contact_id'] ?? 0);
 
         if ($contactId < 0) {
-            $errors['contact_id'][] =
-                'Neplatný zákazník.';
+            $this->validator->addError(
+                'contact_id',
+                'Neplatný zákazník.'
+            );
+
             $contactId = 0;
         }
 
-        $contactValidator = new ContactValidator();
-
+        $contactValidator = new ContactValidator($this->validator);
         $customer = $contactValidator->validate($post);
-
-        $errors = array_merge(
-            $errors,
-            $contactValidator->getErrors()
-        );
 
         $saveCustomer = isset($post['save_customer']);
 
-        $tasks = $this->validateTasks(
-            $post['tasks'] ?? [],
-            $errors
-        );
-
-        $lines = $this->validateLines(
-            $post['lines'] ?? [],
-            $errors
-        );
+        $tasks = $this->validateTasks($post['tasks'] ?? []);
+        $lines = $this->validateLines($post['lines'] ?? []);
 
         return [
             'title' => $title,
@@ -97,22 +99,21 @@ final class InvoiceValidator
             'customer' => $customer,
             'tasks' => $tasks,
             'lines' => $lines,
-            'errors' => $errors,
+            'errors' => $this->validator->getErrors(),
         ];
     }
 
     /**
      * @param mixed $value
-     * @param array<string, list<string>> $errors
      * @return array<int, array<string, mixed>>
      */
-    private function validateTasks(
-        mixed $value,
-        array &$errors
-    ): array {
+    private function validateTasks(mixed $value): array
+    {
         if (!is_array($value)) {
-            $errors['tasks'][] =
-                'Úkoly faktury nejsou platné.';
+            $this->validator->addError(
+                'tasks',
+                'Úkoly faktury nejsou platné.'
+            );
 
             return [];
         }
@@ -121,8 +122,11 @@ final class InvoiceValidator
 
         foreach ($value as $i => $task) {
             if (!is_array($task)) {
-                $errors["tasks.$i"][] =
-                    'Úkol faktury není platný.';
+                $this->validator->addError(
+                    "tasks.$i",
+                    'Úkol faktury není platný.'
+                );
+
                 continue;
             }
 
@@ -140,13 +144,17 @@ final class InvoiceValidator
             );
 
             if ($taskId <= 0) {
-                $errors["tasks.$i.task_id"][] =
-                    'Úkol není platný.';
+                $this->validator->addError(
+                    "tasks.$i.task_id",
+                    'Úkol není platný.'
+                );
             }
 
             if ($title === '') {
-                $errors["tasks.$i.title"][] =
-                    'Název úkolu je povinný.';
+                $this->validator->addError(
+                    "tasks.$i.title",
+                    'Název úkolu je povinný.'
+                );
             }
 
             $tasks[] = [
@@ -162,16 +170,15 @@ final class InvoiceValidator
 
     /**
      * @param mixed $value
-     * @param array<string, list<string>> $errors
      * @return array<int, array<string, mixed>>
      */
-    private function validateLines(
-        mixed $value,
-        array &$errors
-    ): array {
+    private function validateLines(mixed $value): array
+    {
         if (!is_array($value)) {
-            $errors['lines'][] =
-                'Fakturační položky nejsou platné.';
+            $this->validator->addError(
+                'lines',
+                'Fakturační položky nejsou platné.'
+            );
 
             return [];
         }
@@ -180,8 +187,11 @@ final class InvoiceValidator
 
         foreach ($value as $i => $line) {
             if (!is_array($line)) {
-                $errors["lines.$i"][] =
-                    'Fakturační položka není platná.';
+                $this->validator->addError(
+                    "lines.$i",
+                    'Fakturační položka není platná.'
+                );
+
                 continue;
             }
 
@@ -201,47 +211,56 @@ final class InvoiceValidator
                 trim((string) ($line['currency'] ?? 'CZK'))
             );
 
-            $unitPrice = (float) (
-                $line['unit_price'] ?? 0
-            );
+            $unitPrice = (float) ($line['unit_price'] ?? 0);
 
             $hoursRaw = (int) ($line['hours'] ?? 0);
             $minutesRaw = (int) ($line['minutes'] ?? 0);
 
             if ($hoursRaw < 0 || $minutesRaw < 0) {
-                $errors["lines.$i"][] = 'Čas nesmí být záporný.';
+                $this->validator->addError(
+                    "lines.$i",
+                    'Čas nesmí být záporný.'
+                );
             }
 
             $hours = max(0, $hoursRaw);
             $minutes = max(0, $minutesRaw);
 
-            $quantity = (float) (
-                $line['quantity'] ?? 0
-            );
+            $quantity = (float) ($line['quantity'] ?? 0);
 
             if ($description === '') {
-                $errors["lines.$i.description"][] =
-                    'Popis položky je povinný.';
+                $this->validator->addError(
+                    "lines.$i.description",
+                    'Popis položky je povinný.'
+                );
             }
 
             if ($unit === '') {
-                $errors["lines.$i.unit"][] =
-                    'Jednotka množství je povinná.';
+                $this->validator->addError(
+                    "lines.$i.unit",
+                    'Jednotka množství je povinná.'
+                );
             }
 
             if ($priceUnit === '') {
-                $errors["lines.$i.price_unit"][] =
-                    'Jednotka ceny je povinná.';
+                $this->validator->addError(
+                    "lines.$i.price_unit",
+                    'Jednotka ceny je povinná.'
+                );
             }
 
             if ($unitPrice < 0) {
-                $errors["lines.$i.unit_price"][] =
-                    'Cena nesmí být záporná.';
+                $this->validator->addError(
+                    "lines.$i.unit_price",
+                    'Cena nesmí být záporná.'
+                );
             }
 
             if ($currency === '') {
-                $errors["lines.$i.currency"][] =
-                    'Měna je povinná.';
+                $this->validator->addError(
+                    "lines.$i.currency",
+                    'Měna je povinná.'
+                );
             }
 
             $lines[] = [
