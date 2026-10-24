@@ -24,6 +24,7 @@ use DateTimeImmutable;
 use PDO;
 use RuntimeException;
 use App\Core\Types;
+use App\Validators\Validator;
 /** @phpstan-import-type TaskBaseRow from Types */
 final class InvoiceService
 {
@@ -163,7 +164,8 @@ final class InvoiceService
      */
     public function invoiceFromTask(
         int $taskId,
-        array $post
+        array $post,
+        Validator $validator
     ): array {
         $task = $this->requireTaskForInvoice($taskId);
 
@@ -176,9 +178,9 @@ final class InvoiceService
             );
         }
 
-        $validator = new InvoiceValidator();
+        $invoiceValidator = new InvoiceValidator($validator);
 
-        $validated = $validator->validate($post);
+        $validated = $invoiceValidator->validate($post);
 
         if ($validated['errors'] !== []) {
             $draft = $this->buildDraftFromTask($taskId);
