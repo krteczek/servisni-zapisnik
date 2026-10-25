@@ -72,6 +72,13 @@ final class AccessLogger
             ]);
 
             if ($type === self::TYPE_403 || $type === self::TYPE_404) {
+                if (self::detectScanningPath()) {
+                    BanService::banLogout(
+                        Config::get('scanning.ban_type', 'SCANNING_BAN')
+                    );
+                    return;
+                }
+
                 self::detectAbuse(
                     model: $model,
                     type: $type,
@@ -131,5 +138,49 @@ final class AccessLogger
                 . 'Váš přístup je dočasně zablokován.'
             );
         }
+    }
+
+    /**
+     * Okamžitě rozpozná požadavek na cestu typickou pro skenování.
+     */
+    private static function detectScanningPath(): bool
+    {
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+        $path = parse_url($requestUri, PHP_URL_PATH);
+
+        if (!is_string($path) || $path === '') {
+            return false;
+        }
+
+        $path = mb_strtolower(rawurldecode($path), 'UTF-8');
+        $patterns = Config::get('scanning.paths', []);
+
+        if (!is_array($patterns)) {
+            return false;
+        }
+
+        foreach ($patterns as $category) {
+            if (!is_array($category)) {
+                continue;
+            }
+
+            $contains = $category['contains'] ?? [];
+
+            if (!is_array($contains)) {
+                continue;
+            }
+
+            foreach ($contains as $needle) {
+                if (!is_string($needle) || $needle === '') {
+                    continue;
+                }
+
+                if (str_contains($path, mb_strtolower($needle, 'UTF-8'))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
