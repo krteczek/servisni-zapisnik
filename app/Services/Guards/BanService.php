@@ -4,49 +4,47 @@ declare(strict_types=1);
 namespace App\Services\Guards;
 
 use App\Models\BanModel;
-use App\Core\Config;
 use App\Core\Auth;
 use App\Core\Request;
 
 class BanService
 {
-    public static function isBanned(): bool
+    private BanModel $banModel;
+
+    public function __construct(private int $durationMinutes) 
     {
-        return (new BanModel())->isBanned(self::fingerprint());
+        $this->banModel = new BanModel();
     }
 
-    public static function ban(string $type): void
+    public function ban(string $type): void
     {
-        $config = Config::get('accessRateLimits.' . mb_strtoupper($type, 'UTF-8'));
-        $userId = null;
-        if(Auth::check())
-        {
-        	   $userId = Auth::id();
-        }
+        $userId = Auth::check() ? Auth::id() : null;
 
-        (new BanModel())->createBan([
+        $this->banModel->createBan([
             'type' => $type,
             'user_id' => $userId,
             'fingerprint' => self::fingerprint(),
-            'banned_until' => date('Y-m-d H:i:s', time() + $config['ban'] * 60),
+            'banned_until' => date(
+                'Y-m-d H:i:s',
+                time() + $this->durationMinutes * 60
+            ),
             'created_at' => date('Y-m-d H:i:s'),
             'ip' => Request::ip(),
             'user_agent' => Request::ua(),
         ]);
     }
 
-	public static function fingerprint(): int
-	{
-		$ip = Request::ip();
-		$ua = Request::ua();
-	   return unpack('N', hash('xxh32', $ip . '|' . $ua, true))[1];
-	}
-
-    /** metoda volá odhlášení v Auth */
-    public static function banLogout(string $type): void
+    public static function fingerprint(): int
     {
-        self::ban($type);
+        $ip = Request::ip();
+        $ua = Request::ua();
 
-        Auth::banLogout();
+        return unpack('N', hash('xxh32', $ip . '|' . $ua, true))[1];
+    }
+
+    public function banLogout(string $type): void
+    {
+        $this->ban(type: $type);
+        Auth::logout();
     }
 }

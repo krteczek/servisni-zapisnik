@@ -36,10 +36,9 @@ public function tooManyAttempts(
     );
 
     if ($attempts >= $config['rate']) {
-    	// přidáme ban
-    	BanService::ban(
-    		type:    $action,
-    		);
+        $banService = new BanService(durationMinutes: $config['ban']);
+        $banService->ban(type: $action);
+
         return true;
     }
 
