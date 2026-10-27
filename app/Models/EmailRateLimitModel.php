@@ -5,7 +5,7 @@ namespace App\Models;
 
 
 
-final class RateLimitModel extends BaseModel
+final class EmailRateLimitModel extends BaseModel
 {
     protected string $table = 'email_rate_limits';
 
@@ -39,7 +39,7 @@ final class RateLimitModel extends BaseModel
         int $fingerprint,
         int $windowMinutes
     ): int {
-    	  $minutes = $windowMinutes;
+    	$minutes = $windowMinutes;
         $sql = "
             SELECT COUNT(*)
             FROM {$this->table}

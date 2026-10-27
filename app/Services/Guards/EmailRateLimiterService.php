@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace App\Services\Guards;
 
-use App\Models\RateLimitModel;
+use App\Models\EmailRateLimitModel;
 use App\Core\Request;
 use App\Core\Config;
 
 
-class RateLimiterService
+class EmailRateLimiterService
 {
 
     public function __construct(
-        private RateLimitModel $rateLimitModel = new RateLimitModel()
+        private EmailRateLimitModel $rateLimitModel = new EmailRateLimitModel()
     ) {
 
     }
@@ -22,16 +22,16 @@ public function tooManyAttempts(
     string $tenant,
     string $email
 ): bool {
-	//var_dump($action);
-    $config = Config::get('rateLimits.' . $action);
-    //var_dump($config);exit;
+	
+    $config = Config::get('emailRateLimits.' . $action);
+    
     $ip = Request::ip();
     $ua = Request::ua();
     $fingerprint = BanService::fingerprint();
 
     $attempts = $this->rateLimitModel->countRecentAttempts(
         action:          $action,
-       fingerprint:     $fingerprint,
+        fingerprint:     $fingerprint,
         windowMinutes:   $config['time']
     );
 
