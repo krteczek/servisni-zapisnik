@@ -5,6 +5,7 @@ namespace App\Core;
 
 use App\Models\AccessLogModel;
 use App\Services\Guards\BanService;
+use App\Services\Guards\AccessRateLimiterService;
 
 /**
  * Statická služba pro logování přístupů k aplikaci a detekci potenciálního zneužití.
@@ -70,12 +71,27 @@ final class AccessLogger
                 'user_agent' => $us,
                 'company_id' => $companyId,
             ]);
-
             if ($type === self::TYPE_403 || $type === self::TYPE_404) {
                 if (self::detectScanningPath()) {
-                    BanService::banLogout(
-                        Config::get('scanning.ban_type', 'SCANNING_BAN')
-                    );
+                    //dc('Detected scanning path: ' . ($_SERVER['REQUEST_URI'] ?? ''));
+                    if (Auth::check() === true) {
+                        $rateLimiter = new AccessRateLimiterService();
+
+                        $row = $rateLimiter->tooManyAttempts(
+                            action: 'SCANNING_WARNING',
+                            type: $type,
+                            ip: $ip
+                        );
+
+                        if ($row === true) {
+                            BanService::ban('SCANNING_BAN');
+                        }
+                    } else {
+                        BanService::banLogout(
+                            Config::get('scanning.ban_type', 'SCANNING_BAN')
+                        );
+                    }
+
                     return;
                 }
 
@@ -85,9 +101,17 @@ final class AccessLogger
                     ip: $ip
                 );
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             // TODO: [OBSERVABILITY] Přidat fallback logování do souboru/syslog,
             // když DB selže. Logování NIKDY nesmí shodit aplikaci.
+            LoggerHolder::get()->error('AccessLogger  failed.', [
+	                'message' => $e->getMessage(),
+	                'file'    => $e->getFile(),
+	                'line'    => $e->getLine(),
+	                'trace'   => $e->getTraceAsString(),
+
+	            ]);
+
         }
     }
 
@@ -109,7 +133,7 @@ final class AccessLogger
         int $type,
         string $ip
     ): void {
-        $conf = Config::get('rateLimits');
+        $conf = Config::get('accessRateLimits');
 
         $count = $model->countRecent(
             type: $type,

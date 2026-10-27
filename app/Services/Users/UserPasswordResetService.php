@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services\Users;
 
-use App\Services\Guards\RateLimiterService;
+use App\Services\Guards\EmailRateLimiterService;
 
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
@@ -21,7 +21,7 @@ final class UserPasswordResetService
 
 
     public function __construct(
-        private RateLimiterService $rateLimiter = new RateLimiterService(),
+        private EmailRateLimiterService $rateLimiter = new EmailRateLimiterService(),
         private TokenService $tokenService = new TokenService(),
         private UserModel $userModel = new UserModel(),
         private CompanyModel $companyModel = new CompanyModel(),
@@ -41,8 +41,8 @@ final class UserPasswordResetService
         // 1️⃣ Rate limit (fake success pokud překročeno)
 			$row = $this->rateLimiter->tooManyAttempts(
 			    action:        TokenType::PASSWORD_RESET,
-             tenant:        $tenantSlug,
-             email:         $email
+                tenant:        $tenantSlug,
+                email:         $email
 			);
 
 			//var_dump($row);

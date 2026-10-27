@@ -25,7 +25,7 @@ use App\Services\Users\CompanyRegistrationService;
 use App\Services\Mail\MailService;
 use App\Services\Users\UserActivationService;
 use App\Services\Users\UserPasswordResetService;
-use App\Services\Guards\RateLimiterService;
+use App\Services\Guards\EmailRateLimiterService;
 use App\Services\Users\BuildMailService;
 use App\Services\Onboarding\OnboardingService;
 
@@ -119,7 +119,7 @@ public function login(): string
         !password_verify($password, $user['password_hash'])
     ) {
         // 1️⃣ Rate limit
-			$row = (new RateLimiterService())->tooManyAttempts(
+			$row = (new EmailRateLimiterService())->tooManyAttempts(
 			 action:        self::BAD_LOGIN,
              tenant:        $tenant,
              email:         $email,

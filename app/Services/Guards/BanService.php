@@ -17,7 +17,7 @@ class BanService
 
     public static function ban(string $type): void
     {
-        $config = Config::get('rateLimits.' . mb_strtoupper($type, 'UTF-8'));
+        $config = Config::get('accessRateLimits.' . mb_strtoupper($type, 'UTF-8'));
         $userId = null;
         if(Auth::check())
         {

@@ -43,7 +43,7 @@ final class AccessLogModel extends BaseModel
      */
     public function log(array $data): void
     {
-        $this->create([
+        $this->insertRaw([
             'company_id' => $data['company_id'] ?? null,
             'user_id'    => $data['user_id'] ?? null,
             'ip_address' => $data['ip_address'],
