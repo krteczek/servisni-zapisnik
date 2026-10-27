@@ -74,6 +74,7 @@ final class AccessLogger
             if ($type === self::TYPE_403 || $type === self::TYPE_404) {
                 if (self::detectScanningPath()) {
                     //dc('Detected scanning path: ' . ($_SERVER['REQUEST_URI'] ?? ''));
+                    $banService = new BanService(durationMinutes: Config::get('scanning.ban_duration', 60));
                     if (Auth::check() === true) {
                         $rateLimiter = new AccessRateLimiterService();
 
@@ -84,10 +85,12 @@ final class AccessLogger
                         );
 
                         if ($row === true) {
-                            BanService::ban('SCANNING_BAN');
+                            
+                            $banService->ban(type: 'SCANNING_BAN');
                         }
                     } else {
-                        BanService::banLogout(
+                        
+                        $banService->banLogout(
                             Config::get('scanning.ban_type', 'SCANNING_BAN')
                         );
                     }
@@ -155,7 +158,8 @@ final class AccessLogger
         );
 
         if ($count >= $conf['SCANNING_BAN']['rate']) {
-            BanService::banLogout('SCANNING_BAN');
+            $banService = new BanService(durationMinutes: Config::get('scanning.ban_duration', 60));
+            $banService->banLogout('SCANNING_BAN');
 
             Flash::error(
                 'Bylo zaznamenáno opakované neplatné chování. '
