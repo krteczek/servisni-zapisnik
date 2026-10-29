@@ -28,6 +28,7 @@ use App\Services\Users\UserPasswordResetService;
 use App\Services\Guards\EmailRateLimiterService;
 use App\Services\Users\BuildMailService;
 use App\Services\Onboarding\OnboardingService;
+use App\Services\Guards\BanType;
 
 use \Throwable;
 
@@ -42,7 +43,6 @@ class AuthController extends Controller
     private const MAX_COMPANY_NAME_LENGTH    = 255;
     private const MIN_COMPANY_NAME_LENGTH    = 2;
     private const ICO_LENGTH    					= 8;
-    private const BAD_LOGIN                  = 'BAD_LOGIN';
     private const TOKEN_ERROR                = 'Odkaz je neplatný nebo expirovaný.';
 
     public function root(): string
@@ -120,9 +120,9 @@ public function login(): string
     ) {
         // 1️⃣ Rate limit
 			$row = (new EmailRateLimiterService())->tooManyAttempts(
-			 action:        self::BAD_LOGIN,
-             tenant:        $tenant,
-             email:         $email,
+				action: 	BanType::BAD_LOGIN,
+             	tenant:     $tenant,
+             	email:      $email,
 			);
 			if($row === true)
 			{

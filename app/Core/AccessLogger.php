@@ -5,6 +5,7 @@ namespace App\Core;
 
 use App\Models\AccessLogModel;
 use App\Services\Guards\BanService;
+use App\Services\Guards\BanType;
 use App\Services\Guards\AccessRateLimiterService;
 
 /**
@@ -53,70 +54,73 @@ final class AccessLogger
      * @param int $type Typ logované události
      * @return void
      */
-    public static function log(int $type): void
-    {
-        try {
-            $model = new AccessLogModel();
-            $userId = Auth::check() ? Auth::id() : null;
-            $ip = Request::ip();
-            $us = Request::ua();
-            $companyId = Auth::check() ? Auth::companyId() : null;
 
-            $model->log([
-                'user_id' => $userId,
-                'ip_address' => $ip,
-                'type' => $type,
-                'path' => $_SERVER['REQUEST_URI'] ?? '',
-                'method' => $_SERVER['REQUEST_METHOD'] ?? '',
-                'user_agent' => $us,
-                'company_id' => $companyId,
-            ]);
-            if ($type === self::TYPE_403 || $type === self::TYPE_404) {
-                if (self::detectScanningPath()) {
-                    //dc('Detected scanning path: ' . ($_SERVER['REQUEST_URI'] ?? ''));
-                    $banService = new BanService(durationMinutes: Config::get('scanning.ban_duration', 60));
-                    if (Auth::check() === true) {
-                        $rateLimiter = new AccessRateLimiterService();
+public static function log(int $type): void
+{
+    try {
+        $model = new AccessLogModel();
+        $userId = Auth::check() ? Auth::id() : null;
+        $ip = Request::ip();
+        $us = Request::ua();
+        $companyId = Auth::check() ? Auth::companyId() : null;
 
-                        $row = $rateLimiter->tooManyAttempts(
-                            action: 'SCANNING_WARNING',
-                            type: $type,
-                            ip: $ip
+        $model->log([
+            'user_id' => $userId,
+            'ip_address' => $ip,
+            'type' => $type,
+            'path' => $_SERVER['REQUEST_URI'] ?? '',
+            'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+            'user_agent' => $us,
+            'company_id' => $companyId,
+        ]);
+
+        if ($type === self::TYPE_403 || $type === self::TYPE_404) {
+            if (self::detectScanningPath()) {
+                $conf = Config::get('accessRateLimits');
+
+                if (Auth::check() === true) {
+                    $rateLimiter = new AccessRateLimiterService();
+
+                    $row = $rateLimiter->tooManyAttempts(
+                        action: BanType::SCANNING_WARNING,
+                        type: $type,
+                        ip: $ip
+                    );
+
+                    if ($row === true) {
+                        $banService = new BanService(
+                            durationMinutes: $conf[BanType::SCANNING_WARNING]['ban']
                         );
 
-                        if ($row === true) {
-                            
-                            $banService->ban(type: 'SCANNING_BAN');
-                        }
-                    } else {
-                        
-                        $banService->banLogout(
-                            Config::get('scanning.ban_type', 'SCANNING_BAN')
-                        );
+                        $banService->ban(BanType::SCANNING_WARNING);
                     }
+                } else {
+                    $banService = new BanService(
+                        durationMinutes: $conf[BanType::SCANNING_BAN]['ban']
+                    );
 
-                    return;
+                    $banService->banLogout(BanType::SCANNING_BAN);
                 }
 
-                self::detectAbuse(
-                    model: $model,
-                    type: $type,
-                    ip: $ip
-                );
+                return;
             }
-        } catch (\Throwable $e) {
-            // TODO: [OBSERVABILITY] Přidat fallback logování do souboru/syslog,
-            // když DB selže. Logování NIKDY nesmí shodit aplikaci.
-            LoggerHolder::get()->error('AccessLogger  failed.', [
-	                'message' => $e->getMessage(),
-	                'file'    => $e->getFile(),
-	                'line'    => $e->getLine(),
-	                'trace'   => $e->getTraceAsString(),
 
-	            ]);
-
+            self::detectAbuse(
+                model: $model,
+                type: $type,
+                ip: $ip
+            );
         }
+    } catch (\Throwable $e) {
+        LoggerHolder::get()->error('AccessLogger failed.', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]);
     }
+}
+
 
     /**
      * Detekuje potenciální zneužití na základě opakovaných chybových stavů.
@@ -131,42 +135,48 @@ final class AccessLogger
      * @param string $ip IP adresa klienta
      * @return void
      */
-    private static function detectAbuse(
-        AccessLogModel $model,
-        int $type,
-        string $ip
-    ): void {
-        $conf = Config::get('accessRateLimits');
+private static function detectAbuse(
+    AccessLogModel $model,
+    int $type,
+    string $ip
+): void {
+    $conf = Config::get('accessRateLimits');
 
-        $count = $model->countRecent(
-            type: $type,
-            ip: $ip,
-            minutes: $conf['SCANNING_WARNING']['time']
+    $warning = $conf[BanType::SCANNING_WARNING];
+    $ban = $conf[BanType::SCANNING_BAN];
+
+    $count = $model->countRecent(
+        type: $type,
+        ip: $ip,
+        minutes: $warning['time']
+    );
+
+    if ($count >= $warning['rate']) {
+        Flash::error(
+            'Bylo zaznamenáno opakované neplatné chování. '
+            . 'Pokračování může vést k omezení účtu.'
         );
-
-        if ($count >= $conf['SCANNING_WARNING']['rate']) {
-            Flash::error(
-                'Bylo zaznamenáno opakované neplatné chování. '
-                . 'Pokračování může vést k omezení účtu.'
-            );
-        }
-
-        $count = $model->countRecent(
-            type: $type,
-            ip: $ip,
-            minutes: $conf['SCANNING_BAN']['time']
-        );
-
-        if ($count >= $conf['SCANNING_BAN']['rate']) {
-            $banService = new BanService(durationMinutes: Config::get('scanning.ban_duration', 60));
-            $banService->banLogout('SCANNING_BAN');
-
-            Flash::error(
-                'Bylo zaznamenáno opakované neplatné chování. '
-                . 'Váš přístup je dočasně zablokován.'
-            );
-        }
     }
+
+    $count = $model->countRecent(
+        type: $type,
+        ip: $ip,
+        minutes: $ban['time']
+    );
+
+    if ($count >= $ban['rate']) {
+        $banService = new BanService(
+            durationMinutes: $ban['ban']
+        );
+
+        $banService->banLogout(BanType::SCANNING_BAN);
+
+        Flash::error(
+            'Bylo zaznamenáno opakované neplatné chování. '
+            . 'Váš přístup je dočasně zablokován.'
+        );
+    }
+}
 
     /**
      * Okamžitě rozpozná požadavek na cestu typickou pro skenování.

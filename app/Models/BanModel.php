@@ -34,4 +34,20 @@ class BanModel extends BaseModel
 	    $this->create($data);
 	}
 
+    public function isAccountBanned(int $userId): bool
+    {
+        $sql = "
+            SELECT id
+            FROM {$this->tableName}
+            WHERE user_id = ?
+            AND type = 'ACCOUNT_BAN'
+            AND banned_until > NOW()
+            LIMIT 1
+        ";
+
+        $stmt = $this->db()->prepare($sql);
+        $stmt->execute([$userId]);
+
+        return (bool) $stmt->fetchColumn();
+    }
 }
