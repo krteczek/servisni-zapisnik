@@ -1,3 +1,0 @@
-ALTER TABLE work_orders
-ADD COLUMN is_system TINYINT(1) NOT NULL DEFAULT 0
-AFTER status;
