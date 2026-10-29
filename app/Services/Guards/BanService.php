@@ -11,7 +11,7 @@ class BanService
 {
     private BanModel $banModel;
 
-    public function __construct(private int $durationMinutes) 
+    public function __construct(private int $durationMinutes = 60) 
     {
         $this->banModel = new BanModel();
     }
@@ -34,6 +34,10 @@ class BanService
         ]);
     }
 
+    public function isBanned(): bool
+    {
+        return $this->banModel->isBanned(self::fingerprint());
+    }
     public static function fingerprint(): int
     {
         $ip = Request::ip();

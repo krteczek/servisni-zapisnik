@@ -62,7 +62,7 @@ RecurringRunner::run();
 // -------------------------------------------------
 
 
-if (BanService::isBanned() === true) {
+if ((new BanService())->isBanned() === true) {
 
     ob_end_clean();
 
