@@ -80,12 +80,14 @@ public static function log(int $type): void
 
                 if (Auth::check() === true) {
                     $rateLimiter = new AccessRateLimiterService();
-
+                    
                     $row = $rateLimiter->tooManyAttempts(
                         action: BanType::SCANNING_WARNING,
                         type: $type,
                         ip: $ip
                     );
+
+                    dc($row);
 
                     if ($row === true) {
                         $banService = new BanService(

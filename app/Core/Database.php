@@ -164,11 +164,13 @@ final class Database
                     $cfg['host'],
                     $dbName
                 );
-                $pdo = new PDO($dsn, $cfg['user'], $cfg['password'], self::options());
+                $pdo = new PDO($dsn, $cfg['user'], $cfg['password'], self::options());               
 
             } else {
                 throw new RuntimeException('Unknown database key: ' . $key);
             }
+            /** Nastavení času natvrdo **/
+            $pdo->exec("SET time_zone = '+00:00'");
 
         } catch (PDOException $e) {
             // TODO: [OBSERVABILITY] Integrovat s externím monitoringem (Sentry, NewRelic)

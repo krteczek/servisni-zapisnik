@@ -8,6 +8,7 @@ parameters:
 
     paths:
         - app
+        - public
 
     bootstrapFiles:
         - vendor/autoload.php

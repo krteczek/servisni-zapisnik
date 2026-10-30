@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+/** Nastavení času natvrdo **/
+date_default_timezone_set('UTC');
+
 ob_start();
 
 //define('BASE_PATH', '/servisni-zapisnik/public');
@@ -50,6 +53,36 @@ $appDebug = Config::get('app.debug');
 $appBasePath = Config::get('app.base_path');
 
 
+
+// -------------------------------------------------
+// ❗ PRVNÍ A NATVRDO PŘIPOJENÍ K DB = ADMIN
+// -------------------------------------------------
+
+if (Auth::check()) {
+    $user = Auth::user();
+
+    if ($user === null) {
+        Url::redirect('/login');
+    }
+
+    $dbName = Auth::dbName();
+
+    if ($dbName === null || $dbName === '') {
+        LoggerHolder::get()->error(
+            'Authenticated user has no work database name',
+            [
+                'user_id' => Auth::id(),
+                'company_id' => Auth::companyId(),
+            ]
+        );
+
+        Auth::logout();
+        Url::redirect('/login');
+    }
+
+    Database::useWorkDatabase($dbName);
+}
+
 // -------------------------------------------------
 // RecurringRunner: spouští cronování reccuring tasků
 // -------------------------------------------------
@@ -60,9 +93,9 @@ RecurringRunner::run();
 // BanService: pokud se uživatel ošklivě chová,
 // nedostane propustku
 // -------------------------------------------------
+$banService = new BanService();
 
-
-if ((new BanService())->isBanned() === true) {
+if ($banService->isBanned() === true) {
 
     ob_end_clean();
 
@@ -95,34 +128,6 @@ if ((new BanService())->isBanned() === true) {
 Session::start();
 
 // -------------------------------------------------
-// ❗ PRVNÍ A NATVRDO PŘIPOJENÍ K DB = ADMIN
-// -------------------------------------------------
-
-if (Auth::check()) {
-    $user = Auth::user();
-
-    if ($user === null) {
-        Url::redirect('/login');
-    }
-
-    $dbName = Auth::dbName();
-
-    if ($dbName === null || $dbName === '') {
-        LoggerHolder::get()->error(
-            'Authenticated user has no work database name',
-            [
-                'user_id' => Auth::id(),
-                'company_id' => Auth::companyId(),
-            ]
-        );
-
-        Auth::logout();
-        Url::redirect('/login');
-    }
-
-    Database::useWorkDatabase($dbName);
-}
-// -------------------------------------------------
 // Routing
 // -------------------------------------------------
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -147,7 +152,7 @@ if ($appBasePath !== ''
     $uri = substr($uri, strlen($appBasePath));
 }
 
-$uri = $uri ?: '/';
+$uri = $uri !== '' ? $uri : '/';
 
 
 $routes = Config::get('routes');

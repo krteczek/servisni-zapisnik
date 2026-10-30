@@ -5,18 +5,32 @@ return [
     'enabled' => true,
 
     'auditables' => [
-        'users',
+        'access_logs',
+        'bans',
         'companies',
-        'roles',
-        'permissions',
-        'work_orders',
+        'company_bank_accounts',
+        'company_details',
+        'contacts',
+        'email_rate_limits',
+        'internal_invoices',
+        'internal_invoice_items',
+        'internal_invoice_lines',
+        'recurring_tasks',
+        'settings',
+        'system_jobs',
         'tasks',
+        'task_assignments',
+        'task_assignment_participants',
         'teams',
+        'team_memberships',
+        'tokens',        
+        'users',
+        'work_orders',
+        'work_order_sequences',
+        
     ],
 
     'ignores' => [
-        'task_assignments',
-        'work_order_entries',
         'audit_logs',
     ],
 ];
