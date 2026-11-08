@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'Dompdf\\Cpdf' => $vendorDir . '/dompdf/dompdf/lib/Cpdf.php',
     'Texy' => $vendorDir . '/texy/texy/src/Texy.php',
     'Texy\\BlockParser' => $vendorDir . '/texy/texy/src/Texy/BlockParser.php',
     'Texy\\Bridges\\Latte\\TexyExtension' => $vendorDir . '/texy/texy/src/Bridges/Latte/TexyExtension.php',
