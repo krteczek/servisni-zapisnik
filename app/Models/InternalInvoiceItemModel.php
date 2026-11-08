@@ -44,4 +44,38 @@ final class InternalInvoiceItemModel extends BaseModel
             'task_id'    => $taskId,
         ]) !== null;
     }
+
+    /**
+     * Vrátí všechny vazby faktura→úkol pro danou fakturu.
+     *
+     * Používá se při vydání faktury (issue) pro re-guard tasků
+     * a při zobrazení detailu (interní podklady).
+     *
+     * @param int $invoiceId
+     * @return array<int, array<string, mixed>>
+     */
+    public function forInvoice(int $invoiceId): array
+    {
+        if ($invoiceId <= 0) {
+            return [];
+        }
+
+        $where = $this->applyTenant([
+            'invoice_id' => $invoiceId,
+        ]);
+
+        $parts = [];
+        foreach ($where as $col => $val) {
+            $parts[] = "{$col} = :{$col}";
+        }
+
+        $sql = "
+            SELECT id, company_id, invoice_id, task_id, created_at
+            FROM {$this->tableName}
+            WHERE " . implode(' AND ', $parts) . "
+            ORDER BY id ASC
+        ";
+
+        return $this->fetchAll($sql, $where);
+    }
 }

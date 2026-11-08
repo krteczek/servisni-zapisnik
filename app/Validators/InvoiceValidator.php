@@ -168,7 +168,7 @@ final class InvoiceValidator
         return $tasks;
     }
 
-    /**
+     /**
      * @param mixed $value
      * @return array<int, array<string, mixed>>
      */
@@ -228,6 +228,15 @@ final class InvoiceValidator
 
             $quantity = (float) ($line['quantity'] ?? 0);
 
+            /*
+             * Pokud formulář poslal hours/minutes (starý tvar),
+             * převedeme na minuty. quantity v minutách má přednost,
+             * pokud hours/minutes nejsou vyplněné.
+             */
+            if ($unit === 'min' && ($hours > 0 || $minutes > 0)) {
+                $quantity = (float) (($hours * 60) + $minutes);
+            }
+
             if ($description === '') {
                 $this->validator->addError(
                     "lines.$i.description",
@@ -270,14 +279,12 @@ final class InvoiceValidator
                 'price_unit' => $priceUnit,
                 'unit_price' => $unitPrice,
                 'currency' => $currency,
-                'hours' => $hours,
-                'minutes' => $minutes,
             ];
         }
 
         return $lines;
     }
-
+    
     private function isValidDate(string $date): bool
     {
         $value = DateTimeImmutable::createFromFormat(
