@@ -87,7 +87,7 @@ public static function log(int $type): void
                         ip: $ip
                     );
 
-                    dc($row);
+                    
 
                     if ($row === true) {
                         $banService = new BanService(
