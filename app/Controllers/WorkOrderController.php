@@ -273,7 +273,7 @@ public function detailOrder(int $orderId): string
         $contactsModel = new ContactsModel();
         $contact = $contactsModel->find($order['contact_id']);
     } else {
-        $contact = ['company_name' => '—'];
+        $contact = ['official_name' => '—'];
     }
 
     
@@ -339,7 +339,7 @@ public function detailOrder(int $orderId): string
     $order['open_tasks_count']      = $openTaskCount;
     $order['done_tasks_count']      = $doneTaskCount;
     $order['cancelled_tasks_count'] = $cancelledTaskCount;
-    $order['company_name']          = $contact['official_name'];
+    $order['company_name']          = $contact['official_name']; 
     
     // příznak pro zobrazení odkazu na dokončení zakázky, pokud jsou všechny 
     // úkoly hotové nebo zrušené, nebo pokud nejsou žádné úkoly
