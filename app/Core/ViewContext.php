@@ -314,4 +314,7 @@ class ViewContext
     /** @var array<int, BankAccountRow> */
     public array $bankAccounts = [];
 
+    /** generování PDF */
+    public array $supplier = [];
+
 }

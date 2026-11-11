@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Services\Guards\BanType;
 
 class BanModel extends BaseModel
 {
@@ -12,17 +13,22 @@ class BanModel extends BaseModel
     public function isBanned(int $fingerprint): bool
     {
         $sql = "
-            SELECT id
+            SELECT id, type, fingerprint, banned_until, NOW() AS db_now
             FROM {$this->tableName}
             WHERE fingerprint = ?
             AND banned_until > NOW()
+            AND type = ?
             LIMIT 1
         ";
 
         $stmt = $this->db()->prepare($sql);
-        $stmt->execute([$fingerprint]);
+        $stmt->execute([$fingerprint, BanType::SCANNING_BAN]);
 
-        return (bool) $stmt->fetchColumn();
+        $result = $stmt->fetchColumn();
+
+        
+
+        return (bool) $result;
     }
 
     /**
@@ -40,14 +46,15 @@ class BanModel extends BaseModel
             SELECT id
             FROM {$this->tableName}
             WHERE user_id = ?
-            AND type = 'ACCOUNT_BAN'
+            AND type = ?
             AND banned_until > NOW()
             LIMIT 1
         ";
 
         $stmt = $this->db()->prepare($sql);
-        $stmt->execute([$userId]);
+        $stmt->execute([$userId, BanType::ACCOUNT_BAN]);
+        $result = $stmt->fetchColumn();
 
-        return (bool) $stmt->fetchColumn();
+        return (bool) $result;
     }
 }

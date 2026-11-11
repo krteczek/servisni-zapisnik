@@ -20,12 +20,12 @@ return [
     BanType::SCANNING_WARNING => [
         'time' => 15,
         'rate' => 5,
-        'ban'  => 60,
+        'ban'  => 30,//60
     ],
 
     BanType::SCANNING_BAN => [
         'time' => 60,
         'rate' => 20,
-        'ban'  => 180,
+        'ban'  => 30,//180,
     ],
 ];

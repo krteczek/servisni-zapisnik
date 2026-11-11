@@ -48,8 +48,12 @@ final class InvoiceNormalizer
     /**
      * Normalizuje jeden fakturační řádek.
      *
-     * U časové jednotky převede hodiny a minuty
-     * na celé minuty.
+     * `quantity` je vždy authoritative hodnota.
+     * Pro unit='min' jsou to minuty (celé číslo),
+     * pro ostatní jednotky obecné množství.
+     *
+     * hours/minutes z formuláře jsou pouze vstupní
+     * reprezentace a převádí je InvoiceValidator.
      *
      * @param array<string, mixed> $line
      * @return array<string, mixed>
@@ -58,23 +62,10 @@ final class InvoiceNormalizer
     {
         $unit = trim((string) ($line['unit'] ?? ''));
 
-        $hours = max(
-            0,
-            (int) ($line['hours'] ?? 0)
+        $quantity = max(
+            0.0,
+            (float) ($line['quantity'] ?? 0)
         );
-
-        $minutes = max(
-            0,
-            (int) ($line['minutes'] ?? 0)
-        );
-
-        if ($unit === 'min') {
-            $quantity = ($hours * 60) + $minutes;
-        } else {
-            $quantity = (float) (
-                $line['quantity'] ?? 0
-            );
-        }
 
         $priceUnit = trim(
             (string) ($line['price_unit'] ?? '')
