@@ -21,7 +21,7 @@ use App\Core\Session;
 <link rel="icon" type="image/png" sizes="32x32" href="<?= Url::to('/favicon_io/favicon-32x32.png') ?>">
 <link rel="apple-touch-icon" href="<?= Url::to('/favicon_io/apple-touch-icon.png') ?>">
 
-<!--	  -- >  
+
     <link rel="stylesheet" href="<?= Url::to('/css/base.css?v=' .      filemtime(__DIR__ . '/../../../public/css/base.css')) ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/logo.css?v=' .      filemtime(__DIR__ . '/../../../public/css/logo.css')) ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/menu.css?v=' .      filemtime(__DIR__ . '/../../../public/css/menu.css')) ?>">
@@ -40,12 +40,10 @@ use App\Core\Session;
     <link rel="stylesheet" href="<?= Url::to('/css/invoice.css?v=' .   filemtime(__DIR__ . '/../../../public/css/invoice.css')) ?>">
     <link rel="stylesheet" href="<?= Url::to('/css/diff.css?v=' .      filemtime(__DIR__ . '/../../../public/css/diff.css')) ?>">
 
-    <! --  -->
-
-<!--    -->
- <style>
+ 
  <?php
  /* */
+echo '<style>';
 require __DIR__ . '/../../../public/css/base.css';
 require __DIR__ . '/../../../public/css/logo.css';
 require __DIR__ . '/../../../public/css/menu.css';
@@ -63,11 +61,10 @@ require __DIR__ . '/../../../public/css/table.css';
 require __DIR__ . '/../../../public/css/deadline.css';
 require __DIR__ . '/../../../public/css/invoice.css';
 require __DIR__ . '/../../../public/css/diff.css';
-
+echo '</style>';
 
 /* */
 ?>
- </style>
 
  <script src="<?= Url::to('/js/app.js?v=' .                filemtime(__DIR__ . '/../../../public/js/app.js')) ?>" defer></script>
  <script src="<?= Url::to('/js/invoice-create.js?v=' .     filemtime(__DIR__ . '/../../../public/js/invoice-create.js')) ?>" defer></script>
