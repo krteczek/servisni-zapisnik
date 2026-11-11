@@ -42,7 +42,7 @@ use App\Core\Session;
 
  
  <?php
- /* */
+ /* * /
 echo '<style>';
 require __DIR__ . '/../../../public/css/base.css';
 require __DIR__ . '/../../../public/css/logo.css';
