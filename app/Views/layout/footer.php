@@ -39,7 +39,8 @@ use \App\Core\Config;
             <?php endif; ?>
         </div>
 
-    </div>
+    </div><img src="https://www.krteczek.cz/pixel.php?stranka=<?= urlencode($_SERVER['REQUEST_URI']) ?>"
+     width="1" height="1" alt="" style="display:none">
 </footer>
 
 </div>

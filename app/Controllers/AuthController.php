@@ -18,7 +18,7 @@ use App\Models\RegistrationRequestModel;
 use App\Models\TaskModel;
 use App\Models\WorkOrderModel;
 use App\Models\TeamModel;
-
+use App\Services\Guards\BanService;
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
 use App\Services\Users\CompanyRegistrationService;
@@ -133,6 +133,15 @@ public function login(): string
         $this->addError('global', 'Neplatné přihlašovací údaje. Pokud problém přetrvává, kontaktujte správce vašeho prostoru.');
         return $this->render('auth/login');
     }
+
+	/** kontrola zabanování */
+	$banService = new BanService();
+	if($banService->isAccountBanned($user['id']) === true) {
+		/** pokud má uživatel zablokovaný přístup, nelze ho přihlásit **/
+		Flash::error(BanType::message(BanType::ACCOUNT_BAN));
+		Url::redirect('/login');
+	}
+
 	$toLogin = [
 			'id'                => (int) $user['id'],
 			'email'             => $user['email'],

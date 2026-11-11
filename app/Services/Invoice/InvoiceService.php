@@ -245,19 +245,23 @@ final class InvoiceService
         ];
     }
 
-    /**
+     /**
      * Vytvoří interní fakturu.
      *
      * Číslování, snapshot a samotné uložení probíhá
      * v jedné databázové transakci.
      *
+     * Podporuje dvě cesty:
+     *  - faktura z podkladu (workOrder + tasks)
+     *  - faktura bez podkladu (workOrder = null, tasks = [])
+     *
      * @param array<string, mixed> $invoice
-     * @param array<string, mixed> $workOrder
+     * @param array<string, mixed>|null $workOrder
      * @return int ID vytvořené faktury
      */
     private function createInvoice(
         array $invoice,
-        array $workOrder
+        ?array $workOrder
     ): int {
         $companyId = Auth::companyId();
 
@@ -297,8 +301,8 @@ final class InvoiceService
             );
         }
 
-        $year =  (int)$issuedDate->format('Y');
-        $month = (int)$issuedDate->format('m');
+        $year = (int) $issuedDate->format('Y');
+        $month = (int) $issuedDate->format('m');
 
         $title = trim(
             (string) ($invoice['title'] ?? '')
@@ -332,14 +336,20 @@ final class InvoiceService
             );
         }
 
-        $workOrderId = isset($workOrder['id'])
-            ? $workOrder['id']
-            : 0;
+        /*
+         * Faktura bez podkladu:
+         *  - work_order_id může být null
+         *  - tasks může být prázdné pole
+         *  - internal_invoice_items zůstane prázdná
+         */
+        $workOrderId = null;
 
-        if ($workOrderId <= 0) {
-            throw new RuntimeException(
-                'Work order ID is missing.'
-            );
+        if (is_array($workOrder) && isset($workOrder['id'])) {
+            $workOrderId = (int) $workOrder['id'];
+
+            if ($workOrderId <= 0) {
+                $workOrderId = null;
+            }
         }
 
         return Transaction::run(
@@ -412,6 +422,9 @@ final class InvoiceService
                 /*
                  * Snapshot je historický obraz faktury
                  * v okamžiku jejího vytvoření.
+                 *
+                 * Pro fakturu bez podkladu bude workOrder null
+                 * a tasks prázdné pole.
                  */
                 $snapshot = [
                     'invoice' => $invoice,
@@ -569,21 +582,30 @@ final class InvoiceService
                             );
                         }
 
-                        $workOrderModel =
-                            new WorkOrderModel($db);
+                        /*
+                         * Pokud faktura vzniká z podkladu
+                         * a zákazník byl právě vytvořen,
+                         * navážeme ho i na zakázku.
+                         *
+                         * Pro fakturu bez podkladu se nic neděje.
+                         */
+                        if ($workOrderId !== null) {
+                            $workOrderModel =
+                                new WorkOrderModel($db);
 
-                        $updated =
-                            $workOrderModel->update(
-                                $workOrderId,
-                                [
-                                    'contact_id' => $contactId,
-                                ]
-                            );
+                            $updated =
+                                $workOrderModel->update(
+                                    $workOrderId,
+                                    [
+                                        'contact_id' => $contactId,
+                                    ]
+                                );
 
-                        if (!$updated) {
-                            throw new RuntimeException(
-                                'Work order contact update failed.'
-                            );
+                            if (!$updated) {
+                                throw new RuntimeException(
+                                    'Work order contact update failed.'
+                                );
+                            }
                         }
                     }
                 }
@@ -622,35 +644,43 @@ final class InvoiceService
 
                 /*
                  * Vazby faktury na zdrojové úkoly.
+                 *
+                 * Pro fakturu bez podkladu je $tasks prázdné
+                 * pole a tato část se přeskočí.
                  */
-                $itemModel =
-                    new InternalInvoiceItemModel($db);
+                if ($tasks !== []) {
+                    $itemModel =
+                        new InternalInvoiceItemModel($db);
 
-                foreach ($tasks as $task) {
-                    if (!is_array($task)) {
-                        throw new RuntimeException(
-                            'Invalid invoice task.'
+                    foreach ($tasks as $task) {
+                        if (!is_array($task)) {
+                            throw new RuntimeException(
+                                'Invalid invoice task.'
+                            );
+                        }
+
+                        $taskId = (
+                            $task['task_id'] ?? 0
                         );
+
+                        if ($taskId <= 0) {
+                            throw new RuntimeException(
+                                'Invoice task ID is invalid.'
+                            );
+                        }
+
+                        $itemModel->create([
+                            'invoice_id' => $invoiceId,
+                            'task_id' => $taskId,
+                        ]);
                     }
-
-                    $taskId = (
-                        $task['task_id'] ?? 0
-                    );
-
-                    if ($taskId <= 0) {
-                        throw new RuntimeException(
-                            'Invoice task ID is invalid.'
-                        );
-                    }
-
-                    $itemModel->create([
-                        'invoice_id' => $invoiceId,
-                        'task_id' => $taskId,
-                    ]);
                 }
 
                 /*
                  * Skutečné fakturační řádky.
+                 *
+                 * I pro fakturu bez podkladu zde mohou být
+                 * ručně zadané řádky.
                  */
                 $lineModel =
                     new InternalInvoiceLineModel($db);
@@ -688,6 +718,7 @@ final class InvoiceService
             'admin'
         );
     }
+
 
     /**
      * Připraví návrh faktury ze zakázky.
@@ -926,5 +957,138 @@ final class InvoiceService
         }
 
         return $customerData;
+    }
+
+        /**
+     * Vydá draft fakturu (draft → issued).
+     *
+     * Před vydáním znovu ověří, že žádný z navázaných
+     * úkolů mezitím nezískal jinou aktivní fakturu.
+     *
+     * Draft totiž úkol neblokuje (viz
+     * InternalInvoiceItemModel::isTaskActivelyInvoiced),
+     * takže task mohl být mezitím fakturován jinde.
+     *
+     * @param int $companyId
+     * @param int $invoiceId
+     * @return void
+     */
+    public function issue(int $companyId, int $invoiceId): void
+    {
+        if ($companyId <= 0 || $invoiceId <= 0) {
+            throw new RuntimeException(
+                'Požadovaná faktura v systému neexistuje.'
+            );
+        }
+
+        $model = new InternalInvoiceModel();
+
+        $invoice = $model->find($invoiceId);
+
+        if ($invoice === null) {
+            throw new RuntimeException(
+                'Požadovaná faktura v systému neexistuje.'
+            );
+        }
+
+        if ((int) $invoice['company_id'] !== $companyId) {
+            throw new RuntimeException(
+                'Požadovaná faktura v systému neexistuje.'
+            );
+        }
+
+        if ($invoice['status'] !== InvoiceStatus::DRAFT) {
+            throw new RuntimeException(
+                'Vydat lze pouze fakturu ve stavu konceptu.'
+            );
+        }
+
+        /*
+         * Re-guard tasků.
+         *
+         * Používáme přímou kontrolu přes
+         * isTaskActivelyInvoiced, abychom se vyhnuli
+         * Url::back() uvnitř InvoiceGuard (service
+         * nemá redirectovat).
+         */
+        $itemModel = new InternalInvoiceItemModel();
+
+        $items = $itemModel->forInvoice($invoiceId);
+
+        foreach ($items as $item) {
+            $taskId = (int) ($item['task_id'] ?? 0);
+
+            if ($taskId <= 0) {
+                continue;
+            }
+
+            if ($itemModel->isTaskActivelyInvoiced($taskId)) {
+                throw new RuntimeException(
+                    'Úkol je již fakturován jinou fakturou.'
+                );
+            }
+        }
+
+        $updated = $model->update($invoiceId, [
+            'status' => InvoiceStatus::ISSUED,
+        ]);
+
+        if (!$updated) {
+            throw new RuntimeException(
+                'Fakturu se nepodařilo vydat.'
+            );
+        }
+    }
+
+    /**
+     * Stornuje vydanou fakturu (issued → cancelled).
+     *
+     * Varianta 1: mění se pouze stav, nevzniká opravný doklad.
+     * Po stornu lze zdrojové úkoly fakturovat znovu
+     * (cancelled se v isTaskActivelyInvoiced nepočítá).
+     *
+     * @param int $companyId
+     * @param int $invoiceId
+     * @return void
+     */
+    public function cancel(int $companyId, int $invoiceId): void
+    {
+        if ($companyId <= 0 || $invoiceId <= 0) {
+            throw new RuntimeException(
+                'Požadovaná faktura v systému neexistuje.'
+            );
+        }
+
+        $model = new InternalInvoiceModel();
+
+        $invoice = $model->find($invoiceId);
+
+        if ($invoice === null) {
+            throw new RuntimeException(
+                'Požadovaná faktura v systému neexistuje.'
+            );
+        }
+
+        if ((int) $invoice['company_id'] !== $companyId) {
+            throw new RuntimeException(
+                'Požadovaná faktura v systému neexistuje.'
+            );
+        }
+
+        if (!InvoiceStatus::isIssued((string) $invoice['status'])) {
+            throw new RuntimeException(
+                'Stornovat lze pouze vydanou fakturu.'
+            );
+        }
+
+        $updated = $model->update($invoiceId, [
+            'status' => InvoiceStatus::CANCELLED,
+        ]);
+
+        if (!$updated) {
+            throw new RuntimeException(
+                'Fakturu se nepodařilo stornovat.'
+            );
+        }
     }
 }

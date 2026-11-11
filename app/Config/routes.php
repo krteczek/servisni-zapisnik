@@ -1060,7 +1060,18 @@ return [
     //'submenu'=> 'Výpis faktur',
     'title'   => 'Faktury: Stornování faktury',
 ],
-
+//POST /billing/invoice/{id}/issue
+//vydání draftu
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/{id:\d+}/issue',
+    'action'  => [InvoiceController::class, 'issue'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Vydání faktury',
+],
 
 /*-------------------------------------
    Exporty

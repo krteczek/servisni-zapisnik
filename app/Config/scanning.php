@@ -1,15 +1,19 @@
 <?php
 declare(strict_types=1);
 
+use App\Services\Guards\BanType;
 return [
     'paths' => [
         'wp_search' => [
             'contains' => [
                 'wp-login.php',
                 'wp-admin',
+                'wp-admin.php',
                 'wp-content',
                 'wp-includes',
                 'xmlrpc.php',
+                'wp-login',
+                'wp',
             ],
         ],
 
@@ -22,5 +26,5 @@ return [
         ],
     ],
 
-    'ban_type' => 'SCANNING_BAN',
+    'ban_type' => BanType::SCANNING_BAN,
 ];
