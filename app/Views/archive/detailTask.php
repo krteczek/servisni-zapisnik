@@ -17,7 +17,6 @@ $reports = $view->reports;
 $router = $view->router;
 require __DIR__ . '/_filters.php';
 
-dc($task, $reports );
 ?>
 
 <div class="create-container">
@@ -67,7 +66,7 @@ dc($task, $reports );
                 
 						<?php 
 						$ahrefP = '';
-						//dd($task['allReportsParticipants']);
+						
 						foreach ($task['allReportsParticipants'] as $participants) {
 							$min = (int)$participants['minutes_spent'];
 							$ahrefP .= '<a href="' . Url::to('/{tenant}/users/' . $participants['user_id'] . '/detail/#main') . '" title="jít na kartu pracovníka">' .  $participants['first_name'] . " " . $participants['last_name'] . ' (' . formatMinutes($min) . ')</a> ';

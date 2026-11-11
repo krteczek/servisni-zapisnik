@@ -26,7 +26,7 @@ class DevAuthController extends Controller
         $companyId = (int) Config::get('app.company_id');
         $email = Config::get('app.dev_users.' . $role);
 
-        // dd([$companyId, $email]);
+        
         $companyModel = new CompanyModel();
         $company = $companyModel->find($companyId);
 

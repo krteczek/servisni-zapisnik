@@ -40,7 +40,7 @@ public function createFromTask(int $id): string
     try {
         $this->view->data = $this->invoice->buildDraftFromTask($id);
         $this->view->contacts = (new ContactsModel())->all();
-        // dc($this->view->data);
+        
         return $this->render('invoices/create-from-task');
 
     } catch (Throwable $e) {

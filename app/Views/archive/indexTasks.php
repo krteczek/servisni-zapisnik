@@ -12,7 +12,7 @@ require __DIR__ . '/../layout/header.php';
 
 // TODO: udělat ikonku pro normální task
 $tasks = $view->archiveTasks;
-//dc($tasks);
+
 require __DIR__ . '/_filters.php';
 ?>
 <div class="entity-grid">

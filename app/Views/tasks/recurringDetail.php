@@ -26,7 +26,7 @@ $errors = $view->errors; // chyby validace
   - datum deaktivace / ukončení
   * to platí i pro šablonu
  */
-//dd($task, $data);
+
 ?>
 <div class="create-container">
 <!-- DETAIL ŠABLONY -->

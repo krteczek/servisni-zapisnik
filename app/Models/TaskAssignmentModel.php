@@ -112,7 +112,7 @@ final class TaskAssignmentModel extends BaseModel
      */
     public function createReport(int $taskId, int $workOrderId, array $data): int
     {
-        //dd($data);
+       
         return Transaction::run(function () use ($taskId, $workOrderId, $data) {
 
             $totalMinutes = 0;

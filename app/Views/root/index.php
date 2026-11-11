@@ -8,7 +8,7 @@ use App\Core\Url;
 
 require __DIR__ . '/../layout/header.php';
 $companies = $view->companies;
-//dd($companies);
+
 ?>
 
 <?php if (is_array($companies) && $companies === []): ?>

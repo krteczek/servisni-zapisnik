@@ -8,7 +8,7 @@ require __DIR__ . '/../layout/header.php';
 use App\Core\Url;
 
 $data = $view->WBData;
-//dd($data);
+
 ?>
 
 <div class="workbench-container">
