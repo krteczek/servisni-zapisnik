@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\Services\Invoice;
 
-use DateTimeImmutable;
+
 use Defr\QRPlatba\QRPlatba;
 use Throwable;
+use App\Core\LoggerHolder;
 
 final class InvoicePdfService
 {
@@ -245,8 +246,19 @@ final class InvoicePdfService
 
                 $qrHtml = $qrPlatba->getQRCodeImage();
 
-            } catch (Throwable) {
+            } catch (Throwable $e) {
                 // QR platba je volitelná.
+            LoggerHolder::get()->error(
+                'InvoicePdfService.preparePayment: failed',
+                [
+                    'message'   => $e->getMessage(),
+                    'file'      => $e->getFile(),
+                    'line'      => $e->getLine(),
+                    'trace'     => $e->getTraceAsString(),
+
+                ]
+            );
+
             }
         }
 
