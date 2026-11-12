@@ -1,16 +1,28 @@
 (function () {
     'use strict';
-
+console.log('ARES JS: script načten');
     document.addEventListener('click', function (event) {
-        const button = event.target.closest('[data-ajax-loader]');
 
+    console.log('ARES JS: zachycen klik', event.target);
+    const button = event.target.closest('[data-ares-load]');
+console.log('ARES JS: nalezené tlačítko:', button);
+console.log('ARES JS: URL:', button?.dataset.aresUrl);
         if (button === null) {
             return;
         }
-
+/**
         const sourceName = button.dataset.ajaxSource || '';
         const url = button.dataset.ajaxUrl || '';
         const messageId = button.dataset.ajaxMessage || '';
+**/
+const sourceName = 'ico';
+const url = button.dataset.aresUrl || '';
+const message = button.closest('fieldset')
+    ?.querySelector('[data-ares-message]') ?? null;
+
+console.log('ARES JS: zdroj:', sourceName);
+console.log('ARES JS: URL:', url);
+console.log('ARES JS: zpráva:', message);
 
         if (sourceName === '' || url === '') {
             return;
@@ -24,9 +36,6 @@
             return;
         }
 
-        const message = messageId !== ''
-            ? document.getElementById(messageId)
-            : null;
 
         function showMessage(text, type) {
             if (message === null) {

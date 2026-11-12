@@ -3,166 +3,22 @@ declare(strict_types=1);
 
 /** @var \App\Core\ViewContext $view */
 
-use App\Services\Invoice\InvoiceStatus;
-use dfridrich\QRPlatba\QRPlatba;
 
-$invoice  = $view->invoice;
-$supplier = $view->supplier;
+$pdfData = $view->pdfData;
 
-$data      = $invoice['invoice']   ?? [];
-$customer  = $invoice['customer']  ?? [];
-$workOrder = $invoice['workOrder'] ?? [];
-$tasks     = $invoice['tasks']     ?? [];
-$lines     = $invoice['lines']     ?? [];
-
-$status    = (string) ($invoice['status'] ?? '');
-$invoiceNumber = (string) ($invoice['invoice_number'] ?? '');
-$issuedAt = (string) ($invoice['issued_at'] ?? '');
-$dueDate  = (string) ($invoice['due_date'] ?? '');
-
-$isCancelled = InvoiceStatus::isCancelled($status);
-
-/*
- * Formát data: Y-m-d → d.m.Y
- */
-$formatDate = static function (string $date): string {
-    if ($date === '') {
-        return '';
-    }
-
-    $dt = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
-
-    if ($dt === false) {
-        return $date;
-    }
-
-    return $dt->format('d.m.Y');
-};
-
-$total = 0.0;
-foreach ($lines as $line) {
-    $total += (float) ($line['total'] ?? 0);
-}
-
-/*
- * Dodavatel – adresa
- */
-$supplierStreet = trim(
-    (string) ($supplier['street'] ?? '') . ' ' .
-    (string) ($supplier['house_number'] ?? '') .
-    (
-        (string) ($supplier['orientation_number'] ?? '') !== ''
-            ? '/' . $supplier['orientation_number']
-            : ''
-    )
-);
-
-$supplierCity = trim(
-    (string) ($supplier['postal_code'] ?? '') . ' ' .
-    (string) ($supplier['city'] ?? '')
-);
-
-/*
- * Odběratel – adresa
- */
-$customerStreet = trim(
-    (string) ($customer['street'] ?? '') . ' ' .
-    (string) ($customer['house_number'] ?? '') .
-    (
-        (string) ($customer['orientation_number'] ?? '') !== ''
-            ? '/' . $customer['orientation_number']
-            : ''
-    )
-);
-
-$customerCity = trim(
-    (string) ($customer['postal_code'] ?? '') . ' ' .
-    (string) ($customer['city'] ?? '')
-);
-
-/*
- * Bankovní účet – default z bank_accounts.
- */
-$bankAccounts = $supplier['bank_accounts'] ?? [];
-$defaultAccount = null;
-
-foreach ($bankAccounts as $account) {
-    if ((int) ($account['is_default'] ?? 0) === 1) {
-        $defaultAccount = $account;
-        break;
-    }
-}
-
-if ($defaultAccount === null && $bankAccounts !== []) {
-    $defaultAccount = $bankAccounts[0];
-}
-
-/*
- * Sestaví řetězec čísla účtu: "prefix-number/bank_code"
- */
-$accountText = '';
-
-if (is_array($defaultAccount)) {
-    $parts = [];
-
-    if ((string) ($defaultAccount['account_prefix'] ?? '') !== '') {
-        $parts[] = $defaultAccount['account_prefix'];
-    }
-
-    if ((string) ($defaultAccount['account_number'] ?? '') !== '') {
-        $parts[] = $defaultAccount['account_number'];
-    }
-
-    $accountText = implode('-', $parts);
-
-    if ((string) ($defaultAccount['bank_code'] ?? '') !== '') {
-        $accountText .= '/' . $defaultAccount['bank_code'];
-    }
-}
-
-/*
- * QR Platba (dfridrich/qr-platba)
- */
-$qrHtml = '';
-
-if ($defaultAccount !== null && $total > 0) {
-    try {
-        $qrPlatba = new QRPlatba();
-
-        if ((string) ($defaultAccount['iban'] ?? '') !== '') {
-            $qrPlatba->setIBAN((string) $defaultAccount['iban']);
-        } elseif ($accountText !== '') {
-            $qrPlatba->setAccount($accountText);
-        }
-
-        $qrPlatba
-            ->setVariableSymbol($invoiceNumber)
-            ->setAmount($total)
-            ->setMessage('Faktura ' . $invoiceNumber);
-
-        if ($dueDate !== '') {
-            $dt = \DateTimeImmutable::createFromFormat(
-                '!Y-m-d',
-                $dueDate
-            );
-
-            if ($dt !== false) {
-                $qrPlatba->setDueDate($dt);
-            }
-        }
-
-        $qrHtml = $qrPlatba->getQRCodeImage();
-    } catch (\Throwable $e) {
-        // QR je volitelný – když selže, PDF se vygeneruje bez něj.
-        $qrHtml = '';
-    }
-}
+$invoice  = $pdfData['invoice'];
+$supplier = $pdfData['supplier'];
+$customer = $pdfData['customer'];
+$lines    = $pdfData['lines'];
+$totals   = $pdfData['totals'];
+$payment  = $pdfData['payment'];
+$note     = $pdfData['note'];
 
 ?><!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>Faktura <?= e($invoiceNumber) ?></title>
+    <title>Faktura <?= e($invoice['number']) ?></title>
 
     <style>
         @page {
@@ -386,7 +242,7 @@ if ($defaultAccount !== null && $total > 0) {
 </head>
 <body>
 
-<?php if ($isCancelled): ?>
+<?php if ($invoice['is_cancelled']): ?>
     <div class="storno-watermark">STORNO</div>
 <?php endif; ?>
 
@@ -396,38 +252,42 @@ if ($defaultAccount !== null && $total > 0) {
         <tr>
             <td class="supplier">
                 <div class="name">
-                    <?= e((string) ($supplier['official_name'] ?? '')) ?>
+                    <?= e($supplier['name']) ?>
                 </div>
 
-                <?php if ($supplierStreet !== ''): ?>
-                    <div class="line"><?= e($supplierStreet) ?></div>
+                <?php if ($supplier['street'] !== ''): ?>
+                    <div class="line"><?= e($supplier['street']) ?></div>
                 <?php endif; ?>
 
-                <?php if ($supplierCity !== ''): ?>
-                    <div class="line"><?= e($supplierCity) ?></div>
+                <?php if ($supplier['city'] !== ''): ?>
+                    <div class="line"><?= e($supplier['city']) ?></div>
                 <?php endif; ?>
 
-                <?php if ((string) ($supplier['ico'] ?? '') !== ''): ?>
-                    <div class="line">IČO: <?= e((string) $supplier['ico']) ?></div>
+                <?php if ($supplier['ico'] !== ''): ?>
+                    <div class="line">IČO: <?= e($supplier['ico']) ?></div>
                 <?php endif; ?>
 
-                <?php if ((string) ($supplier['dic'] ?? '') !== ''): ?>
-                    <div class="line">DIČ: <?= e((string) $supplier['dic']) ?></div>
+                <?php if ($supplier['dic'] !== ''): ?>
+                    <div class="line">DIČ: <?= e($supplier['dic']) ?></div>
                 <?php endif; ?>
             </td>
 
             <td class="invoice-title">
                 <div class="label">FAKTURA</div>
-                <div class="number">č. <?= e($invoiceNumber) ?></div>
+                <div class="number">č. <?= e($invoice['number']) ?></div>
+
+
+
+
 
                 <div class="meta">
                     <div class="row">
                         <span class="label">Datum vystavení:</span>
-                        <?= e($formatDate($issuedAt)) ?>
+                        <?= e($invoice['issued_at_formatted']) ?>
                     </div>
                     <div class="row">
                         <span class="label">Datum splatnosti:</span>
-                        <?= e($formatDate($dueDate)) ?>
+                        <?= e($invoice['due_date_formatted']) ?>
                     </div>
                     <div class="row">
                         <span class="label">Forma úhrady:</span>
@@ -445,25 +305,25 @@ if ($defaultAccount !== null && $total > 0) {
         <tr>
             <td>
                 <div class="label">Odběratel</div>
-                <div class="name">
-                    <?= e((string) ($customer['official_name'] ?? '')) ?>
-                </div>
+                    <div class="name">
+                        <?= e($customer['name']) ?>
+                    </div>
 
-                <?php if ($customerStreet !== ''): ?>
-                    <div class="line"><?= e($customerStreet) ?></div>
-                <?php endif; ?>
+                    <?php if ($customer['street'] !== ''): ?>
+                        <div class="line"><?= e($customer['street']) ?></div>
+                    <?php endif; ?>
 
-                <?php if ($customerCity !== ''): ?>
-                    <div class="line"><?= e($customerCity) ?></div>
-                <?php endif; ?>
+                    <?php if ($customer['city'] !== ''): ?>
+                        <div class="line"><?= e($customer['city']) ?></div>
+                    <?php endif; ?>
 
-                <?php if ((string) ($customer['ico'] ?? '') !== ''): ?>
-                    <div class="line">IČO: <?= e((string) $customer['ico']) ?></div>
-                <?php endif; ?>
+                    <?php if ($customer['ico'] !== ''): ?>
+                        <div class="line">IČO: <?= e($customer['ico']) ?></div>
+                    <?php endif; ?>
 
-                <?php if ((string) ($customer['dic'] ?? '') !== ''): ?>
-                    <div class="line">DIČ: <?= e((string) $customer['dic']) ?></div>
-                <?php endif; ?>
+                    <?php if ($customer['dic'] !== ''): ?>
+                        <div class="line">DIČ: <?= e($customer['dic']) ?></div>
+                    <?php endif; ?>
             </td>
         </tr>
     </table>
@@ -482,45 +342,14 @@ if ($defaultAccount !== null && $total > 0) {
     </thead>
     <tbody>
         <?php foreach ($lines as $line): ?>
-            <?php
-            $unit = (string) ($line['unit'] ?? '');
-            $qty  = (float) ($line['quantity'] ?? 0);
-
-            if ($unit === 'min') {
-                $mins = (int) $qty;
-                $h = intdiv($mins, 60);
-                $m = $mins % 60;
-                $qtyLabel = trim(
-                    ($h > 0 ? $h . ' h' : '') .
-                    ($m > 0 ? ' ' . $m . ' min' : '')
-                );
-                if ($qtyLabel === '') {
-                    $qtyLabel = '0 min';
-                }
-            } else {
-                $qtyLabel = (string) $qty;
-            }
-            ?>
             <tr>
-                <td><?= e((string) ($line['description'] ?? '')) ?></td>
-                <td class="num"><?= e($qtyLabel) ?></td>
-                <td><?= e($unit) ?></td>
+                <td><?= e($line['description']) ?></td>
+                <td class="num"><?= e($line['quantity_label']) ?></td>
+                <td><?= e($line['unit']) ?></td>
+                <td class="num"><?= e($line['unit_price']) ?></td>
                 <td class="num">
-                    <?= e(number_format(
-                        (float) ($line['unit_price'] ?? 0),
-                        2,
-                        ',',
-                        ' '
-                    )) ?>
-                </td>
-                <td class="num">
-                    <?= e(number_format(
-                        (float) ($line['total'] ?? 0),
-                        2,
-                        ',',
-                        ' '
-                    )) ?>
-                    <?= e((string) ($line['currency'] ?? 'CZK')) ?>
+                    <?= e($line['total']) ?>
+                    <?= e($line['currency']) ?>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -531,10 +360,11 @@ if ($defaultAccount !== null && $total > 0) {
                 Celkem k úhradě:
             </td>
             <td class="num total">
-                <?= e(number_format($total, 2, ',', ' ')) ?> CZK
+                <?= e($totals['total_formatted']) ?>
+                <?= e($totals['currency']) ?>
             </td>
         </tr>
-    </tfoot>
+    </tfoot>    
 </table>
 
 <!-- PLATEBNÍ ÚDAJE + QR -->
@@ -544,59 +374,56 @@ if ($defaultAccount !== null && $total > 0) {
             <td>
                 <div class="label">Platební údaje</div>
 
-                <?php if ($accountText !== ''): ?>
+                <?php if ($payment['account'] !== ''): ?>
                     <div class="line">
                         <strong>Číslo účtu:</strong>
-                        <?= e($accountText) ?>
+                        <?= e($payment['account']) ?>
                     </div>
                 <?php endif; ?>
 
-                <?php if ((string) ($defaultAccount['iban'] ?? '') !== ''): ?>
+                <?php if ($payment['iban'] !== ''): ?>
                     <div class="line">
                         <strong>IBAN:</strong>
-                        <?= e((string) $defaultAccount['iban']) ?>
+                        <?= e($payment['iban']) ?>
                     </div>
                 <?php endif; ?>
 
                 <div class="line">
                     <strong>Variabilní symbol:</strong>
-                    <?= e($invoiceNumber) ?>
+                    <?= e($payment['variable_symbol']) ?>
                 </div>
 
                 <div class="line">
                     <strong>Splatnost:</strong>
-                    <?= e($formatDate($dueDate)) ?>
+                    <?= e($payment['due_date']) ?>
                 </div>
             </td>
 
-            <?php if ($qrHtml !== ''): ?>
+            <?php if ($payment['qr_html'] !== ''): ?>
                 <td class="qr">
                     <div class="label">QR Platba</div>
-                    <?= $qrHtml ?>
+                    <?= $payment['qr_html'] ?>
                 </td>
             <?php endif; ?>
         </tr>
     </table>
 </div>
-
-<?php if ((string) ($data['note'] ?? '') !== ''): ?>
+<?php if ($note !== ''): ?>
     <div class="note">
         <strong>Poznámka:</strong><br>
-        <?= nl2br(e((string) $data['note'])) ?>
+        <?= nl2br(e($note)) ?>
     </div>
 <?php endif; ?>
-
 <!-- PATIČKA -->
 <div class="footer">
     Nejsem plátce DPH.
-    <?php if ((string) ($supplier['official_name'] ?? '') !== ''): ?>
+    <?php if ($supplier['name'] !== ''): ?>
         &nbsp;|&nbsp;
-        <?= e((string) $supplier['official_name']) ?>
-        <?php if ((string) ($supplier['ico'] ?? '') !== ''): ?>
-            , IČO: <?= e((string) $supplier['ico']) ?>
+        <?= e($supplier['name']) ?>
+        <?php if ($supplier['ico'] !== ''): ?>
+            , IČO: <?= e($supplier['ico']) ?>
         <?php endif; ?>
     <?php endif; ?>
 </div>
-
 </body>
 </html>

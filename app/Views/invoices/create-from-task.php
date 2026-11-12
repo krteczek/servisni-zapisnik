@@ -320,7 +320,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                         type="button"
                                         data-ares-load
                                         data-ares-url="<?= Url::to(
-                                            '/{tenant}/ajax/ares/ico'
+                                            '/{tenant}/ajax/contact/ares/ico'
                                         ) ?>"
                                     >
                                         Načíst data z ARES
@@ -343,6 +343,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                     <input
                                         type="text"
                                         name="official_name"
+                                        data-ajax-field="officialName"
                                         value="<?= e(
                                             $customer['official_name'] ?? ''
                                         ) ?>"
@@ -371,6 +372,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                     <input
                                         type="text"
                                         name="dic"
+                                        data-ajax-field="dic"
                                         value="<?= e(
                                             $customer['dic'] ?? ''
                                         ) ?>"
@@ -404,6 +406,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="street"
+                                    data-ajax-field="street"
                                     value="<?= e(
                                         $customer['street'] ?? ''
                                     ) ?>"
@@ -416,6 +419,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="house_number"
+                                    data-ajax-field="houseNumber"
                                     value="<?= e(
                                         $customer['house_number'] ?? ''
                                     ) ?>"
@@ -428,6 +432,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="orientation_number"
+                                    data-ajax-field="orientationNumber"
                                     value="<?= e(
                                         $customer['orientation_number'] ?? ''
                                     ) ?>"
@@ -440,6 +445,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="city_part"
+                                    data-ajax-field="cityPart"
                                     value="<?= e(
                                         $customer['city_part'] ?? ''
                                     ) ?>"
@@ -454,6 +460,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="city"
+                                    data-ajax-field="city"
                                     value="<?= e(
                                         $customer['city'] ?? ''
                                     ) ?>"
@@ -469,6 +476,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="postal_code"
+                                    data-ajax-field="postalCode"
                                     value="<?= e(
                                         $customer['postal_code'] ?? ''
                                     ) ?>"
@@ -484,6 +492,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="country_code"
+                                    data-ajax-field="countryCode"
                                     value="<?= e(
                                         $customer['country_code'] ?? 'CZ'
                                     ) ?>"
@@ -504,6 +513,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="delivery_address_1"
+                                    data-ajax-field="deliveryAddress1"
                                     value="<?= e(
                                         $customer['delivery_address_1'] ?? ''
                                     ) ?>"
@@ -516,6 +526,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="delivery_address_2"
+                                    data-ajax-field="deliveryAddress2"
                                     value="<?= e(
                                         $customer['delivery_address_2'] ?? ''
                                     ) ?>"
@@ -528,6 +539,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                 <input
                                     type="text"
                                     name="delivery_address_3"
+                                    data-ajax-field="deliveryAddress3"
                                     value="<?= e(
                                         $customer['delivery_address_3'] ?? ''
                                     ) ?>"

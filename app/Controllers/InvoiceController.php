@@ -9,6 +9,7 @@ use App\Core\Flash;
 use App\Core\Csrf;
 use App\Core\Url;
 use App\Models\ContactsModel;
+use App\Services\Ares\AjaxStatus;
 
 
 use App\Models\InternalInvoiceModel;
@@ -20,15 +21,18 @@ use App\Core\Auth;
 use RuntimeException;
 use App\Services\Invoice\InvoiceStatus;
 use App\Models\CompanyModel;
+use App\Services\Invoice\InvoicePdfService;
 
 class InvoiceController extends Controller
 {
     private InvoiceService $invoice;
+    private InvoicePdfService $pdfService;
 
     public function __construct(ViewContext $view)
     {
         parent::__construct($view);
         $this->invoice = new InvoiceService();
+        $this->pdfService = new InvoicePdfService();
     }
 
     /**
@@ -40,7 +44,7 @@ public function createFromTask(int $id): string
     try {
         $this->view->data = $this->invoice->buildDraftFromTask($id);
         $this->view->contacts = (new ContactsModel())->all();
-        
+        AjaxStatus::set();
         return $this->render('invoices/create-from-task');
 
     } catch (Throwable $e) {
@@ -72,11 +76,17 @@ public function createFromTask(int $id): string
         $this->confirmSessionCheck('task_id', $id, '/{tenant}/billing/invoice/#main');
         
         if ($_POST === []) {
+            AjaxStatus::set();
             Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
             Url::back();
         }
 
         $this->checkCsrf();
+        if($this->hasErrors()) {
+            AjaxStatus::set();
+            Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
+            Url::back();
+        }
         try {
             /** 
              * vrací:
@@ -102,6 +112,7 @@ public function createFromTask(int $id): string
                 return $this->render('invoices/create-from-task');
             }
 
+            AjaxStatus::consume();
             Flash::success('Návrh faktury byl vytvořen.');
 
             Url::redirect(
@@ -370,12 +381,17 @@ public function detail(int $id): string
              * Renderujeme do bufferu, protože Dompdf
              * očekává hotový HTML string.
              */
-            $this->view->invoice  = $invoice;
-            $this->view->supplier = $supplier;
+            $this->view->pdfData = $this->pdfService->prepare(
+                $invoice,
+                $supplier
+            );
 
+       /*     * 
             ob_start();
-            require __DIR__ . '/../../views/invoices/pdf.php';
+            require __DIR__ . '/../views/invoices/pdf.php';
             $html = (string) ob_get_clean();
+            */
+            $html = $this->render('invoices/pdf');
 
             $dompdf = new \Dompdf\Dompdf([
                 'isRemoteEnabled' => false,

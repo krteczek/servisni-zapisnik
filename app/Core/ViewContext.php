@@ -39,6 +39,8 @@ use App\Core\Types;
  * @phpstan-import-type InternalInvoiceRow from Types 
  * @phpstan-import-type BankAccountRow from Types
  * @phpstan-import-type CompanyDetailsRow from Types
+ * @phpstan-import-type InvoicePdfData from Types
+ * 
  * 
  * 
  */
@@ -315,6 +317,7 @@ class ViewContext
     public array $bankAccounts = [];
 
     /** generování PDF */
-    public array $supplier = [];
+    /** @var InvoicePdfData */
+    public array $pdfData = [];
 
 }

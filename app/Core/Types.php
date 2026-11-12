@@ -627,6 +627,57 @@ use App\Services\Tokens\TokenResult;
  *     default_company_key: ?int
  * }
  *
+ *
+ * @phpstan-type InvoicePdfData array{
+ *     invoice: array{
+ *         id: int,
+ *         number: string,
+ *         status: string,
+ *         is_cancelled: bool,
+ *         issued_at: string,
+ *         issued_at_formatted: string,
+ *         due_date: string,
+ *         due_date_formatted: string
+ *     },
+ *     supplier: array{
+ *         name: string,
+ *         street: string,
+ *         city: string,
+ *         ico: string,
+ *         dic: string
+ *     },
+ *     customer: array{
+ *         name: string,
+ *         street: string,
+ *         city: string,
+ *         ico: string,
+ *         dic: string
+ *     },
+ *     lines: array<int, array{
+ *         description: string,
+ *         quantity: float,
+ *         quantity_label: string,
+ *         unit: string,
+ *         price_unit: string,
+ *         unit_price: string,
+ *         total: string,
+ *         currency: string
+ *     }>,
+ *     totals: array{
+ *         total: float,
+ *         total_formatted: string,
+ *         currency: string
+ *     },
+ *     payment: array{
+ *         account: string,
+ *         iban: string,
+ *         variable_symbol: string,
+ *         due_date: string,
+ *         qr_html: string
+ *     },
+ *     note: string
+ * }
+ *
  */
 final class Types
 {
