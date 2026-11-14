@@ -35,6 +35,25 @@ class InvoiceController extends Controller
         $this->pdfService = new InvoicePdfService();
     }
 
+        /**
+     * seznam návrhů a faktur
+     */
+    public function index(): string
+    {
+        $settingsService = new SettingsService();
+
+        $this->view->invoiceSettingsConfirmed =
+            $settingsService->areInvoiceSettingsConfirmed();
+
+        if ($this->view->invoiceSettingsConfirmed === true) {
+            $model = new InternalInvoiceModel();
+
+            $this->view->invoices = $model->all();
+        }
+
+        return $this->render('invoices/index');
+    }
+
     /**
      * /billing/invoice/create/task/123 GET
      */
@@ -153,24 +172,6 @@ public function createFromTask(int $id): string
         return $this->render('billing/invoice/create-export');
     }
 
-    /**
-     * seznam návrhů a faktur
-     */
-public function index(): string
-{
-    $settingsService = new SettingsService();
-
-    $this->view->invoiceSettingsConfirmed =
-        $settingsService->areInvoiceSettingsConfirmed();
-
-    if ($this->view->invoiceSettingsConfirmed === true) {
-        $model = new InternalInvoiceModel();
-
-        $this->view->invoices = $model->all();
-    }
-
-    return $this->render('invoices/index');
-}
 
 
  /**
