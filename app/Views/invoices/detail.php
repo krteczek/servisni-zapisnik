@@ -315,9 +315,20 @@ foreach ($lines as $line) {
                 </button>
             </form>
         <?php endif; ?>
+        <?php if ($isDraft): ?>
+            <a
+                href="<?= Url::to(
+                    '/{tenant}/billing/invoice/' . $invoiceId . '/edit/#main'
+                ) ?>"
+                class="btn btn-secondary"
+                title="Upravit návrh faktury"
+            >
+                Upravit návrh faktury
+            </a>
+        <?php endif; ?>
 
         <a
-            href="<?= Url::to('/{tenant}/billing/invoices/#main') ?>"
+            href="<?= Url::to('/{tenant}/billing/invoice/#main') ?>"
             class="btn btn-secondary"
         >
             Zpět

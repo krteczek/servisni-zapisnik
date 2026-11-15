@@ -82,7 +82,7 @@ class InternalInvoiceModel extends BaseModel
         $sql = "
             SELECT
                 i.*,
-                COALESCE(lines.total_amount, 0) AS total_amount
+                COALESCE(il.total_amount, 0) AS total_amount
             FROM {$this->tableName} i
             LEFT JOIN (
                 SELECT
@@ -91,7 +91,7 @@ class InternalInvoiceModel extends BaseModel
                 FROM internal_invoice_lines
                 WHERE company_id = :lines_company_id
                 GROUP BY invoice_id
-            ) lines ON lines.invoice_id = i.id
+            ) il ON il.invoice_id = i.id
         ";
 
         $params['lines_company_id'] = Auth::companyId();

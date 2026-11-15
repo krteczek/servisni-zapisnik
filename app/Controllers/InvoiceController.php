@@ -8,6 +8,7 @@ use App\Core\ViewContext;
 use App\Core\Flash;
 use App\Core\Csrf;
 use App\Core\Url;
+use App\Core\Session;
 use App\Models\ContactsModel;
 use App\Services\Ares\AjaxStatus;
 
@@ -35,8 +36,8 @@ class InvoiceController extends Controller
         $this->pdfService = new InvoicePdfService();
     }
 
-        /**
-     * seznam návrhů a faktur
+    /**
+     * Seznam návrhů a faktur.
      */
     public function index(): string
     {
@@ -46,13 +47,75 @@ class InvoiceController extends Controller
             $settingsService->areInvoiceSettingsConfirmed();
 
         if ($this->view->invoiceSettingsConfirmed === true) {
+
+            $defaults = [
+                'search'    => '',
+                'status'    => 'all',
+                'order'     => 'created_at',
+                'direction' => 'DESC',
+            ];
+
+            $filters = Session::get('invoice_index', $defaults);
+
+            if (!is_array($filters)) {
+                $filters = $defaults;
+            }
+
+            // Doplnění případných chybějících hodnot.
+            $filters = array_merge($defaults, $filters);
+
+            // Načtení nových parametrů z GET.
+            foreach ($defaults as $key => $default) {
+                if (isset($_GET[$key])) {
+                    $filters[$key] = $_GET[$key];
+                }
+            }
+
+            // Validace řazení.
+            $allowedOrders = [
+                'created_at',
+                'issued_at',
+                'due_date',
+                'invoice_number',
+                'customer_name',
+                'amount',
+            ];
+
+            if (!in_array($filters['order'], $allowedOrders, true)) {
+                $filters['order'] = $defaults['order'];
+            }
+
+            if (!in_array($filters['direction'], ['ASC', 'DESC'], true)) {
+                $filters['direction'] = $defaults['direction'];
+            }
+
+            // Validace stavu.
+            $allowedStatuses = [
+                'all',
+                'draft',
+                'issued',
+                'paid',
+                'cancelled',
+            ];
+
+            if (!in_array($filters['status'], $allowedStatuses, true)) {
+                $filters['status'] = $defaults['status'];
+            }
+
+            $filters['search'] = trim((string) $filters['search']);
+
+            Session::set('invoice_index', $filters);
+
+            $this->view->filters = $filters;
+
             $model = new InternalInvoiceModel();
 
-            $this->view->invoices = $model->all();
+            $this->view->invoices = $model->forIndex($filters);
         }
 
         return $this->render('invoices/index');
     }
+
 
     /**
      * /billing/invoice/create/task/123 GET
