@@ -79,6 +79,8 @@ class InternalInvoiceModel extends BaseModel
             $params['status'] = $status;
         }
 
+        $lineModel = new InternalInvoiceLineModel();
+        $lineTable = $lineModel->getTableName();
         $sql = "
             SELECT
                 i.*,
@@ -88,13 +90,13 @@ class InternalInvoiceModel extends BaseModel
                 SELECT
                     invoice_id,
                     SUM(total) AS total_amount
-                FROM internal_invoice_lines
+                FROM {$lineTable}
                 WHERE company_id = :lines_company_id
                 GROUP BY invoice_id
             ) il ON il.invoice_id = i.id
         ";
 
-        $params['lines_company_id'] = Auth::companyId();
+        $params['lines_company_id'] = $where['company_id'];
 
         if ($conditions !== []) {
             $sql .= ' WHERE ' . implode(' AND ', $conditions);

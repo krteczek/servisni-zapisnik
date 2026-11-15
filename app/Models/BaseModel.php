@@ -271,6 +271,16 @@ abstract class BaseModel
         return $diff;
     }
 
+    /**
+     * Vrátí název tabulky.
+     *
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return $this->tableName;
+    }
+
     /* ==========================================================
      * SELECT
      * ========================================================== */
