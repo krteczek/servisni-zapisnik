@@ -929,7 +929,7 @@ return [
     //'section' => 'billing',
     //'menu'   => 'Faktury',
     //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Detail faktury',
+    'title'   => 'Faktury: Detail návrhu faktury',
 ],
 
 // GET /billing/invoice/{invoiceId}/edit
@@ -956,24 +956,13 @@ return [
     'title'   => 'Faktury: Úprava návrhu faktury',
 ],
 
-// POST /billing/invoice/{invoiceId}/confirm
-[
-    'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/{invoiceId:\d+}/confirm',
-    'action'  => [InvoiceController::class, 'confirm'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'billing',
-    'menu'    => 'Faktury',
-    'title'   => 'Faktury: Potvrzení faktury',
-],
 
 
 //GET  /billing/invoice/create/from-work-order/123
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/billing/invoice/create/from-work-order/{id:\d+}',
-    'action'  => [InvoiceController::class, 'createWO'],
+    'action'  => [InvoiceController::class, 'createWorkOrder'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',
@@ -985,7 +974,7 @@ return [
 [
     'method'  => 'POST',
     'path'    => '/{tenant}/billing/invoice/create/from-work-order/{id:\d+}',
-    'action'  => [InvoiceController::class, 'storeWO'],
+    'action'  => [InvoiceController::class, 'storeWorkOrder'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     //'section' => 'billing',
@@ -994,44 +983,8 @@ return [
     'title'   => 'Faktury: Vytvoření faktury ze zakázky',
 ],
 
-//GET  /billing/invoice/create/export/123
-// export pro účetní, typicky pro plátce DPH
-[
-    'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/create/export/{id:\d+}',
-    'action'  => [InvoiceController::class, 'createExport'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    //'section' => 'billing',
-    //'menu'   => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Vytvoření exportu pro účetní',
-],
-//POST /billing/invoice/create/export/123
-[
-    'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/create/export/{id:\d+}',
-    'action'  => [InvoiceController::class, 'storeExport'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    //'section' => 'billing',
-    //'menu'   => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Vytvoření faktury ze zakázky',
-],
 
-//GET  /billing/invoice/{id}/detail
-[
-    'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/{id:\d+}/detail',
-    'action'  => [InvoiceController::class, 'detail'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'billing',
-    'menu'    => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Detail faktury',
-],
+
 
 //GET  /billing/invoice/{id}/pdf
 

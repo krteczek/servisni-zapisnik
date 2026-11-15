@@ -10,6 +10,7 @@ require __DIR__ . '/../layout/header.php';
 
 $data = $view->data;
 
+$isEdit    = (bool) ($data['is_edit'] ?? false);
 $invoice   = $data['invoice'] ?? [];
 $supplier  = $data['supplier'] ?? [];
 $customer  = $data['customer'] ?? [];
@@ -278,7 +279,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                                                 value="<?= $contact['id'] ?>"
                                                 <?= (int) (
                                                     $invoice['contact_id'] ?? 0
-                                                ) === $contact['id']
+                                                ) === (int) $contact['id']
                                                     ? 'selected'
                                                     : '' ?>
                                             >
@@ -1454,23 +1455,30 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                      ================================================= -->
 
                 <div class="form-actions">
-
                     <button
                         type="submit"
                         class="btn btn-primary"
                     >
-                        Vytvořit fakturu
+                        <?= $isEdit ? 'Uložit změny návrhu faktury' : 'Vytvořit návrh faktury' ?>
                     </button>
-
                     <a
                         href="<?= Url::to(
                             '/{tenant}/workbench/#main'
                         ) ?>"
                         class="btn btn-secondary"
                     >
-                        Zpět
+                        Jít na Pracovní stůl (Zahodit <?= $isEdit ? 'změny' : 'návrh faktury' ?>)
                     </a>
-
+                    <?php if ($isEdit): ?>
+                        <a
+                            href="<?= Url::to(
+                                '/{tenant}/billing/invoice/' . (int) $data['invoice_id'] . '/detail/#main'
+                            ) ?>"
+                            class="btn btn-secondary"
+                        >
+                            Zrušit úpravy (jít na detail návrhu faktury)
+                        </a>
+                    <?php endif; ?>
                 </div>
 
             </main>

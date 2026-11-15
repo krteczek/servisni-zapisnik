@@ -226,7 +226,53 @@ public function createFromTask(int $id): string
 
         return $this->render('invoices/create-work-order');
     }       
-    
+/*    
+    public function storeWorkOrder(int $id): string
+    {
+        if ($_POST === []) {
+            Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
+            Url::back();
+        }
+
+        $this->checkCsrf();
+
+        try {
+            $result = $this->invoice->invoiceFromWorkOrder(
+                $id,
+                $_POST,
+                $this->validator
+            );
+
+            if ($result['success'] === false) {
+                $this->view->data   = $result['data'];
+                return $this->render('invoices/create-work-order');
+            }
+
+            Flash::success('Návrh faktury byl vytvořen.');
+
+            Url::redirect(
+                '/{tenant}/billing/invoice/' . $result['invoice_id'] . '/detail/#main'
+            );
+
+        } catch (Throwable $e) {
+
+            LoggerHolder::get()->error(
+                'InvoiceController.storeWorkOrder FAILED',
+                [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                ]
+            );
+
+            Flash::error(
+                'Fakturu se nepodařilo vytvořit.'
+            );
+
+            Url::back();
+        }
+    }
+*/
     /**
      * /billing/invoice/create/export/789
      */
@@ -237,65 +283,169 @@ public function createFromTask(int $id): string
 
 
 
- /**
- * Detail faktury
- */
-public function detail(int $id): string
-{
-    try {
-        $companyId = Auth::companyId();
+    /**
+     * Detail faktury
+     */
+    public function detail(int $id): string
+    {
+        try {
+            $companyId = Auth::companyId();
 
-        if ($companyId === null || $companyId <= 0) {
-            Flash::error(
-                'Nelze určit pracovní prostor.'
+            if ($companyId === null || $companyId <= 0) {
+                Flash::error(
+                    'Nelze určit pracovní prostor.'
+                );
+
+                Url::redirect('/{tenant}/billing/invoice/#main');
+            }
+
+            $this->view->invoice = $this->invoice->getDetail(
+                $companyId,
+                $id
             );
 
-            Url::redirect('/{tenant}/billing/invoices/#main');
+            return $this->render('invoices/detail');
+
+        } catch (RuntimeException $e) {
+
+            LoggerHolder::get()->warning(
+                'Invoice detail unavailable',
+                [
+                    'invoice_id' => $id,
+                    'message'    => $e->getMessage(),
+                ]
+            );
+
+            Flash::error(
+                $e->getMessage()
+            );
+
+            Url::redirect('/{tenant}/billing/invoice/#main');
+        } catch (Throwable $e) {
+
+            LoggerHolder::get()->error(
+                'InvoiceController.detail FAILED',
+                [
+                    'invoice_id' => $id,
+                    'message'    => $e->getMessage(),
+                    'file'       => $e->getFile(),
+                    'line'       => $e->getLine(),
+                ]
+            );
+
+            Flash::error(
+                'Detail faktury se nepodařilo načíst.'
+            );
+
+            Url::redirect('/{tenant}/billing/invoice/#main');
         }
 
-        $this->view->invoice = $this->invoice->getDetail(
-            $companyId,
-            $id
-        );
-
-        return $this->render('invoices/detail');
-
-    } catch (RuntimeException $e) {
-
-        LoggerHolder::get()->warning(
-            'Invoice detail unavailable',
-            [
-                'invoice_id' => $id,
-                'message'    => $e->getMessage(),
-            ]
-        );
-
-        Flash::error(
-            $e->getMessage()
-        );
-
-        Url::redirect('/{tenant}/billing/invoices/#main');
-    } catch (Throwable $e) {
-
-        LoggerHolder::get()->error(
-            'InvoiceController.detail FAILED',
-            [
-                'invoice_id' => $id,
-                'message'    => $e->getMessage(),
-                'file'       => $e->getFile(),
-                'line'       => $e->getLine(),
-            ]
-        );
-
-        Flash::error(
-            'Detail faktury se nepodařilo načíst.'
-        );
-
-        Url::redirect('/{tenant}/billing/invoices/#main');
     }
 
-}
+    /**
+     * Editace návrhu faktury.
+     *
+     * GET /{tenant}/billing/invoice/{id}/edit
+     */
+    public function edit(int $id): string
+    {
+        try {
+            $companyId = Auth::companyId();
 
+            if ($companyId === null || $companyId <= 0) {
+                Flash::error('Nelze určit pracovní prostor.');
+                Url::redirect('/{tenant}/billing/invoice/#main');
+            }
+
+            // Načtení faktury včetně snapshotu.
+            $invoice = $this->invoice->getDetail(
+                $companyId,
+                $id
+            );
+
+            // Editovat lze pouze návrh.
+            if (($invoice['status'] ?? null) !== InvoiceStatus::DRAFT) {
+                Flash::error(
+                    'Upravit lze pouze návrh faktury.'
+                );
+
+                Url::redirect(
+                    '/{tenant}/billing/invoice/' . $id . '/detail/#main'
+                );
+            }
+
+            // Aktuální údaje dodavatele.
+            $supplier = (new CompanyModel())
+                ->billingData($companyId);
+
+            if ($supplier === null) {
+                Flash::error(
+                    'Údaje dodavatele nebyly nalezeny.'
+                );
+
+                Url::redirect(
+                    '/{tenant}/billing/invoice/' . $id . '/detail/#main'
+                );
+            }
+
+            // Data ve stejném formátu jako při vytváření faktury.
+
+            $invoiceData = $invoice['invoice'] ?? [];
+
+            $invoiceData['contact_id'] = $invoice['contact_id'] ?? null;
+
+            $this->view->data = [
+                'invoice'   => $invoiceData,
+                'supplier'  => $supplier,
+                'customer'  => $invoice['customer'] ?? [],
+                'workOrder' => $invoice['workOrder'] ?? [],
+                'tasks'     => $invoice['tasks'] ?? [],
+                'lines'     => $invoice['lines'] ?? [],
+                'is_edit'   => true,
+                'invoice_id' => $id,
+            ];
+
+            $this->view->contacts = (new ContactsModel())->all();
+
+            return $this->render('invoices/create-from-task');
+
+        } catch (RuntimeException $e) {
+
+            LoggerHolder::get()->warning(
+                'InvoiceController.edit rejected',
+                [
+                    'invoice_id' => $id,
+                    'message'    => $e->getMessage(),
+                ]
+            );
+
+            Flash::error($e->getMessage());
+
+            Url::redirect(
+                '/{tenant}/billing/invoice/#main'
+            );
+
+        } catch (Throwable $e) {
+
+            LoggerHolder::get()->error(
+                'InvoiceController.edit FAILED',
+                [
+                    'invoice_id' => $id,
+                    'message'    => $e->getMessage(),
+                    'file'       => $e->getFile(),
+                    'line'       => $e->getLine(),
+                ]
+            );
+
+            Flash::error(
+                'Návrh faktury se nepodařilo načíst.'
+            );
+
+            Url::redirect(
+                '/{tenant}/billing/invoice/#main'
+            );
+        }
+    }
 
     /**
      * Vydá draft fakturu (POST).
@@ -320,7 +470,7 @@ public function detail(int $id): string
                 );
 
                 Url::redirect(
-                    '/{tenant}/billing/invoices/#main'
+                    '/{tenant}/billing/invoice/#main'
                 );
             }
 
@@ -390,7 +540,7 @@ public function detail(int $id): string
                 );
 
                 Url::redirect(
-                    '/{tenant}/billing/invoices/#main'
+                    '/{tenant}/billing/invoice/#main'
                 );
             }
 
@@ -521,7 +671,7 @@ public function detail(int $id): string
                 );
 
                 Url::redirect(
-                    '/{tenant}/billing/invoices/#main'
+                    '/{tenant}/billing/invoice/#main'
                 );
             }
 
