@@ -20,7 +20,6 @@ use App\Services\Settings\SettingsService;
 use App\Services\Tasks\TaskStatus;
 use App\Services\Tasks\TaskType;
 use App\Validators\InvoiceValidator;
-use DateTimeImmutable;
 use PDO;
 use RuntimeException;
 use App\Core\Types;
@@ -97,24 +96,9 @@ final class InvoiceService
 
         $customerData = $this->buildCustomerData($customer);
 
-        $dueDays = (new SettingsService())
-            ->getInvoiceDueDays();
-
-        $issuedAt = date('Y-m-d');
-
-        $dueDate = date(
-            'Y-m-d',
-            strtotime(
-                "+{$dueDays} days",
-                strtotime($issuedAt)
-            )
-        );
-
         return [
             'invoice' => [
                 'title' => $workOrder['title'],
-                'issued_at' => $issuedAt,
-                'due_date' => $dueDate,
                 'note' => '',
                 'save_customer' => true,
                 'contact_id' => $contactId,
@@ -187,13 +171,6 @@ final class InvoiceService
 
             $draft['invoice']['title'] =
                 $validated['title'];
-
-            $draft['invoice']['issued_at'] =
-                $validated['issued_at'];
-
-            $draft['invoice']['due_date'] =
-                $validated['due_date'];
-
             $draft['invoice']['note'] =
                 $validated['note'];
 
@@ -271,39 +248,6 @@ final class InvoiceService
             );
         }
 
-        $issuedAt = (string) (
-            $invoice['issued_at'] ?? ''
-        );
-
-        $dueDate = (string) (
-            $invoice['due_date'] ?? ''
-        );
-
-        $issuedDate = DateTimeImmutable::createFromFormat(
-            '!Y-m-d',
-            $issuedAt
-        );
-
-        $dueDateValue = DateTimeImmutable::createFromFormat(
-            '!Y-m-d',
-            $dueDate
-        );
-
-        if ($issuedDate === false) {
-            throw new RuntimeException(
-                'Invalid invoice issue date.'
-            );
-        }
-
-        if ($dueDateValue === false) {
-            throw new RuntimeException(
-                'Invalid invoice due date.'
-            );
-        }
-
-        $year = (int) $issuedDate->format('Y');
-        $month = (int) $issuedDate->format('m');
-
         $title = trim(
             (string) ($invoice['title'] ?? '')
         );
@@ -354,11 +298,6 @@ final class InvoiceService
 
         return Transaction::run(
             function (PDO $db) use (
-                $companyId,
-                $year,
-                $month,
-                $issuedAt,
-                $dueDate,
                 $invoice,
                 $customer,
                 $tasks,
@@ -366,58 +305,9 @@ final class InvoiceService
                 $workOrder,
                 $workOrderId
             ): int {
-                $settings = new SettingsModel($db);
 
-                $billing = $settings
-                    ->getBillingSettings();
-
-                if (
-                    !$settings
-                        ->areRequiredSettingsConfirmed(
-                            'billing'
-                        )
-                ) {
-                    throw new RuntimeException(
-                        'Nastavení fakturace nebylo potvrzeno.'
-                    );
-                }
-
-                $start = (
-                    $billing['invoice_number_start'] ?? 0
-                );
-
-                $format = (string) (
-                    $billing['invoice_number_format'] ?? ''
-                );
-
-                if ($start < 1) {
-                    throw new RuntimeException(
-                        'Invoice number start is invalid.'
-                    );
-                }
-
-                if ($format === '') {
-                    throw new RuntimeException(
-                        'Invoice number format is empty.'
-                    );
-                }
-
-                $numberService =
-                    new InvoiceNumberService();
-
-                $number = $numberService->nextNumber(
-                    $db,
-                    $companyId,
-                    $year,
-                    $start
-                );
-
-                $invoiceNumber = $numberService->format(
-                    $year,
-                    $month,
-                    $number,
-                    $format
-                );
+                $number = null;
+                $invoiceNumber = null;
 
                 /*
                  * Snapshot je historický obraz faktury
@@ -626,16 +516,17 @@ final class InvoiceService
 
                 $invoiceId = $model->create(
                     [
-                        'year' => $year,
-                        'number' => $number,
-                        'invoice_number' => $invoiceNumber,
+                       
+                        'year' => null,
+                        'number' => null,
+                        'invoice_number' => null,
+                        'issued_at' => null,
+                        'due_date' => null,                      
                         'work_order_id' => $workOrderId,
                         'contact_id' => $contactId > 0
                             ? $contactId
                             : null,
                         'customer_name' => $customerName,
-                        'issued_at' => $issuedAt,
-                        'due_date' => $dueDate,
                         'status' => InvoiceStatus::DRAFT,
                         'invoice_json' => $invoiceJson,
                         'created_by' => $createdBy,
@@ -758,9 +649,7 @@ final class InvoiceService
             ? (new ContactsModel())->find($contactId)
             : null;
 
-        $dueDays = (new SettingsService())
-            ->getInvoiceDueDays();
-
+        
         $customerData =
             $this->buildCustomerData($customer);
 
@@ -795,13 +684,6 @@ final class InvoiceService
         return [
             'invoice' => [
                 'title' =>  $workOrder['title'],
-                'issued_at' => date('Y-m-d'),
-                'due_date' => date(
-                    'Y-m-d',
-                    strtotime(
-                        '+' . $dueDays . ' days'
-                    )
-                ),
                 'note' => '',
                 'save_customer' => true,
                 'contact_id' => $contactId,

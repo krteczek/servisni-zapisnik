@@ -80,7 +80,6 @@ class InvoiceController extends Controller
                 'customer_name',
                 'amount',
             ];
-
             if (!in_array($filters['order'], $allowedOrders, true)) {
                 $filters['order'] = $defaults['order'];
             }
@@ -96,6 +95,7 @@ class InvoiceController extends Controller
                 'issued',
                 'paid',
                 'cancelled',
+                'deleted',
             ];
 
             if (!in_array($filters['status'], $allowedStatuses, true)) {
@@ -117,163 +117,7 @@ class InvoiceController extends Controller
     }
 
 
-    /**
-     * /billing/invoice/create/task/123 GET
-     */
-public function createFromTask(int $id): string
-{
-    $this->setSessionCheck('task_id', $id);
-    try {
-        $this->view->data = $this->invoice->buildDraftFromTask($id);
-        $this->view->contacts = (new ContactsModel())->all();
-        AjaxStatus::set();
-        return $this->render('invoices/create-from-task');
-
-    } catch (Throwable $e) {
-
-        LoggerHolder::get()->error(
-            'InvoiceController.createFromTask FAILED',
-            [
-                'task_id' => $id,
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
-            ]
-        );
-
-        Flash::error(
-            'Fakturu se nepodařilo připravit.'
-        );
-
-        Url::back();
-    }
-}
-
-
-    /**
-     * POST
-     */
-    public function storeFromTask(int $id): string
-    {
-        $this->confirmSessionCheck('task_id', $id, '/{tenant}/billing/invoice/#main');
-        
-        if ($_POST === []) {
-            AjaxStatus::set();
-            Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
-            Url::back();
-        }
-
-        $this->checkCsrf();
-        if($this->hasErrors()) {
-            AjaxStatus::set();
-            Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
-            Url::back();
-        }
-        try {
-            /** 
-             * vrací:
-             * return [
-             *      'success'    => true, bool
-             *      'invoice_id' => $invoiceId, int
-             *      'errors'     => [], array list
-             *      'data'       => [], array list 
-             * ];
-
-             */
-            $result = $this->invoice->invoiceFromTask(
-                $id,
-                $_POST,
-                $this->validator
-            );
-
-            if ($result['success'] === false) {
-                $this->setSessionCheck('task_id', $id);
-
-                $this->view->data   = $result['data'];
-                $this->view->contacts = (new ContactsModel())->all();
-                return $this->render('invoices/create-from-task');
-            }
-
-            AjaxStatus::consume();
-            Flash::success('Návrh faktury byl vytvořen.');
-
-            Url::redirect(
-                '/{tenant}/billing/invoice/' . $result['invoice_id'] . '/detail/#main'
-            );
-
-        } catch (Throwable $e) {
-
-            LoggerHolder::get()->error(
-                'InvoiceController.storeFromTask FAILED',
-                [
-                    'message' => $e->getMessage(),
-                    'file'    => $e->getFile(),
-                    'line'    => $e->getLine(),
-                ]
-            );
-
-            Flash::error(
-                'Fakturu se nepodařilo vytvořit.'
-            );
-
-            Url::back();
-        }
-    }
-
-    public function createWorkOrder(int $id): string
-    {
-        $this->view->data = $this->invoice->buildDraftFromWorkOrder($id);
-
-        return $this->render('invoices/create-work-order');
-    }       
-/*    
-    public function storeWorkOrder(int $id): string
-    {
-        if ($_POST === []) {
-            Flash::error('Neplatná žádost. Musíte vyplnit požadovaná pole...');
-            Url::back();
-        }
-
-        $this->checkCsrf();
-
-        try {
-            $result = $this->invoice->invoiceFromWorkOrder(
-                $id,
-                $_POST,
-                $this->validator
-            );
-
-            if ($result['success'] === false) {
-                $this->view->data   = $result['data'];
-                return $this->render('invoices/create-work-order');
-            }
-
-            Flash::success('Návrh faktury byl vytvořen.');
-
-            Url::redirect(
-                '/{tenant}/billing/invoice/' . $result['invoice_id'] . '/detail/#main'
-            );
-
-        } catch (Throwable $e) {
-
-            LoggerHolder::get()->error(
-                'InvoiceController.storeWorkOrder FAILED',
-                [
-                    'message' => $e->getMessage(),
-                    'file'    => $e->getFile(),
-                    'line'    => $e->getLine(),
-                ]
-            );
-
-            Flash::error(
-                'Fakturu se nepodařilo vytvořit.'
-            );
-
-            Url::back();
-        }
-    }
-*/
-    /**
+   /**
      * /billing/invoice/create/export/789
      */
     public function createExport(int $id): string
@@ -304,7 +148,7 @@ public function createFromTask(int $id): string
                 $id
             );
 
-            return $this->render('invoices/detail');
+            return $this->render('invoices/issuedDetail');
 
         } catch (RuntimeException $e) {
 
@@ -342,181 +186,6 @@ public function createFromTask(int $id): string
 
     }
 
-    /**
-     * Editace návrhu faktury.
-     *
-     * GET /{tenant}/billing/invoice/{id}/edit
-     */
-    public function edit(int $id): string
-    {
-        try {
-            $companyId = Auth::companyId();
-
-            if ($companyId === null || $companyId <= 0) {
-                Flash::error('Nelze určit pracovní prostor.');
-                Url::redirect('/{tenant}/billing/invoice/#main');
-            }
-
-            // Načtení faktury včetně snapshotu.
-            $invoice = $this->invoice->getDetail(
-                $companyId,
-                $id
-            );
-
-            // Editovat lze pouze návrh.
-            if (($invoice['status'] ?? null) !== InvoiceStatus::DRAFT) {
-                Flash::error(
-                    'Upravit lze pouze návrh faktury.'
-                );
-
-                Url::redirect(
-                    '/{tenant}/billing/invoice/' . $id . '/detail/#main'
-                );
-            }
-
-            // Aktuální údaje dodavatele.
-            $supplier = (new CompanyModel())
-                ->billingData($companyId);
-
-            if ($supplier === null) {
-                Flash::error(
-                    'Údaje dodavatele nebyly nalezeny.'
-                );
-
-                Url::redirect(
-                    '/{tenant}/billing/invoice/' . $id . '/detail/#main'
-                );
-            }
-
-            // Data ve stejném formátu jako při vytváření faktury.
-
-            $invoiceData = $invoice['invoice'] ?? [];
-
-            $invoiceData['contact_id'] = $invoice['contact_id'] ?? null;
-
-            $this->view->data = [
-                'invoice'   => $invoiceData,
-                'supplier'  => $supplier,
-                'customer'  => $invoice['customer'] ?? [],
-                'workOrder' => $invoice['workOrder'] ?? [],
-                'tasks'     => $invoice['tasks'] ?? [],
-                'lines'     => $invoice['lines'] ?? [],
-                'is_edit'   => true,
-                'invoice_id' => $id,
-            ];
-
-            $this->view->contacts = (new ContactsModel())->all();
-
-            return $this->render('invoices/create-from-task');
-
-        } catch (RuntimeException $e) {
-
-            LoggerHolder::get()->warning(
-                'InvoiceController.edit rejected',
-                [
-                    'invoice_id' => $id,
-                    'message'    => $e->getMessage(),
-                ]
-            );
-
-            Flash::error($e->getMessage());
-
-            Url::redirect(
-                '/{tenant}/billing/invoice/#main'
-            );
-
-        } catch (Throwable $e) {
-
-            LoggerHolder::get()->error(
-                'InvoiceController.edit FAILED',
-                [
-                    'invoice_id' => $id,
-                    'message'    => $e->getMessage(),
-                    'file'       => $e->getFile(),
-                    'line'       => $e->getLine(),
-                ]
-            );
-
-            Flash::error(
-                'Návrh faktury se nepodařilo načíst.'
-            );
-
-            Url::redirect(
-                '/{tenant}/billing/invoice/#main'
-            );
-        }
-    }
-
-    /**
-     * Vydá draft fakturu (POST).
-     *
-     * POST /{tenant}/billing/invoice/{id}/issue
-     */
-    public function issue(int $id): string
-    {
-        if ($_POST === []) {
-            Flash::error('Neplatná žádost.');
-            Url::back();
-        }
-
-        $this->checkCsrf();
-
-        try {
-            $companyId = Auth::companyId();
-
-            if ($companyId === null || $companyId <= 0) {
-                Flash::error(
-                    'Nelze určit pracovní prostor.'
-                );
-
-                Url::redirect(
-                    '/{tenant}/billing/invoice/#main'
-                );
-            }
-
-            $this->invoice->issue($companyId, $id);
-
-            Flash::success('Faktura byla vydána.');
-
-            Url::redirect(
-                '/{tenant}/billing/invoice/' . $id . '/detail/#main'
-            );
-
-        } catch (RuntimeException $e) {
-
-            LoggerHolder::get()->warning(
-                'InvoiceController.issue rejected',
-                [
-                    'invoice_id' => $id,
-                    'message'    => $e->getMessage(),
-                ]
-            );
-
-            Flash::error($e->getMessage());
-
-            Url::redirect(
-                '/{tenant}/billing/invoice/' . $id . '/detail/#main'
-            );
-
-        } catch (Throwable $e) {
-
-            LoggerHolder::get()->error(
-                'InvoiceController.issue FAILED',
-                [
-                    'invoice_id' => $id,
-                    'message'    => $e->getMessage(),
-                    'file'       => $e->getFile(),
-                    'line'       => $e->getLine(),
-                ]
-            );
-
-            Flash::error('Fakturu se nepodařilo vydat.');
-
-            Url::redirect(
-                '/{tenant}/billing/invoice/' . $id . '/detail/#main'
-            );
-        }
-    }
 
     /**
      * pdf

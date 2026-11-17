@@ -38,6 +38,7 @@ class InternalInvoiceModel extends BaseModel
             'issued',
             'paid',
             'cancelled',
+            'deleted',
         ];
 
         $allowedOrders = [
@@ -74,11 +75,14 @@ class InternalInvoiceModel extends BaseModel
             $params['search'] = '%' . $search . '%';
         }
 
-        if ($status !== 'all' && in_array($status, $allowedStatuses, true)) {
+        if ($status === 'all' || !in_array($status, $allowedStatuses, true)) {
+            $conditions[] = 'i.status != :deleted_status';
+            $params['deleted_status'] = 'deleted';
+        } else {
             $conditions[] = 'i.status = :status';
             $params['status'] = $status;
         }
-
+        
         $lineModel = new InternalInvoiceLineModel();
         $lineTable = $lineModel->getTableName();
         $sql = "

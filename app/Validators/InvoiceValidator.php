@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Validators;
 
-use DateTimeImmutable;
-
 final class InvoiceValidator
 {
     public function __construct(private Validator $validator)
@@ -13,16 +11,14 @@ final class InvoiceValidator
     }
 
     /**
-     * Zvaliduje vstupní data faktury.
+     * Zvaliduje vstupní data návrhu faktury.
      *
-     * Validator pouze ověřuje vstupní hodnoty.
-     * Výpočty a převod do interní struktury provádí InvoiceNormalizer.
+     * Datum vystavení, splatnost a číslo faktury
+     * nejsou součástí vstupu. Doplní se až při vystavení.
      *
      * @param array<string, mixed> $post
      * @return array{
      *     title: string,
-     *     issued_at: string,
-     *     due_date: string,
      *     note: string,
      *     contact_id: int,
      *     save_customer: bool,
@@ -35,38 +31,12 @@ final class InvoiceValidator
     public function validate(array $post): array
     {
         $title = trim((string) ($post['title'] ?? ''));
-        $issuedAt = trim((string) ($post['issued_at'] ?? ''));
-        $dueDate = trim((string) ($post['due_date'] ?? ''));
         $note = trim((string) ($post['note'] ?? ''));
 
         if ($title === '') {
             $this->validator->addError(
                 'title',
                 'Název faktury je povinný.'
-            );
-        }
-
-        if ($issuedAt === '') {
-            $this->validator->addError(
-                'issued_at',
-                'Datum vystavení je povinné.'
-            );
-        } elseif (!$this->isValidDate($issuedAt)) {
-            $this->validator->addError(
-                'issued_at',
-                'Datum vystavení není platné.'
-            );
-        }
-
-        if ($dueDate === '') {
-            $this->validator->addError(
-                'due_date',
-                'Datum splatnosti je povinné.'
-            );
-        } elseif (!$this->isValidDate($dueDate)) {
-            $this->validator->addError(
-                'due_date',
-                'Datum splatnosti není platné.'
             );
         }
 
@@ -91,8 +61,6 @@ final class InvoiceValidator
 
         return [
             'title' => $title,
-            'issued_at' => $issuedAt,
-            'due_date' => $dueDate,
             'note' => $note,
             'contact_id' => $contactId,
             'save_customer' => $saveCustomer,
@@ -284,15 +252,5 @@ final class InvoiceValidator
 
         return $lines;
     }
-    
-    private function isValidDate(string $date): bool
-    {
-        $value = DateTimeImmutable::createFromFormat(
-            '!Y-m-d',
-            $date
-        );
 
-        return $value !== false
-            && $value->format('Y-m-d') === $date;
-    }
 }

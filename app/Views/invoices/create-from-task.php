@@ -47,14 +47,14 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
 
         <div class="invoice-layout">
 
-            <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
+            
 
             <!-- =====================================================
                  LEVÁ ČÁST – 2/3
                  ===================================================== -->
 
             <main class="invoice-main">
-
+                <?php require __DIR__ . '/../layout/formsErrors.php'; ?>
                 <!-- =================================================
                      1. DODAVATEL
                      ================================================= -->
@@ -690,45 +690,21 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                         </div>
 
                         <div class="form-group invoice-date">
-
-                            <label for="issued_at">
-                                Datum vystavení
-                            </label>
-
-                            <input
-                                type="date"
-                                id="issued_at"
-                                name="issued_at"
-                                value="<?= e(
-                                    (string) (
-                                        $invoice['issued_at'] ?? ''
-                                    )
-                                ) ?>"
-                                required
-                            >
-
+                            <label>Datum vystavení</label>
+                            <p class="field-description">
+                                Datum vystavení faktury bude automaticky doplněno
+                                v den jejího vystavení.
+                            </p>
                         </div>
 
                         <div class="form-group invoice-date">
-
-                            <label for="due_date">
-                                Datum splatnosti
-                            </label>
-
-                            <input
-                                type="date"
-                                id="due_date"
-                                name="due_date"
-                                value="<?= e(
-                                    (string) (
-                                        $invoice['due_date'] ?? ''
-                                    )
-                                ) ?>"
-                                required
-                            >
-
+                            <label>Datum splatnosti</label>
+                            <p class="field-description">
+                                Datum splatnosti bude vypočítáno podle nastavené
+                                doby splatnosti.
+                            </p>
                         </div>
-
+                        
                         <div class="form-group invoice-currency">
 
                             <label for="currency">

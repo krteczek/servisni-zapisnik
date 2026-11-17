@@ -278,7 +278,7 @@ foreach ($lines as $line) {
             <form
                 method="post"
                 action="<?= Url::to(
-                    '/{tenant}/billing/invoice/' . $invoiceId . '/issue'
+                    '/{tenant}/billing/invoice/draft/' . $invoiceId . '/issue'
                 ) ?>"
                 style="display:inline"
             >
@@ -292,7 +292,7 @@ foreach ($lines as $line) {
         <?php if ($isIssued || $isPaid): ?>
             <a
                 href="<?= Url::to(
-                    '/{tenant}/billing/invoice/' . $invoiceId . '/pdf'
+                    '/{tenant}/billing/invoice/issued/' . $invoiceId . '/pdf'
                 ) ?>"
                 class="btn btn-secondary"
             >
@@ -314,17 +314,6 @@ foreach ($lines as $line) {
                     Stornovat
                 </button>
             </form>
-        <?php endif; ?>
-        <?php if ($isDraft): ?>
-            <a
-                href="<?= Url::to(
-                    '/{tenant}/billing/invoice/' . $invoiceId . '/edit/#main'
-                ) ?>"
-                class="btn btn-secondary"
-                title="Upravit návrh faktury"
-            >
-                Upravit návrh faktury
-            </a>
         <?php endif; ?>
 
         <a

@@ -24,6 +24,7 @@ use App\Controllers\RootController;
 use App\Controllers\RoleSwitcherController;
 use App\Controllers\AjaxController;
 use App\Controllers\CompanyController;
+use App\Controllers\InvoiceDraftController;
 
 return [
 
@@ -881,62 +882,89 @@ return [
 |   Nová fakturace
 -----------------------------------------*/
 //routy:
-//GET  /billing/invoice/
+// ==================================================
+// FAKTURY – SPOLEČNÝ PŘEHLED
+// ==================================================
+
 [
     'method'  => 'GET',
     'path'    => '/{tenant}/billing/invoice',
-    'action'  => [InvoiceController::class, 'index'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    'section' => 'billing',
-    'menu'   => 'Faktury',
-    'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Výpis faktur',
-],
-
-//GET  /billing/invoice/create/from-task/123
-[
-    'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/create/from-task/{id:\d+}',
-    'action'  => [InvoiceController::class, 'createFromTask'],
+    'action' => [InvoiceController::class, 'index'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
     'menu'    => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Vytvoření faktury z úkolu',
+    'title'   => 'Faktury: Přehled',
 ],
-//POST billing/invoice/create/from-task/123
+
+
+// ==================================================
+// NÁVRHY FAKTUR
+// ==================================================
+
+// Vytvoření návrhu z úkolu
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/draft/create/from-task/{id:\d+}',
+    'action' => [InvoiceDraftController::class, 'createFromTask'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Vytvoření návrhu z úkolu',
+],
+
 [
     'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/create/from-task/{id:\d+}',
-    'action'  => [InvoiceController::class, 'storeFromTask'],
+    'path'    => '/{tenant}/billing/invoice/draft/create/from-task/{id:\d+}',
+    'action' => [InvoiceDraftController::class, 'storeFromTask'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
     'menu'    => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Vytvoření faktury z úkolu',
+    'title'   => 'Faktury: Vytvoření návrhu z úkolu',
 ],
 
-//GET /billing/invoice/{invoiceId}/detail
+// Vytvoření návrhu ze zakázky
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/{invoiceId:\d+}/detail',
-    'action'  => [InvoiceController::class, 'detail'],
+    'path'    => '/{tenant}/billing/invoice/draft/create/from-work-order/{id:\d+}',
+    'action' => [InvoiceDraftController::class, 'createWorkOrder'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
-    //'section' => 'billing',
-    //'menu'   => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Vytvoření návrhu ze zakázky',
+],
+
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/draft/create/from-work-order/{id:\d+}',
+    'action' => [InvoiceDraftController::class, 'storeWorkOrder'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Vytvoření návrhu ze zakázky',
+],
+
+// Detail návrhu
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/draft/{id:\d+}/detail',
+    'action' => [InvoiceDraftController::class, 'detail'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
     'title'   => 'Faktury: Detail návrhu faktury',
 ],
 
-// GET /billing/invoice/{invoiceId}/edit
+// Editace návrhu
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/{invoiceId:\d+}/edit',
-    'action'  => [InvoiceController::class, 'edit'],
+    'path'    => '/{tenant}/billing/invoice/draft/{id:\d+}/edit',
+    'action' => [InvoiceDraftController::class, 'edit'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
@@ -944,11 +972,10 @@ return [
     'title'   => 'Faktury: Úprava návrhu faktury',
 ],
 
-// POST /billing/invoice/{invoiceId}/edit
 [
     'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/{invoiceId:\d+}/edit',
-    'action'  => [InvoiceController::class, 'update'],
+    'path' => '/{tenant}/billing/invoice/draft/{id:\d+}/update',
+    'action' => [InvoiceDraftController::class, 'update'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
@@ -956,74 +983,163 @@ return [
     'title'   => 'Faktury: Úprava návrhu faktury',
 ],
 
+// Zahazování návrhu
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/draft/{id:\d+}/discard',
+    'action' => [InvoiceDraftController::class, 'discard'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Zahození návrhu',
+],
+
+// Vystavení návrhu
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/draft/{id:\d+}/issue',
+    'action' => [InvoiceDraftController::class, 'issue'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Vystavení faktury z návrhu',
+],
 
 
-//GET  /billing/invoice/create/from-work-order/123
+// ==================================================
+// ZAHOZENÉ NÁVRHY
+// ==================================================
+
+// Seznam zahodených návrhů
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/create/from-work-order/{id:\d+}',
-    'action'  => [InvoiceController::class, 'createWorkOrder'],
+    'path'    => '/{tenant}/billing/invoice/deleted',
+    'action' => [InvoiceDraftController::class, 'deleted'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
-    //'section' => 'billing',
-    //'menu'   => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Vytvoření faktury ze zakázky',
-],
-// invoice/create/from-work-order/123
-[
-    'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/create/from-work-order/{id:\d+}',
-    'action'  => [InvoiceController::class, 'storeWorkOrder'],
-    'auth'    => true,
-    'roles'   => ['admin', 'mistr'],
-    //'section' => 'billing',
-    //'menu'   => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Vytvoření faktury ze zakázky',
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: Zahozené návrhy',
 ],
 
-
-
-
-//GET  /billing/invoice/{id}/pdf
-
+// Detail zahodeného návrhu
 [
     'method'  => 'GET',
-    'path'    => '/{tenant}/billing/invoice/{id:\d+}/pdf',
-    'action'  => [InvoiceController::class, 'pdf'],
+    'path'    => '/{tenant}/billing/invoice/deleted/{id:\d+}/detail',
+    'action' => [InvoiceDraftController::class, 'deletedDetail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
     'menu'    => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Stažení faktury v PDF formátu',
+    'title'   => 'Faktury: Detail zahozeného návrhu',
 ],
 
-//POST /billing/invoice/{id}/cancel
-//stornování faktury
+// Obnovení návrhu
 [
     'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/{id:\d+}/cancel',
-    'action'  => [InvoiceController::class, 'cancel'],
+    'path'    => '/{tenant}/billing/invoice/deleted/{id:\d+}/restore',
+    'action' => [InvoiceDraftController::class, 'restore'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
     'menu'    => 'Faktury',
-    //'submenu'=> 'Výpis faktur',
-    'title'   => 'Faktury: Stornování faktury',
+    'title'   => 'Faktury: Obnovení návrhu',
 ],
-//POST /billing/invoice/{id}/issue
-//vydání draftu
+
+
+// ==================================================
+// VYDANÉ FAKTURY
+// ==================================================
+
+// Detail vydané faktury
 [
-    'method'  => 'POST',
-    'path'    => '/{tenant}/billing/invoice/{id:\d+}/issue',
-    'action'  => [InvoiceController::class, 'issue'],
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/issued/{id:\d+}/detail',
+    'action' => [InvoiceController::class, 'detail'],
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'billing',
     'menu'    => 'Faktury',
-    'title'   => 'Faktury: Vydání faktury',
+    'title'   => 'Faktury: Detail vydané faktury',
+],
+
+// PDF vydané faktury
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/issued/{id:\d+}/pdf',
+    'action' => [InvoiceController::class, 'pdf'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+    'title'   => 'Faktury: PDF vydané faktury',
+],
+
+// Storno vydané faktury
+[
+    'method'  => 'POST',
+    'path'    => '/{tenant}/billing/invoice/issued/{id:\d+}/cancel',
+    'action' => [InvoiceController::class, 'cancel'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+],
+
+
+// ==================================================
+// ZAPLACENÉ FAKTURY
+// ==================================================
+
+// Detail zaplacené faktury
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/paid/{id:\d+}/detail',
+    'action' => [InvoiceController::class, 'detail'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+],
+
+// PDF zaplacené faktury
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/paid/{id:\d+}/pdf',
+    'action' => [InvoiceController::class, 'pdf'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+],
+
+
+// ==================================================
+// STORNOVANÉ FAKTURY
+// ==================================================
+
+// Detail stornované faktury
+[
+    'method'  => 'GET',
+    'path'   => '/{tenant}/billing/invoice/cancelled/{id:\d+}/detail',
+    'action' => [InvoiceController::class, 'detail'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
+],
+
+// PDF stornované faktury
+[
+    'method'  => 'GET',
+    'path'    => '/{tenant}/billing/invoice/cancelled/{id:\d+}/pdf',
+    'action' => [InvoiceController::class, 'pdf'],
+    'auth'    => true,
+    'roles'   => ['admin', 'mistr'],
+    'section' => 'billing',
+    'menu'    => 'Faktury',
 ],
 
 /*-------------------------------------
@@ -1036,8 +1152,8 @@ return [
     'auth'    => true,
     'roles'   => ['admin', 'mistr'],
     'section' => 'exports',
-    'menu'   => 'Exporty',
-    'submenu'=> 'Výpis datových exportů',
+    'menu'    => 'Exporty',
+    'submenu' => 'Výpis datových exportů',
     'title'   => 'Exporty: Výpis datových exportů',
 ],
 

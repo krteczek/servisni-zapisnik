@@ -175,13 +175,16 @@ $orderLabels = [
                         <td>
                             <?= $statusLabels[$invoice['status']] ?? 'Neznámý stav' ?>
                         </td>
-                        <td><a href="<?= Url::to('/{tenant}/billing/invoice/' . (int) $invoice['id'] . '/detail/#main') ?>"
+                        <td>
+                            <?php $invoiceDraft = $invoice['status'] === 'draft' ? 'draft/' : 'issued/'; ?>
+                                <a href="<?= Url::to('/{tenant}/billing/invoice/' . $invoiceDraft . (int) $invoice['id'] . '/detail/#main') ?>"
                                     class="card-title"
                                     title="Otevřít detail faktury">
                                         <?= $invoice['status'] === 'draft'
                                             ? 'Návrh'
                                             : e($invoice['invoice_number']) ?>
                                     </a>
+                        </td>
                     </tr>
 
                 <?php endforeach; ?>
