@@ -330,6 +330,10 @@ class InvoiceController extends Controller
         }
 
         $this->checkCsrf();
+        if($this->hasErrors()) {
+            Flash::error('Neplatná žádost. ');
+            Url::back();
+        }
 
         try {
             $companyId = Auth::companyId();

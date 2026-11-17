@@ -386,6 +386,10 @@ class InvoiceDraftController extends Controller
         }
 
         $this->checkCsrf();
+        if($this->hasErrors()) {
+            Flash::error('Neplatná žádost. ');
+            Url::back();
+        }
 
         try {
             $companyId = Auth::companyId();
@@ -421,7 +425,7 @@ class InvoiceDraftController extends Controller
             Flash::error($e->getMessage());
 
             Url::redirect(
-                '/{tenant}/billing/invoice/issued/' . $id . '/detail/#main'
+                '/{tenant}/billing/invoice/draft/' . $id . '/detail/#main'
             );
 
         } catch (Throwable $e) {
