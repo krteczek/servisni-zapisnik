@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use DateTime;
-use App\Core\Auth;
-use App\Core\Roles;
+use App\Services\Invoice\InvoiceStatus;
 
 class InternalInvoiceModel extends BaseModel
 {   
@@ -139,5 +137,39 @@ class InternalInvoiceModel extends BaseModel
         return (int) $stmt->fetchColumn();
     }
 
+ /**
+ * Stornuje vydanou fakturu.
+ *
+ * Změní pouze stav ISSUED → CANCELLED.
+ * Ostatní údaje faktury ani vazby na úkoly nemění.
+ *
+ * @param int $invoiceId
+ * @param int $companyId
+ * @return bool
+ */
+public function cancelIssued(int $invoiceId, int $companyId): bool
+{
+    if ($invoiceId <= 0 || $companyId <= 0) {
+        return false;
+    }
 
+    $sql = "
+        UPDATE {$this->tableName}
+        SET status = :status
+        WHERE id = :id
+          AND company_id = :company_id
+          AND status = :current_status
+    ";
+
+    $stmt = $this->db()->prepare($sql);
+
+    $stmt->execute([
+        'status' => InvoiceStatus::CANCELLED,
+        'id' => $invoiceId,
+        'company_id' => $companyId,
+        'current_status' => InvoiceStatus::ISSUED,
+    ]);
+
+    return $stmt->rowCount() === 1;
+}
 }

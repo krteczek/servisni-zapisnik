@@ -349,7 +349,7 @@ class InvoiceController extends Controller
             Flash::success('Faktura byla stornována.');
 
             Url::redirect(
-                '/{tenant}/billing/invoice/' . $id . '/detail/#main'
+                '/{tenant}/billing/invoice/issued/' . $id . '/detail/#main'
             );
 
         } catch (RuntimeException $e) {
@@ -365,7 +365,7 @@ class InvoiceController extends Controller
             Flash::error($e->getMessage());
 
             Url::redirect(
-                '/{tenant}/billing/invoice/' . $id . '/detail/#main'
+                '/{tenant}/billing/invoice/issued/' . $id . '/detail/#main'
             );
 
         } catch (Throwable $e) {
@@ -383,7 +383,7 @@ class InvoiceController extends Controller
             Flash::error('Fakturu se nepodařilo stornovat.');
 
             Url::redirect(
-                '/{tenant}/billing/invoice/' . $id . '/detail/#main'
+                '/{tenant}/billing/invoice/issued/' . $id . '/detail/#main'
             );
         }
     }

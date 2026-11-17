@@ -156,12 +156,18 @@ $orderLabels = [
                         </td>
 
                         <td>
-                            <?= htmlspecialchars(
-                                date('d. m. Y', strtotime($invoice['due_date'])),
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-                        </td>
+                            <?php
+                                if($invoice['status'] === 'draft') {
+                                    echo '—';
+                                } else {
+                                    echo htmlspecialchars(
+                                        date('d. m. Y', strtotime($invoice['due_date'])),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    );
+                                }
+                            ?>
+                         </td>
 
                         <td>
                             <?= number_format(

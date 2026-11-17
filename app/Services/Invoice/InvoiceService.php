@@ -12,7 +12,6 @@ use App\Models\ContactsModel;
 use App\Models\InternalInvoiceItemModel;
 use App\Models\InternalInvoiceLineModel;
 use App\Models\InternalInvoiceModel;
-use App\Models\SettingsModel;
 use App\Models\TaskModel;
 use App\Models\WorkOrderModel;
 use App\Models\CompanyModel;
@@ -774,31 +773,26 @@ final class InvoiceService
             'year' => $invoice['year'],
             'number' => $invoice['number'],
             'company_id' => $invoice['company_id'],
-            'work_order_id' =>
-                $invoice['work_order_id'],
+            'work_order_id' => $invoice['work_order_id'],
             'contact_id' => $invoice['contact_id'],
-            'customer_name' =>
-                $invoice['customer_name'],
+            'customer_name' => $invoice['customer_name'],
             'issued_at' => $invoice['issued_at'],
+            'issued_on' => $invoice['issued_on'],
+            'issued_by' => $invoice['issued_by'],
             'due_date' => $invoice['due_date'],
             'status' => $invoice['status'],
             'created_by' => $invoice['created_by'],
             'created_at' => $invoice['created_at'],
 
-            'invoice' =>
-                $snapshot['invoice'] ?? [],
+            'invoice' => $snapshot['invoice'] ?? [],
 
-            'customer' =>
-                $snapshot['customer'] ?? [],
+            'customer' => $snapshot['customer'] ?? [],
 
-            'workOrder' =>
-                $snapshot['workOrder'] ?? [],
+            'workOrder' => $snapshot['workOrder'] ?? [],
 
-            'tasks' =>
-                $snapshot['tasks'] ?? [],
+            'tasks' => $snapshot['tasks'] ?? [],
 
-            'lines' =>
-                $snapshot['lines'] ?? [],
+            'lines' => $snapshot['lines'] ?? [],
         ];
     }
 
@@ -841,7 +835,7 @@ final class InvoiceService
         return $customerData;
     }
 
-        /**
+    /**
      * Vydá draft fakturu (draft → issued).
      *
      * Před vydáním znovu ověří, že žádný z navázaných
@@ -855,45 +849,37 @@ final class InvoiceService
      * @param int $invoiceId
      * @return void
      */
-    public function issue(int $companyId, int $invoiceId): void
-    {
-        if ($companyId <= 0 || $invoiceId <= 0) {
-            throw new RuntimeException(
-                'Požadovaná faktura v systému neexistuje.'
-            );
+public function issue(int $companyId, int $invoiceId): void
+{
+    if ((int) Auth::companyId() !== $companyId) {
+        throw new \RuntimeException('Neplatná firma.');
+    }
+
+    Transaction::run(function (\PDO $db) use ($companyId, $invoiceId): bool {
+
+        // Zamkneme firmu. Tím serializujeme vystavování faktur
+        // v rámci jedné firmy.
+        $companyModel = new CompanyModel($db);
+
+        if ($companyModel->lockForUpdate($companyId) === null) {
+            throw new \RuntimeException('Firma nebyla nalezena.');
         }
 
-        $model = new InternalInvoiceModel();
+        // Načteme návrh faktury.
+        $invoiceModel = new InternalInvoiceModel($db);
+        $invoice = $invoiceModel->find($invoiceId);
 
-        $invoice = $model->find($invoiceId);
-
-        if ($invoice === null) {
-            throw new RuntimeException(
-                'Požadovaná faktura v systému neexistuje.'
-            );
+        if (
+            !$invoice
+            || (int) $invoice['company_id'] !== $companyId
+            || $invoice['status'] !== InvoiceStatus::DRAFT
+        ) {
+            throw new \RuntimeException('Návrh faktury nelze vystavit.');
         }
 
-        if ((int) $invoice['company_id'] !== $companyId) {
-            throw new RuntimeException(
-                'Požadovaná faktura v systému neexistuje.'
-            );
-        }
-
-        if ($invoice['status'] !== InvoiceStatus::DRAFT) {
-            throw new RuntimeException(
-                'Vydat lze pouze fakturu ve stavu konceptu.'
-            );
-        }
-
-        /*
-         * Re-guard tasků.
-         *
-         * Používáme přímou kontrolu přes
-         * isTaskActivelyInvoiced, abychom se vyhnuli
-         * Url::back() uvnitř InvoiceGuard (service
-         * nemá redirectovat).
-         */
-        $itemModel = new InternalInvoiceItemModel();
+        // Znovu ověříme fakturovatelnost všech navázaných úkolů.
+        $itemModel = new InternalInvoiceItemModel($db);
+        $taskModel = new TaskModel($db);
 
         $items = $itemModel->forInvoice($invoiceId);
 
@@ -901,26 +887,117 @@ final class InvoiceService
             $taskId = (int) ($item['task_id'] ?? 0);
 
             if ($taskId <= 0) {
-                continue;
+                throw new \RuntimeException(
+                    'Návrh obsahuje neplatnou položku.'
+                );
+            }
+
+            $task = $taskModel->findById($taskId);
+
+            if (
+                $task === null
+                || $task['status'] !== TaskStatus::DONE
+                || $task['task_type'] === TaskType::RECURRING_MASTER
+            ) {
+                throw new \RuntimeException(
+                    'Některý z úkolů již nelze fakturovat.'
+                );
             }
 
             if ($itemModel->isTaskActivelyInvoiced($taskId)) {
-                throw new RuntimeException(
-                    'Úkol je již fakturován jinou fakturou.'
+                throw new \RuntimeException(
+                    'Některý z úkolů je již součástí jiné vydané faktury.'
                 );
             }
         }
+        // Načteme a ověříme fakturační nastavení.
+        $settings = new SettingsService($db);
 
-        $updated = $model->update($invoiceId, [
+        if (!$settings->areInvoiceSettingsConfirmed()) {
+            throw new \RuntimeException(
+                'Fakturační nastavení nejsou potvrzena.'
+            );
+        }
+
+        $dueDays = $settings->getInvoiceDueDays();
+        $numberStart = $settings->getInvoiceNumberStart();
+        $numberFormat = $settings->getInvoiceNumberFormat();
+
+        if (!is_numeric($dueDays) || (int) $dueDays < 0) {
+            throw new \RuntimeException('Neplatná doba splatnosti faktury.');
+        }
+
+        if (!is_numeric($numberStart) || (int) $numberStart < 1) {
+            throw new \RuntimeException('Neplatný počáteční stav číselné řady.');
+        }
+
+        $dueDays = (int) $dueDays;
+        $numberStart = (int) $numberStart;
+
+        $numberService = new InvoiceNumberService();
+
+        if (!$numberService->isValidFormat($numberFormat)) {
+            throw new \RuntimeException('Neplatný formát číslování faktur.');
+        }
+
+        // Datum a čas vystavení.
+        $now = new \DateTimeImmutable();
+
+        $issuedAt = $now->format('Y-m-d');
+        $issuedOn = $now->format('Y-m-d H:i:s');
+
+        $year = (int) $now->format('Y');
+        $month = (int) $now->format('n');
+
+        // Datum splatnosti.
+        $dueDate = $now
+            ->setTime(0, 0)
+            ->modify("+{$dueDays} days")
+            ->format('Y-m-d');
+
+        // Vystavující uživatel.
+        $issuedBy = Auth::id();
+
+        if (!$issuedBy || (int) $issuedBy <= 0) {
+            throw new \RuntimeException('Nelze určit vystavujícího uživatele.');
+        }
+
+        // Přidělíme číslo faktury.
+        $number = $numberService->nextNumber(
+            $db,
+            $companyId,
+            $year,
+            $numberStart
+        );
+
+        $invoiceNumber = $numberService->format(
+            $year,
+            $month,
+            $number,
+            $numberFormat
+        );
+
+        // Uložíme vystavenou fakturu.
+        $updated = $invoiceModel->update($invoiceId, [
+            'year' => $year,
+            'number' => $number,
+            'invoice_number' => $invoiceNumber,
+            'issued_at' => $issuedAt,
+            'issued_on' => $issuedOn,
+            'issued_by' => $issuedBy,
+            'due_date' => $dueDate,
             'status' => InvoiceStatus::ISSUED,
         ]);
 
         if (!$updated) {
-            throw new RuntimeException(
-                'Fakturu se nepodařilo vydat.'
-            );
+            throw new \RuntimeException('Fakturu se nepodařilo vystavit.');
         }
-    }
+
+        return true;
+
+    }, 'admin');
+}
+
 
     /**
      * Stornuje vydanou fakturu (issued → cancelled).
@@ -941,35 +1018,18 @@ final class InvoiceService
             );
         }
 
+        if (Auth::companyId() !== $companyId) {
+            throw new RuntimeException(
+                'Požadovaná faktura v systému neexistuje.'
+            );
+        }
+
         $model = new InternalInvoiceModel();
 
-        $invoice = $model->find($invoiceId);
-
-        if ($invoice === null) {
+        if (!$model->cancelIssued($invoiceId, $companyId)) {
             throw new RuntimeException(
-                'Požadovaná faktura v systému neexistuje.'
-            );
-        }
-
-        if ((int) $invoice['company_id'] !== $companyId) {
-            throw new RuntimeException(
-                'Požadovaná faktura v systému neexistuje.'
-            );
-        }
-
-        if (!InvoiceStatus::isIssued((string) $invoice['status'])) {
-            throw new RuntimeException(
-                'Stornovat lze pouze vydanou fakturu.'
-            );
-        }
-
-        $updated = $model->update($invoiceId, [
-            'status' => InvoiceStatus::CANCELLED,
-        ]);
-
-        if (!$updated) {
-            throw new RuntimeException(
-                'Fakturu se nepodařilo stornovat.'
+                'Fakturu se nepodařilo stornovat. '
+                . 'Faktura neexistuje nebo není ve stavu vydaná.'
             );
         }
     }

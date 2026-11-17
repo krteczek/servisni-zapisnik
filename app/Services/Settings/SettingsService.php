@@ -6,14 +6,15 @@ namespace App\Services\Settings;
 
 use App\Services\Settings\BillingMode;
 use App\Models\SettingsModel;
+use PDO;
 
 final class SettingsService
 {
     private SettingsModel $model;
 
-    public function __construct()
+    public function __construct(?PDO $pdo = null)
     {
-        $this->model = new SettingsModel();
+        $this->model = new SettingsModel($pdo);
     }
 
     /**

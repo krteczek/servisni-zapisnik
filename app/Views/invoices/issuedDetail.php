@@ -289,7 +289,7 @@ foreach ($lines as $line) {
             </form>
         <?php endif; ?>
 
-        <?php if ($isIssued || $isPaid): ?>
+        <?php if ($isIssued || $isPaid || $isCancelled): ?>
             <a
                 href="<?= Url::to(
                     '/{tenant}/billing/invoice/issued/' . $invoiceId . '/pdf'
@@ -304,7 +304,7 @@ foreach ($lines as $line) {
             <form
                 method="post"
                 action="<?= Url::to(
-                    '/{tenant}/billing/invoice/' . $invoiceId . '/cancel'
+                    '/{tenant}/billing/invoice/issued/' . $invoiceId . '/cancel'
                 ) ?>"
                 style="display:inline"
                 onsubmit="return confirm('Opravdu stornovat fakturu?');"
