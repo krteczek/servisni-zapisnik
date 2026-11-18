@@ -8,7 +8,10 @@ require __DIR__ . '/../layout/header.php';
 use App\Core\Url;
 
 $data = $view->WBData;
-
+// Lookup mapy id => team (pro místa, kde tým není přímo v datech)
+$myTeamsById    = array_column($data['myTeams'], null, 'id');
+$otherTeamsById = array_column($data['otherTeams'], null, 'id');
+$allTeamsById   = $myTeamsById + $otherTeamsById;
 ?>
 
 <div class="workbench-container">

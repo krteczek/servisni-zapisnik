@@ -1,89 +1,50 @@
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Společné UI chování – confirm formulářů, toggleAll checkbox, user time boxy.
+ */
+(function () {
+    'use strict';
 
-    // confirm formuláře
-    document.querySelectorAll('form[data-confirm]').forEach(form => {
-        form.addEventListener('submit', e => {
-            if (!confirm(form.dataset.confirm)) {
-                e.preventDefault();
-            }
+    function initConfirmForms() {
+        document.querySelectorAll('form[data-confirm]').forEach(form => {
+            form.addEventListener('submit', e => {
+                if (!confirm(form.dataset.confirm)) {
+                    e.preventDefault();
+                }
+            });
         });
-    });
+    }
 
-    // toggleAll checkbox
-    const toggle = document.getElementById('toggleAll');
-    if (toggle) {
+    function initToggleAll() {
+        const toggle = document.getElementById('toggleAll');
+        if (!toggle) return;
+
         toggle.addEventListener('change', e => {
             document.querySelectorAll('input[name="ids[]"]')
                 .forEach(cb => cb.checked = e.target.checked);
         });
     }
 
-    // 🔥 TOHLE TAM CHYBĚLO
-    document.querySelectorAll('.user-checkbox').forEach(cb => {
-        const userId = cb.dataset.userId;
-        const timeBox = document.getElementById(`time-${userId}`);
+    function initUserCheckboxes() {
+        document.querySelectorAll('.user-checkbox').forEach(cb => {
+            const userId = cb.dataset.userId;
+            const timeBox = document.getElementById(`time-${userId}`);
 
-        if (!timeBox) return;
+            if (!timeBox) return;
 
-        // inicializace (když je už checked po reloadu)
-        timeBox.style.display = cb.checked ? 'block' : 'none';
-
-        cb.addEventListener('change', () => {
+            // inicializace (když je už checked po reloadu)
             timeBox.style.display = cb.checked ? 'block' : 'none';
+
+            cb.addEventListener('change', () => {
+                timeBox.style.display = cb.checked ? 'block' : 'none';
+            });
         });
-    });
+    }
 
-    
-    document.querySelectorAll('.main-tab-button').forEach(button => {
+    function init() {
+        initConfirmForms();
+        initToggleAll();
+        initUserCheckboxes();
+    }
 
-        button.addEventListener('click', () => {
-
-            const targetId = button.dataset.target;
-
-            document.querySelectorAll('.main-tab-content').forEach(section => {
-                section.hidden = true;
-            });
-
-            document.querySelectorAll('.main-tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            const target = document.getElementById(targetId);
-
-            if (target) {
-                target.hidden = false;
-            }
-
-            button.classList.add('active');
-        });
-
-    });
-
-
-    document.querySelectorAll('.sub-tab-button').forEach(button => {
-
-        button.addEventListener('click', () => {
-
-            const targetId = button.dataset.target;
-
-            document.querySelectorAll('.sub-tab-content').forEach(section => {
-                section.hidden = true;
-            });
-
-            document.querySelectorAll('.sub-tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            const target = document.getElementById(targetId);
-
-            if (target) {
-                target.hidden = false;
-            }
-
-            button.classList.add('active');
-        });
-
-    });
-
-
-});   
+    document.addEventListener('DOMContentLoaded', init);
+})();

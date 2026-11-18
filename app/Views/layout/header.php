@@ -71,7 +71,7 @@ echo '</style>';
  <script src="<?= Url::to('/js/get-task-reports.js?v=' .   filemtime(__DIR__ . '/../../../public/js/get-task-reports.js')) ?>" defer></script>
  <script src="<?= Url::to('/js/ajaxAresLoader.js?v=' .     filemtime(__DIR__ . '/../../../public/js/ajaxAresLoader.js')) ?>" defer></script>
  <script src="<?= Url::to('/js/updateDiff.js?v=' .         filemtime(__DIR__ . '/../../../public/js/updateDiff.js')) ?>" defer></script>
-
+ <script src="<?= Url::to('/js/forWorkBench.js?v=' .       filemtime(__DIR__ . '/../../../public/js/forWorkBench.js')) ?>" defer></script>
 </head>
 <body>
 

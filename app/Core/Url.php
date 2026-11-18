@@ -204,7 +204,7 @@ final class Url
      * 
      * @return never
      */
-    public static function back(): never
+    public static function backOld(): never
     {
         $old = Session::get('last_page', '/');
 
@@ -212,7 +212,27 @@ final class Url
         exit;
     }
 
+    public static function back(): never
+    {
+        $open = $_GET['open'] ?? null;
+        $old  = Session::get('last_page', '/');
 
+        // 1) odstraň existující open= (kdekoli v query)
+        $old = preg_replace('/([?&])open=[^&]*&?/', '$1', $old);
+
+        // 2) ukliď osiřelé ? / & na konci
+        $old = rtrim($old, '?&');
+
+        // 3) přidej aktuální open
+        if ($open !== null && $open !== '') {
+            $old .= (str_contains($old, '?') ? '&' : '?') . 'open=' . urlencode($open);
+        }
+
+        header('Location: ' . $old, true, 302);
+        exit;
+    }
+
+    
     /**
      * Přesměruje na stejnou stránku (refresh).
      * Používá se po POST operacích pro prevenci duplicate submission.

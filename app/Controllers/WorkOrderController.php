@@ -506,7 +506,8 @@ public function detailOrder(int $orderId): string
                 Flash::error(
                     'Zakázku nelze zrušit, protože obsahuje otevřené nebo dokončené úkoly.'
                 );
-                Url::redirect("/{tenant}/work-orders/{$orderId}/detail/#main");
+                //Url::redirect("/{tenant}/work-orders/{$orderId}/detail/#main");
+                Url::back();
             }
 
             $woModel->update($orderId, [
@@ -515,7 +516,8 @@ public function detailOrder(int $orderId): string
             ]);
 
             Flash::success('Zakázka byla zrušena.');
-            Url::redirect('/{tenant}/work-orders/#main');
+            // Url::redirect('/{tenant}/work-orders/#main');
+            Url::back();
 
             } catch (\Throwable $e) {
                 LoggerHolder::get()->error('WorkOrderController.closeOrderCanceled: failed', [
@@ -525,7 +527,8 @@ public function detailOrder(int $orderId): string
                             'trace'   => $e->getTraceAsString(),
                 ]);
                 Flash::error('Zakázku se nepodařilo zrušit.');
-                Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
+                // Url::redirect('/{tenant}/work-orders/' . $orderId . '/detail/#main');
+                Url::back();
             }
         
     }

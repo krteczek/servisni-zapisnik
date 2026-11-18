@@ -44,7 +44,7 @@ class WorkbenchModel extends BaseModel
             'otherOrdersInProgress'     => $this->otherOrdersInProgress(),
 
             'myReadyToCancelTasks'      => $this->myReadyToCancelTasks($teamIds),
-            //'otherReadyToCancelTasks' => $this->otherReadyToCancelTasks($teamIds),
+            'otherReadyToCancelTasks'   => $this->otherReadyToCancelTasks($teamIds),
 
             'myInvoiceToReady'          => $this->myInvoiceToReady($teamIds),
             'otherInvoiceToReady'       => $this->otherInvoiceToReady($teamIds),
@@ -316,9 +316,7 @@ private function openTasksForOtherTeams(array $teamIds): array
     private function otherReadyToDoneTasks(array $teamIds): array
     {
 
-        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
-
-                $sql = 
+        $sql = 
             "SELECT
                 t.id,
                 t.title,
@@ -371,6 +369,16 @@ private function openTasksForOtherTeams(array $teamIds): array
      */
 private function myReadyToCancelTasks(array $teamIds): array
 {
+    $params = [Auth::companyId()];
+    $placeholders = '';
+
+    if ($teamIds !== []) {
+
+        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+
+        $params = array_merge($params, $teamIds);
+    }    
+    
     $sql =
         "SELECT
             t.id,
@@ -392,20 +400,8 @@ private function myReadyToCancelTasks(array $teamIds): array
         WHERE
             t.company_id = ?
             AND t.status = 'open'
-         ";
+            AND t.team_id IN ($placeholders)
 
-    $params = [Auth::companyId()];
-
-    if ($teamIds !== []) {
-
-        $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
-
-        $sql .= " AND t.team_id IN ($placeholders)";
-
-        $params = array_merge($params, $teamIds);
-    }
-
-    $sql .= "
         GROUP BY t.id
 
         HAVING COUNT(ta.id) = 0
@@ -415,6 +411,53 @@ private function myReadyToCancelTasks(array $teamIds): array
 
     return $this->fetchAll($sql, $params);
 }
+
+    /**
+     * @param array<int, int> $teamIds
+     * @return array<int, array<string, mixed>>
+     */
+private function otherReadyToCancelTasks(array $teamIds): array
+{
+    $params = [Auth::companyId()];
+    $placeholders = '';
+    if ($teamIds !== []) {
+            $placeholders = implode(',', array_fill(0, count($teamIds), '?'));
+            $params = array_merge($params, $teamIds);
+    }
+
+    $sql =
+        "SELECT
+            t.id,
+            t.title,
+            t.team_id,
+            t.work_order_id,
+            t.status,
+            t.task_type,
+            t.recurring_task_id,
+
+            COUNT(ta.id) AS assignments_count
+
+        FROM tasks t
+
+        LEFT JOIN task_assignments ta
+            ON ta.task_id = t.id
+            AND ta.company_id = t.company_id
+
+        WHERE
+            t.company_id = ?
+            AND t.status = 'open'
+            AND t.team_id NOT IN ($placeholders)
+
+        GROUP BY t.id
+
+        HAVING COUNT(ta.id) = 0
+
+        ORDER BY t.created_at ASC
+    ";
+
+    return $this->fetchAll($sql, $params);
+}
+
 
 /*
 private function myReadyToDoneOrders(): array

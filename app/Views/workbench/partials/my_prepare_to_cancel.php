@@ -5,10 +5,15 @@ declare(strict_types=1);
 
 
 use App\Core\Url;
+use App\Core\Csrf;
 
 /** @var \App\Core\ViewContext $view */
 $data = $view->WBData;
-// var_dump($data);
+$myTeamsById    = array_column($data['myTeams'], null, 'id');
+$otherTeamsById = array_column($data['otherTeams'], null, 'id');
+$allTeamsById   = $myTeamsById + $otherTeamsById;
+
+//var_dump($data);
 ?>
 <h2>Připraveno ke stornování</h2>
 <p>Seznam úkolů a zakázek, které splňují podmínky pro stornování. </p>
@@ -27,7 +32,7 @@ $data = $view->WBData;
     <thead>
         <tr>
             <th>Název</th>
-            
+            <th>Tým</th>
             <th>Status</th>
             <th>Počet reportů</th>
         </tr>
@@ -39,11 +44,17 @@ $data = $view->WBData;
                                     title="Jít na detail úkolu a zkontrolovat nebo přidat reporty."
                                     >
                                     <?= e($task['title']) ?></a></td>
-                
+                <td><span class="team-dot" style="background: <?= e($myTeamsById[$task['team_id']]['color']) ?>"></span></td>
+
                 <td><span class="badge badge-status-<?= e($task['status']) ?>">
                     <?= te($task['status']) ?>
                 </span></td>
-                <td><?= e($task['assignments_count'] ?? 0) ?></td>
+                <td><form action="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/cancel?open=my-prepare-to-cancel') ?>" method="post"
+                          onsubmit="return confirm('Opravdu chcete stornovat úkol <?= e($task['title']) ?>?');">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <?= Csrf::getField() ?>
+                        <button type="submit" class="btn btn-danger">Stornovat</button>
+                    </form></td>
             </tr>
         <?php endforeach; ?>
     </tbody>
@@ -66,8 +77,7 @@ $data = $view->WBData;
                 <th>Popis</th>
                 <th>Status</th>
                 <th>Počet úkolů u zakázky</th>
-                <th>K uzavření</th>
-                <th>Ke stornování</th>
+                <th>Akce</th>
             </tr>
         </thead>
     <tbody>
@@ -82,8 +92,12 @@ $data = $view->WBData;
                     <?= te($orders['status']) ?>
                 </span></td>
                 <td><?= count($orders['tasks'] ?? []) ?></td>
-                <td><?= e($orders['can_be_done'] ? 'Ano' : 'Ne') ?></td>
-                <td><?= e($orders['can_be_cancelled'] ? 'Ano' : 'Ne') ?></td>
+                <td><form action="<?= Url::to('/{tenant}/work-orders/' . $orders['id'] . '/close/canceled?open=my-prepare-to-cancel') ?>" method="post"
+                          onsubmit="return confirm('Opravdu chcete stornovat úkol <?= e($orders['title']) ?>?');">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <?= Csrf::getField() ?>
+                        <button type="submit" class="btn btn-danger">Stornovat</button>
+                    </form></td>
             </tr>
         <?php endforeach; ?>
     </tbody>
