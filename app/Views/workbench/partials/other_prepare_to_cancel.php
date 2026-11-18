@@ -78,7 +78,7 @@ $allTeamsById   = $myTeamsById + $otherTeamsById;
             </tr>
         </thead>
     <tbody>
-        <?php foreach ($data['otherReadyToCancelTasks'] as $orders): ?>
+        <?php foreach ($data['otherReadyToCancelOrders'] as $orders): ?>
             <tr>
                 <td>[<?= e($orders['id']) ?>] <a href="<?= Url::to('/{tenant}/work-orders/' .  $orders['id'] . '/detail/#main') ?>" 
                                     title="Jít na detail zakázky a zkontrolovat její úkoly."
