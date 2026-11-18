@@ -400,9 +400,13 @@ private function myReadyToCancelTasks(array $teamIds): array
         WHERE
             t.company_id = ?
             AND t.status = 'open'
-            AND t.team_id IN ($placeholders)
+        ";
+        if ($teamIds !== []) {
+            $sql .= " AND t.team_id IN ($placeholders)";
+       }
 
-        GROUP BY t.id
+        $sql .= 
+        "GROUP BY t.id
 
         HAVING COUNT(ta.id) = 0
 
@@ -446,8 +450,13 @@ private function otherReadyToCancelTasks(array $teamIds): array
         WHERE
             t.company_id = ?
             AND t.status = 'open'
-            AND t.team_id NOT IN ($placeholders)
+        ";
+        if ($teamIds !== []) {
+            $sql .= " AND t.team_id NOT IN ($placeholders)";
+        }
 
+        $sql .= 
+        "
         GROUP BY t.id
 
         HAVING COUNT(ta.id) = 0

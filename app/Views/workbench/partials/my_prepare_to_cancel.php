@@ -93,7 +93,7 @@ $allTeamsById   = $myTeamsById + $otherTeamsById;
                 </span></td>
                 <td><?= count($orders['tasks'] ?? []) ?></td>
                 <td><form action="<?= Url::to('/{tenant}/work-orders/' . $orders['id'] . '/close/canceled?open=my-prepare-to-cancel') ?>" method="post"
-                          onsubmit="return confirm('Opravdu chcete stornovat úkol <?= e($orders['title']) ?>?');">
+                          onsubmit="return confirm('Opravdu chcete stornovat zakázku <?= e($orders['title']) ?>?');">
                         <input type="hidden" name="_method" value="DELETE">
                         <?= Csrf::getField() ?>
                         <button type="submit" class="btn btn-danger">Stornovat</button>
