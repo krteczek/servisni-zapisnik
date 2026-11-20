@@ -49,7 +49,7 @@ if (!$data['isInternalBilling'] && !$data['isExternalAccounting']): ?>
             <tbody>
                 <?php foreach ($data['myInvoiceToReady'] as $task): ?>
                 <tr>
-                    <td><a href="<?=  Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main') ?>"><?= e($task['work_order_title'] ?? '-') ?></a></td>
+                    <td><a href="<?=  Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/') ?>"><?= e($task['work_order_title'] ?? '-') ?></a></td>
                     <td><?= e($task['title']) ?></td>
                     <td><?= formatCzDate($task['done_at']) ?></td>
                     <td><?= formatMinutes((int)$task['total_minutes']) ?></td>
@@ -60,7 +60,7 @@ if (!$data['isInternalBilling'] && !$data['isExternalAccounting']): ?>
                                 title="vytvořit fakturu z tohoto úkolu">Fakturovat</a>
                         <?php elseif ($data['isExternalAccounting']): ?>
                             <a href="<?= Url::to('/{tenant}/billing/export/draft/create/from-task/' . $task['id'] . '/#main') ?>"
-                                title="vytvořit export z tohoto úkolu">Exportovat</a>
+                                title="vytvořit export z tohoto úkolu pro fakturaci pro účetní">Exportovat</a>
                         <?php endif; ?>
                     </td>
                 </tr>

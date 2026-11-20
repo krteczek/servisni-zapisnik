@@ -58,3 +58,11 @@
 .btn-danger:hover {
     background: #b71c1c;
 }
+
+.tab-button.active {
+    font-weight: bold;
+    border-bottom: 2px solid currentColor;
+}
+.tab-level {
+    margin-bottom: 1rem;
+}

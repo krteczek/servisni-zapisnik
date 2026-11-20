@@ -1,72 +1,70 @@
 /**
- * Workbench – přepínání main/sub tabů + obnova stavu z URL.
- * Vyžaduje: .main-tab-button[data-target], .main-tab-content,
- *           .sub-tab-button[data-target], .sub-tab-content
+ * Workbench – obecné přepínání tabů libovolné hloubky.
+ * Struktura:
+ *   .tab-level
+ *     .tab-button[data-target]
+ *     .tab-content[id]
+ *       ... (volitelně další .tab-level uvnitř)
  */
 (function () {
     'use strict';
 
-    function activateMainTab(targetId) {
-        document.querySelectorAll('.main-tab-content').forEach(s => s.hidden = true);
-        document.querySelectorAll('.main-tab-button').forEach(b => b.classList.remove('active'));
-
+    function activateTab(targetId, { openFirstChild = true, updateUrl = true } = {}) {
         const target = document.getElementById(targetId);
-        if (target) target.hidden = false;
+        if (!target) return;
 
-        const btn = document.querySelector(`.main-tab-button[data-target="${targetId}"]`);
-        if (btn) btn.classList.add('active');
-    }
+        const parent = target.parentElement;
+        if (!parent) return;
 
-    function activateSubTab(targetId) {
-        document.querySelectorAll('.sub-tab-content').forEach(s => s.hidden = true);
-        document.querySelectorAll('.sub-tab-button').forEach(b => b.classList.remove('active'));
+        parent.querySelectorAll(':scope > .tab-content').forEach(el => {
+            el.hidden = el !== target;
+        });
 
-        const target = document.getElementById(targetId);
-        if (target) target.hidden = false;
+        parent.querySelectorAll(':scope > .tab-button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.target === targetId);
+        });
 
-        const btn = document.querySelector(`.sub-tab-button[data-target="${targetId}"]`);
-        if (btn) btn.classList.add('active');
+        if (openFirstChild) {
+            const firstChild = target.querySelector(':scope > .tab-level > .tab-content');
+            if (firstChild) activateTab(firstChild.id, { updateUrl: false });
+        }
+
+        if (updateUrl) {
+            history.replaceState(null, '', '#' + targetId);
+        }
     }
 
     function openFromUrl() {
         const params = new URLSearchParams(location.search);
-        const fromQuery = params.get('open');
-        const fromHash  = location.hash.replace(/^#/, '');
-        const targetId  = fromQuery || fromHash;
-
+        const targetId = params.get('open') || location.hash.replace(/^#/, '');
         if (!targetId) return;
 
         const target = document.getElementById(targetId);
-        if (!target) return;
+        if (!target || !target.classList.contains('tab-content')) return;
 
-        if (target.classList.contains('sub-tab-content')) {
-            const parent = target.closest('.main-tab-content');
-            if (parent) activateMainTab(parent.id);
-            activateSubTab(targetId);
-        } else if (target.classList.contains('main-tab-content')) {
-            activateMainTab(targetId);
+        const chain = [];
+        let el = target;
+        while (el && el.classList.contains('tab-content')) {
+            chain.unshift(el.id);
+            el = el.parentElement?.closest('.tab-content');
         }
 
-        // Ukliď ?open= z URL
-        if (fromQuery) {
+        chain.forEach((id, i) => {
+            activateTab(id, {
+                openFirstChild: i === chain.length - 1,
+                updateUrl: false,
+            });
+        });
+
+        if (params.get('open')) {
             history.replaceState(null, '', '#' + targetId);
         }
     }
 
     function bindClickHandlers() {
-        document.querySelectorAll('.main-tab-button').forEach(button => {
+        document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
-                const targetId = button.dataset.target;
-                activateMainTab(targetId);
-                history.replaceState(null, '', '#' + targetId);
-            });
-        });
-
-        document.querySelectorAll('.sub-tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                const targetId = button.dataset.target;
-                activateSubTab(targetId);
-                history.replaceState(null, '', '#' + targetId);
+                activateTab(button.dataset.target);
             });
         });
     }
@@ -77,8 +75,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
-
-    // bfcache – zpět v prohlížeči
     window.addEventListener('pageshow', (e) => {
         if (e.persisted) openFromUrl();
     });

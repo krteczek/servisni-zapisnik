@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1); 
+declare(strict_types=1);
 
 /** @var \App\Core\ViewContext $view */
 
@@ -8,10 +8,11 @@ require __DIR__ . '/../layout/header.php';
 use App\Core\Url;
 
 $data = $view->WBData;
-// Lookup mapy id => team (pro místa, kde tým není přímo v datech)
+
 $myTeamsById    = array_column($data['myTeams'], null, 'id');
 $otherTeamsById = array_column($data['otherTeams'], null, 'id');
 $allTeamsById   = $myTeamsById + $otherTeamsById;
+// var_dump($data);
 ?>
 
 <div class="workbench-container">
@@ -27,96 +28,104 @@ $allTeamsById   = $myTeamsById + $otherTeamsById;
                             <li><span class="team-dot" style="background: <?= e($team['color']) ?>"></span><?= e($team['name']) ?></li>
                         <?php endforeach; ?>
                     </ul>
-                <?php endif; ?>               
+                <?php endif; ?>
             </details>
-            
-        </div><!-- .card-wb-teams -->
+        </div>
         <div class="card card-wb-teams">
             <details>
                 <summary>Ostatní týmy</summary>
                 <?php if ($data['otherTeams'] === []): ?>
-                    <p>Neexistují žádné další týmy.</p> 
+                    <p>Neexistují žádné další týmy.</p>
                 <?php else: ?>
                     <ul>
                         <?php foreach ($data['otherTeams'] as $team): ?>
                             <li><span class="team-dot" style="background: <?= e($team['color']) ?>"></span><?= e($team['name']) ?></li>
                         <?php endforeach; ?>
                     </ul>
-                <?php endif; ?>               
+                <?php endif; ?>
             </details>
-            
-        </div><!-- .card-wb-teams -->
+        </div>
+    </div>
 
-    </div><!-- .workbench-teams-grid -->
     <h2>Důležité akce</h2>
-    <div>
-        <button class="main-tab-button" data-target="myTabsButtons" title="Akce pro týmy, kterých jsem účastníkem">Moje Týmy</button>
-        <button class="main-tab-button" data-target="otherTabsButtons" title="Akce pro ostatní týmy">Ostatní týmy</button>
-    </div>
-    <div>
-        <div id="myTabsButtons"  class="main-tab-content">
-            <button class="sub-tab-button" data-target="my-tasks" title="úkoly týmů, kterých jsem členem">Otevřené úkoly (mé) [<?= count($data['myTeamTasks']) ?>]</button>
-            <button class="sub-tab-button" data-target="my-prepare-to-done" title="moje úkoly a zakázky, které lze uzavřít">K uzavření (mé) [<?= (count($data['myReadyToDoneTasks']) + count($data['myReadyToDoneOrders'])) ?>]</button>
-            <button class="sub-tab-button" data-target="my-prepare-to-cancel" title="moje úkoly a zakázky, které lze stornovat">Ke stornování (mé) [<?= (count($data['myReadyToCancelTasks']) + count($data['myReadyToCancelOrders'])) ?>]</button>
-            <button class="sub-tab-button" data-target="my-invoice-ready" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (mé) [<?=  count($data['myInvoiceToReady']) ?>]</button>
+
+    <!-- ============ ÚROVEŇ 1: Moje / Ostatní ============ -->
+    <div class="tab-level" data-level="1">
+        <button class="tab-button" data-target="my" title="Akce pro týmy, kterých jsem účastníkem">Moje týmy</button>
+        <button class="tab-button" data-target="other" title="Akce pro ostatní týmy">Ostatní týmy</button>
+        <button class="tab-button" data-target="orders">Zakázky []</button>
+        <!-- ============ MOJE ============ -->
+
+        <!-- ---- MOJE → ÚKOLY ---- -->
+        <div id="my" class="tab-content">
+            <div class="tab-level" data-level="2">
+                <button class="tab-button" data-target="my-tasks-open">Otevřené [<?= count($data['myTeamTasks']) ?>]</button>
+                <button class="tab-button" data-target="my-tasks-done">K dokončení [<?= count($data['myReadyToDoneTasks']) ?>]</button>
+                <button class="tab-button" data-target="my-tasks-cancel">Ke stornování [<?= count($data['myReadyToCancelTasks']) ?>]</button>
+                <button class="tab-button" data-target="my-tasks-invoice">K fakturaci [<?= count($data['myInvoiceToReady']) ?>]</button>
+
+                <div id="my-tasks-open" class="tab-content">
+                    <?php require __DIR__ . '/partials/my_teams_tasks.php'; ?>
+                </div>
+                <div id="my-tasks-done" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/my_tasks_to_done.php'; ?>
+                </div>
+                <div id="my-tasks-cancel" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/my_tasks_to_cancel.php'; ?>
+                </div>
+                <div id="my-tasks-invoice" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/my_invoice_ready.php'; ?>
+                </div>
+            </div>
+        </div>
+        <!-- ============ OSTATNÍ ============ -->
+        <!-- ---- OSTATNÍ → ÚKOLY ---- -->
+        <div id="other" class="tab-content">
+            <div class="tab-level" data-level="2">
+                <button class="tab-button" data-target="other-tasks-open">Otevřené [<?= count($data['otherTeamTasks']) ?>]</button>
+                <button class="tab-button" data-target="other-tasks-done">K dokončení [<?= count($data['otherReadyToDoneTasks']) ?>]</button>
+                <button class="tab-button" data-target="other-tasks-cancel">Ke stornování [<?= count($data['otherReadyToCancelTasks']) ?>]</button>
+                <button class="tab-button" data-target="other-tasks-invoice">K fakturaci [<?= count($data['otherInvoiceToReady']) ?>]</button>
+
+                <div id="other-tasks-open" class="tab-content">
+                    <?php require __DIR__ . '/partials/other_teams_tasks.php'; ?>
+                </div>
+                <div id="other-tasks-done" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/other_tasks_to_done.php'; ?>
+                </div>
+                <div id="other-tasks-cancel" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/other_tasks_to_cancel.php'; ?>
+                </div>
+                <div id="other-tasks-invoice" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/other_invoice_ready.php'; ?>
+                </div>
+            </div>
         </div>
 
-        <div id="otherTabsButtons"  class="main-tab-content" hidden>
-            <button class="sub-tab-button" data-target="other-tasks" title="úkoly týmů, kterých nejsem členem">Otevřené úkoly (ostatní) [<?= count($data['otherTeamTasks']) ?>]</button>
-            <button class="sub-tab-button" data-target="other-prepare-to-done" title="ostatní úkoly a zakázky, které lze uzavřít">K uzavření (ostatní) [<?= count($data['otherReadyToDoneTasks'] ?? 0) ?>]</button>
-            <button class="sub-tab-button" data-target="other-prepare-to-cancel" title="Úkoly a zakázky ostatních týmů, které lze stornovat">Zakázky ke stornování (ostatní) [0]</button>
-            <button class="sub-tab-button" data-target="other-invoice-ready" title="úkoly, které splňují systémové podmínky pro fakturaci">Připraveno k fakturaci (ostatní) [<?=  count($data['otherInvoiceToReady']) ?>]</button>
+        <!-- ---- MOJE → ZAKÁZKY ---- -->
+        <div id="orders" class="tab-content" hidden>
+            <div class="tab-level" data-level="2">
+                <button class="tab-button" data-target="my-orders-open">Otevřené [<?= count($data['myTeamOrders']) ?>]</button>
+                <button class="tab-button" data-target="my-orders-done">K dokončení [<?= count($data['myReadyToDoneOrders']) ?>]</button>
+                <button class="tab-button" data-target="my-orders-cancel">Ke stornování [<?= count($data['myReadyToCancelOrders']) ?>]</button>
+
+                <div id="my-orders-done" class="tab-content">
+                    <?php require __DIR__ . '/partials/my_orders_to_done.php'; ?>
+                </div>
+                <div id="my-orders-cancel" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/my_orders_to_cancel.php'; ?>
+                </div>
+
+                <div id="other-orders-done" class="tab-content">
+                    <?php require __DIR__ . '/partials/other_orders_to_done.php'; ?>
+                </div>
+                <div id="other-orders-cancel" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/other_orders_to_cancel.php'; ?>
+                </div>
+            </div>
         </div>
+
     </div>
+</div>
 
-
-
-
-    <div id="my-tasks" class="sub-tab-content">
-        <!-- úkoly pro mé týmy -->
-        <?php require __DIR__ . '/partials/my_teams_tasks.php'; ?>
-        
-    </div>
-    
-    <div id="my-prepare-to-done" class="sub-tab-content" hidden>
-        <!-- Připraveno k uzavření (zakázky i úkoly-->
-        <?php require __DIR__ . '/partials/my_prepare_to_done.php'; ?>
-    </div>
-
-    <div id="my-prepare-to-cancel" class="sub-tab-content" hidden>
-        <!-- připraveno ke stornování -->
-        <?php require __DIR__ . '/partials/my_prepare_to_cancel.php'; ?>
-    </div>
-
-    <div id="my-invoice-ready" class="sub-tab-content" hidden>
-        <!-- Úkoly a zakázky, které je možno fakturovat -->
-        <?php require __DIR__ . '/partials/my_invoice_ready.php'; ?>
-    </div>
-
-
-    <!-- Akce pro ostatní týmy -->
-    <div id="other-tasks" class="sub-tab-content" hidden>
-        <!-- úkoly pro ostatní týmy -->
-        <?php require __DIR__ . '/partials/other_teams_tasks.php'; ?>
-    </div>
-
-     <div id="other-prepare-to-done" class="sub-tab-content" hidden>
-        <!-- Připraveno k uzavření -->
-        <?php require __DIR__ . '/partials/other_prepare_to_done.php'; ?>
-    </div>
-
-    <div id="other-prepare-to-cancel" class="sub-tab-content" hidden>
-        <!-- připraveno ke stornování -->
-        <?php require __DIR__ . '/partials/other_prepare_to_cancel.php'; ?>
-    </div>
-
-   <div id="other-invoice-ready" class="sub-tab-content" hidden>
-        <!-- úkoly pro mé týmy k fakturaci -->
-         <?php require __DIR__ . '/partials/other_invoice_ready.php'; ?>
-       
-    </div>
-
-
-
-</div><!-- .workbench-container -->
-<?php require __DIR__ . '/../layout/footer.php'; ?>
+<?php require __DIR__ . '/../layout/footer.php';
