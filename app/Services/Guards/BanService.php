@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Services\Guards;
 
 use App\Models\BanModel;
+use App\Models\UserModel;
 use App\Core\Auth;
 use App\Core\Request;
 
@@ -55,7 +56,13 @@ class BanService
  
     public function banLogout(string $type): void
     {
-        $this->ban(type: $type);
+        $this->ban($type);
+        
+        $userId = Auth::id();
+        if ($userId !== null) {
+            (new UserModel())->incrementSessionVersion($userId);
+        }
+        
         Auth::logout();
     }
 }

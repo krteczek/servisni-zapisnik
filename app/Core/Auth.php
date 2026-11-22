@@ -5,7 +5,7 @@ namespace App\Core;
 use App\Models\UserModel;
 use DomainException;
 use App\Core\Types;
-use App\Services\Security\AccessLogger;
+
 
 /**
  * Centrální autentizační a autorizační služba.
@@ -251,7 +251,6 @@ class Auth
         Session::regenerate(); 
         Csrf::regenerate();
         Session::set(self::USER_KEY, $userData);
-        AccessLogger::log(AccessLogger::TYPE_LOGIN);
         self::$cachedUser = null;
     }
 
@@ -271,22 +270,9 @@ class Auth
     public static function logout(): void
     {
         Session::start();
-        AccessLogger::log(AccessLogger::TYPE_LOGOUT);
         
         Session::destroy();
         self::$cachedUser = null;
-    }
-
-
-    public static function banLogout(): void
-    {
-        $userId = self::id();
-
-        if ($userId !== null) {
-            (new UserModel())->incrementSessionVersion($userId);
-        }
-
-        self::logout();
     }
 
 

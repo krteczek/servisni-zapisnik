@@ -5,19 +5,19 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
-use App\Core\Database;
+// use App\Core\Database;
 use App\Core\Url;
-use App\Core\Session;
-use App\Core\Mailer;
+// use App\Core\Session;
+// use App\Core\Mailer;
 use App\Core\Flash;
 use App\Core\LoggerHolder;
 
 use App\Models\UserModel;
 use App\Models\CompanyModel;
-use App\Models\RegistrationRequestModel;
-use App\Models\TaskModel;
-use App\Models\WorkOrderModel;
-use App\Models\TeamModel;
+// use App\Models\RegistrationRequestModel;
+// use App\Models\TaskModel;
+// use App\Models\WorkOrderModel;
+// use App\Models\TeamModel;
 use App\Services\Guards\BanService;
 use App\Services\Tokens\TokenService;
 use App\Services\Tokens\TokenType;
@@ -29,6 +29,7 @@ use App\Services\Guards\EmailRateLimiterService;
 use App\Services\Users\BuildMailService;
 use App\Services\Onboarding\OnboardingService;
 use App\Services\Guards\BanType;
+use App\Services\Security\AccessLogger;
 
 use \Throwable;
 
@@ -157,6 +158,7 @@ public function login(): string
 		//var_dump($toLogin);exit;
     /* ===== LOGIN OK ===== */
  	Auth::login($toLogin);
+	AccessLogger::log(AccessLogger::TYPE_LOGIN);
    
 
     Flash::success('Vítej v aplikaci, ' . ($user['first_name'] ?? $user['email']) . ' 👋'
@@ -183,6 +185,7 @@ public function login(): string
         }
 
         Flash::success('Byl jste odhlášen. Přijďte zas!');
+		AccessLogger::log(AccessLogger::TYPE_LOGOUT);
 
         Auth::logout();
         Url::redirect('/login/#main');

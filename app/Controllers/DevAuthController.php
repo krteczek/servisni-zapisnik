@@ -9,6 +9,7 @@ use App\Core\Url;
 use App\Models\CompanyModel;
 use App\Core\Config;
 use App\Models\UserModel;
+use App\Services\Security\AccessLogger;
 
 
 class DevAuthController extends Controller
@@ -51,6 +52,7 @@ class DevAuthController extends Controller
 		];
 
         Auth::login($toLogin);
+        AccessLogger::log(AccessLogger::TYPE_LOGIN);
 
         $url = match ($user['global_role']) {
             'root'  => '/' . $company['slug'] . '/root/list-companies/#main',
