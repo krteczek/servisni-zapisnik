@@ -5,6 +5,7 @@ namespace App\Core;
 use App\Models\UserModel;
 use DomainException;
 use App\Core\Types;
+use App\Services\Security\AccessLogger;
 
 /**
  * Centrální autentizační a autorizační služba.

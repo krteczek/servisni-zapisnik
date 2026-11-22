@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use App\Core\AccessLogger;
+use App\Services\Security\AccessLogger;
 use App\Validators\Validator;
 
 /**

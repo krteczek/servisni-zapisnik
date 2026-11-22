@@ -7,6 +7,8 @@ use App\Controllers\ErrorController;
 use Throwable;
 use LogicException;
 use App\Core\LoggerHolder;
+use App\Services\Security\AccessLogger;
+
 
 /**
  * Router pro zpracování HTTP požadavků a směrování na příslušné controllery.

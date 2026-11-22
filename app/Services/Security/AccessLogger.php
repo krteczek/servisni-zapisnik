@@ -1,12 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Core;
+namespace App\Services\Security;
 
 use App\Models\AccessLogModel;
 use App\Services\Guards\BanService;
 use App\Services\Guards\BanType;
 use App\Services\Guards\AccessRateLimiterService;
+use App\Core\Config;
+use App\Core\Flash;
+use App\Core\Request;
+use App\Core\Auth;
+use App\Core\LoggerHolder;
 
 /**
  * Statická služba pro logování přístupů k aplikaci a detekci potenciálního zneužití.
