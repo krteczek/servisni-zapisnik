@@ -53,7 +53,7 @@ $allTeamsById   = $myTeamsById + $otherTeamsById;
     <div class="tab-level" data-level="1">
         <button class="tab-button" data-target="my" title="Akce pro týmy, kterých jsem účastníkem">Moje týmy</button>
         <button class="tab-button" data-target="other" title="Akce pro ostatní týmy">Ostatní týmy</button>
-        <button class="tab-button" data-target="orders">Zakázky []</button>
+        <button class="tab-button" data-target="orders">Zakázky [[<?= count($data['ordersInProgress']) . ' + ' . count($data['ordersToDone']) . ' + ' . count($data['ordersToCancel']) . ' + ' . count($data['ordersToInvoice']) ?>]]</button>
         <!-- ============ MOJE ============ -->
 
         <!-- ---- MOJE → ÚKOLY ---- -->
@@ -80,7 +80,7 @@ $allTeamsById   = $myTeamsById + $otherTeamsById;
         </div>
         <!-- ============ OSTATNÍ ============ -->
         <!-- ---- OSTATNÍ → ÚKOLY ---- -->
-        <div id="other" class="tab-content">
+        <div id="other" class="tab-content" hidden>
             <div class="tab-level" data-level="2">
                 <button class="tab-button" data-target="other-tasks-open">Otevřené [<?= count($data['otherTeamTasks']) ?>]</button>
                 <button class="tab-button" data-target="other-tasks-done">K dokončení [<?= count($data['otherReadyToDoneTasks']) ?>]</button>
@@ -102,25 +102,25 @@ $allTeamsById   = $myTeamsById + $otherTeamsById;
             </div>
         </div>
 
-        <!-- ---- MOJE → ZAKÁZKY ---- -->
+        <!-- ---- ZAKÁZKY ---- -->
         <div id="orders" class="tab-content" hidden>
             <div class="tab-level" data-level="2">
-                <button class="tab-button" data-target="my-orders-open">Otevřené [<?= count($data['myTeamOrders']) ?>]</button>
-                <button class="tab-button" data-target="my-orders-done">K dokončení [<?= count($data['myReadyToDoneOrders']) ?>]</button>
-                <button class="tab-button" data-target="my-orders-cancel">Ke stornování [<?= count($data['myReadyToCancelOrders']) ?>]</button>
+                <button class="tab-button" data-target="orders-in-progress">Otevřené [<?= count($data['ordersInProgress']) ?>]</button>
+                <button class="tab-button" data-target="orders-to-done">K dokončení [<?= count($data['ordersToDone']) ?>]</button>
+                <button class="tab-button" data-target="orders-to-cancel">Ke stornování [<?= count($data['ordersToCancel']) ?>]</button>
+                <button class="tab-button" data-target="orders-to-invoice">K fakturaci [<?= count($data['ordersToInvoice']) ?>]</button>
 
-                <div id="my-orders-done" class="tab-content">
-                    <?php require __DIR__ . '/partials/my_orders_to_done.php'; ?>
+                <div id="orders-in-progress" class="tab-content">
+                    <?php require __DIR__ . '/partials/orders_in_progress.php'; ?>
                 </div>
-                <div id="my-orders-cancel" class="tab-content" hidden>
-                    <?php require __DIR__ . '/partials/my_orders_to_cancel.php'; ?>
+                <div id="orders-to-done" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/orders_to_done.php'; ?>
                 </div>
-
-                <div id="other-orders-done" class="tab-content">
-                    <?php require __DIR__ . '/partials/other_orders_to_done.php'; ?>
+                <div id="orders-to-cancel" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/orders_to_cancel.php'; ?>
                 </div>
-                <div id="other-orders-cancel" class="tab-content" hidden>
-                    <?php require __DIR__ . '/partials/other_orders_to_cancel.php'; ?>
+                <div id="orders-to-invoice" class="tab-content" hidden>
+                    <?php require __DIR__ . '/partials/orders_to_invoice.php'; ?>
                 </div>
             </div>
         </div>

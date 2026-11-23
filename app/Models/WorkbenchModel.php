@@ -40,8 +40,10 @@ class WorkbenchModel extends BaseModel
             'myReadyToDoneTasks'        => $this->myReadyToDoneTasks($teamIds),
             'otherReadyToDoneTasks'     => $this->otherReadyToDoneTasks($teamIds),
 
-            'myOrdersInProgress'        => $this->myOrdersInProgress(),
-            'otherOrdersInProgress'     => $this->otherOrdersInProgress(),
+            'ordersInProgress'        => $this->OrdersInProgress(),
+            // 'ordersToDone'              => $this->OrdersToDone(),
+            // 'ordersToCancel'            => $this->OrdersToCancel(),
+            'ordersToInvoice'            => [], // $this->OrdersToInvoice(),
 
             'myReadyToCancelTasks'      => $this->myReadyToCancelTasks($teamIds),
             'otherReadyToCancelTasks'   => $this->otherReadyToCancelTasks($teamIds),
@@ -519,45 +521,72 @@ private function myReadyToDoneOrders(): array
     /**
      * @return array<int, array<string, mixed>>
      */
-private function myOrdersInProgress(): array
+private function OrdersInProgress(): array
 {
     return $this->fetchAll(
         "
         SELECT *
         FROM work_orders
-        WHERE company_id = ?
-          AND created_by_user_id = ?
+        WHERE company_id = ?         
           AND status IN ('in_progress', 'new')
         ORDER BY created_at ASC
         ",
         [
             Auth::companyId(),
-            Auth::id(),
         ]
     );
 }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-private function otherOrdersInProgress(): array
+
+public function OrdersToDone(): array
 {
-     return $this->fetchAll(
+    return $this->fetchAll(
         "
         SELECT *
         FROM work_orders
-        WHERE company_id = ?
-          AND created_by_user_id <> ?
+        WHERE company_id = ?         
           AND status IN ('in_progress', 'new')
+          -- musí splnovat podmínku, že všechny úkoly v zakázce jsou dokončené nebo stornovane, ale aspon jeden musí být dokončen --
         ORDER BY created_at ASC
         ",
         [
             Auth::companyId(),
-            Auth::id(),
         ]
     );
-   
+}
 
+public function OrdersToCancel(): array
+{
+    return $this->fetchAll(
+        "
+        SELECT *
+        FROM work_orders
+        WHERE company_id = ?         
+          AND status IN ('in_progress', 'new')
+          -- musí splnovat podmínku, že NEMÁ ŽÁDEN VYTVOŘENÝ ÚKOL NEBO všechny úkoly v zakázce jsou stornovane --
+        ORDER BY created_at ASC
+        ",
+        [
+            Auth::companyId(),
+        ]
+    );
+}
+
+public function OrdersToInvoice(): array
+{
+    return $this->fetchAll(
+        "
+        SELECT *
+        FROM work_orders
+        WHERE company_id = ?         
+          AND status IN ('done')
+          -- muswí splnovat podmínku, že všechny úkoly musí být done nabo cancelled a alespoň jeden musí být done, ale nesmí být fakturovaný -- 
+        ORDER BY created_at ASC
+        ",
+        [
+            Auth::companyId(),
+        ]
+    );
 }
 
     /**

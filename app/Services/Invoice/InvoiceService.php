@@ -22,7 +22,7 @@ use App\Validators\InvoiceValidator;
 use PDO;
 use RuntimeException;
 use App\Core\Types;
-use App\Validators\Validator;
+use App\Core\Validators\Validator;
 /** @phpstan-import-type TaskBaseRow from Types */
 final class InvoiceService
 {
@@ -923,16 +923,16 @@ public function issue(int $companyId, int $invoiceId): void
         $numberStart = $settings->getInvoiceNumberStart();
         $numberFormat = $settings->getInvoiceNumberFormat();
 
-        if (!is_numeric($dueDays) || (int) $dueDays < 0) {
+        if (!is_numeric($dueDays) || $dueDays < 0) {
             throw new \RuntimeException('Neplatná doba splatnosti faktury.');
         }
 
-        if (!is_numeric($numberStart) || (int) $numberStart < 1) {
+        if (!is_numeric($numberStart) || $numberStart < 1) {
             throw new \RuntimeException('Neplatný počáteční stav číselné řady.');
         }
 
-        $dueDays = (int) $dueDays;
-        $numberStart = (int) $numberStart;
+        $dueDays = $dueDays;
+        $numberStart = $numberStart;
 
         $numberService = new InvoiceNumberService();
 
@@ -958,7 +958,7 @@ public function issue(int $companyId, int $invoiceId): void
         // Vystavující uživatel.
         $issuedBy = Auth::id();
 
-        if (!$issuedBy || (int) $issuedBy <= 0) {
+        if (!$issuedBy || $issuedBy <= 0) {
             throw new \RuntimeException('Nelze určit vystavujícího uživatele.');
         }
 

@@ -12,7 +12,10 @@ use App\Core\ViewContext;
 use App\Models\ContactsModel;
 use App\Services\Ares\AresSession;
 use App\Services\Ares\AjaxStatus;
+use App\Core\Validators\Validator;
 use App\Validators\ContactValidator;
+
+
 
 /**
  * @phpstan-import-type ContactRow from Types
@@ -20,6 +23,7 @@ use App\Validators\ContactValidator;
 final class ContactsController extends Controller
 {
     private ContactsModel $model;
+    // private Validator $validator;
 
     /**
      * Pole, která lze převzít z ARES.

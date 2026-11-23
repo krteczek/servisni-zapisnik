@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 use App\Services\Security\AccessLogger;
-use App\Validators\Validator;
+use App\Core\Validators\Validator;
 
 /**
  * Abstraktní základní třída pro všechny controllery aplikace.

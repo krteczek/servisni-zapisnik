@@ -9,7 +9,8 @@ use App\Core\Url;
 $data = $view->WBData;
 
 ?>
-        <h2>Otevřené úkoly pro ostatní týmy</h2>
+<div class="workbench-grid">
+    <div class="card card-workbench">        <h2>Otevřené úkoly pro ostatní týmy</h2>
         <table>
             <thead>
                 <tr>
@@ -80,3 +81,5 @@ $data = $view->WBData;
                 <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
+</div><!-- .workbench-grid -->

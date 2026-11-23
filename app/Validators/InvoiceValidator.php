@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace App\Validators;
+use App\Core\Validators\Validator;
 
 final class InvoiceValidator
 {
