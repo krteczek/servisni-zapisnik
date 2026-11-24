@@ -149,13 +149,23 @@ h4.card-header, h5.card-header {
     gap: 24px;
    
 }
+
+.workbench-grid--full {
+    grid-template-columns: 1fr;
+}
+
+/* card.css */
 .card-workbench {
     border: 1px solid #e5e7eb;
     background: #f9fafb;
     padding: 16px;
     border-radius: 10px;
     min-width: 0;
-    /* width:48%; */
+    overflow-x: auto;
+}
+
+.card-workbench table {
+    border: none;
 }
 
 .workbench-teams-grid {

@@ -53,7 +53,7 @@ $allTeamsById   = $myTeamsById + $otherTeamsById;
     <div class="tab-level" data-level="1">
         <button class="tab-button" data-target="my" title="Akce pro týmy, kterých jsem účastníkem">Moje týmy</button>
         <button class="tab-button" data-target="other" title="Akce pro ostatní týmy">Ostatní týmy</button>
-        <button class="tab-button" data-target="orders">Zakázky [[<?= count($data['ordersInProgress']) . ' + ' . count($data['ordersToDone']) . ' + ' . count($data['ordersToCancel']) . ' + ' . count($data['ordersToInvoice']) ?>]]</button>
+        <button class="tab-button" data-target="orders">Zakázky [<?= count($data['ordersInProgress']) . ' + ' . count($data['ordersToDone']) . ' + ' . count($data['ordersToCancel']) . ' + ' . count($data['ordersToInvoice']) ?>]</button>
         <!-- ============ MOJE ============ -->
 
         <!-- ---- MOJE → ÚKOLY ---- -->

@@ -6,13 +6,14 @@ use App\Core\Url;
 
 $data = $view->WBData;
 ?>
-<h2>Zakázky v průběhu</h2>
+<h2>Zakázky v průběhu [<?= count($data['ordersInProgress']) ?>]</h2>
+<p>Zakázky, které jsou rozpracované nebo nové.</p>
 
 <?php if ($data['ordersInProgress'] === []): ?>
-    <p>Nemáte žádné rozpracované zakázky.</p>
+    <p>Žádné zakázky v průběhu.</p>
 <?php else: ?>
-<div class="workbench-grid">
-    <div class="card card-workbench">    
+<div class="workbench-grid workbench-grid--full">
+    <div class="card card-workbench">
         <table>
             <thead>
                 <tr>
@@ -38,5 +39,5 @@ $data = $view->WBData;
             </tbody>
         </table>
     </div>
-</div><!-- .workbench-grid -->
+</div>
 <?php endif; ?>

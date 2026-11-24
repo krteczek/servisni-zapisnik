@@ -6,6 +6,31 @@
         border-collapse: collapse;
 
     }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+
+        border: none;
+    }
+
+    th, td {
+        padding: 8px 12px;
+        text-align: left;
+        border: 1px solid #e5e7eb;
+    }
+
+    thead th {
+        background: #f9fafb;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    tbody tr:nth-child(even) {
+        background: #fafafa;
+    }
+
+
     tbody tr:nth-child(even) {
         background: #fafafa;
     }
@@ -27,14 +52,28 @@
 }
 
 .tab-button {
-    padding: .6rem 1rem;
-    border: 1px solid #ccc;
-    border-bottom: none;
-    background: #f3f3f3;
+    padding: .5rem 1rem;
+    border: 1px solid #cfd6de;
+    border-radius: 10px;
+    background: #f3f4f6;
     cursor: pointer;
+    color: #374151;
+    font-weight: 500;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab-button:hover {
+    background: #e5e7eb;
 }
 
 .tab-button.active {
-    background: white;
-    font-weight: bold;
+    background: #e1e5ea;
+    color: #111827;
+    font-weight: 600;
+    border-color: #c7cdd4;
+}
+
+.tab-level[data-level="2"] .tab-button {
+    padding: .4rem .8rem;
+    font-size: 0.9rem;
 }

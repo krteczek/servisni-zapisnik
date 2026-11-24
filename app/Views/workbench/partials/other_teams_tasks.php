@@ -1,85 +1,57 @@
 <?php
-declare(strict_types=1); 
+declare(strict_types=1);
 
 /** @var \App\Core\ViewContext $view */
-
-
 use App\Core\Url;
 
 $data = $view->WBData;
-
 ?>
-<div class="workbench-grid">
-    <div class="card card-workbench">        <h2>Otevřené úkoly pro ostatní týmy</h2>
+<h2>Otevřené úkoly pro ostatní týmy [<?= count($data['otherTeamTasks']) ?>]</h2>
+<p>Úkoly, které jsou přiřazené týmům, kterých nejste členem.</p>
+
+<?php if ($data['otherTeamTasks'] === []): ?>
+    <p>Žádné otevřené úkoly.</p>
+<?php else: ?>
+<div class="workbench-grid workbench-grid--full">
+    <div class="card card-workbench">
         <table>
             <thead>
                 <tr>
                     <th>Priorita</th>
                     <th>Název úkolu</th>
                     <th>Tým</th>
-                    <th>Zakázka</th>        
+                    <th>Zakázka</th>
                     <th>Termín</th>
                     <th>Opakující se</th>
-                    
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($data['otherTeamTasks'] as $task): ?>
                     <tr>
-                        <td><span class="badge badge-priority-<?= e($task['work_order_priority']) ?>">
-                                <?= te($task['work_order_priority']) ?>
-                            </span></td>
-                        <td><a href="<?= Url::to('/{tenant}/tasks/' .  $task['id'] . '/report/#main') ?>" 
-                                    title="Jít na detail tohoto úkolu"
-                                    >
-                                    <?= e($task['title']) ?></a>
-
-                                <a href="<?= Url::to('/{tenant}/tasks/' .  $task['id'] . '/report/#main') ?>" 
-                                    title="Jít na detail tohoto úkolu, otevřít v novém okně"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="open-new-tab"
-                                    aria-label="Otevřít detail úkolu v novém panelu"> ( ↗ ) </a>
+                        <td><span class="badge badge-priority-<?= e($task['work_order_priority']) ?>"><?= te($task['work_order_priority']) ?></span></td>
+                        <td>
+                            <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>"><?= e($task['title']) ?></a>
+                            <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/report/#main') ?>" target="_blank" rel="noopener noreferrer" class="open-new-tab"> ( ↗ ) </a>
                         </td>
                         <td><span class="team-dot" style="background: <?= e($task['team_color']) ?>"></span> <?= e($task['team_name']) ?></td>
-                        <td><a href="<?= Url::to('/{tenant}/work-orders/' .  $task['work_order_id'] . '/detail/#main') ?>" 
-                                    title="Jít na detail této zakázky" 
-                                >
-                                    <?= e($task['work_order_title']) ?></a>
-
-                                <a href="<?= Url::to('/{tenant}/work-orders/' .  $task['work_order_id'] . '/detail/#main') ?>" 
-                                    title="Jít na detail této zakázky, otevřít v novém okně" 
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="open-new-tab"
-                                    aria-label="Otevřít detail zakázky v novém panelu"> ( ↗ ) </a>
+                        <td>
+                            <a href="<?= Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main') ?>"><?= e($task['work_order_title']) ?></a>
+                            <a href="<?= Url::to('/{tenant}/work-orders/' . $task['work_order_id'] . '/detail/#main') ?>" target="_blank" rel="noopener noreferrer" class="open-new-tab"> ( ↗ ) </a>
                         </td>
-                        
                         <td><?= e($task['due_date'] ?? 'Neuveden') ?></td>
                         <td>
                             <?php if ($task['task_type'] === 'recurring_master'): ?>
-                                <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurringEdit/#main') ?>" 
-                                    title="Upravit nastavení tohoto opakujícího se úkolu"
-                                    class="btn btn-secondary"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label="Upravit nastavení tohoto opakujícího se úkolu v novém panelu"
-                                    >
-                                    🔁 ↗
-                                </a>
+                                <a href="<?= Url::to('/{tenant}/tasks/' . $task['id'] . '/recurringEdit/#main') ?>" class="btn btn-secondary" target="_blank">🔁 ↗</a>
                             <?php elseif ($task['task_type'] === 'recurring_instance'): ?>
-                                <span title="Tento úkol byl vygenerován automaticky systémem a nelze ho upravit"
-                                    aria-label="Tento úkol byl vygenerován automaticky systémem a nelze ho upravit"
-                                > ↻ </span>
+                                <span title="Vygenerováno automaticky">↻</span>
                             <?php else: ?>
                                 ---
                             <?php endif; ?>
-
                         </td>
-                        
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
-</div><!-- .workbench-grid -->
+</div>
+<?php endif; ?>

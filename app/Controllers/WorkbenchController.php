@@ -24,10 +24,8 @@ class WorkbenchController extends Controller
 	{
         /** @var WorkbenchDataRow $data */
         $data = $this->model->forIndex();
-        [$data['ordersToDone'], $data['ordersToCancel'] ] = $this->canOrdersBeDoneOrCancel($data['ordersInProgress']);
-        //[$data['otherReadyToDoneOrders'], $data['otherReadyToCancelOrders'] ] = $this->canOrdersBeDoneOrCancel($data['otherOrdersInProgress']);
-      
-        /** @var WorkbenchDataRow $data */
+        [$data['ordersToDone'], $data['ordersToCancel'], $data['ordersInProgress']] = $this->canOrdersBeDoneOrCancel($data['ordersInProgress']);
+
         $this->view->WBData = $data;
         $this->view->WBData['isInternalBilling'] = (new SettingsService())->isInternalBilling();
         $this->view->WBData['isExternalAccounting'] = (new SettingsService())->isExternalAccounting();
@@ -37,7 +35,7 @@ class WorkbenchController extends Controller
 
     /**
      * @param array<int, WorkbenchOrderRow> $orders
-     * @return array{0: array<int, WorkbenchOrderRow>, 1: array<int, WorkbenchOrderRow>}
+     * @return array{0: array<int, WorkbenchOrderRow>, 1: array<int, WorkbenchOrderRow>, 2: array<int, WorkbenchOrderRow>}
      */
     private function canOrdersBeDoneOrCancel(array $orders): array
     {
@@ -54,7 +52,7 @@ class WorkbenchController extends Controller
             $tasksByOrder[$task['work_order_id']][] = $task;
             //$orders['']
         }
-
+        $ordersOut = [];
         foreach ($orders as &$order) {
 
             $orderTasks = $tasksByOrder[$order['id']] ?? [];
@@ -114,9 +112,10 @@ class WorkbenchController extends Controller
             if ($order['can_be_cancelled']) {
                 $woCancel[] = $order;
             }
-
+            
+            $ordersOut[] = $order;
             unset($order);
         }
-            return [$woDone, $woCancel];
+            return [$woDone, $woCancel, $ordersOut];
     }
 }

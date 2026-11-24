@@ -1439,7 +1439,7 @@ $supplierBankAccounts = $supplier['bank_accounts'] ?? [];
                     </button>
                     <a
                         href="<?= Url::to(
-                            '/{tenant}/workbench/#main'
+                            '/{tenant}/workbench/?open=my-tasks-invoice#main'
                         ) ?>"
                         class="btn btn-secondary"
                     >
