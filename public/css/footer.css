@@ -1,9 +1,10 @@
+
 /* =========================
-   CSS/footer.CSS
+   CSS/FOOTER.CSS
    ========================= */
+
 .footer {
     border-top: 1px solid #ddd;
-
     padding: 24px 16px;
     font-size: 14px;
     color: #666;
@@ -20,7 +21,7 @@
     gap: 20px;
 }
 
-/* sloupce */
+/* Sloupce */
 .footer-left,
 .footer-center,
 .footer-right {
@@ -29,17 +30,17 @@
     gap: 6px;
 }
 
-/* střed zarovnat */
+/* Střed zarovnat */
 .footer-center {
     align-items: center;
 }
 
-/* pravý zarovnat doprava */
+/* Pravý sloupec zarovnat doprava */
 .footer-right {
     align-items: flex-end;
 }
 
-/* mobil */
+/* Mobil */
 @media (max-width: 700px) {
     .footer-inner {
         flex-direction: column;

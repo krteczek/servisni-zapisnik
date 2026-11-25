@@ -1,7 +1,7 @@
+
 /* =========================
    CSS/BUTTONS.CSS
    ========================= */
-
 
 /* =====================================================
    BUTTONS
@@ -47,7 +47,6 @@
     background: #e0e0e0;
 }
 
-
 /* Danger */
 
 .btn-danger {
@@ -59,10 +58,13 @@
     background: #b71c1c;
 }
 
+/* Tabs */
+
 .tab-button.active {
     font-weight: bold;
     border-bottom: 2px solid currentColor;
 }
+
 .tab-level {
     margin-bottom: 1rem;
 }

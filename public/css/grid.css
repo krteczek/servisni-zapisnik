@@ -1,40 +1,43 @@
-/* =========================
-   CSS/GRID.CSS
-   ========================= */
+
+/* =====================================================
+   ENTITY GRID
+   ===================================================== */
 
 .entity-grid {
-
-  display: grid;
-
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 20px;
-
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
 }
+
+
+/* =====================================================
+   TASK GRID
+   ===================================================== */
 
 .task-grid {
-
-  display: grid;
-
-  gap: 1rem;
-
-  grid-template-columns: repeat(auto-fill, minmax(420px, 420px));
-
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 420px));
 }
+
+
+/* =====================================================
+   INVOICE LAYOUT
+   ===================================================== */
 
 .invoice-layout {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;
-    
 }
 
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
 @media (max-width: 700px) {
-
-  .entity-grid {
-
-    grid-template-columns: 1fr;
-
-  }
-
+    .entity-grid {
+        grid-template-columns: 1fr;
+    }
 }

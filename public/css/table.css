@@ -1,79 +1,110 @@
+
 /* =========================
    CSS/TABLE.CSS
    ========================= */
-   table, th, td {
-        border: 1px solid #ccc;
-        border-collapse: collapse;
 
-    }
+/* Tabulky */
+table,
+th,
+td {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+}
 
-        border: none;
-    }
+th,
+td {
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid #e5e7eb;
+}
 
-    th, td {
-        padding: 8px 12px;
-        text-align: left;
-        border: 1px solid #e5e7eb;
-    }
+thead th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
 
-    thead th {
-        background: #f9fafb;
-        font-weight: 600;
-        color: #374151;
-    }
+tbody tr:nth-child(even) {
+    background: #fafafa;
+}
 
-    tbody tr:nth-child(even) {
-        background: #fafafa;
-    }
-
-
-    tbody tr:nth-child(even) {
-        background: #fafafa;
-    }
-
-    .open-new-tab {
+/* Odkaz na otevření v novém panelu */
+.open-new-tab {
     margin-left: .35rem;
     opacity: .5;
     text-decoration: none;
 }
-    .open-new-tab:hover {
-        opacity: 1;
-    }
 
-    .tabs {
+.open-new-tab:hover {
+    opacity: 1;
+}
+
+/* Záložky */
+.tabs {
     display: flex;
     gap: .25rem;
     margin-bottom: 1rem;
     border-bottom: 1px solid #ccc;
 }
 
-.tab-button {
-    padding: .5rem 1rem;
-    border: 1px solid #cfd6de;
-    border-radius: 10px;
-    background: #f3f4f6;
-    cursor: pointer;
-    color: #374151;
-    font-weight: 500;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
 .tab-button:hover {
+    background: #d1d5db;
+    color: #374151;
+}
+
+/* Wrapper - linka od kraje do kraje */
+.tab-level {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 24px 16px 0 16px;
+    margin-bottom: 0;
+    border-bottom: 1px solid #cfd6de;
+}
+
+/* Neaktivní taby */
+.tab-button {
+    padding: .5rem 1.2rem;
+    border: 1px solid #cfd6de;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
     background: #e5e7eb;
+    color: #6b7280;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+
+    /* Posun tabů ke spodní lince wrapperu */
+    margin-bottom: -3px;
+    position: relative;
+    z-index: 1;
 }
 
+/* Aktivní tab */
 .tab-button.active {
-    background: #e1e5ea;
+    background: #fff;
     color: #111827;
-    font-weight: 600;
-    border-color: #c7cdd4;
+    font-weight: 500;
+    border-color: #cfd6de;
+    border-bottom: 1px solid #fff;
+    z-index: 2;
 }
 
-.tab-level[data-level="2"] .tab-button {
-    padding: .4rem .8rem;
-    font-size: 0.9rem;
+/* Obsah tabů */
+.tab-content {
+    background: #fff;
+    border: 1px solid #cfd6de;
+    border-top: 1px solid #cfd6de;
+    border-radius: 0 8px 8px 8px;
+    padding: 8px;
+    margin-top: -2px;
+    position: relative;
+    z-index: 1;
 }
